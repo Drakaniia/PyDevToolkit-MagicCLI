@@ -12,6 +12,18 @@
 
 ### 2025-11-03
 
+#### 📚 Documentation
+
+- **update readme** (`a443bcc`) - *Qwenzy*
+  - 📁 2 doc files
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-03
+
 #### 🐛 Bug Fixes
 
 - **fixed the frustrating bug where Git push would incorrectly report "no...** (`f27d37a`) - *Qwenzy*

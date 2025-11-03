@@ -1142,8 +1142,8 @@ class GitPush:
             print(f"  ⚠️  Could not get summary: {e}\n")
     
     def _get_commit_message(self) -> Optional[str]:
-        """Get commit message from user"""
-        message = input("Commit message: ").strip()
+        """Get commit message from user with automatic heart emoji prefix"""
+        message = input("💭 Commit message: ").strip()
         
         if not message:
             return None
@@ -1154,6 +1154,10 @@ class GitPush:
             if retry == 'y':
                 return self._get_commit_message()
             return None
+        
+        # Always add heart emoji at the beginning if not already present
+        if not message.startswith("❤️"):
+            message = f"❤️ {message}"
         
         return message
 

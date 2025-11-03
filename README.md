@@ -8,9 +8,7 @@
 
 ---
 
-## 🚀 Key Features
-
-**Just type `magic` in your terminal and get instant access to see haven**
+**Just type `magic` in your terminal and get instant access to powerful development automation.**
 
 ---
 
@@ -91,7 +89,7 @@ $ magic
    A  src/utils/helpers.ts
    M  README.md
 
-💭 Enter commit message (or press Enter for AI-generated):
+💭 Commit message:
 ```
 
 ---
@@ -106,13 +104,7 @@ $ magic
 
 ## 🤝 Contributing
 
-Found a bug or want to add a feature? Contributions are welcome!
-
-1. Fork the repository
-2. Create your feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
