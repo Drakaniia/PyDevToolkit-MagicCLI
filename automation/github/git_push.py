@@ -435,7 +435,9 @@ class GitPushRetry:
     def _has_changes(self) -> bool:
         """Check if there are uncommitted changes or untracked files"""
         try:
-            status = self.git.status(porcelain=True)
+            # Use fresh Git client to avoid stale state issues
+            fresh_git = get_git_client(working_dir=Path.cwd(), force_new=True)
+            status = fresh_git.status(porcelain=True)
             return bool(status and status.strip())
         except Exception:
             return False
@@ -971,6 +973,18 @@ class GitPush:
         print("⬆️  GIT PUSH (With Auto-Retry & Auto-Changelog)")
         print("="*70 + "\n")
         
+        # IMPORTANT: Refresh Git client to avoid stale state
+        # This prevents the "nothing to commit" bug that requires restarting
+        print("🔄 Refreshing Git state...")
+        self.git = get_git_client(working_dir=Path.cwd(), force_new=True)
+        self.push_retry.git = get_git_client(working_dir=Path.cwd(), force_new=True)
+        
+        # Also refresh the Git index to ensure we see all filesystem changes
+        try:
+            subprocess.run(['git', 'status'], capture_output=True, cwd=Path.cwd(), timeout=5)
+        except:
+            pass  # Not critical if this fails
+        
         # Check for changes
         if not self._has_changes():
             print("ℹ️  No changes detected. Working directory is clean.")
@@ -1009,26 +1023,71 @@ class GitPush:
         input("\nPress Enter to continue...")
     
     def _has_changes(self) -> bool:
-        """Check if there are any changes including untracked files"""
+        """Check if there are any changes including untracked files with fresh Git client"""
         try:
-            status = self.git.status(porcelain=True)
+            # IMPORTANT: Create a fresh Git client instance to avoid stale state
+            # This prevents the "nothing to commit" bug when files have changed
+            fresh_git = get_git_client(working_dir=Path.cwd(), force_new=True)
+            
+            # Force refresh by running git status twice with different methods
+            # First check with the fresh client
+            status = fresh_git.status(porcelain=True)
             has_changes = bool(status and status.strip())
             
+            # If no changes detected, try a direct subprocess call as fallback
+            # This bypasses any potential caching issues
             if not has_changes:
+                print("🔄 Double-checking for changes with direct Git command...")
                 result = subprocess.run(
-                    ['git', 'status', '--porcelain'],
+                    ['git', 'status', '--porcelain', '--untracked-files=all'],
                     capture_output=True,
                     text=True,
-                    cwd=self.current_dir
+                    cwd=self.current_dir,
+                    timeout=10
                 )
                 if result.stdout.strip():
+                    print(f"✅ Found changes via direct Git command:")
+                    lines = result.stdout.strip().split('\n')
+                    for line in lines[:5]:  # Show first 5 changes
+                        print(f"   {line}")
+                    if len(lines) > 5:
+                        print(f"   ... and {len(lines) - 5} more")
+                    return True
+            
+            # Also check for staged changes that might not show in porcelain
+            if not has_changes:
+                staged_result = subprocess.run(
+                    ['git', 'diff', '--cached', '--name-only'],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.current_dir,
+                    timeout=10
+                )
+                if staged_result.stdout.strip():
+                    print("✅ Found staged changes:")
+                    staged_files = staged_result.stdout.strip().split('\n')
+                    for file in staged_files[:5]:
+                        print(f"   staged: {file}")
                     return True
             
             return has_changes
             
         except Exception as e:
             print(f"⚠️  Error checking for changes: {e}")
-            return False
+            # In case of error, be conservative and assume there might be changes
+            print("🔄 Attempting direct git status as fallback...")
+            try:
+                fallback_result = subprocess.run(
+                    ['git', 'status', '--porcelain'],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.current_dir,
+                    timeout=5
+                )
+                return bool(fallback_result.stdout.strip())
+            except:
+                print("⚠️  All change detection methods failed")
+                return False
     
     def _show_changes_summary(self):
         """Display detailed summary of all changes"""

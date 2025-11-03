@@ -440,14 +440,19 @@ class GitClient:
 _git_client: Optional[GitClient] = None
 
 
-def get_git_client(working_dir: Optional[Path] = None) -> GitClient:
+def get_git_client(working_dir: Optional[Path] = None, force_new: bool = False) -> GitClient:
     """
     Get or create GitClient singleton
     
     Args:
         working_dir: Working directory (creates new instance if different)
+        force_new: Force creation of new instance (bypasses singleton)
     """
     global _git_client
+    
+    # Force new instance if requested (helps with stale state issues)
+    if force_new:
+        return GitClient(working_dir)
     
     if _git_client is None or (working_dir and working_dir != _git_client.working_dir):
         _git_client = GitClient(working_dir)
