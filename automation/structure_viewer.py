@@ -156,7 +156,7 @@ class StructureViewer:
         self.current_dir = Path.cwd()
         
         print("\n" + "="*70)
-        print("📁 PROJECT STRUCTURE (Optimized for AI)")
+        print("📁 PROJECT STRUCTURE")
         print("="*70)
         print(f"\n📍 Current Directory: {self.current_dir.name}")
         print(f"📍 Absolute Path: {self.current_dir.absolute()}")
@@ -164,10 +164,9 @@ class StructureViewer:
         # Load .gitignore patterns
         self._load_gitignore()
         
-        print("\n💡 Showing: All source code and important files (optimized for AI understanding)")
+        print("\n💡 Showing: All source code and important files")
         print(f"   Hiding: Build artifacts, dependencies, cache, hidden folders, auth-portal")
         print(f"   Max depth: {self.max_depth} levels")
-        print(f"   Enhanced exploration of: {', '.join(sorted(self.IMPORTANT_SOURCE_DIRS))}")
         
         # Show summary first for AI context
         file_count, dir_count = self._count_items(self.current_dir)
@@ -176,13 +175,11 @@ class StructureViewer:
         # Generate the tree structure
         tree_lines = self._generate_tree(self.current_dir)
         
-        print("\n" + "="*50 + " COPY BELOW FOR AI " + "="*50)
-        print("```")
+        print("\n```")
         print(f"{self.current_dir.name}/")
         for line in tree_lines:
             print(line)
-        print("```")
-        print("="*120 + "\n")
+        print("```\n")
         
         input("Press Enter to continue...")
     
@@ -532,11 +529,7 @@ class StructureViewer:
                 
                 # Display name with size for files (optimized for AI readability)
                 if item.is_dir():
-                    # Check if it's an important source directory
-                    if item.name.lower() in self.IMPORTANT_SOURCE_DIRS:
-                        display_name = f"{item.name}/ ## enhanced exploration"
-                    else:
-                        display_name = f"{item.name}/"
+                    display_name = f"{item.name}/"
                 else:
                     try:
                         size = self._format_size(item.stat().st_size)
