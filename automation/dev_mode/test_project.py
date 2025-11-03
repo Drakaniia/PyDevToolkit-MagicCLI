@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional, Any
 from automation.dev_mode._base import DevModeCommand
 from automation.core.loading import LoadingSpinner, loading_animation
+from automation.dev_mode.menu_utils import get_choice_with_arrows
 
 
 class TestProjectCommand(DevModeCommand):
@@ -46,31 +47,22 @@ class TestProjectCommand(DevModeCommand):
             input("\nPress Enter to continue...")
             return
         
-        # Show available test options
-        print("Available Test Commands:")
-        for i, (name, command, framework) in enumerate(test_frameworks, 1):
-            print(f"  {i}. {name} ({framework})")
-        print(f"  {len(test_frameworks) + 1}. Cancel")
+        # Show available test options and get user choice with arrow navigation
+        test_options = [f"{name} ({framework})" for name, command, framework in test_frameworks]
+        test_options.append("Cancel")
         
-        # Get user choice
-        choice = input(f"\nYour choice (1-{len(test_frameworks) + 1}): ").strip()
+        choice = get_choice_with_arrows(test_options, "Available Test Commands")
         
-        try:
-            choice_num = int(choice)
-            if choice_num == len(test_frameworks) + 1:
-                print("\n❌ Operation cancelled")
-                input("\nPress Enter to continue...")
-                return
-            
-            if 1 <= choice_num <= len(test_frameworks):
-                name, command, framework = test_frameworks[choice_num - 1]
-                self._run_test_command(name, command, framework, current_dir)
-            else:
-                print("❌ Invalid choice")
-                input("\nPress Enter to continue...")
+        if choice == len(test_frameworks) + 1:
+            print("\n❌ Operation cancelled")
+            input("\nPress Enter to continue...")
+            return
         
-        except ValueError:
-            print("❌ Invalid input")
+        if 1 <= choice <= len(test_frameworks):
+            name, command, framework = test_frameworks[choice - 1]
+            self._run_test_command(name, command, framework, current_dir)
+        else:
+            print("❌ Invalid choice")
             input("\nPress Enter to continue...")
     
     def _noninteractive_run(

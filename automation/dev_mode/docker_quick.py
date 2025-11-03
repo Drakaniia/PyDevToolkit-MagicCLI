@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 from automation.dev_mode._base import DevModeCommand
+from automation.dev_mode.menu_utils import get_choice_with_arrows
 
 
 class DockerQuickCommand(DevModeCommand):
@@ -43,34 +44,35 @@ class DockerQuickCommand(DevModeCommand):
             input("\nPress Enter to continue...")
             return
         
-        # Show Docker operations menu
-        print("Docker Operations:")
-        print("  1. Build Image")
-        print("  2. Run Container")
-        print("  3. Stop Container")
-        print("  4. List Running Containers")
-        print("  5. List All Containers")
-        print("  6. List Images")
-        print("  7. Prune Unused Resources")
-        print("  8. Cancel")
+        # Show Docker operations menu with arrow navigation
+        docker_options = [
+            "Build Image",
+            "Run Container", 
+            "Stop Container",
+            "List Running Containers",
+            "List All Containers",
+            "List Images",
+            "Prune Unused Resources",
+            "Cancel"
+        ]
         
-        choice = input("\nYour choice (1-8): ").strip()
+        choice = get_choice_with_arrows(docker_options, "Docker Operations")
         
-        if choice == '1':
+        if choice == 1:
             self._build_image()
-        elif choice == '2':
+        elif choice == 2:
             self._run_container()
-        elif choice == '3':
+        elif choice == 3:
             self._stop_container()
-        elif choice == '4':
+        elif choice == 4:
             self._list_containers(all_containers=False)
-        elif choice == '5':
+        elif choice == 5:
             self._list_containers(all_containers=True)
-        elif choice == '6':
+        elif choice == 6:
             self._list_images()
-        elif choice == '7':
+        elif choice == 7:
             self._prune_resources()
-        elif choice == '8':
+        elif choice == 8:
             print("\n❌ Operation cancelled")
         else:
             print("❌ Invalid choice")
@@ -201,30 +203,19 @@ class DockerQuickCommand(DevModeCommand):
                 print("💡 Build an image first using option 1")
                 return
             
-            # Display available images with numbers
-            print("Available Images:")
-            for i, image in enumerate(available_images, 1):
-                print(f"  {i}. {image}")
+            # Display available images with arrow navigation
+            image_options = available_images + ["Enter custom image name"]
+            choice = get_choice_with_arrows(image_options, "Available Images")
             
-            print(f"  {len(available_images) + 1}. Enter custom image name")
-            
-            # Get image selection
-            choice = input(f"\nSelect image (1-{len(available_images) + 1}): ").strip()
-            
-            try:
-                choice_num = int(choice)
-                if 1 <= choice_num <= len(available_images):
-                    image_name = available_images[choice_num - 1]
-                elif choice_num == len(available_images) + 1:
-                    image_name = input("Enter image name: ").strip()
-                    if not image_name:
-                        print("❌ Image name cannot be empty")
-                        return
-                else:
-                    print("❌ Invalid choice")
+            if 1 <= choice <= len(available_images):
+                image_name = available_images[choice - 1]
+            elif choice == len(available_images) + 1:
+                image_name = input("Enter image name: ").strip()
+                if not image_name:
+                    print("❌ Image name cannot be empty")
                     return
-            except ValueError:
-                print("❌ Invalid input")
+            else:
+                print("❌ Invalid choice")
                 return
             
             # Verify image exists
@@ -245,12 +236,10 @@ class DockerQuickCommand(DevModeCommand):
             # Volume mapping
             volume_map = input("Volume mapping (e.g., /host/path:/container/path, optional): ").strip()
             
-            # Run mode
-            print("\nRun mode:")
-            print("  1. Detached (background)")
-            print("  2. Interactive (foreground)")
-            mode_choice = input("Your choice (1-2, default: 1): ").strip() or '1'
-            detached = (mode_choice == '1')
+            # Run mode with arrow navigation
+            mode_options = ["Detached (background)", "Interactive (foreground)"]
+            mode_choice = get_choice_with_arrows(mode_options, "Run mode")
+            detached = (mode_choice == 1)
         else:
             image_name = kwargs.get('image_name')
             container_name = kwargs.get('container_name', '')
@@ -340,12 +329,10 @@ class DockerQuickCommand(DevModeCommand):
         # Volume mapping
         volume_map = input("Volume mapping (e.g., /host/path:/container/path, optional): ").strip()
         
-        # Run mode
-        print("\nRun mode:")
-        print("  1. Detached (background)")
-        print("  2. Interactive (foreground)")
-        mode_choice = input("Your choice (1-2, default: 1): ").strip() or '1'
-        detached = (mode_choice == '1')
+        # Run mode with arrow navigation
+        mode_options = ["Detached (background)", "Interactive (foreground)"]
+        mode_choice = get_choice_with_arrows(mode_options, "Run mode")
+        detached = (mode_choice == 1)
         
         # Build command
         cmd = ['docker', 'run']
@@ -430,33 +417,29 @@ class DockerQuickCommand(DevModeCommand):
                 return
             
             if interactive:
-                print("Running Containers:")
-                for i, container in enumerate(containers, 1):
+                # Prepare container options for arrow navigation
+                container_options = []
+                for container in containers:
                     parts = container.split('\t')
                     container_id = parts[0][:12]  # Short ID
                     name = parts[1] if len(parts) > 1 else '<none>'
                     image = parts[2] if len(parts) > 2 else '<unknown>'
                     status = parts[3] if len(parts) > 3 else '<unknown>'
-                    print(f"  {i}. {container_id} | {name} | {image} | {status}")
+                    container_options.append(f"{container_id} | {name} | {image} | {status}")
                 
-                print(f"  {len(containers) + 1}. Stop All")
+                container_options.append("Stop All")
                 
-                choice = input(f"\nSelect container to stop (1-{len(containers) + 1}): ").strip()
+                choice = get_choice_with_arrows(container_options, "Running Containers")
                 
-                try:
-                    choice_num = int(choice)
-                    if 1 <= choice_num <= len(containers):
-                        container_info = containers[choice_num - 1].split('\t')
-                        container_id = container_info[0]
-                    elif choice_num == len(containers) + 1:
-                        # Stop all containers
-                        self._stop_all_containers()
-                        return
-                    else:
-                        print("❌ Invalid choice")
-                        return
-                except ValueError:
-                    print("❌ Invalid input")
+                if 1 <= choice <= len(containers):
+                    container_info = containers[choice - 1].split('\t')
+                    container_id = container_info[0]
+                elif choice == len(containers) + 1:
+                    # Stop all containers
+                    self._stop_all_containers()
+                    return
+                else:
+                    print("❌ Invalid choice")
                     return
             else:
                 container_id = kwargs.get('container_id')

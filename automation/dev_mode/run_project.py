@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 from automation.dev_mode._base import DevModeCommand
 from automation.core.loading import LoadingSpinner, loading_animation
+from automation.dev_mode.menu_utils import get_choice_with_arrows
 
 
 class RunProjectCommand(DevModeCommand):
@@ -51,31 +52,22 @@ class RunProjectCommand(DevModeCommand):
             input("\nPress Enter to continue...")
             return
         
-        # Show available scripts
-        print("Available Scripts:")
-        for i, (name, command) in enumerate(scripts.items(), 1):
-            print(f"  {i}. {name}: {command}")
-        print(f"  {len(scripts) + 1}. Cancel")
+        # Show available scripts and get user choice with arrow navigation
+        script_options = [f"{name}: {command}" for name, command in scripts.items()]
+        script_options.append("Cancel")
         
-        # Get user choice
-        choice = input(f"\nYour choice (1-{len(scripts) + 1}): ").strip()
+        choice = get_choice_with_arrows(script_options, "Available Scripts")
         
-        try:
-            choice_num = int(choice)
-            if choice_num == len(scripts) + 1:
-                print("\n❌ Operation cancelled")
-                input("\nPress Enter to continue...")
-                return
-            
-            if 1 <= choice_num <= len(scripts):
-                script_name = list(scripts.keys())[choice_num - 1]
-                self._run_script(script_name, current_dir)
-            else:
-                print("❌ Invalid choice")
-                input("\nPress Enter to continue...")
+        if choice == len(scripts) + 1:
+            print("\n❌ Operation cancelled")
+            input("\nPress Enter to continue...")
+            return
         
-        except ValueError:
-            print("❌ Invalid input")
+        if 1 <= choice <= len(scripts):
+            script_name = list(scripts.keys())[choice - 1]
+            self._run_script(script_name, current_dir)
+        else:
+            print("❌ Invalid choice")
             input("\nPress Enter to continue...")
     
     def _noninteractive_run(

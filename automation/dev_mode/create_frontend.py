@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from typing import Optional, Dict, Any
 from automation.dev_mode._base import DevModeCommand
+from automation.dev_mode.menu_utils import get_choice_with_arrows
 
 
 class CreateFrontendCommand(DevModeCommand):
@@ -294,16 +295,15 @@ class CreateFrontendCommand(DevModeCommand):
     
     def _prompt_framework(self) -> Optional[str]:
         """Prompt user to select framework"""
-        print("Select Framework:")
-        for key, value in self.FRAMEWORKS.items():
-            print(f"  {key}. {value['name']}")
+        framework_options = [value['name'] for value in self.FRAMEWORKS.values()]
         
-        choice = input("\nYour choice (1-3): ").strip()
-        if choice not in self.FRAMEWORKS:
+        choice = get_choice_with_arrows(framework_options, "Select Framework")
+        if 1 <= choice <= len(self.FRAMEWORKS):
+            return str(choice)
+        else:
             print("❌ Invalid choice")
             input("\nPress Enter to continue...")
             return None
-        return choice
     
     def _prompt_project_name(self) -> Optional[str]:
         """Prompt for project name"""
@@ -321,21 +321,17 @@ class CreateFrontendCommand(DevModeCommand):
     
     def _prompt_package_manager(self) -> str:
         """Prompt for package manager"""
-        print("\nPackage Manager:")
-        for key, value in self.PACKAGE_MANAGERS.items():
-            print(f"  {key}. {value}")
+        pm_options = list(self.PACKAGE_MANAGERS.values())
         
-        choice = input("\nYour choice (1-3, default: npm): ").strip() or '1'
-        return self.PACKAGE_MANAGERS.get(choice, 'npm')
+        choice = get_choice_with_arrows(pm_options, "Package Manager")
+        return self.PACKAGE_MANAGERS.get(str(choice), 'npm')
     
     def _prompt_css_framework(self) -> str:
         """Prompt for CSS framework"""
-        print("\nCSS Framework:")
-        for key, value in self.CSS_FRAMEWORKS.items():
-            print(f"  {key}. {value['name']}")
+        css_options = [value['name'] for value in self.CSS_FRAMEWORKS.values()]
         
-        choice = input("\nYour choice (1-3, default: None): ").strip() or '1'
-        return choice if choice in self.CSS_FRAMEWORKS else '1'
+        choice = get_choice_with_arrows(css_options, "CSS Framework")
+        return str(choice) if str(choice) in self.CSS_FRAMEWORKS else '1'
     
     def _prompt_directory(self) -> str:
         """Prompt for target directory"""
