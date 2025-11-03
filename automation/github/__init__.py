@@ -9,6 +9,7 @@ from automation.github.git_log import GitLog
 from automation.github.git_push import GitPush
 from automation.github.git_initializer import GitInitializer
 from automation.github.git_recover import GitRecover
+from automation.github.git_removesubmodule import GitRemoveSubmodule
 from automation.changelog_generator import ChangelogGenerator
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     'GitPush',
     'GitInitializer',
     'GitRecover',
+    'GitRemoveSubmodule',
     'ChangelogGenerator',
 ]

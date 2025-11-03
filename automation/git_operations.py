@@ -10,6 +10,7 @@ from automation.github.git_pull import GitPull
 from automation.github.git_push import GitPush
 from automation.github.git_initializer import GitInitializer
 from automation.github.git_recover import GitRecover
+from automation.github.git_removesubmodule import GitRemoveSubmodule
 from automation.menu import Menu, MenuItem
 from automation.core.git_client import get_git_client
 
@@ -70,6 +71,11 @@ class GitOperations:
             commit_details_func=log_handler.get_commit_details,
             verify_commit_func=log_handler.verify_commit_exists
         )
+    
+    def manage_submodules(self):
+        """Manage nested repositories and submodules"""
+        submodule_handler = GitRemoveSubmodule()
+        submodule_handler.run_interactive_menu()
 
 
 class GitMenu(Menu):
@@ -88,5 +94,6 @@ class GitMenu(Menu):
             MenuItem("Push (Add, Commit & Push)", lambda: self.git_ops.push()),
             MenuItem("Initialize Git & Push to GitHub", lambda: self.git_ops.initialize_and_push()),
             MenuItem("Git Recovery (Revert to Previous Commit)", lambda: self.git_ops.show_recovery_menu()),
+            MenuItem("Manage Submodules/Nested Repos", lambda: self.git_ops.manage_submodules()),
             MenuItem("Back to Main Menu", lambda: "exit")
         ]
