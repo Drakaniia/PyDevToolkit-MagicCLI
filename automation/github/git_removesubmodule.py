@@ -5,6 +5,7 @@ Handles detection and management of nested repositories/submodules
 
 import os
 import subprocess
+import json
 from typing import List, Tuple, Optional
 from automation.core.loading import loading_animation
 from automation.core.exceptions import GitError
@@ -17,6 +18,8 @@ class GitRemoveSubmodule:
     def __init__(self):
         self.nested_repos: List[Tuple[str, str]] = []  # (folder_name, full_path)
         self.disabled_repos: List[Tuple[str, str]] = []  # Track disabled repos for recovery
+        self.state_file = ".submodule_state.json"  # File to persist state
+        self.load_state()
     
     def scan_nested_repositories(self, base_path: str = ".") -> List[Tuple[str, str]]:
         """
@@ -49,6 +52,28 @@ class GitRemoveSubmodule:
             
         except Exception as e:
             raise GitError(f"Error scanning for nested repositories: {str(e)}")
+    
+    def load_state(self) -> None:
+        """Load persistent state from file"""
+        try:
+            if os.path.exists(self.state_file):
+                with open(self.state_file, 'r') as f:
+                    data = json.load(f)
+                    self.disabled_repos = data.get('disabled_repos', [])
+        except Exception as e:
+            print(f"Warning: Could not load state file: {str(e)}")
+            self.disabled_repos = []
+    
+    def save_state(self) -> None:
+        """Save persistent state to file"""
+        try:
+            data = {
+                'disabled_repos': self.disabled_repos
+            }
+            with open(self.state_file, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            print(f"Warning: Could not save state file: {str(e)}")
     
     def display_nested_repositories(self) -> None:
         """Display the list of found nested repositories"""
@@ -83,9 +108,9 @@ class GitRemoveSubmodule:
         
         return choice
     
-    def disable_repository(self, repo_path: str) -> bool:
+    def disable_and_remove_repository(self, repo_path: str) -> bool:
         """
-        Temporarily disable a repository by renaming .git to .git_disabled
+        Disable repository and remove from git cache in one operation
         
         Args:
             repo_path: Path to the repository
@@ -105,18 +130,44 @@ class GitRemoveSubmodule:
                 print(f"❌ Repository already appears to be disabled (.git_disabled exists)")
                 return False
             
-            # Rename .git to .git_disabled
+            # Step 1: Rename .git to .git_disabled
             os.rename(git_path, disabled_path)
-            
-            # Add to disabled repos list for recovery tracking
-            folder_name = os.path.basename(repo_path)
-            self.disabled_repos.append((folder_name, repo_path))
-            
             print(f"✅ Repository disabled: .git → .git_disabled")
-            return True
             
+            # Step 2: Remove from git cache
+            rel_path = os.path.relpath(repo_path)
+            result = subprocess.run(
+                ["git", "rm", "--cached", "-r", rel_path],
+                capture_output=True,
+                text=True,
+                cwd="."
+            )
+            
+            if result.returncode == 0:
+                print(f"✅ Removed {rel_path} from git cache")
+                print("   The folder is now pushable as regular files")
+                
+                # Add to disabled repos list for recovery tracking
+                folder_name = os.path.basename(repo_path)
+                self.disabled_repos.append((folder_name, repo_path))
+                self.save_state()  # Persist state
+                
+                return True
+            else:
+                # If git rm failed, revert the .git rename
+                os.rename(disabled_path, git_path)
+                print(f"❌ Error removing from git cache: {result.stderr}")
+                print("   Reverted repository disable operation")
+                return False
+                
         except Exception as e:
-            print(f"❌ Error disabling repository: {str(e)}")
+            # Try to revert if something went wrong
+            try:
+                if os.path.exists(disabled_path) and not os.path.exists(git_path):
+                    os.rename(disabled_path, git_path)
+            except:
+                pass
+            print(f"❌ Error in disable and remove operation: {str(e)}")
             return False
     
     def remove_from_git_cache(self, repo_path: str) -> bool:
@@ -184,6 +235,7 @@ class GitRemoveSubmodule:
                 (name, path) for name, path in self.disabled_repos 
                 if path != repo_path
             ]
+            self.save_state()  # Persist state
             
             print(f"✅ Repository recovered: .git_disabled → .git")
             return True
@@ -206,7 +258,22 @@ class GitRemoveSubmodule:
             print()
     
     def run_interactive_menu(self) -> None:
-        """Run the interactive menu for submodule management"""
+        """Run the interactive menu for submodule management with auto-scan"""
+        # Auto-scan for nested repositories when starting
+        with loading_animation("Scanning for nested repositories..."):
+            self.scan_nested_repositories()
+        
+        # Validation: if no nested repositories found, don't proceed
+        if not self.nested_repos:
+            print("\n❌ No nested repositories found in the current directory.")
+            print("   The submodule manager requires nested repositories to function.")
+            input("\nPress Enter to return to the previous menu...")
+            return
+        
+        # If nested repositories exist, display them and show the menu
+        print(f"\n✅ Found {len(self.nested_repos)} nested repository/repositories:")
+        self.display_nested_repositories()
+        
         menu = SubmoduleMenu(self)
         menu.run()
     
@@ -237,78 +304,77 @@ class SubmoduleMenu(Menu):
     def __init__(self, submodule_manager: GitRemoveSubmodule):
         self.manager = submodule_manager
         super().__init__("🔧 Git Submodule/Nested Repository Manager")
+        
+        # Show disabled repositories if any exist
+        self._show_disabled_repos()
+    
+    def _show_disabled_repos(self):
+        """Display disabled repositories if any exist"""
+        if self.manager.disabled_repos:
+            print("\n" + "="*60)
+            print("🔄 Previously disabled repositories:")
+            self.manager.display_disabled_repositories()
+            print("="*60)
     
     def setup_items(self):
         """Setup menu items for submodule management"""
         self.items = [
-            MenuItem("Scan for nested repositories", self._scan_repositories),
-            MenuItem("Disable repository (rename .git)", self._disable_repository),
-            MenuItem("Remove from git cache (git rm --cached)", self._remove_from_cache),
-            MenuItem("Recover disabled repository", self._recover_repository),
-            MenuItem("View disabled repositories", self._view_disabled),
+            MenuItem("Disable & Remove Repository (Combined)", self._disable_and_remove_repository),
+            MenuItem("Recover Disabled Repository", self._recover_repository),
+            MenuItem("Rescan for Nested Repositories", self._rescan_repositories),
             MenuItem("Back to GitHub Operations", lambda: "exit")
         ]
     
-    def _scan_repositories(self):
-        """Scan for nested repositories"""
-        with loading_animation("Scanning for nested repositories..."):
+    def _disable_and_remove_repository(self):
+        """Disable repository and remove from git cache in one operation"""
+        if not self.manager.nested_repos:
+            print("No nested repositories found to disable.")
+            input("\nPress Enter to continue...")
+            return None
+        
+        selected = self.manager.choose_repository()
+        if selected:
+            folder_name, repo_path = selected
+            print(f"\n🔄 Processing repository: {folder_name}")
+            print("   1. Disabling repository (.git → .git_disabled)")
+            print("   2. Removing from git cache (git rm --cached)")
+            
+            if self.manager.disable_and_remove_repository(repo_path):
+                print(f"\n🎉 Successfully processed repository: {folder_name}")
+                print("   ✅ Repository disabled and removed from git cache")
+                print("   📁 Folder is now pushable as regular files")
+                print("   💾 State saved - will remember this change")
+            input("\nPress Enter to continue...")
+        return None
+    
+    def _rescan_repositories(self):
+        """Rescan for nested repositories"""
+        with loading_animation("Rescanning for nested repositories..."):
             self.manager.scan_nested_repositories()
         
+        print("\n🔄 Rescan completed!")
         self.manager.display_nested_repositories()
         input("\nPress Enter to continue...")
-        return None
-    
-    def _disable_repository(self):
-        """Disable a repository"""
-        if not self.manager.nested_repos:
-            print("Please scan for repositories first.")
-            input("\nPress Enter to continue...")
-            return None
-        
-        selected = self.manager.choose_repository()
-        if selected:
-            folder_name, repo_path = selected
-            if self.manager.disable_repository(repo_path):
-                print(f"\n✅ Successfully disabled repository: {folder_name}")
-                print("   You can now use 'Remove from git cache' to make it pushable.")
-            input("\nPress Enter to continue...")
-        return None
-    
-    def _remove_from_cache(self):
-        """Remove repository from git cache"""
-        if not self.manager.nested_repos:
-            print("Please scan for repositories first.")
-            input("\nPress Enter to continue...")
-            return None
-        
-        selected = self.manager.choose_repository()
-        if selected:
-            folder_name, repo_path = selected
-            if self.manager.remove_from_git_cache(repo_path):
-                print(f"\n✅ Successfully removed {folder_name} from git cache")
-                print("   The folder can now be pushed as regular files.")
-            input("\nPress Enter to continue...")
         return None
     
     def _recover_repository(self):
         """Recover a disabled repository"""
         if not self.manager.disabled_repos:
-            self.manager.display_disabled_repositories()
+            print("No disabled repositories found to recover.")
             input("\nPress Enter to continue...")
             return None
         
         selected = self.manager.choose_disabled_repository()
         if selected:
             folder_name, repo_path = selected
+            print(f"\n🔄 Recovering repository: {folder_name}")
+            print("   Restoring .git_disabled → .git")
+            
             if self.manager.recover_repository(repo_path):
-                print(f"\n✅ Successfully recovered repository: {folder_name}")
+                print(f"\n🎉 Successfully recovered repository: {folder_name}")
+                print("   ✅ Repository is now active again")
+                print("   💾 State saved - change remembered")
             input("\nPress Enter to continue...")
-        return None
-    
-    def _view_disabled(self):
-        """View disabled repositories"""
-        self.manager.display_disabled_repositories()
-        input("\nPress Enter to continue...")
         return None
 
 

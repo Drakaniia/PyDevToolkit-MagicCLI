@@ -56,6 +56,9 @@ token.json
 # Ignore commit cache
 .commit_cache.json
 
+# Submodule state file
+.submodule_state.json
+
 # Optional: ignore test files
 test_ai_commit.py
 test_gpt4all.py
