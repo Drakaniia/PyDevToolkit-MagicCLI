@@ -8,6 +8,17 @@
 
 ---
 
+### 2025-11-03
+
+#### ♻️ Code Refactoring
+
+- refactor: enhance loading utilities and improve structure viewer logic (`74187f2`) - Qwenzy
+
+**Total**: 1 commit(s)
+
+---
+
+
 ### 2025-11-01
 
 #### ✨ New Features

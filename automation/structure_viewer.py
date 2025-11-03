@@ -22,7 +22,7 @@ class StructureViewer:
     EXCLUDE_DIRS = {
         # Python
         "__pycache__", ".pytest_cache", ".mypy_cache", ".tox",
-        ".eggs", "*.egg-info", ".coverage", "htmlcov",
+        ".eggs", ".coverage", "htmlcov",
         ".venv", "venv", "env", "ENV", "virtualenv",
         
         # JavaScript/Node
@@ -36,7 +36,17 @@ class StructureViewer:
         ".git", ".svn", ".hg",
         
         # OS files
-        ".DS_Store", "Thumbs.db"
+        ".DS_Store", "Thumbs.db",
+        
+        # Project-specific exclusions
+        "auth-portal"  # Specific folder to exclude as requested
+    }
+    
+    # Exclude directories that match these patterns
+    EXCLUDE_DIR_PATTERNS = {
+        "*.egg-info",  # Python egg info directories
+        "*-info",      # General info directories
+        ".coverage*",  # Coverage report directories
     }
     
     # Exclude ONLY generated files
@@ -119,25 +129,34 @@ class StructureViewer:
         '.md', '.rst', '.txt'
     }
     
-    def __init__(self, max_depth: int = 5, max_files_per_dir: int = 100):
+    def __init__(self, max_depth: int = 8, max_files_per_dir: int = 50):
         """
         Initialize structure viewer
         
         Args:
-            max_depth: Maximum directory depth to explore
-            max_files_per_dir: Maximum files to show per directory
+            max_depth: Maximum directory depth to explore (increased for better deep exploration)
+            max_files_per_dir: Maximum files to show per directory (reduced to focus on important files)
         """
         self.current_dir = Path.cwd()
         self.max_depth = max_depth
         self.max_files_per_dir = max_files_per_dir
         self.gitignore_patterns: Set[str] = set()
+        
+        # Directories that should show ALL their contents (deep exploration)
+        self.IMPORTANT_SOURCE_DIRS = {
+            "src", "app", "components", "lib", "utils", "hooks", "pages", 
+            "api", "services", "models", "views", "controllers", "routes",
+            "config", "constants", "types", "interfaces", "schemas",
+            "automation", "tests", "test", "__tests__", "spec",
+            "docs", "documentation", "examples", "demo"
+        }
     
     def show_structure(self):
         """Display enhanced project structure"""
         self.current_dir = Path.cwd()
         
         print("\n" + "="*70)
-        print("📁 PROJECT STRUCTURE")
+        print("📁 PROJECT STRUCTURE (Optimized for AI)")
         print("="*70)
         print(f"\n📍 Current Directory: {self.current_dir.name}")
         print(f"📍 Absolute Path: {self.current_dir.absolute()}")
@@ -145,25 +164,44 @@ class StructureViewer:
         # Load .gitignore patterns
         self._load_gitignore()
         
-        print("\n💡 Showing: All source code and important files")
-        print(f"   Hiding: Build artifacts, dependencies, cache, hidden folders")
-        print(f"   Max depth: {self.max_depth} levels\n")
+        print("\n💡 Showing: All source code and important files (optimized for AI understanding)")
+        print(f"   Hiding: Build artifacts, dependencies, cache, hidden folders, auth-portal")
+        print(f"   Max depth: {self.max_depth} levels")
+        print(f"   Enhanced exploration of: {', '.join(sorted(self.IMPORTANT_SOURCE_DIRS))}")
+        
+        # Show summary first for AI context
+        file_count, dir_count = self._count_items(self.current_dir)
+        print(f"\n📊 Summary: {dir_count} directories, {file_count} files")
         
         # Generate the tree structure
         tree_lines = self._generate_tree(self.current_dir)
         
+        print("\n" + "="*50 + " COPY BELOW FOR AI " + "="*50)
         print("```")
         print(f"{self.current_dir.name}/")
         for line in tree_lines:
             print(line)
         print("```")
-        
-        # Show summary
-        file_count, dir_count = self._count_items(self.current_dir)
-        print(f"\n📊 Summary: {dir_count} directories, {file_count} files")
-        print("="*70 + "\n")
+        print("="*120 + "\n")
         
         input("Press Enter to continue...")
+    
+    def get_clean_structure(self) -> str:
+        """
+        Get clean structure output optimized for AI consumption
+        Returns the structure as a simple string without UI elements
+        """
+        self.current_dir = Path.cwd()
+        self._load_gitignore()
+        
+        # Generate the tree structure
+        tree_lines = self._generate_tree(self.current_dir)
+        
+        # Build clean output
+        output_lines = [f"{self.current_dir.name}/"]
+        output_lines.extend(tree_lines)
+        
+        return "\n".join(output_lines)
     
     def _load_gitignore(self):
         """Load and parse .gitignore patterns"""
@@ -234,18 +272,25 @@ class StructureViewer:
                 # Hidden file - only show if in ALWAYS_SHOW_FILES
                 return name not in self.ALWAYS_SHOW_FILES
         
-        # Rule 3: For directories, check if they contain source code FIRST
-        # This ensures we show important directories even if they match other exclusion rules
+        # Rule 3: Check explicit exclude lists BEFORE source code check
+        # This ensures build artifacts are always excluded
+        if is_dir:
+            if name in self.EXCLUDE_DIRS:
+                return True
+            # Check directory patterns
+            for pattern in self.EXCLUDE_DIR_PATTERNS:
+                if self._matches_pattern(name, pattern):
+                    return True
+        
+        # Rule 3.5: For directories, check if they contain source code
+        # This ensures we show important directories that aren't explicitly excluded
         if is_dir and not name.startswith('.'):
             # Check if this directory or its subdirectories contain source code
             if self._has_source_code_deep(path):
                 return False
         
-        # Rule 4: Check explicit exclude lists for non-hidden items
-        if is_dir:
-            if name in self.EXCLUDE_DIRS:
-                return True
-        else:
+        # Rule 4: Check file exclusion patterns
+        if not is_dir:
             for pattern in self.EXCLUDE_FILES:
                 if self._matches_pattern(name, pattern):
                     return True
@@ -403,7 +448,7 @@ class StructureViewer:
         depth: int = 0
     ) -> List[str]:
         """
-        Generate tree structure
+        Generate tree structure with enhanced sorting and prioritization
         
         Args:
             directory: Directory to scan
@@ -420,10 +465,7 @@ class StructureViewer:
         
         try:
             # Get all items
-            items = sorted(
-                directory.iterdir(),
-                key=lambda x: (not x.is_dir(), x.name.lower())
-            )
+            items = list(directory.iterdir())
             
             # Filter out excluded items
             filtered_items = []
@@ -431,10 +473,47 @@ class StructureViewer:
                 if not self._should_exclude(item, item.is_dir()):
                     filtered_items.append(item)
             
-            # Limit items if too many
-            if len(filtered_items) > self.max_files_per_dir:
-                shown_items = filtered_items[:self.max_files_per_dir]
-                hidden_count = len(filtered_items) - self.max_files_per_dir
+            # Enhanced sorting for better AI understanding
+            def sort_key(item: Path):
+                name = item.name.lower()
+                is_dir = item.is_dir()
+                
+                # Priority order for better structure presentation
+                priority = 0
+                
+                # Highest priority: important config files
+                if name in {'readme.md', 'package.json', 'setup.py', 'requirements.txt', 'dockerfile'}:
+                    priority = 1
+                # High priority: source directories
+                elif is_dir and name in self.IMPORTANT_SOURCE_DIRS:
+                    priority = 2
+                # Medium priority: other directories
+                elif is_dir:
+                    priority = 3
+                # Lower priority: source files
+                elif any(name.endswith(ext) for ext in ['.py', '.js', '.ts', '.jsx', '.tsx', '.vue']):
+                    priority = 4
+                # Lowest priority: other files
+                else:
+                    priority = 5
+                
+                return (priority, name)
+            
+            filtered_items.sort(key=sort_key)
+            
+            # Smart limiting based on directory importance
+            current_dir_name = directory.name.lower()
+            is_important_dir = current_dir_name in self.IMPORTANT_SOURCE_DIRS
+            
+            if is_important_dir:
+                # Show more items in important directories
+                max_items = min(self.max_files_per_dir * 2, 100)
+            else:
+                max_items = self.max_files_per_dir
+            
+            if len(filtered_items) > max_items:
+                shown_items = filtered_items[:max_items]
+                hidden_count = len(filtered_items) - max_items
             else:
                 shown_items = filtered_items
                 hidden_count = 0
@@ -451,13 +530,21 @@ class StructureViewer:
                     current_prefix = "├── "
                     next_prefix = "│   "
                 
-                # Display name with size for files
+                # Display name with size for files (optimized for AI readability)
                 if item.is_dir():
-                    display_name = f"{item.name}/"
+                    # Check if it's an important source directory
+                    if item.name.lower() in self.IMPORTANT_SOURCE_DIRS:
+                        display_name = f"{item.name}/ ## enhanced exploration"
+                    else:
+                        display_name = f"{item.name}/"
                 else:
                     try:
                         size = self._format_size(item.stat().st_size)
-                        display_name = f"{item.name} ({size})"
+                        # Only show size for larger files to reduce noise
+                        if item.stat().st_size > 1024:  # Show size for files > 1KB
+                            display_name = f"{item.name} ({size})"
+                        else:
+                            display_name = item.name
                     except:
                         display_name = item.name
                 
