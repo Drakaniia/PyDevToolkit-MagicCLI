@@ -1,6 +1,6 @@
-# 🚀 Python Automation System
+# ✨ Magic CLI
 
-A powerful, developer-friendly CLI automation toolkit with AI-powered Git operations, interactive navigation, and intelligent commit management.
+**One command to rule them all** - A powerful developer toolkit that puts Git operations, project management, and web development automation at your fingertips.
 
 ![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -8,122 +8,118 @@ A powerful, developer-friendly CLI automation toolkit with AI-powered Git operat
 
 ---
 
-## ✨ Unique Features
+## 🚀 Key Features
 
-### 🔧 Comprehensive Git Management
-
-- **Repository Initialization**: One-command setup for new Git repositories with remote configuration
-- **Smart Status Checking**: View detailed repository status with color-coded output
-- **Commit Recovery**: Interactive interface to revert to previous commits
-- **Multiple Reset Options**: Hard reset, soft reset, or create branches from any commit
-- **Pull Operations**: Simple pull and pull-with-rebase functionality
-- **Remote Management**: Easy configuration and updates of remote URLs
-
-### 📊 Project Structure Visualization
-
-- **AI-Readable Format**: Generates clean tree structures perfect for sharing with AI assistants
-- **File Size Information**: Displays human-readable file sizes for each file
-- **Smart Filtering**: Automatically excludes common unwanted directories (`__pycache__`, `.git`, `node_modules`)
-- **Recursive Scanning**: Full project tree with nested directory support
-- **Summary Statistics**: Shows total file and directory counts
-
-### 🎯 Developer Experience
-
-- **Single Command Access**: Just type `magic` anywhere in your terminal
-- **Beautiful UI**: Clean, emoji-enhanced interface with clear visual hierarchy
-- **Error Handling**: Graceful error messages with helpful suggestions
-- **Permission Management**: Handles permission errors elegantly
-- **Encoding Support**: Robust UTF-8 encoding with fallback handling
-
-### 📝 Changelog Intelligence
-
-- **Automatic Categorization**: Organizes commits into Features, Bug Fixes, Refactoring, and Documentation
-- **Growth Analytics**: Tracks code growth/shrinkage with line counts
-- **Contributor Recognition**: Lists all contributors for multi-author projects
-- **Change Summaries**: Provides concise but comprehensive change descriptions
-- **Historical Context**: Maintains full changelog history with timestamps
+**Just type `magic` in your terminal and get instant access to see haven**
 
 ---
 
-## 📦 Installation
+## 🎯 How to Use
 
-### Prerequisites
+### Installation
 
-- **Python 3.7 or higher**
-- **Git** (for Git operations)
+```bash
+# 1. Clone the repository
+git clone https://github.com/Drakaniia/python-automation.git
+cd python-automation
+
+# 2. Run the setup script
+bash setup.sh
+
+# 3. Reload your shell
+source ~/.bashrc  # or ~/.zshrc
+
+# 4. Start using it anywhere!
+magic
+```
+
+### Quick Start
+
+Once installed, just type `magic` in any directory:
+
+```bash
+$ magic
+```
+
+Then use arrow keys ↑↓ to navigate and Enter to select!
+
+## 📺 Sample Terminal Output
+
+```bash
+$ magic
+
+======================================================================
+  🚀 Python Automation System - Main Menu
+======================================================================
+  📍 Current Directory: /home/user/my-project
+======================================================================
+
+  ► 1. GitHub Operations
+    2. Show Project Structure
+    3. Navigate Folders
+    4. Dev Mode (Web Dev Automation)
+    5. Exit
+
+======================================================================
+
+  Use ↑/↓ arrow keys to navigate, Enter to select, or type number
+
+# Select "GitHub Operations" →
+
+======================================================================
+  🔧 GitHub Operations
+======================================================================
+  📍 Current Directory: /home/user/my-project
+======================================================================
+
+    1. 📤 Push to GitHub (Auto-commit)
+    2. 📥 Pull from GitHub
+    3. 📊 Repository Status
+    4. 🔄 Commit Recovery
+    5. ⚙️  Git Submodule Manager
+    6. 🏠 Back to Main Menu
+
+# Select "Push to GitHub" →
+
+======================================================================
+⬆️  GIT PUSH (With Auto-Retry & Auto-Changelog)
+======================================================================
+
+🔄 Refreshing Git state...
+✅ Found 3 changed files:
+   M  src/components/Button.tsx
+   A  src/utils/helpers.ts
+   M  README.md
+
+💭 Enter commit message (or press Enter for AI-generated):
+```
+
+---
+
+## ⚙️ Prerequisites
+
+- **Python 3.7+**
+- **Git**
 - **Bash shell** (Linux/macOS) or **Git Bash** (Windows)
 
-### Quick Install
+---
 
-#### Option 1: Automated Setup (Recommended)
+## 🤝 Contributing
 
-1. **Clone the repository**:
+Found a bug or want to add a feature? Contributions are welcome!
 
-```bash
-git clone https://github.com/Drakaniia/python-automation.git
-cd python-automation
-```
+1. Fork the repository
+2. Create your feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-2. **Run the setup script**:
+---
 
-```bash
-chmod +x setup.sh
-./setup.sh
-```
+## 📄 License
 
-3. **Activate the alias**:
+MIT License - feel free to use this in your own projects!
 
-```bash
-source ~/.bashrc  # or ~/.zshrc for Zsh users
-```
+---
 
-4. **Start using it**:
-
-```bash
-magic
-```
-
-#### Option 2: Manual Setup
-
-1. **Clone the repository**:
-
-```bash
-git clone https://github.com/Drakaniia/python-automation.git
-cd python-automation
-```
-
-2. **Add alias to your shell configuration**:
-
-For Bash (Linux/macOS):
-
-```bash
-echo 'alias magic="python3 /full/path/to/python-automation/main.py"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-For Zsh (macOS):
-
-```bash
-echo 'alias magic="python3 /full/path/to/python-automation/main.py"' >> ~/.zshrc
-source ~/.zshrc
-```
-
-For Windows (Git Bash):
-
-```bash
-echo 'alias magic="python /full/path/to/python-automation/main.py"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-3. **Make the script executable** (Linux/macOS):
-
-```bash
-chmod +x main.py
-```
-
-4. **Run it**:
-
-```bash
-magic
-```
-
+**Made with ❤️ for developers who love automation**
