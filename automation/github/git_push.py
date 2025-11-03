@@ -160,9 +160,16 @@ class GitPushRetry:
         # Execute push with progressive strategies
         push_success = self._execute_push_with_strategies(remote, branch)
         
-        # Generate changelog after successful push
-        if push_success and self.config.auto_generate_changelog:
-            self._auto_generate_changelog()
+        # Handle results
+        if push_success:
+            print("✅ Push completed successfully!")
+            self._show_push_summary()
+            # Generate changelog after successful push
+            if self.config.auto_generate_changelog:
+                self._auto_generate_changelog()
+        else:
+            print("❌ Push failed after all retry attempts")
+            self._provide_push_failure_guidance()
         
         return push_success
     
@@ -434,21 +441,446 @@ class GitPushRetry:
             return False
     
     def _stage_and_commit(self, message: str) -> bool:
-        """Stage and commit changes"""
+        """Enhanced staging and commit with smart error handling and auto-fix"""
+        
+        # Step 1: Pre-staging diagnostics with auto-fix
+        staging_issues = self._diagnose_staging_issues()
+        if staging_issues:
+            print("🔍 Pre-staging analysis found potential issues:")
+            for issue in staging_issues:
+                print(f"   ⚠️  {issue}")
+            
+            # Try to auto-fix critical issues (like lock files)
+            if any("lock file" in issue.lower() for issue in staging_issues):
+                print("\n🔧 Attempting to auto-fix Git lock file issues...")
+                if self._auto_fix_git_issues(staging_issues):
+                    print("✅ Auto-fix successful, retrying diagnostics...\n")
+                    
+                    # Re-run diagnostics to confirm fix
+                    new_issues = self._diagnose_staging_issues()
+                    if new_issues:
+                        print("⚠️  Some issues remain after auto-fix:")
+                        for issue in new_issues:
+                            print(f"   • {issue}")
+                        if any("lock file" in issue.lower() for issue in new_issues):
+                            print("\n❌ Lock file issues persist after auto-fix")
+                            self._provide_manual_fix_guidance(new_issues)
+                            return False
+                    else:
+                        print("✅ All issues resolved!\n")
+                else:
+                    print("❌ Auto-fix failed")
+                    self._provide_manual_fix_guidance(staging_issues)
+                    return False
+            print()
+        
+        # Step 2: Smart staging with fallbacks
+        if not self._smart_stage_changes():
+            return False
+        
+        # Step 3: Commit with validation
+        return self._smart_commit(message)
+    
+    def _diagnose_staging_issues(self) -> List[str]:
+        """Diagnose potential staging issues before attempting to stage"""
+        issues = []
+        
         try:
-            print("📝 Staging changes...")
+            # Check if we're in a git repo
+            if not self.git.is_repo():
+                issues.append("Not in a Git repository")
+                return issues
+            
+            # CRITICAL: Check for Git lock files first
+            git_dir = Path(self.git.working_dir) / '.git'
+            lock_files = self._check_git_lock_files(git_dir)
+            if lock_files:
+                for lock_file in lock_files:
+                    issues.append(f"Git lock file detected: {lock_file}")
+                # This is a critical issue that prevents all Git operations
+                return issues
+            
+            # Check git status
+            try:
+                status_output = self.git.status(porcelain=True)
+                if not status_output.strip():
+                    issues.append("No changes to stage")
+                    return issues
+            except Exception as e:
+                if "index.lock" in str(e).lower() or "unable to create" in str(e).lower():
+                    issues.append("Git index lock detected from git status command")
+                    return issues
+                issues.append(f"Git status error: {str(e)}")
+                return issues
+            
+            # Check for problematic files
+            lines = status_output.strip().split('\n')
+            for line in lines:
+                if len(line) >= 3:
+                    status_code = line[:2]
+                    file_path = line[3:]
+                    
+                    # Check for binary files that might cause issues
+                    if any(ext in file_path.lower() for ext in ['.exe', '.dll', '.so', '.dylib']):
+                        issues.append(f"Binary file detected: {file_path}")
+                    
+                    # Check for very large files
+                    try:
+                        file_obj = Path(self.git.working_dir) / file_path
+                        if file_obj.exists() and file_obj.stat().st_size > 100 * 1024 * 1024:  # 100MB
+                            issues.append(f"Large file detected (>100MB): {file_path}")
+                    except:
+                        pass
+                    
+                    # Check for deleted files
+                    if status_code[0] == 'D' or status_code[1] == 'D':
+                        issues.append(f"Deleted file: {file_path}")
+        
+        except Exception as e:
+            if "index.lock" in str(e).lower() or "unable to create" in str(e).lower():
+                issues.append("Git lock file issue detected")
+            else:
+                issues.append(f"Diagnostic error: {str(e)}")
+        
+        return issues
+    
+    def _check_git_lock_files(self, git_dir: Path) -> List[str]:
+        """Check for Git lock files that prevent operations"""
+        lock_files = []
+        
+        try:
+            # Common Git lock files
+            potential_locks = [
+                'index.lock',
+                'HEAD.lock',
+                'refs/heads/main.lock',
+                'refs/heads/master.lock',
+                'config.lock',
+                'packed-refs.lock'
+            ]
+            
+            for lock_file in potential_locks:
+                lock_path = git_dir / lock_file
+                if lock_path.exists():
+                    lock_files.append(str(lock_path))
+            
+            # Check for branch-specific locks
+            refs_heads = git_dir / 'refs' / 'heads'
+            if refs_heads.exists():
+                for branch_file in refs_heads.glob('*.lock'):
+                    lock_files.append(str(branch_file))
+        
+        except Exception:
+            pass
+        
+        return lock_files
+    
+    def _auto_fix_git_issues(self, issues: List[str]) -> bool:
+        """Automatically fix common Git issues"""
+        fixed_any = False
+        
+        for issue in issues:
+            if "lock file" in issue.lower():
+                if self._fix_git_lock_files():
+                    print("   ✅ Fixed Git lock file issues")
+                    fixed_any = True
+                else:
+                    print("   ❌ Failed to fix Git lock file issues")
+        
+        return fixed_any
+    
+    def _fix_git_lock_files(self) -> bool:
+        """Fix Git lock file issues by safely removing lock files"""
+        try:
+            git_dir = Path(self.git.working_dir) / '.git'
+            lock_files = self._check_git_lock_files(git_dir)
+            
+            if not lock_files:
+                return True  # No lock files to fix
+            
+            print(f"   🔧 Found {len(lock_files)} lock file(s) to remove:")
+            
+            removed_count = 0
+            for lock_file_path in lock_files:
+                try:
+                    lock_path = Path(lock_file_path)
+                    
+                    # Safety check: ensure it's actually a lock file
+                    if lock_path.name.endswith('.lock') and lock_path.exists():
+                        print(f"      • Removing: {lock_path.name}")
+                        
+                        # Try to remove the lock file
+                        lock_path.unlink()
+                        removed_count += 1
+                        
+                        # Verify it's actually gone
+                        if not lock_path.exists():
+                            print(f"        ✅ Successfully removed {lock_path.name}")
+                        else:
+                            print(f"        ❌ Failed to remove {lock_path.name}")
+                    
+                except Exception as e:
+                    print(f"      ❌ Error removing {lock_file_path}: {e}")
+            
+            if removed_count > 0:
+                print(f"   ✅ Successfully removed {removed_count} lock file(s)")
+                
+                # Wait a moment for filesystem to catch up
+                import time
+                time.sleep(0.5)
+                
+                # Verify Git operations work now
+                try:
+                    self.git.status(porcelain=True)
+                    print("   ✅ Git operations restored")
+                    return True
+                except Exception as e:
+                    print(f"   ⚠️  Git still has issues after lock removal: {e}")
+                    return False
+            else:
+                print("   ❌ No lock files were successfully removed")
+                return False
+        
+        except Exception as e:
+            print(f"   ❌ Error during lock file fix: {e}")
+            return False
+    
+    def _provide_manual_fix_guidance(self, issues: List[str]) -> None:
+        """Provide manual fix guidance for remaining issues"""
+        print("\n" + "="*60)
+        print("🔧 MANUAL FIX REQUIRED")
+        print("="*60)
+        
+        lock_file_issues = [issue for issue in issues if "lock file" in issue.lower()]
+        
+        if lock_file_issues:
+            print("\n🔒 Git Lock File Issues:")
+            print("   If auto-fix failed, try these manual steps:")
+            print("   1. Close any Git GUI applications (GitKraken, SourceTree, etc.)")
+            print("   2. Close any IDE/editors that might be running Git operations")
+            print("   3. Wait for any background Git processes to complete")
+            print("   4. Manually remove lock files:")
+            
+            git_dir = Path(self.git.working_dir) / '.git'
+            lock_files = self._check_git_lock_files(git_dir)
+            for lock_file in lock_files:
+                print(f"      rm \"{lock_file}\"")
+            
+            print("   5. If on Windows, check Task Manager for git.exe processes")
+            print("   6. Restart your terminal/command prompt")
+            
+            print("\n💡 One-liner fix commands:")
+            print("   Windows: del \".git\\index.lock\" 2>nul")
+            print("   Linux/Mac: rm -f .git/index.lock")
+        
+        print("\n" + "="*60)
+    
+    def _smart_stage_changes(self) -> bool:
+        """Smart staging with multiple fallback strategies"""
+        strategies = [
+            ("Standard staging", self._stage_standard),
+            ("Interactive staging", self._stage_interactive),
+            ("Individual file staging", self._stage_individual_files),
+            ("Force staging", self._stage_force)
+        ]
+        
+        for strategy_name, strategy_func in strategies:
+            try:
+                print(f"📝 Trying {strategy_name.lower()}...")
+                if strategy_func():
+                    print(f"✅ {strategy_name} successful\n")
+                    return True
+                else:
+                    print(f"⚠️  {strategy_name} had issues, trying next strategy...\n")
+            except Exception as e:
+                print(f"❌ {strategy_name} failed: {e}")
+                print(f"   Trying next strategy...\n")
+        
+        print("❌ All staging strategies failed")
+        self._provide_staging_guidance()
+        return False
+    
+    def _stage_standard(self) -> bool:
+        """Standard git add . staging"""
+        try:
             self.git.add()
-            print("✅ Changes staged\n")
+            return True
+        except Exception:
+            return False
+    
+    def _stage_interactive(self) -> bool:
+        """Interactive staging to handle problematic files"""
+        try:
+            # Get list of changed files
+            status_output = self.git.status(porcelain=True)
+            if not status_output.strip():
+                return False
+            
+            # Stage files one by one, skipping problematic ones
+            lines = status_output.strip().split('\n')
+            staged_count = 0
+            
+            for line in lines:
+                if len(line) >= 3:
+                    file_path = line[3:]
+                    try:
+                        # Try to stage individual file
+                        result = self.git._run_command(['git', 'add', file_path], check=False)
+                        if result.returncode == 0:
+                            staged_count += 1
+                        else:
+                            print(f"   ⚠️  Skipped problematic file: {file_path}")
+                    except:
+                        print(f"   ⚠️  Skipped problematic file: {file_path}")
+            
+            return staged_count > 0
+        
+        except Exception:
+            return False
+    
+    def _stage_individual_files(self) -> bool:
+        """Stage files individually with detailed error reporting"""
+        try:
+            status_output = self.git.status(porcelain=True)
+            if not status_output.strip():
+                return False
+            
+            lines = status_output.strip().split('\n')
+            successful_files = []
+            failed_files = []
+            
+            for line in lines:
+                if len(line) >= 3:
+                    file_path = line[3:]
+                    try:
+                        # Check if file exists
+                        full_path = Path(self.git.working_dir) / file_path
+                        if not full_path.exists() and line[0] != 'D':
+                            failed_files.append((file_path, "File not found"))
+                            continue
+                        
+                        # Try to add the file
+                        result = self.git._run_command(['git', 'add', file_path], check=False)
+                        if result.returncode == 0:
+                            successful_files.append(file_path)
+                        else:
+                            failed_files.append((file_path, result.stderr.strip()))
+                    
+                    except Exception as e:
+                        failed_files.append((file_path, str(e)))
+            
+            if successful_files:
+                print(f"   ✅ Successfully staged {len(successful_files)} files")
+                if failed_files:
+                    print(f"   ⚠️  Failed to stage {len(failed_files)} files:")
+                    for file_path, error in failed_files[:3]:  # Show first 3 errors
+                        print(f"      - {file_path}: {error}")
+                    if len(failed_files) > 3:
+                        print(f"      ... and {len(failed_files) - 3} more")
+                return True
+            
+            return False
+        
+        except Exception:
+            return False
+    
+    def _stage_force(self) -> bool:
+        """Force staging with git add -A"""
+        try:
+            result = self.git._run_command(['git', 'add', '-A'], check=False)
+            return result.returncode == 0
+        except Exception:
+            return False
+    
+    def _smart_commit(self, message: str) -> bool:
+        """Smart commit with validation"""
+        try:
+            # Check if there are staged changes
+            result = self.git._run_command(['git', 'diff', '--cached', '--quiet'], check=False)
+            if result.returncode == 0:
+                print("⚠️  No staged changes to commit")
+                return False
             
             print(f"💾 Creating commit: '{message}'")
             self.git.commit(message)
             print("✅ Commit created\n")
-            
             return True
         
         except Exception as e:
-            print(f"❌ Failed to stage/commit: {e}\n")
+            print(f"❌ Failed to commit: {e}")
+            self._provide_commit_guidance()
             return False
+    
+    def _provide_staging_guidance(self) -> None:
+        """Provide guidance when staging fails"""
+        print("\n🔧 Staging Troubleshooting Guide:")
+        print("   1. Check if you're in a Git repository: git status")
+        print("   2. Check for file permission issues")
+        print("   3. Look for large files or binary files that might be problematic")
+        print("   4. Try staging files individually: git add <filename>")
+        print("   5. Check .gitignore for conflicting patterns")
+        print("   6. Verify file paths don't contain special characters")
+        print()
+    
+    def _provide_commit_guidance(self) -> None:
+        """Provide guidance when commit fails"""
+        print("\n🔧 Commit Troubleshooting Guide:")
+        print("   1. Ensure you have staged changes: git status")
+        print("   2. Check commit message length and characters")
+        print("   3. Verify Git user configuration: git config user.name/user.email")
+        print("   4. Try with a simpler commit message")
+        print()
+    
+    def _provide_push_failure_guidance(self) -> None:
+        """Provide comprehensive guidance when push fails completely"""
+        print("\n" + "="*60)
+        print("🔧 PUSH FAILURE DIAGNOSTIC & SOLUTIONS")
+        print("="*60)
+        
+        print("\n🔍 Common Push Failure Causes & Solutions:")
+        
+        print("\n1. 📡 NETWORK/CONNECTIVITY ISSUES:")
+        print("   • Check internet connection")
+        print("   • Verify remote URL: git remote -v")
+        print("   • Test connectivity: git ls-remote origin")
+        print("   • Try with different network or VPN")
+        
+        print("\n2. 🔐 AUTHENTICATION ISSUES:")
+        print("   • Check Git credentials: git config --list")
+        print("   • Update GitHub token/SSH key")
+        print("   • Run: git credential-manager-core erase")
+        print("   • Re-authenticate: git push (will prompt)")
+        
+        print("\n3. 📝 REPOSITORY STATE ISSUES:")
+        print("   • Check repo status: git status")
+        print("   • View recent commits: git log --oneline -5")
+        print("   • Check branch tracking: git branch -vv")
+        print("   • Ensure branch exists on remote")
+        
+        print("\n4. 🔒 PERMISSION ISSUES:")
+        print("   • Verify you have push access to the repository")
+        print("   • Check if branch is protected")
+        print("   • Ensure you're pushing to correct remote/branch")
+        
+        print("\n5. 📦 REPOSITORY SIZE ISSUES:")
+        print("   • Check for large files: git ls-files | xargs ls -la")
+        print("   • Use Git LFS for large files")
+        print("   • Consider splitting large commits")
+        
+        print("\n🚀 IMMEDIATE TROUBLESHOOTING STEPS:")
+        print("   1. Run: git status (check current state)")
+        print("   2. Run: git remote -v (verify remote URL)")
+        print("   3. Run: git branch -vv (check branch tracking)")
+        print("   4. Run: git push --verbose (detailed push output)")
+        print("   5. Try: git push --force-with-lease (if safe)")
+        
+        print("\n💡 ALTERNATIVE APPROACHES:")
+        print("   • Create new branch: git checkout -b new-feature")
+        print("   • Reset and retry: git reset --soft HEAD~1")
+        print("   • Manual push: git push origin <branch-name>")
+        print("   • Use GitHub CLI: gh repo sync")
+        
+        print("\n" + "="*60)
     
     def _show_push_summary(self):
         """Show summary after successful push"""

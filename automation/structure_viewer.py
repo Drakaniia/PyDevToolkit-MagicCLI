@@ -36,10 +36,7 @@ class StructureViewer:
         ".git", ".svn", ".hg",
         
         # OS files
-        ".DS_Store", "Thumbs.db",
-        
-        # Project-specific exclusions
-        "auth-portal"  # Specific folder to exclude as requested
+        ".DS_Store", "Thumbs.db"
     }
     
     # Exclude directories that match these patterns
@@ -165,7 +162,7 @@ class StructureViewer:
         self._load_gitignore()
         
         print("\n💡 Showing: All source code and important files")
-        print(f"   Hiding: Build artifacts, dependencies, cache, hidden folders, auth-portal")
+        print(f"   Hiding: Build artifacts, dependencies, cache, hidden folders")
         print(f"   Max depth: {self.max_depth} levels")
         
         # Show summary first for AI context
