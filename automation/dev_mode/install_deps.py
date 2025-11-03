@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional, List, Any
 from automation.dev_mode._base import DevModeCommand
 from automation.core.loading import LoadingSpinner, loading_animation
+from automation.dev_mode.menu_utils import get_choice_with_arrows
 
 
 class InstallDepsCommand(DevModeCommand):
@@ -42,20 +43,22 @@ class InstallDepsCommand(DevModeCommand):
         detected_manager = self._detect_package_manager()
         print(f"Detected package manager: {detected_manager}")
         
-        # Prompt for package manager
-        print("\nPackage Manager:")
-        print("  1. npm")
-        print("  2. pnpm")
-        print("  3. yarn")
-        print(f"  4. Use detected ({detected_manager})")
+        # Prompt for package manager with arrow navigation
+        package_manager_options = [
+            "npm",
+            "pnpm", 
+            "yarn",
+            f"Use detected ({detected_manager})"
+        ]
         
-        choice = input(f"\nYour choice (1-4, default: 4): ").strip() or '4'
+        print("\n📦 Select Package Manager:")
+        choice = get_choice_with_arrows(package_manager_options, "Package Manager")
         
         manager_map = {
-            '1': 'npm',
-            '2': 'pnpm',
-            '3': 'yarn',
-            '4': detected_manager
+            1: 'npm',
+            2: 'pnpm',
+            3: 'yarn',
+            4: detected_manager
         }
         
         manager = manager_map.get(choice, detected_manager)
@@ -73,18 +76,20 @@ class InstallDepsCommand(DevModeCommand):
             input("\nPress Enter to continue...")
             return
         
-        # Install type
-        print("\nInstall Type:")
-        print("  1. Install all dependencies (default)")
-        print("  2. Install specific package")
-        print("  3. Install package as dev dependency")
+        # Install type with arrow navigation
+        install_type_options = [
+            "Install all dependencies",
+            "Install specific package", 
+            "Install package as dev dependency"
+        ]
         
-        install_type = input("\nYour choice (1-3, default: 1): ").strip() or '1'
+        print("\n🔨 Select Install Type:")
+        install_type = get_choice_with_arrows(install_type_options, "Install Type")
         
-        if install_type == '1':
+        if install_type == 1:
             # Install all
             self._install_all(manager)
-        elif install_type in ['2', '3']:
+        elif install_type in [2, 3]:
             # Install specific package
             package_name = input("\nPackage name: ").strip()
             if not package_name:
@@ -92,7 +97,7 @@ class InstallDepsCommand(DevModeCommand):
                 input("\nPress Enter to continue...")
                 return
             
-            is_dev = (install_type == '3')
+            is_dev = (install_type == 3)
             self._install_package(manager, package_name, is_dev)
         
         input("\nPress Enter to continue...")

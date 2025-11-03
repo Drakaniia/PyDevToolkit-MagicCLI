@@ -1135,3 +1135,156 @@ $$$@@
              @
              @
              @@
+
+             
+
+def get_manual_qwenzyy_banner():
+    """
+    Manual ASCII art banner as fallback with shadow effect
+    """
+    return """
+
+
+ ███      
+░░░███    
+  ░░░███  
+    ░░░███
+     ███░ 
+   ███░   
+ ███░     
+░░░       
+             
+            
+"""
+
+
+def get_manual_qwenzyy_banner():
+    """
+    Manual ASCII art banner as fallback with shadow effect
+    """
+    return """
+
+    ██████   
+  ███░░░░███ 
+ ███    ░░███
+░███     ░███
+░███   ██░███
+░░███ ░░████ 
+ ░░░██████░██
+   ░░░░░░ ░░   
+             
+            
+"""def get_manual_qwenzyy_banner():
+    """
+    Manual ASCII art banner as fallback with shadow effect
+    """
+    return """
+
+
+   
+ █████   ███   █████
+░░███   ░███  ░░███ 
+ ░███   ░███   ░███ 
+ ░███   ░███   ░███ 
+ ░░███  █████  ███  
+  ░░░█████░█████░   
+    ░░███ ░░███     
+     ░░░   ░░░      
+             
+            
+"""def get_manual_qwenzyy_banner():
+    """
+    Manual ASCII art banner as fallback with shadow effect
+    """
+    return """
+
+
+ ██████████
+░░███░░░░░█
+ ░███  █ ░ 
+ ░██████   
+ ░███░░█   
+ ░███ ░   █
+ ██████████
+░░░░░░░░░░ 
+             
+             
+            
+"""def get_manual_qwenzyy_banner():
+    """
+    Manual ASCII art banner as fallback with shadow effect
+    """
+    return """
+
+
+ ██████   █████
+░░██████ ░░███ 
+ ░███░███ ░███ 
+ ░███░░███░███ 
+ ░███ ░░██████ 
+ ░███  ░░█████ 
+ █████  ░░█████
+░░░░░    ░░░░░ 
+             
+            
+"""def get_manual_qwenzyy_banner():
+    """
+    Manual ASCII art banner as fallback with shadow effect
+    """
+    return """
+
+               
+ ███████████
+░█░░░░░░███ 
+░     ███░  
+     ███    
+    ███     
+  ████     █
+ ███████████
+░░░░░░░░░░░ 
+             
+            
+"""
+
+
+
+"""
+
+
+"""def get_manual_qwenzyy_banner():
+    """
+    Manual ASCII art banner as fallback with shadow effect
+    """
+    return """
+]
+                      
+ █████ █████
+░░███ ░░███ 
+ ░░███ ███  
+  ░░█████   
+   ░░███    
+    ░███    
+    █████   
+   ░░░░░    
+             
+            
+"""
+
+def get_manual_qwenzyy_banner():
+    """
+    Manual ASCII art banner as fallback with shadow effect
+    """
+    return """
+]
+                      
+ █████ █████
+░░███ ░░███ 
+ ░░███ ███  
+  ░░█████   
+   ░░███    
+    ░███    
+    █████   
+   ░░░░░    
+             
+            
+"""
