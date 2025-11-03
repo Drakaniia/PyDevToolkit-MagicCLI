@@ -14,6 +14,18 @@
 
 #### 📚 Documentation
 
+- **update readme and add contributing** (`41cf111`) - *Qwenzy*
+  - 📁 3 doc files, 1 backend file, 1 other file
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-03
+
+#### 📚 Documentation
+
 - **update readme** (`a443bcc`) - *Qwenzy*
   - 📁 2 doc files
 

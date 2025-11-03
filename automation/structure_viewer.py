@@ -139,6 +139,14 @@ class StructureViewer:
         self.max_files_per_dir = max_files_per_dir
         self.gitignore_patterns: Set[str] = set()
         
+        # Track what's actually being hidden for smart display
+        self.hidden_categories = {
+            'dependencies': set(),
+            'cache': set(),
+            'build_artifacts': set(),
+            'hidden_folders': set()
+        }
+        
         # Directories that should show ALL their contents (deep exploration)
         self.IMPORTANT_SOURCE_DIRS = {
             "src", "app", "components", "lib", "utils", "hooks", "pages", 
@@ -161,16 +169,38 @@ class StructureViewer:
         # Load .gitignore patterns
         self._load_gitignore()
         
+        # Reset hidden categories tracking
+        self.hidden_categories = {
+            'dependencies': set(),
+            'cache': set(),
+            'build_artifacts': set(),
+            'hidden_folders': set()
+        }
+        
+        # Generate the tree structure (this will populate hidden_categories)
+        tree_lines = self._generate_tree(self.current_dir)
+        
         print("\n💡 Showing: All source code and important files")
-        print(f"   Hiding: Build artifacts, dependencies, cache, hidden folders")
+        
+        # Smart hiding display - only show what's actually being hidden
+        hidden_items = []
+        if self.hidden_categories['build_artifacts']:
+            hidden_items.append("build artifacts")
+        if self.hidden_categories['dependencies']:
+            hidden_items.append("dependencies")
+        if self.hidden_categories['cache']:
+            hidden_items.append("cache")
+        if self.hidden_categories['hidden_folders']:
+            hidden_items.append("hidden folders")
+        
+        if hidden_items:
+            print(f"   Hiding: {', '.join(hidden_items)}")
+        
         print(f"   Max depth: {self.max_depth} levels")
         
         # Show summary first for AI context
         file_count, dir_count = self._count_items(self.current_dir)
         print(f"\n📊 Summary: {dir_count} directories, {file_count} files")
-        
-        # Generate the tree structure
-        tree_lines = self._generate_tree(self.current_dir)
         
         print("\n```")
         print(f"{self.current_dir.name}/")
@@ -187,6 +217,14 @@ class StructureViewer:
         """
         self.current_dir = Path.cwd()
         self._load_gitignore()
+        
+        # Reset hidden categories tracking
+        self.hidden_categories = {
+            'dependencies': set(),
+            'cache': set(),
+            'build_artifacts': set(),
+            'hidden_folders': set()
+        }
         
         # Generate the tree structure
         tree_lines = self._generate_tree(self.current_dir)
@@ -258,22 +296,46 @@ class StructureViewer:
                 # Exception: Check if it's a special case like .vscode with important files
                 if name == '.vscode':
                     # Only show .vscode if it has important files
-                    return not self._has_important_vscode_files(path)
+                    should_exclude = not self._has_important_vscode_files(path)
+                    if should_exclude:
+                        self.hidden_categories['hidden_folders'].add(name)
+                    return should_exclude
                 
                 # All other hidden directories are excluded
+                self.hidden_categories['hidden_folders'].add(name)
                 return True
             else:
                 # Hidden file - only show if in ALWAYS_SHOW_FILES
-                return name not in self.ALWAYS_SHOW_FILES
+                should_exclude = name not in self.ALWAYS_SHOW_FILES
+                if should_exclude:
+                    self.hidden_categories['hidden_folders'].add(name)
+                return should_exclude
         
         # Rule 3: Check explicit exclude lists BEFORE source code check
         # This ensures build artifacts are always excluded
         if is_dir:
             if name in self.EXCLUDE_DIRS:
+                # Categorize the exclusion
+                if name in {'node_modules', 'bower_components'}:
+                    self.hidden_categories['dependencies'].add(name)
+                elif name in {'__pycache__', '.pytest_cache', '.mypy_cache', '.cache', '.parcel-cache', '.turbo'}:
+                    self.hidden_categories['cache'].add(name)
+                elif name in {'dist', 'build', '.build', 'target/debug', 'target/release', 'out'}:
+                    self.hidden_categories['build_artifacts'].add(name)
+                elif name in {'.venv', 'venv', 'env', 'ENV', 'virtualenv'}:
+                    self.hidden_categories['dependencies'].add(name)
+                else:
+                    self.hidden_categories['hidden_folders'].add(name)
                 return True
             # Check directory patterns
             for pattern in self.EXCLUDE_DIR_PATTERNS:
                 if self._matches_pattern(name, pattern):
+                    if 'egg-info' in pattern or 'info' in pattern:
+                        self.hidden_categories['build_artifacts'].add(name)
+                    elif 'coverage' in pattern:
+                        self.hidden_categories['cache'].add(name)
+                    else:
+                        self.hidden_categories['build_artifacts'].add(name)
                     return True
         
         # Rule 3.5: For directories, check if they contain source code
@@ -287,6 +349,14 @@ class StructureViewer:
         if not is_dir:
             for pattern in self.EXCLUDE_FILES:
                 if self._matches_pattern(name, pattern):
+                    if pattern in {'*.pyc', '*.pyo', '*.pyd', '*.class', '*.o', '*.obj'}:
+                        self.hidden_categories['build_artifacts'].add(name)
+                    elif pattern in {'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'poetry.lock', 'Pipfile.lock'}:
+                        self.hidden_categories['dependencies'].add(name)
+                    elif pattern in {'*.min.js', '*.min.css', '*.map'}:
+                        self.hidden_categories['build_artifacts'].add(name)
+                    else:
+                        self.hidden_categories['cache'].add(name)
                     return True
         
         # Rule 5: Check .gitignore
@@ -297,6 +367,8 @@ class StructureViewer:
                     # For directories, double-check if they contain source code
                     if is_dir and not name.startswith('.') and self._has_source_code_deep(path):
                         return False
+                    # Track gitignore exclusions as build artifacts (most common case)
+                    self.hidden_categories['build_artifacts'].add(name)
                     return True
         except ValueError:
             pass
