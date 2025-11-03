@@ -12,6 +12,17 @@
 
 #### ♻️ Code Refactoring
 
+- refactor: simplify project structure viewer output for clarity (`29c7ccc`) - Qwenzy
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-03
+
+#### ♻️ Code Refactoring
+
 - refactor: optimize structure viewer for enhanced AI readability and e... (`e6d062a`) - Qwenzy
 
 **Total**: 1 commit(s)
