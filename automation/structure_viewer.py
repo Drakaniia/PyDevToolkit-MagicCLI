@@ -194,7 +194,7 @@ class StructureViewer:
         Enhanced Strategy:
         1. NEVER exclude if it's an ALWAYS_SHOW file
         2. ALWAYS exclude hidden folders (starting with .) UNLESS they contain only important files
-        3. NEVER exclude non-hidden directories with source code
+        3. NEVER exclude non-hidden directories with source code (including deep nested ones)
         4. ONLY exclude if it's in EXCLUDE_DIRS/FILES or .gitignore
         
         Args:
@@ -234,7 +234,14 @@ class StructureViewer:
                 # Hidden file - only show if in ALWAYS_SHOW_FILES
                 return name not in self.ALWAYS_SHOW_FILES
         
-        # Rule 3: Check explicit exclude lists for non-hidden items
+        # Rule 3: For directories, check if they contain source code FIRST
+        # This ensures we show important directories even if they match other exclusion rules
+        if is_dir and not name.startswith('.'):
+            # Check if this directory or its subdirectories contain source code
+            if self._has_source_code_deep(path):
+                return False
+        
+        # Rule 4: Check explicit exclude lists for non-hidden items
         if is_dir:
             if name in self.EXCLUDE_DIRS:
                 return True
@@ -243,13 +250,13 @@ class StructureViewer:
                 if self._matches_pattern(name, pattern):
                     return True
         
-        # Rule 4: Check .gitignore
+        # Rule 5: Check .gitignore
         try:
             relative_path = str(path.relative_to(self.current_dir))
             for pattern in self.gitignore_patterns:
                 if self._matches_gitignore(relative_path, pattern, is_dir):
-                    # But still show if it's a non-hidden directory with source code
-                    if is_dir and not name.startswith('.') and self._has_source_code(path):
+                    # For directories, double-check if they contain source code
+                    if is_dir and not name.startswith('.') and self._has_source_code_deep(path):
                         return False
                     return True
         except ValueError:
@@ -318,6 +325,44 @@ class StructureViewer:
                     return True
                 elif item.is_dir() and not item.name.startswith('.'):
                     if self._has_source_code_shallow(item, depth + 1):
+                        return True
+        except (PermissionError, OSError):
+            pass
+        
+        return False
+    
+    def _has_source_code_deep(self, directory: Path, depth: int = 0) -> bool:
+        """
+        Deep recursive check for source code with more thorough scanning
+        This is used to ensure important directories like src/app are never hidden
+        
+        Args:
+            directory: Directory to check
+            depth: Current recursion depth
+            
+        Returns:
+            True if directory or any subdirectory contains source files
+        """
+        # Prevent infinite recursion and limit depth for performance
+        if depth > 4:  # Allow deeper checking than shallow version
+            return False
+        
+        try:
+            for item in directory.iterdir():
+                # Skip hidden directories and known excluded directories
+                if item.name.startswith('.') or item.name in self.EXCLUDE_DIRS:
+                    continue
+                    
+                if item.is_file():
+                    # Check if it's a source file
+                    if item.suffix in self.SOURCE_EXTENSIONS:
+                        return True
+                    # Check if it's an important file
+                    if item.name in self.ALWAYS_SHOW_FILES:
+                        return True
+                elif item.is_dir():
+                    # Recursively check subdirectories
+                    if self._has_source_code_deep(item, depth + 1):
                         return True
         except (PermissionError, OSError):
             pass

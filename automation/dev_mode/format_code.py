@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from typing import Optional, Dict, Any
 from automation.dev_mode._base import DevModeCommand
+from automation.core.loading import LoadingSpinner, loading_animation
 
 
 class FormatCodeCommand(DevModeCommand):
@@ -420,34 +421,35 @@ class FormatCodeCommand(DevModeCommand):
         try:
             use_shell = sys.platform == 'win32'
             
-            if use_shell:
-                process = subprocess.Popen(
-                    ' '.join(cmd),
-                    cwd=project_dir,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    shell=True,
-                    encoding='utf-8',
-                    errors='replace'
-                )
+            with LoadingSpinner(f"Installing Prettier with {pkg_manager}", style='dots'):
+                if use_shell:
+                    result = subprocess.run(
+                        ' '.join(cmd),
+                        cwd=project_dir,
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                        encoding='utf-8',
+                        errors='replace'
+                    )
+                else:
+                    result = subprocess.run(
+                        cmd,
+                        cwd=project_dir,
+                        capture_output=True,
+                        text=True,
+                        encoding='utf-8',
+                        errors='replace'
+                    )
+            
+            if result.returncode == 0:
+                print("✅ Prettier installed successfully!")
+                return True
             else:
-                process = subprocess.Popen(
-                    cmd,
-                    cwd=project_dir,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    encoding='utf-8',
-                    errors='replace'
-                )
-            
-            for line in process.stdout:
-                print(line, end='')
-                sys.stdout.flush()
-            
-            process.wait()
-            return process.returncode == 0
+                print(f"❌ Installation failed with exit code {result.returncode}")
+                if result.stderr:
+                    print(f"Error: {result.stderr.strip()}")
+                return False
         except Exception as e:
             print(f"\n❌ Error: {e}")
             return False

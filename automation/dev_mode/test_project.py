@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import Optional, Any
 from automation.dev_mode._base import DevModeCommand
+from automation.core.loading import LoadingSpinner, loading_animation
 
 
 class TestProjectCommand(DevModeCommand):

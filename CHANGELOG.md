@@ -12,6 +12,17 @@
 
 #### ✨ New Features
 
+- add TestProjectCommand to run project tests with interactive and non-... (`f8458e2`) - Qwenzy
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-01
+
+#### ✨ New Features
+
 - add tests reature (`0f88451`) - Qwenzy
 
 **Total**: 1 commit(s)

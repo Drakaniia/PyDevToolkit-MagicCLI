@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import Optional, List, Any
 from automation.dev_mode._base import DevModeCommand
+from automation.core.loading import LoadingSpinner, loading_animation
 
 
 class InstallDepsCommand(DevModeCommand):
@@ -125,29 +126,35 @@ class InstallDepsCommand(DevModeCommand):
             # Use shell=True on Windows
             use_shell = sys.platform == 'win32'
             
-            result = subprocess.run(
-                cmd if not use_shell else ' '.join(cmd),
-                cwd=Path.cwd(),
-                check=True,
-                capture_output=not interactive,
-                shell=use_shell
-            )
+            with LoadingSpinner(f"Installing dependencies with {manager}", style='dots'):
+                result = subprocess.run(
+                    cmd if not use_shell else ' '.join(cmd),
+                    cwd=Path.cwd(),
+                    check=True,
+                    capture_output=True,
+                    shell=use_shell,
+                    text=True
+                )
             
-            print("\n✅ Dependencies installed successfully!")
+            print("✅ Dependencies installed successfully!")
+            if interactive and result.stdout and not result.stdout.isspace():
+                print(f"Output: {result.stdout.strip()}")
         
         except subprocess.CalledProcessError as e:
             if interactive:
-                print(f"\n❌ Installation failed with exit code {e.returncode}")
+                print(f"❌ Installation failed with exit code {e.returncode}")
+                if e.stderr:
+                    print(f"Error: {e.stderr.strip()}")
             else:
                 raise
         except FileNotFoundError:
             if interactive:
-                print(f"\n❌ Error: '{manager}' not found in PATH")
+                print(f"❌ Error: '{manager}' not found in PATH")
             else:
                 raise
         except Exception as e:
             if interactive:
-                print(f"\n❌ Error: {e}")
+                print(f"❌ Error: {e}")
             else:
                 raise
     
@@ -186,29 +193,35 @@ class InstallDepsCommand(DevModeCommand):
             # Use shell=True on Windows
             use_shell = sys.platform == 'win32'
             
-            result = subprocess.run(
-                cmd if not use_shell else ' '.join(cmd),
-                cwd=Path.cwd(),
-                check=True,
-                capture_output=not interactive,
-                shell=use_shell
-            )
+            with LoadingSpinner(f"Installing {package} as {dep_type}", style='dots'):
+                result = subprocess.run(
+                    cmd if not use_shell else ' '.join(cmd),
+                    cwd=Path.cwd(),
+                    check=True,
+                    capture_output=True,
+                    shell=use_shell,
+                    text=True
+                )
             
-            print(f"\n✅ Package '{package}' installed successfully!")
+            print(f"✅ Package '{package}' installed successfully!")
+            if interactive and result.stdout and not result.stdout.isspace():
+                print(f"Output: {result.stdout.strip()}")
         
         except subprocess.CalledProcessError as e:
             if interactive:
-                print(f"\n❌ Installation failed with exit code {e.returncode}")
+                print(f"❌ Installation failed with exit code {e.returncode}")
+                if e.stderr:
+                    print(f"Error: {e.stderr.strip()}")
             else:
                 raise
         except FileNotFoundError:
             if interactive:
-                print(f"\n❌ Error: '{manager}' not found in PATH")
+                print(f"❌ Error: '{manager}' not found in PATH")
             else:
                 raise
         except Exception as e:
             if interactive:
-                print(f"\n❌ Error: {e}")
+                print(f"❌ Error: {e}")
             else:
                 raise
     

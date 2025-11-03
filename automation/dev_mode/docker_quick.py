@@ -104,6 +104,36 @@ class DockerQuickCommand(DevModeCommand):
         except:
             return False
     
+    def _get_available_images(self) -> list:
+        """Get list of available Docker images"""
+        try:
+            result = subprocess.run(
+                ['docker', 'images', '--format', '{{.Repository}}:{{.Tag}}'],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            images = result.stdout.strip().split('\n')
+            # Filter out empty lines and <none>:<none> images
+            images = [img for img in images if img and not img.startswith('<none>')]
+            return sorted(images)
+        except subprocess.CalledProcessError:
+            return []
+        except Exception:
+            return []
+    
+    def _image_exists(self, image_name: str) -> bool:
+        """Check if a Docker image exists"""
+        try:
+            result = subprocess.run(
+                ['docker', 'image', 'inspect', image_name],
+                capture_output=True,
+                timeout=5
+            )
+            return result.returncode == 0
+        except:
+            return False
+    
     def _build_image(self, interactive: bool = True, **kwargs):
         """Build Docker image"""
         print("\n🔨 BUILD DOCKER IMAGE")
@@ -143,6 +173,15 @@ class DockerQuickCommand(DevModeCommand):
         try:
             subprocess.run(cmd, check=True)
             print(f"\n✅ Image '{image_name}' built successfully!")
+            
+            # Offer to run the container after successful build
+            if interactive:
+                run_now = input(f"\n🚀 Run container from '{image_name}' now? (y/n, default: n): ").strip().lower()
+                if run_now in ['y', 'yes']:
+                    print("\n" + "="*70)
+                    # Pass the image name to run container function
+                    self._run_container_with_image(image_name)
+                    
         except subprocess.CalledProcessError as e:
             print(f"\n❌ Build failed with exit code {e.returncode}")
         except Exception as e:
@@ -154,10 +193,44 @@ class DockerQuickCommand(DevModeCommand):
         print("="*70 + "\n")
         
         if interactive:
-            # Get image name
-            image_name = input("Image name: ").strip()
-            if not image_name:
-                print("❌ Image name cannot be empty")
+            # Get available images
+            available_images = self._get_available_images()
+            
+            if not available_images:
+                print("❌ No Docker images available")
+                print("💡 Build an image first using option 1")
+                return
+            
+            # Display available images with numbers
+            print("Available Images:")
+            for i, image in enumerate(available_images, 1):
+                print(f"  {i}. {image}")
+            
+            print(f"  {len(available_images) + 1}. Enter custom image name")
+            
+            # Get image selection
+            choice = input(f"\nSelect image (1-{len(available_images) + 1}): ").strip()
+            
+            try:
+                choice_num = int(choice)
+                if 1 <= choice_num <= len(available_images):
+                    image_name = available_images[choice_num - 1]
+                elif choice_num == len(available_images) + 1:
+                    image_name = input("Enter image name: ").strip()
+                    if not image_name:
+                        print("❌ Image name cannot be empty")
+                        return
+                else:
+                    print("❌ Invalid choice")
+                    return
+            except ValueError:
+                print("❌ Invalid input")
+                return
+            
+            # Verify image exists
+            if not self._image_exists(image_name):
+                print(f"❌ Image '{image_name}' not found")
+                print("💡 Available images are listed above")
                 return
             
             # Get container name
@@ -165,6 +238,12 @@ class DockerQuickCommand(DevModeCommand):
             
             # Port mapping
             port_map = input("Port mapping (e.g., 8080:80, optional): ").strip()
+            
+            # Environment variables
+            env_vars = input("Environment variables (e.g., ENV1=value1,ENV2=value2, optional): ").strip()
+            
+            # Volume mapping
+            volume_map = input("Volume mapping (e.g., /host/path:/container/path, optional): ").strip()
             
             # Run mode
             print("\nRun mode:")
@@ -176,6 +255,8 @@ class DockerQuickCommand(DevModeCommand):
             image_name = kwargs.get('image_name')
             container_name = kwargs.get('container_name', '')
             port_map = kwargs.get('port_map', '')
+            env_vars = kwargs.get('env_vars', '')
+            volume_map = kwargs.get('volume_map', '')
             detached = kwargs.get('detached', True)
             
             if not image_name:
@@ -195,6 +276,16 @@ class DockerQuickCommand(DevModeCommand):
         if port_map:
             cmd.extend(['-p', port_map])
         
+        if volume_map:
+            cmd.extend(['-v', volume_map])
+        
+        # Add environment variables
+        if env_vars:
+            for env_var in env_vars.split(','):
+                env_var = env_var.strip()
+                if '=' in env_var:
+                    cmd.extend(['-e', env_var])
+        
         cmd.append(image_name)
         
         print(f"$ {' '.join(cmd)}\n")
@@ -205,14 +296,115 @@ class DockerQuickCommand(DevModeCommand):
             if detached:
                 container_id = result.stdout.strip()[:12]
                 print(f"✅ Container started: {container_id}")
+                if container_name:
+                    print(f"📝 Container name: {container_name}")
                 if port_map:
                     host_port = port_map.split(':')[0]
                     print(f"🌐 Access at: http://localhost:{host_port}")
+                print(f"🔍 View logs: docker logs {container_id}")
             else:
                 print("✅ Container stopped")
         
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ Failed to run container: {e}")
+            print(f"\n❌ Failed to run container:")
+            print(f"   Exit code: {e.returncode}")
+            if e.stderr:
+                print(f"   Error: {e.stderr.strip()}")
+            if e.stdout:
+                print(f"   Output: {e.stdout.strip()}")
+            
+            # Common error suggestions
+            if e.returncode == 125:
+                print("\n💡 Common solutions for exit code 125:")
+                print("   • Check if the image name is correct")
+                print("   • Verify the image exists: docker images")
+                print("   • Check if port is already in use")
+                print("   • Ensure container name is unique")
+        except Exception as e:
+            print(f"\n❌ Error: {e}")
+    
+    def _run_container_with_image(self, image_name: str):
+        """Run container with pre-selected image"""
+        print(f"▶️  RUN CONTAINER: {image_name}")
+        print("="*70 + "\n")
+        
+        # Get container name
+        container_name = input("Container name (optional): ").strip()
+        
+        # Port mapping
+        port_map = input("Port mapping (e.g., 8080:80, optional): ").strip()
+        
+        # Environment variables
+        env_vars = input("Environment variables (e.g., ENV1=value1,ENV2=value2, optional): ").strip()
+        
+        # Volume mapping
+        volume_map = input("Volume mapping (e.g., /host/path:/container/path, optional): ").strip()
+        
+        # Run mode
+        print("\nRun mode:")
+        print("  1. Detached (background)")
+        print("  2. Interactive (foreground)")
+        mode_choice = input("Your choice (1-2, default: 1): ").strip() or '1'
+        detached = (mode_choice == '1')
+        
+        # Build command
+        cmd = ['docker', 'run']
+        
+        if detached:
+            cmd.append('-d')
+        else:
+            cmd.extend(['-it'])
+        
+        if container_name:
+            cmd.extend(['--name', container_name])
+        
+        if port_map:
+            cmd.extend(['-p', port_map])
+        
+        if volume_map:
+            cmd.extend(['-v', volume_map])
+        
+        # Add environment variables
+        if env_vars:
+            for env_var in env_vars.split(','):
+                env_var = env_var.strip()
+                if '=' in env_var:
+                    cmd.extend(['-e', env_var])
+        
+        cmd.append(image_name)
+        
+        print(f"\n$ {' '.join(cmd)}\n")
+        
+        try:
+            result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+            
+            if detached:
+                container_id = result.stdout.strip()[:12]
+                print(f"✅ Container started: {container_id}")
+                if container_name:
+                    print(f"📝 Container name: {container_name}")
+                if port_map:
+                    host_port = port_map.split(':')[0]
+                    print(f"🌐 Access at: http://localhost:{host_port}")
+                print(f"🔍 View logs: docker logs {container_id}")
+            else:
+                print("✅ Container stopped")
+        
+        except subprocess.CalledProcessError as e:
+            print(f"\n❌ Failed to run container:")
+            print(f"   Exit code: {e.returncode}")
+            if e.stderr:
+                print(f"   Error: {e.stderr.strip()}")
+            if e.stdout:
+                print(f"   Output: {e.stdout.strip()}")
+            
+            # Common error suggestions
+            if e.returncode == 125:
+                print("\n💡 Common solutions for exit code 125:")
+                print("   • Check if the image name is correct")
+                print("   • Verify the image exists: docker images")
+                print("   • Check if port is already in use")
+                print("   • Ensure container name is unique")
         except Exception as e:
             print(f"\n❌ Error: {e}")
     
@@ -224,7 +416,7 @@ class DockerQuickCommand(DevModeCommand):
         # List running containers
         try:
             result = subprocess.run(
-                ['docker', 'ps', '--format', '{{.ID}}\t{{.Names}}\t{{.Image}}'],
+                ['docker', 'ps', '--format', '{{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}'],
                 capture_output=True,
                 text=True,
                 check=True
@@ -240,15 +432,26 @@ class DockerQuickCommand(DevModeCommand):
             if interactive:
                 print("Running Containers:")
                 for i, container in enumerate(containers, 1):
-                    print(f"  {i}. {container}")
+                    parts = container.split('\t')
+                    container_id = parts[0][:12]  # Short ID
+                    name = parts[1] if len(parts) > 1 else '<none>'
+                    image = parts[2] if len(parts) > 2 else '<unknown>'
+                    status = parts[3] if len(parts) > 3 else '<unknown>'
+                    print(f"  {i}. {container_id} | {name} | {image} | {status}")
                 
-                choice = input(f"\nSelect container to stop (1-{len(containers)}): ").strip()
+                print(f"  {len(containers) + 1}. Stop All")
+                
+                choice = input(f"\nSelect container to stop (1-{len(containers) + 1}): ").strip()
                 
                 try:
                     choice_num = int(choice)
                     if 1 <= choice_num <= len(containers):
                         container_info = containers[choice_num - 1].split('\t')
                         container_id = container_info[0]
+                    elif choice_num == len(containers) + 1:
+                        # Stop all containers
+                        self._stop_all_containers()
+                        return
                     else:
                         print("❌ Invalid choice")
                         return
@@ -269,6 +472,38 @@ class DockerQuickCommand(DevModeCommand):
         
         except subprocess.CalledProcessError as e:
             print(f"\n❌ Failed to stop container: {e}")
+        except Exception as e:
+            print(f"\n❌ Error: {e}")
+    
+    def _stop_all_containers(self):
+        """Stop all running containers"""
+        try:
+            # Get all running container IDs
+            result = subprocess.run(
+                ['docker', 'ps', '-q'],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            container_ids = result.stdout.strip().split('\n')
+            container_ids = [cid for cid in container_ids if cid]
+            
+            if not container_ids:
+                print("ℹ️  No running containers to stop")
+                return
+            
+            print(f"🛑 Stopping {len(container_ids)} container(s)...")
+            
+            # Stop all containers
+            cmd = ['docker', 'stop'] + container_ids
+            print(f"$ {' '.join(cmd[:3])} [...]")
+            
+            subprocess.run(cmd, check=True)
+            print(f"✅ All containers stopped successfully!")
+            
+        except subprocess.CalledProcessError as e:
+            print(f"\n❌ Failed to stop all containers: {e}")
         except Exception as e:
             print(f"\n❌ Error: {e}")
     

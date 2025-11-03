@@ -17,6 +17,7 @@ from automation.core.exceptions import (
     UncommittedChangesError,
     handle_errors
 )
+from automation.core.loading import LoadingSpinner, loading_animation
 
 
 class PushStrategy:
@@ -96,44 +97,7 @@ class PushConfig:
         ]
 
 
-class ProgressIndicator:
-    """Enhanced progress indicator with status"""
-    
-    SPINNERS = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
-    
-    def __init__(self, message: str):
-        self.message = message
-        self.index = 0
-        self.active = False
-    
-    def start(self):
-        """Start showing progress"""
-        self.active = True
-        self._update()
-    
-    def _update(self):
-        """Update spinner"""
-        if self.active:
-            spinner = self.SPINNERS[self.index % len(self.SPINNERS)]
-            sys.stdout.write(f'\r{spinner} {self.message}...')
-            sys.stdout.flush()
-            self.index += 1
-    
-    def stop(self, success: bool = True, message: Optional[str] = None):
-        """Stop progress and show result"""
-        self.active = False
-        icon = "✅" if success else "❌"
-        final_msg = message or self.message
-        sys.stdout.write(f'\r{icon} {final_msg}\n')
-        sys.stdout.flush()
-    
-    def __enter__(self):
-        self.start()
-        return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.stop(success=exc_type is None)
-        return False
+# ProgressIndicator class removed - now using LoadingSpinner from automation.core.loading
 
 
 class GitPushRetry:
@@ -298,7 +262,7 @@ class GitPushRetry:
             print(f"   $ {' '.join(cmd)}")
             
             # Execute with progress indicator
-            with ProgressIndicator(f"Pushing with {strategy.name}"):
+            with LoadingSpinner(f"Pushing with {strategy.name}", style='dots'):
                 result = self.git._run_command(
                     cmd,
                     check=True,
