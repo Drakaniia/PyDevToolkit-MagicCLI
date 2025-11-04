@@ -11,6 +11,7 @@ from automation.github.git_push import GitPush
 from automation.github.git_initializer import GitInitializer
 from automation.github.git_recover import GitRecover
 from automation.github.git_removesubmodule import GitRemoveSubmodule
+from automation.github.git_cache import GitCache
 from automation.menu import Menu, MenuItem
 from automation.core.git_client import get_git_client
 
@@ -76,6 +77,11 @@ class GitOperations:
         """Manage nested repositories and submodules"""
         submodule_handler = GitRemoveSubmodule()
         submodule_handler.run_interactive_menu()
+    
+    def manage_cache(self):
+        """Manage git cache and handle sensitive files"""
+        cache_handler = GitCache()
+        cache_handler.show_cache_menu()
 
 
 class GitMenu(Menu):
@@ -94,6 +100,7 @@ class GitMenu(Menu):
             MenuItem("Push (Add, Commit & Push)", lambda: self.git_ops.push()),
             MenuItem("Initialize Git & Push to GitHub", lambda: self.git_ops.initialize_and_push()),
             MenuItem("Git Recovery (Revert to Previous Commit)", lambda: self.git_ops.show_recovery_menu()),
+            MenuItem("Git Cache (Handle Sensitive Files)", lambda: self.git_ops.manage_cache()),
             MenuItem("Manage Submodules/Nested Repos", lambda: self.git_ops.manage_submodules()),
             MenuItem("Back to Main Menu", lambda: "exit")
         ]

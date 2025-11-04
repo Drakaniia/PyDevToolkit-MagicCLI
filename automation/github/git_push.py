@@ -53,6 +53,7 @@ class PushConfig:
         self.enable_force_push = True
         self.exponential_backoff = True
         self.auto_generate_changelog = True  # NEW: Enable auto-changelog
+        self.auto_handle_gitignore = True  # NEW: Auto-handle .gitignore changes
         
         # Define progressive strategies
         self.strategies = [
@@ -445,7 +446,11 @@ class GitPushRetry:
     def _stage_and_commit(self, message: str) -> bool:
         """Enhanced staging and commit with smart error handling and auto-fix"""
         
-        # Step 1: Pre-staging diagnostics with auto-fix
+        # Step 1: Check for .gitignore changes and handle previously tracked files
+        if not self._handle_gitignore_changes():
+            return False
+        
+        # Step 2: Pre-staging diagnostics with auto-fix
         staging_issues = self._diagnose_staging_issues()
         if staging_issues:
             print("🔍 Pre-staging analysis found potential issues:")
@@ -476,11 +481,11 @@ class GitPushRetry:
                     return False
             print()
         
-        # Step 2: Smart staging with fallbacks
+        # Step 3: Smart staging with fallbacks
         if not self._smart_stage_changes():
             return False
         
-        # Step 3: Commit with validation
+        # Step 4: Commit with validation
         return self._smart_commit(message)
     
     def _diagnose_staging_issues(self) -> List[str]:
@@ -676,6 +681,159 @@ class GitPushRetry:
             print("   Linux/Mac: rm -f .git/index.lock")
         
         print("\n" + "="*60)
+    
+    def _handle_gitignore_changes(self) -> bool:
+        """Handle .gitignore changes by removing previously tracked files that now match ignore patterns"""
+        try:
+            # Check if .gitignore has been modified or is new
+            status_output = self.git.status(porcelain=True)
+            gitignore_modified = False
+            
+            if status_output:
+                lines = status_output.strip().split('\n')
+                for line in lines:
+                    if len(line) >= 3:
+                        file_path = line[3:]
+                        if file_path == '.gitignore' or file_path.endswith('/.gitignore'):
+                            gitignore_modified = True
+                            break
+            
+            if not gitignore_modified:
+                return True  # No .gitignore changes, continue normally
+            
+            print("🔍 Detected .gitignore changes, checking for previously tracked files...")
+            
+            # Get all tracked files
+            try:
+                tracked_files_result = self.git._run_command(
+                    ['git', 'ls-files'], 
+                    check=True
+                )
+                tracked_files = tracked_files_result.stdout.strip().split('\n') if tracked_files_result.stdout.strip() else []
+            except Exception as e:
+                print(f"⚠️  Could not get tracked files list: {e}")
+                return True  # Continue with normal staging
+            
+            if not tracked_files:
+                return True  # No tracked files to check
+            
+            # Check which tracked files now match .gitignore patterns
+            files_to_remove = []
+            
+            for file_path in tracked_files:
+                if not file_path.strip():
+                    continue
+                
+                try:
+                    # Use git check-ignore to see if file should be ignored
+                    check_ignore_result = self.git._run_command(
+                        ['git', 'check-ignore', file_path],
+                        check=False
+                    )
+                    
+                    # If git check-ignore returns 0, the file matches an ignore pattern
+                    if check_ignore_result.returncode == 0:
+                        files_to_remove.append(file_path)
+                
+                except Exception:
+                    continue  # Skip files that cause errors
+            
+            if not files_to_remove:
+                print("✅ No previously tracked files match new .gitignore patterns")
+                return True
+            
+            # Show user what files will be removed from tracking
+            print(f"\n🚨 Found {len(files_to_remove)} previously tracked files that now match .gitignore patterns:")
+            print("\n📁 Files to be removed from Git tracking:")
+            
+            # Group files by type for better display
+            node_modules = [f for f in files_to_remove if 'node_modules' in f]
+            cache_files = [f for f in files_to_remove if '__pycache__' in f or '.pyc' in f]
+            other_files = [f for f in files_to_remove if f not in node_modules and f not in cache_files]
+            
+            if node_modules:
+                print(f"   📦 Node modules ({len(node_modules)} files):")
+                for file_path in node_modules[:5]:
+                    print(f"      • {file_path}")
+                if len(node_modules) > 5:
+                    print(f"      ... and {len(node_modules) - 5} more node_modules files")
+            
+            if cache_files:
+                print(f"   🗃️  Python cache files ({len(cache_files)} files):")
+                for file_path in cache_files[:3]:
+                    print(f"      • {file_path}")
+                if len(cache_files) > 3:
+                    print(f"      ... and {len(cache_files) - 3} more cache files")
+            
+            if other_files:
+                print(f"   📄 Other files ({len(other_files)} files):")
+                for file_path in other_files[:5]:
+                    print(f"      • {file_path}")
+                if len(other_files) > 5:
+                    print(f"      ... and {len(other_files) - 5} more files")
+            
+            print("\n❓ These files are currently tracked in Git but now match .gitignore patterns.")
+            print("   They should be removed from Git tracking (this will delete them from the remote repository)")
+            
+            # Check if auto-handling is enabled
+            if self.config.auto_handle_gitignore:
+                print("🤖 Auto-handling enabled: Automatically removing these files from Git tracking...")
+                user_choice = 'YES'
+            else:
+                print("   Do you want to remove them from Git tracking?")
+                print("   Type 'YES' to remove them, or 'NO' to keep them tracked:")
+                user_choice = input("   > ").strip().upper()
+            
+            if user_choice == 'YES':
+                print(f"\n🗑️  Removing {len(files_to_remove)} files from Git tracking...")
+                
+                # Remove files from Git tracking using git rm --cached
+                removed_count = 0
+                failed_removals = []
+                
+                for file_path in files_to_remove:
+                    try:
+                        result = self.git._run_command(
+                            ['git', 'rm', '--cached', file_path],
+                            check=False
+                        )
+                        
+                        if result.returncode == 0:
+                            removed_count += 1
+                        else:
+                            failed_removals.append(file_path)
+                    
+                    except Exception as e:
+                        failed_removals.append(file_path)
+                        print(f"      ⚠️  Failed to remove {file_path}: {e}")
+                
+                print(f"✅ Successfully removed {removed_count} files from Git tracking")
+                
+                if failed_removals:
+                    print(f"⚠️  Failed to remove {len(failed_removals)} files:")
+                    for file_path in failed_removals[:3]:
+                        print(f"      • {file_path}")
+                    if len(failed_removals) > 3:
+                        print(f"      ... and {len(failed_removals) - 3} more")
+                
+                print("\n💡 These files have been removed from Git tracking but remain on your local filesystem.")
+                print("   They will be deleted from the remote repository when you push.")
+                
+            elif user_choice == 'NO':
+                print("\n📌 Keeping files tracked in Git (they will remain in the repository)")
+                print("💡 To remove them later, run: git rm --cached <filename>")
+            
+            else:
+                print("\n⚠️  Invalid choice. Keeping files tracked for safety.")
+                print("💡 You can manually remove them later with: git rm --cached <filename>")
+            
+            print()
+            return True
+            
+        except Exception as e:
+            print(f"⚠️  Error handling .gitignore changes: {e}")
+            print("   Continuing with normal staging process...")
+            return True  # Continue even if this fails
     
     def _smart_stage_changes(self) -> bool:
         """Smart staging with multiple fallback strategies"""
@@ -1142,8 +1300,14 @@ class GitPush:
             print(f"  ⚠️  Could not get summary: {e}\n")
     
     def _get_commit_message(self) -> Optional[str]:
-        """Get commit message from user with automatic heart emoji prefix"""
-        message = input("💭 Commit message: ").strip()
+        """Get commit message from user with heart emoji pre-filled for optional use"""
+        # Pre-fill with heart emoji but allow user to delete it if desired
+        try:
+            # Try to use input with pre-filled text (may not work on all terminals)
+            message = input("💬 Commit message: ❤️ ").strip()
+        except:
+            # Fallback if pre-filling doesn't work
+            message = input("💬 Commit message: ").strip()
         
         if not message:
             return None
@@ -1155,10 +1319,7 @@ class GitPush:
                 return self._get_commit_message()
             return None
         
-        # Always add heart emoji at the beginning if not already present
-        if not message.startswith("❤️"):
-            message = f"❤️ {message}"
-        
+        # No automatic heart emoji addition - user controls it entirely
         return message
 
 

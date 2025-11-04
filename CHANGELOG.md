@@ -12,6 +12,18 @@
 
 ### 2025-11-03
 
+#### ♻️ Code Refactoring
+
+- **❤️ refactor smart hidden folder** (`439ba31`) - *Qwenzy*
+  - 📁 1 doc file, 1 backend file
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-03
+
 #### 📚 Documentation
 
 - **update readme and add contributing** (`41cf111`) - *Qwenzy*
