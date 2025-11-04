@@ -10,6 +10,18 @@
 
 ---
 
+### 2025-11-04
+
+#### ✨ New Features
+
+- **add new feature. Git --cache** (`37ad2cb`) - *Qwenzy*
+  - 📁 1 doc file, 4 backend files
+
+**Total**: 1 commit(s)
+
+---
+
+
 ### 2025-11-03
 
 #### ♻️ Code Refactoring
