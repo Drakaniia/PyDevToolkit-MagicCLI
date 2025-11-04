@@ -34,39 +34,37 @@ class GitCache:
     def show_cache_menu(self):
         """Display the git cache management menu"""
         cache_menu = GitCacheMenu()
-        cache_menu.display()
+        cache_menu.run()
     
     def create_cache_point(self):
-        """Create a cache point of current git state"""
+        """Create a cache point and push directory directly"""
         print("\n" + "="*70)
-        print("💾 CREATE GIT CACHE POINT")
+        print("💾 GIT CACHE & DIRECT PUSH")
         print("="*70 + "\n")
         
         if not self._is_git_repo():
             print("❌ Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
-            return
+            return None
         
-        # Check if there are uncommitted changes
-        if self._has_uncommitted_changes():
-            print("⚠️  You have uncommitted changes. Please commit or stash them first.")
-            input("\nPress Enter to continue...")
-            return
+        # Show loading animation
+        self._show_loading("Preparing cache operation...")
         
-        cache_name = input("Enter cache point name (or press Enter for timestamp): ").strip()
-        if not cache_name:
-            from datetime import datetime
-            cache_name = f"cache_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        # Generate cache name
+        from datetime import datetime
+        cache_name = f"cache_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         
         # Create a tag for the cache point
-        if self._run_command(["git", "tag", f"cache/{cache_name}"]):
+        self._show_loading("Creating cache point...")
+        if self._run_command_silent(["git", "tag", f"cache/{cache_name}"]):
             print(f"✅ Cache point '{cache_name}' created successfully!")
             self._show_cache_confirmation(cache_name)
-            return self._auto_clean_and_push()
+            self._direct_push()
         else:
             print("❌ Failed to create cache point.")
             input("\nPress Enter to continue...")
-            return False
+        
+        return None
     
     def list_cache_points(self):
         """List all available cache points"""
@@ -316,145 +314,48 @@ class GitCache:
         print(f"💾 Cache Point: {cache_name}")
         print(f"🕒 Timestamp: {self._get_timestamp()}")
         print("\n" + "="*70)
-        print("🔄 Now automatically cleaning sensitive files and pushing changes...")
+        print("🚀 Now pushing changes to remote repository...")
         print("="*70 + "\n")
     
-    def _auto_clean_and_push(self):
-        """Automatically clean sensitive files and push changes"""
-        print("🧹 Step 1: Scanning for sensitive files...")
-        
-        # Auto-detect and clean sensitive files
-        cleaned_files = self._auto_detect_and_clean()
-        
-        if cleaned_files:
-            print(f"\n✅ Cleaned {len(cleaned_files)} sensitive files from repository:")
-            for file in cleaned_files:
-                print(f"   🗑️  {file}")
+    def _direct_push(self):
+        """Directly push current directory state"""
+        try:
+            # Show loading while adding files
+            self._show_loading("Adding files to git...")
             
-            print("\n🔄 Step 2: Updating .gitignore...")
-            self._auto_update_gitignore()
-            
-            print("\n🚀 Step 3: Pushing changes to remove sensitive files...")
-            return self._auto_push_changes()
-        else:
-            print("\n✅ No sensitive files found in repository!")
-            print("Repository is clean and secure.")
-            input("\nPress Enter to continue...")
-            return True
-    
-    def _auto_detect_and_clean(self):
-        """Automatically detect and clean sensitive files"""
-        cleaned_files = []
-        current_dir = Path('.')
-        
-        # Check for sensitive files in current directory and subdirectories
-        for pattern in self.sensitive_patterns:
-            if pattern.endswith('/'):
-                # Directory pattern
-                dir_name = pattern.rstrip('/')
-                for path in current_dir.rglob(dir_name):
-                    if path.is_dir() and self._is_tracked_by_git(str(path)):
-                        if self._remove_from_git_history(str(path)):
-                            cleaned_files.append(str(path))
-            elif '*' in pattern:
-                # Wildcard pattern
-                for path in current_dir.rglob(pattern):
-                    if path.is_file() and self._is_tracked_by_git(str(path)):
-                        if self._remove_from_git_history(str(path)):
-                            cleaned_files.append(str(path))
-            else:
-                # Exact file match
-                if current_dir.joinpath(pattern).exists() and self._is_tracked_by_git(pattern):
-                    if self._remove_from_git_history(pattern):
-                        cleaned_files.append(pattern)
-        
-        return cleaned_files
-    
-    def _is_tracked_by_git(self, file_path):
-        """Check if file is tracked by git"""
-        try:
-            result = subprocess.run(
-                ["git", "ls-files", "--error-unmatch", file_path],
-                capture_output=True,
-                text=True,
-                encoding='utf-8',
-                errors='replace'
-            )
-            return result.returncode == 0
-        except:
-            return False
-    
-    def _remove_from_git_history(self, file_path):
-        """Remove file from git history"""
-        try:
-            # First, remove from index
-            subprocess.run(
-                ["git", "rm", "--cached", "-r", file_path],
-                capture_output=True,
-                text=True,
-                check=True,
-                encoding='utf-8',
-                errors='replace'
-            )
-            return True
-        except subprocess.CalledProcessError:
-            return False
-    
-    def _auto_update_gitignore(self):
-        """Automatically update .gitignore with sensitive patterns"""
-        gitignore_path = Path('.gitignore')
-        
-        if gitignore_path.exists():
-            with open(gitignore_path, 'r', encoding='utf-8') as f:
-                current_content = f.read()
-        else:
-            current_content = ""
-        
-        new_patterns = []
-        for pattern in self.sensitive_patterns:
-            if pattern not in current_content:
-                new_patterns.append(pattern)
-        
-        if new_patterns:
-            with open(gitignore_path, 'a', encoding='utf-8') as f:
-                f.write("\n# Auto-added sensitive file patterns (Git Cache)\n")
-                for pattern in new_patterns:
-                    f.write(f"{pattern}\n")
-            print(f"✅ Added {len(new_patterns)} patterns to .gitignore")
-        else:
-            print("✅ .gitignore already contains all sensitive patterns")
-    
-    def _auto_push_changes(self):
-        """Automatically push changes after cleaning"""
-        try:
-            # Add changes to staging
-            print("📦 Adding changes to staging area...")
+            # Add all files
             if not self._run_command_silent(["git", "add", "."]):
-                print("❌ Failed to add changes to staging")
+                print("❌ Failed to add files to git")
+                input("\nPress Enter to continue...")
                 return False
             
             # Check if there are changes to commit
             if not self._has_uncommitted_changes():
-                print("✅ No changes to commit - repository is already clean!")
+                print("✅ No changes to commit - repository is up to date!")
                 input("\nPress Enter to continue...")
                 return True
             
+            # Show loading while committing
+            self._show_loading("Committing changes...")
+            
             # Commit changes
-            commit_message = f"🔒 Remove sensitive files and update .gitignore - Cache: {self._get_timestamp()}"
-            print("📝 Committing changes...")
+            commit_message = f"🔄 Cache point commit - {self._get_timestamp()}"
             if not self._run_command_silent(["git", "commit", "-m", commit_message]):
                 print("❌ Failed to commit changes")
+                input("\nPress Enter to continue...")
                 return False
             
+            # Show loading while pushing
+            self._show_loading("Pushing to remote repository...")
+            
             # Push to remote
-            print("🚀 Pushing to remote repository...")
             if self._run_command_silent(["git", "push"]):
                 print("\n" + "🎉" * 25)
-                print("✅ SUCCESS! SENSITIVE FILES REMOVED & PUSHED!")
+                print("✅ SUCCESS! DIRECTORY CACHED & PUSHED!")
                 print("🎉" * 25)
-                print("\n🔒 Your repository is now secure!")
+                print("\n🔒 Your repository has been cached safely!")
                 print("💾 Cache point preserved for recovery if needed")
-                print("🚀 Changes pushed to remote repository")
+                print("🚀 All changes pushed to remote repository")
                 print("\n" + "="*70)
             else:
                 print("⚠️  Changes committed locally but failed to push to remote")
@@ -464,9 +365,10 @@ class GitCache:
             return True
             
         except Exception as e:
-            print(f"❌ Error during auto-push: {e}")
+            print(f"❌ Error during push operation: {e}")
             input("\nPress Enter to continue...")
             return False
+    
     
     def _run_command_silent(self, command):
         """Run a command silently and return success status"""
@@ -489,6 +391,24 @@ class GitCache:
         """Get current timestamp"""
         from datetime import datetime
         return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    def _show_loading(self, message):
+        """Show loading animation"""
+        import time
+        import sys
+        
+        print(f"\n{message}")
+        
+        # Loading animation
+        for i in range(3):
+            for char in "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏":
+                sys.stdout.write(f"\r{char} Loading...")
+                sys.stdout.flush()
+                time.sleep(0.1)
+        
+        # Clear loading line
+        sys.stdout.write("\r" + " " * 20 + "\r")
+        sys.stdout.flush()
     
     def _is_git_repo(self):
         """Check if current directory is a git repository"""
@@ -550,10 +470,10 @@ class GitCacheMenu(Menu):
     def setup_items(self):
         """Setup menu items for git cache operations"""
         self.items = [
-            MenuItem("🚀 Cache & Clean Repository (Auto-Remove Sensitive Files)", lambda: self.git_cache.create_cache_point()),
+            MenuItem("🚀 Cache Directory & Push to Remote", lambda: self.git_cache.create_cache_point()),
             MenuItem("📋 List Cache Points", lambda: self.git_cache.list_cache_points()),
             MenuItem("🔄 Restore from Cache", lambda: self.git_cache.restore_from_cache()),
-            MenuItem("🗑️  Manual: Remove Sensitive Files from History", lambda: self.git_cache.remove_sensitive_files()),
-            MenuItem("📝 Manual: Update .gitignore", lambda: self.git_cache.update_gitignore()),
+            MenuItem("🗑️  Remove Sensitive Files from History", lambda: self.git_cache.remove_sensitive_files()),
+            MenuItem("📝 Update .gitignore", lambda: self.git_cache.update_gitignore()),
             MenuItem("🔙 Back to Git Menu", lambda: "exit")
         ]
