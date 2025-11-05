@@ -23,6 +23,7 @@ class DevModeMenu(Menu):
         from automation.dev_mode.create_frontend import COMMAND as create_frontend
         from automation.dev_mode.run_project import COMMAND as run_project
         from automation.dev_mode.test_project import COMMAND as test_project
+        from automation.dev_mode.port_killer_command import COMMAND as port_killer
         from automation.dev_mode.install_deps import COMMAND as install_deps
         from automation.dev_mode.format_code import COMMAND as format_code
         from automation.dev_mode.docker_quick import COMMAND as docker_quick
@@ -31,15 +32,17 @@ class DevModeMenu(Menu):
         # ORDER MATTERS - This determines menu item numbers:
         # 1. Create Frontend Project (React / Next.js / Vue)
         # 2. Run Project (Dev / Build)
-        # 3. Run Tests (All Types) ← NEW!
-        # 4. Install Dependencies (npm install)
-        # 5. Setup Prettier (Format on Save)
-        # 6. Docker Quick Commands
-        # 7. Back to Main Menu (added automatically)
+        # 3. Run Tests (All Types)
+        # 4. Port Killer (Clear Conflicts) ← NEW!
+        # 5. Install Dependencies (npm install)
+        # 6. Setup Prettier (Format on Save)
+        # 7. Docker Quick Commands
+        # 8. Back to Main Menu (added automatically)
         self.commands = [
             create_frontend,
             run_project,
-            test_project,     # This is the new option 3
+            test_project,
+            port_killer,      # This is the new option 4
             install_deps,
             format_code,
             docker_quick
