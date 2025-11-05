@@ -139,6 +139,16 @@ class UncommittedChangesError(GitError):
         )
 
 
+class SSHConfigError(GitError):
+    """SSH configuration specific errors"""
+    pass
+
+
+class GitHubAPIError(AutomationError):
+    """GitHub API related errors"""
+    pass
+
+
 class ExceptionHandler:
     """Centralized exception handling"""
     
