@@ -11,7 +11,6 @@ from automation.github.git_initializer import GitInitializer
 from automation.github.git_recover import GitRecover
 from automation.github.git_removesubmodule import GitRemoveSubmodule
 from automation.github.git_cache import GitCache
-from automation.github.git_ssh_config import GitSSHConfig
 from automation.changelog_generator import ChangelogGenerator
 
 __all__ = [
@@ -22,6 +21,5 @@ __all__ = [
     'GitRecover',
     'GitRemoveSubmodule',
     'GitCache',
-    'GitSSHConfig',
     'ChangelogGenerator',
 ]
