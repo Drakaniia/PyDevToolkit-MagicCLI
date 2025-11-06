@@ -121,50 +121,6 @@ class RunProjectCommand(DevModeCommand):
         print(f"\n🚀 Running script: {script_name}")
         print("="*70 + "\n")
         
-        # Clear all development ports before starting server
-        if script_name in ['dev', 'start', 'serve', 'preview']:
-            print("🔧 PREPARING DEVELOPMENT ENVIRONMENT")
-            print("-" * 50)
-            try:
-                # First, scan for any active servers
-                active_servers = scan_active_servers(verbose=False)
-                
-                if active_servers:
-                    print(f"⚠️  Found {len(active_servers)} active server process(es)")
-                    print("💀 Using comprehensive port clearing...")
-                    
-                    # Use force clear for maximum effectiveness
-                    result = force_clear_all_ports(verbose=True)
-                    
-                    if result['total_killed'] > 0:
-                        print(f"✅ Successfully cleared {result['total_killed']} processes")
-                    else:
-                        print("✅ All processes already terminated")
-                else:
-                    print("🔍 Scanning common development ports...")
-                    result = kill_all_dev_ports(verbose=True)
-                    
-                    if result['total_killed'] > 0:
-                        print(f"✅ Cleared {result['total_killed']} port conflicts")
-                    else:
-                        print("✅ No port conflicts detected")
-                
-                # Final validation
-                remaining_servers = scan_active_servers(verbose=False)
-                if remaining_servers:
-                    print(f"⚠️  Warning: {len(remaining_servers)} server process(es) still active")
-                    for server in remaining_servers:
-                        print(f"  Port {server['port']} | PID {server['pid']} | {server['name']}")
-                else:
-                    print("✅ All development ports are now clear")
-                
-                print()
-                
-            except Exception as e:
-                print(f"⚠️  Warning: Port clearing failed: {e}")
-                print("🔄 Continuing with server startup...")
-                print()
-        
         # Detect package manager
         pkg_manager = self._detect_package_manager(cwd)
         
