@@ -650,58 +650,80 @@ class CreateFrontendCommand(DevModeCommand):
                 print(f"   {tip}")
     
     def _prompt_framework(self) -> Optional[str]:
-        """Prompt user to select framework with arrow navigation"""
-        # Create organized list of frameworks for arrow navigation
-        framework_options = []
+        """Prompt user to select framework category first, then specific framework"""
+        # Step 1: Choose category
+        category = self._prompt_framework_category()
+        if not category:
+            return None
         
-        # Add section headers and frameworks
-        framework_options.append("🌐 WEB FRAMEWORKS")
-        framework_options.append("─" * 50)
-        
-        for key, framework in sorted(self.FRAMEWORKS.items(), key=lambda x: int(x[0])):
-            if framework['type'] == 'web':
-                framework_options.append(f"{framework['name']}")
-        
-        framework_options.append("")  # Empty line separator
-        framework_options.append("📱 MOBILE FRAMEWORKS")
-        framework_options.append("─" * 50)
-        
-        for key, framework in sorted(self.FRAMEWORKS.items(), key=lambda x: int(x[0])):
-            if framework['type'] == 'mobile':
-                framework_options.append(f"{framework['name']}")
-        
-        framework_options.append("")  # Empty line separator
-        framework_options.append("🔧 FULL-STACK FRAMEWORKS")
-        framework_options.append("─" * 50)
-        
-        for key, framework in sorted(self.FRAMEWORKS.items(), key=lambda x: int(x[0])):
-            if framework['type'] == 'fullstack':
-                framework_options.append(f"{framework['name']}")
-        
-        framework_options.append("")  # Empty line separator
-        framework_options.append("❌ Exit")
+        # Step 2: Choose framework from selected category
+        return self._prompt_framework_from_category(category)
+    
+    def _prompt_framework_category(self) -> Optional[str]:
+        """Prompt user to select framework category"""
+        categories = [
+            "🌐 Web Frameworks",
+            "📱 Mobile Frameworks", 
+            "🔧 Full-Stack Frameworks",
+            "❌ Exit"
+        ]
         
         try:
-            choice = get_choice_with_arrows(framework_options, "Frontend Framework")
+            choice_idx = get_choice_with_arrows(categories, "Select Framework Category", show_numbers=True)
             
-            # Handle exit option
-            if choice == "❌ Exit":
+            # Handle exit option (last option)
+            if choice_idx == len(categories):
                 print("\n❌ Operation cancelled")
                 return None
             
-            # Handle section headers and separators
-            if choice in ["🌐 WEB FRAMEWORKS", "📱 MOBILE FRAMEWORKS", "🔧 FULL-STACK FRAMEWORKS", 
-                         "─" * 50, ""]:
-                return self._prompt_framework()  # Re-prompt if header/separator selected
+            # Map choice to category type
+            category_map = {
+                1: 'web',
+                2: 'mobile', 
+                3: 'fullstack'
+            }
             
-            # Find the framework key by name
-            for key, framework in self.FRAMEWORKS.items():
-                if framework['name'] == choice:
-                    return key
+            return category_map.get(choice_idx)
             
-            # If no match found, re-prompt
-            print(f"❌ Framework not found: {choice}")
-            return self._prompt_framework()
+        except KeyboardInterrupt:
+            print("\n❌ Operation cancelled")
+            return None
+    
+    def _prompt_framework_from_category(self, category: str) -> Optional[str]:
+        """Prompt user to select specific framework from chosen category"""
+        # Get frameworks for the selected category
+        category_frameworks = []
+        framework_keys = []
+        
+        for key, framework in sorted(self.FRAMEWORKS.items(), key=lambda x: int(x[0])):
+            if framework['type'] == category:
+                category_frameworks.append(framework['name'])
+                framework_keys.append(key)
+        
+        if not category_frameworks:
+            print(f"❌ No frameworks found for category: {category}")
+            return None
+        
+        # Add exit option
+        category_frameworks.append("❌ Exit")
+        
+        try:
+            # Get category name for display
+            category_names = {
+                'web': 'Web',
+                'mobile': 'Mobile',
+                'fullstack': 'Full-Stack'
+            }
+            display_name = category_names.get(category, category)
+            
+            choice_idx = get_choice_with_arrows(category_frameworks, f"Select {display_name} Framework", show_numbers=True)
+            
+            # Handle exit option (last option)
+            if choice_idx == len(category_frameworks):
+                return None
+            
+            # Return the framework key for the selected framework
+            return framework_keys[choice_idx - 1]
             
         except KeyboardInterrupt:
             print("\n❌ Operation cancelled")
@@ -736,33 +758,42 @@ class CreateFrontendCommand(DevModeCommand):
         """Prompt for package manager"""
         pm_options = list(self.PACKAGE_MANAGERS.values()) + ["❌ Exit"]
         
-        choice = get_choice_with_arrows(pm_options, "Package Manager")
-        
-        # Handle exit option
-        if choice == len(pm_options) or pm_options[choice - 1] == "❌ Exit":
+        try:
+            choice_idx = get_choice_with_arrows(pm_options, "Package Manager", show_numbers=True)
+            
+            # Handle exit option (last option)
+            if choice_idx == len(pm_options):
+                return None
+            
+            # Return the selected package manager directly
+            return pm_options[choice_idx - 1]
+            
+        except KeyboardInterrupt:
+            print("\n❌ Operation cancelled")
             return None
-        
-        # Return the selected package manager directly
-        selected_pm = pm_options[choice - 1]
-        return selected_pm
     
     def _prompt_css_framework(self) -> Optional[str]:
         """Prompt for CSS framework"""
         css_options = [value['name'] for value in self.CSS_FRAMEWORKS.values()] + ["❌ Exit"]
         
-        choice = get_choice_with_arrows(css_options, "CSS Framework")
-        
-        # Handle exit option
-        if choice == len(css_options) or css_options[choice - 1] == "❌ Exit":
+        try:
+            choice_idx = get_choice_with_arrows(css_options, "CSS Framework", show_numbers=True)
+            
+            # Handle exit option (last option)
+            if choice_idx == len(css_options):
+                return None
+            
+            # Find the CSS framework key by matching the selected name
+            selected_name = css_options[choice_idx - 1]
+            for key, framework in self.CSS_FRAMEWORKS.items():
+                if framework['name'] == selected_name:
+                    return key
+            
+            return '1'  # Default to first option if not found
+            
+        except KeyboardInterrupt:
+            print("\n❌ Operation cancelled")
             return None
-        
-        # Find the CSS framework key by matching the selected name
-        selected_name = css_options[choice - 1]
-        for key, framework in self.CSS_FRAMEWORKS.items():
-            if framework['name'] == selected_name:
-                return key
-        
-        return '1'  # Default to first option if not found
     
     def _prompt_directory(self) -> Optional[str]:
         """Prompt for target directory"""
