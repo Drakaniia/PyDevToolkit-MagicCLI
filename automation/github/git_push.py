@@ -1301,11 +1301,15 @@ class GitPush:
     
     def _get_commit_message(self) -> Optional[str]:
         """Get commit message from user with heart emoji auto-generated but deletable"""
-        # Auto-generate commit message with heart emoji, but allow user to delete it
-        message = input("💬 Commit message: ❤️ ").strip()
+        # Get user input without pre-filling
+        message = input("💬 Commit message: ").strip()
         
         if not message:
             return None
+        
+        # Auto-add heart emoji at the beginning if not already present
+        if not message.startswith('❤️'):
+            message = f"❤️ {message}"
         
         if len(message) < 3:
             print("\n⚠️  Commit message too short (minimum 3 characters)")
@@ -1314,7 +1318,6 @@ class GitPush:
                 return self._get_commit_message()
             return None
         
-        # The heart emoji is now part of the actual message and can be deleted by user
         return message
 
 
