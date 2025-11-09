@@ -152,7 +152,7 @@ class GitInitializer:
             
             commit_choice = input("\nDo you want to commit these changes first? (y/n): ").strip().lower()
             if commit_choice == 'y':
-                commit_msg = input("Enter commit message: ").strip()
+                commit_msg = input("Enter commit message: ❤️ ").strip()
                 if not commit_msg:
                     commit_msg = "Update files before push"
                 

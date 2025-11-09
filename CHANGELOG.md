@@ -10,6 +10,18 @@
 
 ---
 
+### 2025-11-09
+
+#### 🐛 Bug Fixes
+
+- **Fix framework selection to first choose category (web/mobile/fullstac...** (`2d26df8`) - *Qwenzy*
+  - 📄 `automation/dev_mode/create_frontend.py`
+
+**Total**: 1 commit(s)
+
+---
+
+
 ### 2025-11-06
 
 #### ⚡ Performance Improvements

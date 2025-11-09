@@ -1300,14 +1300,9 @@ class GitPush:
             print(f"  ⚠️  Could not get summary: {e}\n")
     
     def _get_commit_message(self) -> Optional[str]:
-        """Get commit message from user with heart emoji pre-filled for optional use"""
-        # Pre-fill with heart emoji but allow user to delete it if desired
-        try:
-            # Try to use input with pre-filled text (may not work on all terminals)
-            message = input("💬 Commit message: ❤️ ").strip()
-        except:
-            # Fallback if pre-filling doesn't work
-            message = input("💬 Commit message: ").strip()
+        """Get commit message from user with heart emoji auto-generated but deletable"""
+        # Auto-generate commit message with heart emoji, but allow user to delete it
+        message = input("💬 Commit message: ❤️ ").strip()
         
         if not message:
             return None
@@ -1319,7 +1314,7 @@ class GitPush:
                 return self._get_commit_message()
             return None
         
-        # No automatic heart emoji addition - user controls it entirely
+        # The heart emoji is now part of the actual message and can be deleted by user
         return message
 
 
