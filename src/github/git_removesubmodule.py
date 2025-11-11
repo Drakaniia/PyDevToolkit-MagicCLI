@@ -7,9 +7,9 @@ import os
 import subprocess
 import json
 from typing import List, Tuple, Optional
-from automation.core.loading import loading_animation
-from automation.core.exceptions import GitError
-from automation.menu import Menu, MenuItem
+from core.loading import loading_animation
+from core.exceptions import GitError
+from menu import Menu, MenuItem
 
 
 class GitRemoveSubmodule:

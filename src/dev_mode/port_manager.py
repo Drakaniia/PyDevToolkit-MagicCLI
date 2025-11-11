@@ -9,7 +9,7 @@ import argparse
 from pathlib import Path
 from typing import List, Optional
 
-from automation.dev_mode.port_killer import (
+from .port_killer import (
     PortKiller,
     kill_all_dev_ports,
     kill_port,

@@ -19,7 +19,7 @@
 ```bash
 # 1. Clone the repository
 git clone https://github.com/Drakaniia/python-automation.git
-cd python-automation
+cd python-src
 
 # 2. Run the setup script
 bash setup.sh

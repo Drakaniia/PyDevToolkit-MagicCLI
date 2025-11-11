@@ -9,15 +9,15 @@ import sys
 import time
 import subprocess
 
-from automation.core.git_client import get_git_client
-from automation.core.exceptions import (
+from core.git_client import get_git_client
+from core.exceptions import (
     ExceptionHandler,
     GitError,
     GitCommandError,
     UncommittedChangesError,
     handle_errors
 )
-from automation.core.loading import LoadingSpinner, loading_animation
+from core.loading import LoadingSpinner, loading_animation
 
 
 class PushStrategy:
@@ -182,7 +182,7 @@ class GitPushRetry:
             print("="*70 + "\n")
             
             # Import here to avoid circular dependency
-            from automation.changelog_generator import ChangelogGenerator
+            from changelog_generator import ChangelogGenerator
             
             changelog_gen = ChangelogGenerator()
             
@@ -1343,7 +1343,7 @@ if __name__ == "__main__":
     
     print("\n" + "="*70)
     print("Ready to use! Import and call:")
-    print("  from automation.github.git_push import GitPush")
+    print("  from src.github.git_push import GitPush")
     print("  pusher = GitPush()")
     print("  pusher.push()")
     print("\n✨ Changelog will be automatically generated after successful push!")

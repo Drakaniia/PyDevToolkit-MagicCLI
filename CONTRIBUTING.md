@@ -26,7 +26,7 @@ We love contributions! Magic CLI is built by developers, for developers. Here's 
 ```bash
 # Clone and setup
 git clone https://github.com/Drakaniia/python-automation.git
-cd python-automation
+cd python-src
 bash setup.sh
 
 # Test your changes

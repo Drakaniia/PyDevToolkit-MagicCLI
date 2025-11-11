@@ -3,8 +3,8 @@ automation/core/__init__.py
 Core Git operations and utilities
 """
 
-from automation.core.git_client import GitClient, get_git_client
-from automation.core.exceptions import (
+from .git_client import GitClient, get_git_client
+from .exceptions import (
     AutomationError,
     GitError,
     GitCommandError,

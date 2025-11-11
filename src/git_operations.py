@@ -4,16 +4,16 @@ Main orchestrator for all Git operations using modular components
 UPDATED: Changelog is now auto-generated after successful push
 """
 from pathlib import Path
-from automation.github.git_status import GitStatus
-from automation.github.git_log import GitLog
-from automation.github.git_pull import GitPull
-from automation.github.git_push import GitPush
-from automation.github.git_initializer import GitInitializer
-from automation.github.git_recover import GitRecover
-from automation.github.git_removesubmodule import GitRemoveSubmodule
-from automation.github.git_cache import GitCache
-from automation.menu import Menu, MenuItem
-from automation.core.git_client import get_git_client
+from github.git_status import GitStatus
+from github.git_log import GitLog
+from github.git_pull import GitPull
+from github.git_push import GitPush
+from github.git_initializer import GitInitializer
+from github.git_recover import GitRecover
+from github.git_removesubmodule import GitRemoveSubmodule
+from github.git_cache import GitCache
+from menu import Menu, MenuItem
+from core.git_client import get_git_client
 
 
 class GitOperations:

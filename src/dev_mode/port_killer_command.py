@@ -4,9 +4,9 @@ Port Killer command for the Dev Mode menu
 Provides interactive port management and termination
 """
 from typing import Any, List, Dict
-from automation.dev_mode._base import DevModeCommand
-from automation.dev_mode.menu_utils import get_choice_with_arrows
-from automation.dev_mode.port_killer import (
+from ._base import DevModeCommand
+from .menu_utils import get_choice_with_arrows
+from .port_killer import (
     PortKiller,
     kill_all_dev_ports,
     scan_active_servers,

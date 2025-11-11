@@ -6,8 +6,8 @@ FINAL VERSION: Includes all 6 commands with Run Tests as option 3
 import sys
 from pathlib import Path
 from typing import List, Dict, Any
-from automation.menu import Menu, MenuItem
-from automation.dev_mode._base import DevModeCommand
+from menu import Menu, MenuItem
+from ._base import DevModeCommand
 
 
 class DevModeMenu(Menu):
@@ -19,14 +19,14 @@ class DevModeMenu(Menu):
     
     def setup_items(self):
         """Setup menu items by loading command modules"""
-        # Import command modules in the order they should appear
-        from automation.dev_mode.create_frontend import COMMAND as create_frontend
-        from automation.dev_mode.run_project import COMMAND as run_project
-        from automation.dev_mode.test_project import COMMAND as test_project
-        from automation.dev_mode.port_killer_command import COMMAND as port_killer
-        from automation.dev_mode.install_deps import COMMAND as install_deps
-        from automation.dev_mode.format_code import COMMAND as format_code
-        from automation.dev_mode.docker_quick import COMMAND as docker_quick
+# Import command modules in the order they should appear
+        from .create_frontend import COMMAND as create_frontend
+        from .run_project import COMMAND as run_project
+        from .test_project import COMMAND as test_project
+        from .port_killer_command import COMMAND as port_killer
+        from .install_deps import COMMAND as install_deps
+        from .format_code import COMMAND as format_code
+        from .docker_quick import COMMAND as docker_quick
         
         # Store commands for access
         # ORDER MATTERS - This determines menu item numbers:

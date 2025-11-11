@@ -7,8 +7,10 @@ import json
 import re
 from pathlib import Path
 from typing import Optional, Dict, List, Tuple
-from automation.dev_mode._base import DevModeCommand
-from automation.dev_mode.menu_utils import get_choice_with_arrows
+from . import _base
+from . import menu_utils
+from ._base import DevModeCommand
+from .menu_utils import get_choice_with_arrows
 
 
 class DockerQuickCommand(DevModeCommand):
@@ -55,6 +57,8 @@ class DockerQuickCommand(DevModeCommand):
             "List Running Containers",
             "List All Containers",
             "List Images",
+            "Docker Compose",
+            "Container Orchestration (Swarm)",
             "Prune Unused Resources",
             "Cancel"
         ]
@@ -76,8 +80,12 @@ class DockerQuickCommand(DevModeCommand):
         elif choice == 7:
             self._list_images()
         elif choice == 8:
-            self._prune_resources()
+            self._docker_compose_menu()
         elif choice == 9:
+            self._container_orchestration_menu()
+        elif choice == 10:
+            self._prune_resources()
+        elif choice == 11:
             print("\n❌ Operation cancelled")
         else:
             print("❌ Invalid choice")
@@ -1207,7 +1215,1187 @@ CMD {json.dumps(start_command.split())}
             print("\n✅ Resources pruned successfully!")
         except subprocess.CalledProcessError as e:
             print(f"\n❌ Prune failed: {e}")
+    
+    def _docker_compose_menu(self):
+        """Docker Compose operations menu"""
+        print("\n" + "="*70)
+        print("🐳 DOCKER COMPOSE INTEGRATION")
+        print("="*70 + "\n")
+        
+        # Check if docker-compose is installed
+        if not self.validate_binary('docker-compose'):
+            self.show_missing_binary_error(
+                'docker-compose',
+                'https://docs.docker.com/compose/install/'
+            )
+            input("\nPress Enter to continue...")
+            return
+        
+        # Docker Compose operations menu
+        compose_options = [
+            "Initialize docker-compose.yml",
+            "Start Services (up)",
+            "Stop Services (down)",
+            "Restart Services",
+            "View Service Logs",
+            "List Services",
+            "Scale Services",
+            "Build Services",
+            "Pull Services",
+            "Remove Stopped Containers",
+            "Back to Main Menu"
+        ]
+        
+        choice = get_choice_with_arrows(compose_options, "Docker Compose Operations")
+        
+        if choice == 1:
+            self._docker_compose_init()
+        elif choice == 2:
+            self._docker_compose_up()
+        elif choice == 3:
+            self._docker_compose_down()
+        elif choice == 4:
+            self._docker_compose_restart()
+        elif choice == 5:
+            self._docker_compose_logs()
+        elif choice == 6:
+            self._docker_compose_ps()
+        elif choice == 7:
+            self._docker_compose_scale()
+        elif choice == 8:
+            self._docker_compose_build()
+        elif choice == 9:
+            self._docker_compose_pull()
+        elif choice == 10:
+            self._docker_compose_rm()
+        elif choice == 11:
+            return
+        else:
+            print("❌ Invalid choice")
+        
+        input("\nPress Enter to continue...")
+    
+    def _docker_compose_init(self):
+        """Initialize docker-compose.yml with intelligent service detection"""
+        print("\n📝 DOCKER COMPOSE INITIALIZATION")
+        print("="*70 + "\n")
+        
+        # Detect project type and existing Dockerfile
+        project_info = self._detect_project_type()
+        dockerfile_exists = Path("Dockerfile").exists()
+        compose_file_exists = Path("docker-compose.yml").exists() or Path("docker-compose.yaml").exists()
+        
+        print(f"📋 Detected project type: {project_info['type']}")
+        if project_info['framework']:
+            print(f"🔧 Framework: {project_info['framework']}")
+        print(f"🐳 Dockerfile exists: {'Yes' if dockerfile_exists else 'No'}")
+        print(f"📄 Compose file exists: {'Yes' if compose_file_exists else 'No'}")
+        print()
+        
+        if compose_file_exists:
+            overwrite = input("docker-compose.yml already exists. Overwrite? (y/n, default: n): ").strip().lower()
+            if overwrite not in ['y', 'yes']:
+                print("❌ Operation cancelled")
+                return
+        
+        # Get service configuration
+        app_name = input("Application service name (default: app): ").strip() or "app"
+        app_port = input("Application port (default: 3000): ").strip() or "3000"
+        
+        # Ask about additional services
+        print("\n🔧 ADDITIONAL SERVICES")
+        print("-" * 25)
+        
+        services = {}
+        
+        # Database options
+        db_choice = input("Add database service? (postgres/mysql/mongo/redis/no, default: no): ").strip().lower()
+        if db_choice in ['postgres', 'postgresql']:
+            services['database'] = {
+                'image': 'postgres:15',
+                'env': ['POSTGRES_DB=appdb', 'POSTGRES_USER=appuser', 'POSTGRES_PASSWORD=apppass'],
+                'volumes': ['postgres_data:/var/lib/postgresql/data'],
+                'ports': ['5432:5432']
+            }
+        elif db_choice == 'mysql':
+            services['database'] = {
+                'image': 'mysql:8',
+                'env': ['MYSQL_DATABASE=appdb', 'MYSQL_USER=appuser', 'MYSQL_PASSWORD=apppass', 'MYSQL_ROOT_PASSWORD=rootpass'],
+                'volumes': ['mysql_data:/var/lib/mysql'],
+                'ports': ['3306:3306']
+            }
+        elif db_choice == 'mongo' or db_choice == 'mongodb':
+            services['database'] = {
+                'image': 'mongo:6',
+                'env': ['MONGO_INITDB_ROOT_USERNAME=admin', 'MONGO_INITDB_ROOT_PASSWORD=apppass'],
+                'volumes': ['mongo_data:/data/db'],
+                'ports': ['27017:27017']
+            }
+        elif db_choice == 'redis':
+            services['redis'] = {
+                'image': 'redis:7-alpine',
+                'volumes': ['redis_data:/data'],
+                'ports': ['6379:6379']
+            }
+        
+        # Nginx reverse proxy
+        nginx_choice = input("Add Nginx reverse proxy? (y/n, default: n): ").strip().lower()
+        if nginx_choice in ['y', 'yes']:
+            services['nginx'] = {
+                'image': 'nginx:alpine',
+                'volumes': ['./nginx.conf:/etc/nginx/nginx.conf'],
+                'ports': ['80:80', '443:443'],
+                'depends_on': [app_name]
+            }
+        
+        # Generate docker-compose.yml
+        compose_content = self._generate_docker_compose(project_info, app_name, app_port, services)
+        
+        # Write docker-compose.yml
+        compose_file = Path("docker-compose.yml")
+        with open(compose_file, 'w') as f:
+            f.write(compose_content)
+        
+        print(f"\n✅ docker-compose.yml created successfully!")
+        
+        # Generate .env file if services have environment variables
+        if services:
+            self._generate_env_file(services)
+        
+        # Generate nginx.conf if nginx was added
+        if 'nginx' in services:
+            self._generate_nginx_conf(app_name, app_port)
+        
+        print(f"\n🎉 Docker Compose initialization complete!")
+        print(f"📄 Services configured: {len(services) + 1}")
+        print(f"🚀 Start with: docker-compose up -d")
+    
+    def _generate_docker_compose(self, project_info: Dict[str, str], app_name: str, app_port: str, services: Dict) -> str:
+        """Generate docker-compose.yml content"""
+        
+        # Main application service
+        app_service = f"""  {app_name}:
+    build: .
+    ports:
+      - "{app_port}:{app_port}"
+    environment:
+      - NODE_ENV=development"""
+        
+        # Add environment variables based on services
+        if 'database' in services:
+            db_type = services['database']['image'].split(':')[0]
+            if db_type == 'postgres':
+                app_service += f"""
+      - DATABASE_URL=postgresql://appuser:apppass@database:5432/appdb"""
+            elif db_type == 'mysql':
+                app_service += f"""
+      - DATABASE_URL=mysql://appuser:apppass@database:3306/appdb"""
+            elif db_type == 'mongo':
+                app_service += f"""
+      - DATABASE_URL=mongodb://admin:apppass@database:27017/appdb"""
+        
+        if 'redis' in services:
+            app_service += f"""
+      - REDIS_URL=redis://redis:6379"""
+        
+        # Add volumes for development
+        app_service += f"""
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:"""
+        
+        # Add dependencies
+        if 'database' in services:
+            app_service += f"""
+      - database"""
+        if 'redis' in services:
+            app_service += f"""
+      - redis"""
+        
+        # Start building the compose file
+        compose_content = f"""version: '3.8'
+
+services:
+{app_service}
+"""
+        
+        # Add additional services
+        for service_name, service_config in services.items():
+            compose_content += f"\n  {service_name}:\n"
+            compose_content += f"    image: {service_config['image']}\n"
+            
+            if 'ports' in service_config:
+                compose_content += "    ports:\n"
+                for port in service_config['ports']:
+                    compose_content += f"      - \"{port}\"\n"
+            
+            if 'env' in service_config:
+                compose_content += "    environment:\n"
+                for env_var in service_config['env']:
+                    compose_content += f"      - {env_var}\n"
+            
+            if 'volumes' in service_config:
+                compose_content += "    volumes:\n"
+                for volume in service_config['volumes']:
+                    compose_content += f"      - {volume}\n"
+            
+            if 'depends_on' in service_config:
+                compose_content += "    depends_on:\n"
+                for dep in service_config['depends_on']:
+                    compose_content += f"      - {dep}\n"
+            
+            # Add restart policy for services
+            if service_name != app_name:
+                compose_content += "    restart: unless-stopped\n"
+        
+        # Add volumes section
+        compose_content += "\nvolumes:\n"
+        for service_name, service_config in services.items():
+            if 'volumes' in service_config:
+                for volume in service_config['volumes']:
+                    if ':' not in volume:  # Named volume
+                        compose_content += f"  {volume}:\n"
+        
+        # Add networks section for better isolation
+        compose_content += """
+networks:
+  default:
+    driver: bridge"""
+        
+        return compose_content
+    
+    def _generate_env_file(self, services: Dict):
+        """Generate .env file for environment variables"""
+        env_content = "# Environment variables for Docker Compose\n"
+        
+        for service_name, service_config in services.items():
+            if 'env' in service_config:
+                env_content += f"\n# {service_name.title()} variables\n"
+                for env_var in service_config['env']:
+                    if '=' in env_var:
+                        key, value = env_var.split('=', 1)
+                        env_content += f"{key}={value}\n"
+        
+        with open('.env', 'w') as f:
+            f.write(env_content)
+        
+        print("✅ .env file created successfully!")
+    
+    def _generate_nginx_conf(self, app_name: str, app_port: str):
+        """Generate nginx.conf for reverse proxy"""
+        nginx_content = f"""events {{
+    worker_connections 1024;
+}}
+
+http {{
+    upstream app {{
+        server {app_name}:{app_port};
+    }}
+    
+    server {{
+        listen 80;
+        server_name localhost;
+        
+        location / {{
+            proxy_pass http://app;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }}
+    }}
+}}"""
+        
+        with open('nginx.conf', 'w') as f:
+            f.write(nginx_content)
+        
+        print("✅ nginx.conf created successfully!")
+    
+    def _docker_compose_up(self):
+        """Start Docker Compose services"""
+        print("\n🚀 DOCKER COMPOSE UP")
+        print("="*70 + "\n")
+        
+        if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
+            print("❌ docker-compose.yml not found")
+            print("💡 Run 'Initialize docker-compose.yml' first")
+            return
+        
+        detached = input("Run in detached mode? (Y/n, default: Y): ").strip().lower()
+        detached = detached not in ['n', 'no']
+        
+        cmd = ['docker-compose', 'up']
+        if detached:
+            cmd.append('-d')
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            if detached:
+                print("✅ Services started successfully!")
+                self._docker_compose_ps(show_output=False)
+            else:
+                print("✅ Services stopped")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to start services: {e}")
+    
+    def _docker_compose_down(self):
+        """Stop Docker Compose services"""
+        print("\n🛑 DOCKER COMPOSE DOWN")
+        print("="*70 + "\n")
+        
+        if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
+            print("❌ docker-compose.yml not found")
+            return
+        
+        remove_volumes = input("Remove volumes? (y/N, default: N): ").strip().lower()
+        remove_volumes = remove_volumes in ['y', 'yes']
+        
+        cmd = ['docker-compose', 'down']
+        if remove_volumes:
+            cmd.append('-v')
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print("✅ Services stopped successfully!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to stop services: {e}")
+    
+    def _docker_compose_restart(self):
+        """Restart Docker Compose services"""
+        print("\n🔄 DOCKER COMPOSE RESTART")
+        print("="*70 + "\n")
+        
+        if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
+            print("❌ docker-compose.yml not found")
+            return
+        
+        cmd = ['docker-compose', 'restart']
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print("✅ Services restarted successfully!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to restart services: {e}")
+    
+    def _docker_compose_logs(self):
+        """View Docker Compose service logs"""
+        print("\n📋 DOCKER COMPOSE LOGS")
+        print("="*70 + "\n")
+        
+        if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
+            print("❌ docker-compose.yml not found")
+            return
+        
+        follow = input("Follow logs? (Y/n, default: Y): ").strip().lower()
+        follow = follow not in ['n', 'no']
+        
+        service = input("Specific service? (leave empty for all): ").strip()
+        
+        cmd = ['docker-compose', 'logs']
+        if follow:
+            cmd.append('-f')
+        if service:
+            cmd.append(service)
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to view logs: {e}")
+        except KeyboardInterrupt:
+            print("\n📋 Logs viewing stopped")
+    
+    def _docker_compose_ps(self, show_output: bool = True):
+        """List Docker Compose services"""
+        if show_output:
+            print("\n📋 DOCKER COMPOSE SERVICES")
+            print("="*70 + "\n")
+        
+        if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
+            if show_output:
+                print("❌ docker-compose.yml not found")
+            return
+        
+        cmd = ['docker-compose', 'ps']
+        
+        if show_output:
+            print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            if show_output:
+                print(f"❌ Failed to list services: {e}")
+    
+    def _docker_compose_scale(self):
+        """Scale Docker Compose services"""
+        print("\n📈 DOCKER COMPOSE SCALE")
+        print("="*70 + "\n")
+        
+        if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
+            print("❌ docker-compose.yml not found")
+            return
+        
+        service = input("Service name to scale: ").strip()
+        if not service:
+            print("❌ Service name cannot be empty")
+            return
+        
+        replicas = input("Number of replicas: ").strip()
+        if not replicas.isdigit() or int(replicas) < 1:
+            print("❌ Invalid number of replicas")
+            return
+        
+        cmd = ['docker-compose', 'up', '-d', '--scale', f'{service}={replicas}']
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print(f"✅ Service '{service}' scaled to {replicas} replicas!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to scale service: {e}")
+    
+    def _docker_compose_build(self):
+        """Build Docker Compose services"""
+        print("\n🔨 DOCKER COMPOSE BUILD")
+        print("="*70 + "\n")
+        
+        if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
+            print("❌ docker-compose.yml not found")
+            return
+        
+        no_cache = input("Build without cache? (y/N, default: N): ").strip().lower()
+        no_cache = no_cache in ['y', 'yes']
+        
+        service = input("Specific service? (leave empty for all): ").strip()
+        
+        cmd = ['docker-compose', 'build']
+        if no_cache:
+            cmd.append('--no-cache')
+        if service:
+            cmd.append(service)
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print("✅ Services built successfully!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to build services: {e}")
+    
+    def _docker_compose_pull(self):
+        """Pull Docker Compose service images"""
+        print("\n📥 DOCKER COMPOSE PULL")
+        print("="*70 + "\n")
+        
+        if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
+            print("❌ docker-compose.yml not found")
+            return
+        
+        service = input("Specific service? (leave empty for all): ").strip()
+        
+        cmd = ['docker-compose', 'pull']
+        if service:
+            cmd.append(service)
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print("✅ Images pulled successfully!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to pull images: {e}")
+    
+    def _docker_compose_rm(self):
+        """Remove stopped Docker Compose containers"""
+        print("\n🗑️  DOCKER COMPOSE REMOVE")
+        print("="*70 + "\n")
+        
+        if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
+            print("❌ docker-compose.yml not found")
+            return
+        
+        force = input("Force removal? (y/N, default: N): ").strip().lower()
+        force = force in ['y', 'yes']
+        
+        cmd = ['docker-compose', 'rm']
+        if force:
+            cmd.append('-f')
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print("✅ Stopped containers removed successfully!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to remove containers: {e}")
+    
+    def _container_orchestration_menu(self):
+        """Container Orchestration (Docker Swarm) menu"""
+        print("\n" + "="*70)
+        print("🐳 CONTAINER ORCHESTRATION (DOCKER SWARM)")
+        print("="*70 + "\n")
+        
+        # Check if Docker is running
+        if not self._is_docker_running():
+            print("❌ Docker daemon is not running")
+            input("\nPress Enter to continue...")
+            return
+        
+        # Check if Swarm is initialized
+        swarm_status = self._get_swarm_status()
+        
+        # Swarm operations menu
+        swarm_options = [
+            "Initialize Swarm",
+            "Join Swarm",
+            "Leave Swarm",
+            "Deploy Stack",
+            "List Services",
+            "List Nodes",
+            "Scale Service",
+            "Update Service",
+            "Remove Service",
+            "List Stacks",
+            "Remove Stack",
+            "Swarm Status",
+            "Back to Main Menu"
+        ]
+        
+        choice = get_choice_with_arrows(swarm_options, "Docker Swarm Operations")
+        
+        if choice == 1:
+            self._swarm_init()
+        elif choice == 2:
+            self._swarm_join()
+        elif choice == 3:
+            self._swarm_leave()
+        elif choice == 4:
+            self._swarm_deploy()
+        elif choice == 5:
+            self._swarm_list_services()
+        elif choice == 6:
+            self._swarm_list_nodes()
+        elif choice == 7:
+            self._swarm_scale_service()
+        elif choice == 8:
+            self._swarm_update_service()
+        elif choice == 9:
+            self._swarm_remove_service()
+        elif choice == 10:
+            self._swarm_list_stacks()
+        elif choice == 11:
+            self._swarm_remove_stack()
+        elif choice == 12:
+            self._swarm_status()
+        elif choice == 13:
+            return
+        else:
+            print("❌ Invalid choice")
+        
+        input("\nPress Enter to continue...")
+    
+    def _get_swarm_status(self) -> Dict[str, str]:
+        """Get Docker Swarm status"""
+        try:
+            result = subprocess.run(
+                ['docker', 'info', '--format', '{{.Swarm.LocalNodeState}}'],
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=10
+            )
+            state = result.stdout.strip()
+            
+            if state == 'active':
+                # Get more details
+                info_result = subprocess.run(
+                    ['docker', 'info', '--format', '{{.Swarm.NodeID}} {{.Swarm.NodeAddr}}'],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                    timeout=10
+                )
+                node_info = info_result.stdout.strip().split()
+                
+                return {
+                    'state': 'active',
+                    'node_id': node_info[0] if len(node_info) > 0 else 'unknown',
+                    'node_addr': node_info[1] if len(node_info) > 1 else 'unknown'
+                }
+            else:
+                return {'state': state}
+                
+        except subprocess.CalledProcessError:
+            return {'state': 'unknown'}
+        except Exception:
+            return {'state': 'error'}
+    
+    def _swarm_init(self):
+        """Initialize Docker Swarm"""
+        print("\n🚀 DOCKER SWARM INITIALIZATION")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] == 'active':
+            print("ℹ️  This node is already part of a Swarm")
+            print(f"   Node ID: {swarm_status.get('node_id', 'unknown')}")
+            print(f"   Address: {swarm_status.get('node_addr', 'unknown')}")
+            
+            reset = input("Reset and reinitialize? (y/N, default: N): ").strip().lower()
+            if reset not in ['y', 'yes']:
+                return
+            
+            # Leave current swarm first
+            try:
+                subprocess.run(['docker', 'swarm', 'leave', '-f'], check=True)
+                print("✅ Left current Swarm")
+            except subprocess.CalledProcessError:
+                print("⚠️  Could not leave current Swarm")
+        
+        # Get advertise address
+        advertise_addr = input("Advertise address (default: auto-detect): ").strip()
+        
+        # Get listen address
+        listen_addr = input("Listen address (default: 0.0.0.0:2377): ").strip() or "0.0.0.0:2377"
+        
+        cmd = ['docker', 'swarm', 'init']
+        
+        if advertise_addr:
+            cmd.extend(['--advertise-addr', advertise_addr])
+        
+        if listen_addr != "0.0.0.0:2377":
+            cmd.extend(['--listen-addr', listen_addr])
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+            print("✅ Swarm initialized successfully!")
+            
+            # Show join token for workers
+            if result.stdout:
+                print("\n📋 To add worker nodes, run:")
+                print(result.stdout.strip())
+            
+            # Get manager join token
+            try:
+                token_result = subprocess.run(
+                    ['docker', 'swarm', 'join-token', 'manager'],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                if token_result.stdout:
+                    print("\n📋 To add manager nodes, run:")
+                    print(token_result.stdout.strip())
+            except:
+                pass
+                
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to initialize Swarm: {e}")
+    
+    def _swarm_join(self):
+        """Join existing Docker Swarm"""
+        print("\n🔗 DOCKER SWARM JOIN")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] == 'active':
+            print("❌ This node is already part of a Swarm")
+            return
+        
+        # Get join token
+        join_token = input("Join token: ").strip()
+        if not join_token:
+            print("❌ Join token cannot be empty")
+            return
+        
+        # Get manager address
+        manager_addr = input("Manager address (IP:PORT): ").strip()
+        if not manager_addr:
+            print("❌ Manager address cannot be empty")
+            return
+        
+        # Ask if joining as worker or manager
+        role = input("Join as worker or manager? (worker/manager, default: worker): ").strip().lower()
+        if role not in ['worker', 'manager']:
+            role = 'worker'
+        
+        # Listen address
+        listen_addr = input("Listen address (default: 0.0.0.0:2377): ").strip() or "0.0.0.0:2377"
+        
+        cmd = ['docker', 'swarm', 'join', '--token', join_token]
+        
+        if role == 'manager':
+            cmd.append('--manager')
+        
+        cmd.extend([manager_addr])
+        
+        if listen_addr != "0.0.0.0:2377":
+            cmd.extend(['--listen-addr', listen_addr])
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print(f"✅ Successfully joined Swarm as {role}!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to join Swarm: {e}")
+    
+    def _swarm_leave(self):
+        """Leave Docker Swarm"""
+        print("\n👋 DOCKER SWARM LEAVE")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] != 'active':
+            print("❌ This node is not part of a Swarm")
+            return
+        
+        force = input("Force leave? (y/N, default: N): ").strip().lower()
+        force = force in ['y', 'yes']
+        
+        cmd = ['docker', 'swarm', 'leave']
+        if force:
+            cmd.append('-f')
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print("✅ Successfully left Swarm!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to leave Swarm: {e}")
+    
+    def _swarm_deploy(self):
+        """Deploy stack to Docker Swarm"""
+        print("\n🚀 DOCKER SWARM DEPLOY")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] != 'active':
+            print("❌ This node is not part of a Swarm")
+            return
+        
+        # Check for compose file
+        compose_file = None
+        if Path("docker-compose.yml").exists():
+            compose_file = "docker-compose.yml"
+        elif Path("docker-compose.yaml").exists():
+            compose_file = "docker-compose.yaml"
+        elif Path("docker-stack.yml").exists():
+            compose_file = "docker-stack.yml"
+        elif Path("docker-stack.yaml").exists():
+            compose_file = "docker-stack.yaml"
+        
+        if not compose_file:
+            print("❌ No Docker Compose file found")
+            print("💡 Expected files: docker-compose.yml, docker-compose.yaml, docker-stack.yml, docker-stack.yaml")
+            return
+        
+        stack_name = input("Stack name: ").strip()
+        if not stack_name:
+            print("❌ Stack name cannot be empty")
+            return
+        
+        cmd = ['docker', 'stack', 'deploy', '-c', compose_file, stack_name]
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print(f"✅ Stack '{stack_name}' deployed successfully!")
+            
+            # Show services
+            print("\n📋 Deployed services:")
+            self._swarm_list_services(stack_name, show_output=False)
+            
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to deploy stack: {e}")
+    
+    def _swarm_list_services(self, stack_name: str = None, show_output: bool = True):
+        """List Swarm services"""
+        if show_output:
+            print("\n📋 SWARM SERVICES")
+            print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] != 'active':
+            if show_output:
+                print("❌ This node is not part of a Swarm")
+            return
+        
+        cmd = ['docker', 'service', 'ls', '--format', 'table {{.ID}}\t{{.Name}}\t{{.Mode}}\t{{.Replicas}}\t{{.Image}}\t{{.Ports}}']
+        
+        if show_output:
+            print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            if show_output:
+                print(f"❌ Failed to list services: {e}")
+    
+    def _swarm_list_nodes(self):
+        """List Swarm nodes"""
+        print("\n📋 SWARM NODES")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] != 'active':
+            print("❌ This node is not part of a Swarm")
+            return
+        
+        cmd = ['docker', 'node', 'ls', '--format', 'table {{.ID}}\t{{.Hostname}}\t{{.Status}}\t{{.Availability}}\t{{.ManagerStatus}}']
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to list nodes: {e}")
+    
+    def _swarm_scale_service(self):
+        """Scale Swarm service"""
+        print("\n📈 SWARM SCALE SERVICE")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] != 'active':
+            print("❌ This node is not part of a Swarm")
+            return
+        
+        # Get available services
+        try:
+            result = subprocess.run(
+                ['docker', 'service', 'ls', '--format', '{{.Name}}'],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            services = [s.strip() for s in result.stdout.strip().split('\n') if s.strip()]
+            
+            if not services:
+                print("❌ No services found")
+                return
+            
+            print("📋 Available services:")
+            for i, service in enumerate(services, 1):
+                print(f"   {i}. {service}")
+            
+            choice = input(f"\nSelect service (1-{len(services)}): ").strip()
+            
+            try:
+                service_idx = int(choice) - 1
+                if 0 <= service_idx < len(services):
+                    service_name = services[service_idx]
+                else:
+                    print("❌ Invalid selection")
+                    return
+            except ValueError:
+                print("❌ Invalid selection")
+                return
+                
+        except subprocess.CalledProcessError:
+            print("❌ Failed to get services list")
+            return
+        
+        replicas = input("Number of replicas: ").strip()
+        if not replicas.isdigit() or int(replicas) < 0:
+            print("❌ Invalid number of replicas")
+            return
+        
+        cmd = ['docker', 'service', 'scale', f'{service_name}={replicas}']
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print(f"✅ Service '{service_name}' scaled to {replicas} replicas!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to scale service: {e}")
+    
+    def _swarm_update_service(self):
+        """Update Swarm service"""
+        print("\n🔄 SWARM UPDATE SERVICE")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] != 'active':
+            print("❌ This node is not part of a Swarm")
+            return
+        
+        # Get available services
+        try:
+            result = subprocess.run(
+                ['docker', 'service', 'ls', '--format', '{{.Name}}'],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            services = [s.strip() for s in result.stdout.strip().split('\n') if s.strip()]
+            
+            if not services:
+                print("❌ No services found")
+                return
+            
+            print("📋 Available services:")
+            for i, service in enumerate(services, 1):
+                print(f"   {i}. {service}")
+            
+            choice = input(f"\nSelect service (1-{len(services)}): ").strip()
+            
+            try:
+                service_idx = int(choice) - 1
+                if 0 <= service_idx < len(services):
+                    service_name = services[service_idx]
+                else:
+                    print("❌ Invalid selection")
+                    return
+            except ValueError:
+                print("❌ Invalid selection")
+                return
+                
+        except subprocess.CalledProcessError:
+            print("❌ Failed to get services list")
+            return
+        
+        # Update options
+        print("\n🔧 Update Options:")
+        print("1. Update image")
+        print("2. Add/remove environment variables")
+        print("3. Update replicas")
+        print("4. Update placement constraints")
+        print("5. Force update")
+        
+        update_choice = input("Select update option (1-5): ").strip()
+        
+        cmd = ['docker', 'service', 'update', service_name]
+        
+        if update_choice == '1':
+            new_image = input("New image: ").strip()
+            if new_image:
+                cmd.extend(['--image', new_image])
+        elif update_choice == '2':
+            env_vars = input("Environment variables (KEY=VALUE, comma-separated): ").strip()
+            if env_vars:
+                for env_var in env_vars.split(','):
+                    env_var = env_var.strip()
+                    if '=' in env_var:
+                        cmd.extend(['--env-add', env_var])
+        elif update_choice == '3':
+            replicas = input("Number of replicas: ").strip()
+            if replicas.isdigit():
+                cmd.extend(['--replicas', replicas])
+        elif update_choice == '4':
+            constraints = input("Placement constraints (comma-separated): ").strip()
+            if constraints:
+                for constraint in constraints.split(','):
+                    constraint = constraint.strip()
+                    cmd.extend(['--constraint', constraint])
+        elif update_choice == '5':
+            cmd.append('--force')
+        else:
+            print("❌ Invalid option")
+            return
+        
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print(f"✅ Service '{service_name}' updated successfully!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to update service: {e}")
+    
+    def _swarm_remove_service(self):
+        """Remove Swarm service"""
+        print("\n🗑️  SWARM REMOVE SERVICE")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] != 'active':
+            print("❌ This node is not part of a Swarm")
+            return
+        
+        # Get available services
+        try:
+            result = subprocess.run(
+                ['docker', 'service', 'ls', '--format', '{{.Name}}'],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            services = [s.strip() for s in result.stdout.strip().split('\n') if s.strip()]
+            
+            if not services:
+                print("❌ No services found")
+                return
+            
+            print("📋 Available services:")
+            for i, service in enumerate(services, 1):
+                print(f"   {i}. {service}")
+            
+            choice = input(f"\nSelect service to remove (1-{len(services)}): ").strip()
+            
+            try:
+                service_idx = int(choice) - 1
+                if 0 <= service_idx < len(services):
+                    service_name = services[service_idx]
+                else:
+                    print("❌ Invalid selection")
+                    return
+            except ValueError:
+                print("❌ Invalid selection")
+                return
+                
+        except subprocess.CalledProcessError:
+            print("❌ Failed to get services list")
+            return
+        
+        confirm = input(f"Remove service '{service_name}'? (yes/no): ").strip().lower()
+        if confirm != 'yes':
+            print("❌ Operation cancelled")
+            return
+        
+        cmd = ['docker', 'service', 'rm', service_name]
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print(f"✅ Service '{service_name}' removed successfully!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to remove service: {e}")
+    
+    def _swarm_list_stacks(self):
+        """List Swarm stacks"""
+        print("\n📋 SWARM STACKS")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] != 'active':
+            print("❌ This node is not part of a Swarm")
+            return
+        
+        cmd = ['docker', 'stack', 'ls', '--format', 'table {{.Name}}\t{{.Services}}']
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to list stacks: {e}")
+    
+    def _swarm_remove_stack(self):
+        """Remove Swarm stack"""
+        print("\n🗑️  SWARM REMOVE STACK")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        if swarm_status['state'] != 'active':
+            print("❌ This node is not part of a Swarm")
+            return
+        
+        # Get available stacks
+        try:
+            result = subprocess.run(
+                ['docker', 'stack', 'ls', '--format', '{{.Name}}'],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            stacks = [s.strip() for s in result.stdout.strip().split('\n') if s.strip()]
+            
+            if not stacks:
+                print("❌ No stacks found")
+                return
+            
+            print("📋 Available stacks:")
+            for i, stack in enumerate(stacks, 1):
+                print(f"   {i}. {stack}")
+            
+            choice = input(f"\nSelect stack to remove (1-{len(stacks)}): ").strip()
+            
+            try:
+                stack_idx = int(choice) - 1
+                if 0 <= stack_idx < len(stacks):
+                    stack_name = stacks[stack_idx]
+                else:
+                    print("❌ Invalid selection")
+                    return
+            except ValueError:
+                print("❌ Invalid selection")
+                return
+                
+        except subprocess.CalledProcessError:
+            print("❌ Failed to get stacks list")
+            return
+        
+        confirm = input(f"Remove stack '{stack_name}' and all its services? (yes/no): ").strip().lower()
+        if confirm != 'yes':
+            print("❌ Operation cancelled")
+            return
+        
+        cmd = ['docker', 'stack', 'rm', stack_name]
+        print(f"$ {' '.join(cmd)}\n")
+        
+        try:
+            subprocess.run(cmd, check=True)
+            print(f"✅ Stack '{stack_name}' removed successfully!")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to remove stack: {e}")
+    
+    def _swarm_status(self):
+        """Show detailed Swarm status"""
+        print("\n📊 SWARM STATUS")
+        print("="*70 + "\n")
+        
+        swarm_status = self._get_swarm_status()
+        
+        print(f"🔸 Swarm State: {swarm_status['state']}")
+        
+        if swarm_status['state'] == 'active':
+            print(f"🔸 Node ID: {swarm_status.get('node_id', 'unknown')}")
+            print(f"🔸 Node Address: {swarm_status.get('node_addr', 'unknown')}")
+            
+            # Show nodes
+            print("\n📋 Nodes:")
+            try:
+                subprocess.run(['docker', 'node', 'ls'], check=True)
+            except subprocess.CalledProcessError:
+                print("   Could not retrieve node list")
+            
+            # Show services
+            print("\n📋 Services:")
+            try:
+                subprocess.run(['docker', 'service', 'ls'], check=True)
+            except subprocess.CalledProcessError:
+                print("   Could not retrieve service list")
+            
+            # Show stacks
+            print("\n📋 Stacks:")
+            try:
+                subprocess.run(['docker', 'stack', 'ls'], check=True)
+            except subprocess.CalledProcessError:
+                print("   Could not retrieve stack list")
+        else:
+            print("💡 To initialize a Swarm, run 'Initialize Swarm' from the menu")
 
 
 # Export command instance
-COMMAND = DockerQuickCommand()  
+COMMAND = DockerQuickCommand()

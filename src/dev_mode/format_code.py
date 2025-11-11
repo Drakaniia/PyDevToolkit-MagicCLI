@@ -8,8 +8,8 @@ import json
 import sys
 from pathlib import Path
 from typing import Optional, Dict, Any
-from automation.dev_mode._base import DevModeCommand
-from automation.core.loading import LoadingSpinner, loading_animation
+from ._base import DevModeCommand
+from core.loading import LoadingSpinner, loading_animation
 
 
 class FormatCodeCommand(DevModeCommand):

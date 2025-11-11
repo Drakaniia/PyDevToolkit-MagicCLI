@@ -433,10 +433,10 @@ class MainMenu(Menu):
             return
 
         # Import here to avoid circular imports
-        from automation.git_operations import GitMenu
-        from automation.structure_viewer import StructureViewer
-        from automation.folder_navigator import FolderNavigator
-        from automation.dev_mode import DevModeMenu
+        from git_operations import GitMenu
+        from structure_viewer import StructureViewer
+        from folder_navigator import FolderNavigator
+        from dev_mode import DevModeMenu
 
         # Create instances once and reuse them
         if self._git_menu is None:

@@ -12,6 +12,18 @@
 
 ### 2025-11-09
 
+#### 📚 Documentation
+
+- **❤️ add changelog** (`d98dd74`) - *Qwenzy*
+  - 📄 `CHANGELOG.md`
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-09
+
 #### ✨ New Features
 
 - **the heart emoji will be automatically added to the commit message and...** (`ee85db5`) - *Qwenzy*

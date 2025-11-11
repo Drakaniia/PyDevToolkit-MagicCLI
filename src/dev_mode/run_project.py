@@ -9,10 +9,10 @@ import json
 import sys
 from pathlib import Path
 from typing import Optional, Dict, Any
-from automation.dev_mode._base import DevModeCommand
-from automation.core.loading import LoadingSpinner, loading_animation
-from automation.dev_mode.menu_utils import get_choice_with_arrows
-from automation.dev_mode.port_killer import (
+from ._base import DevModeCommand
+from core.loading import LoadingSpinner, loading_animation
+from .menu_utils import get_choice_with_arrows
+from .port_killer import (
     kill_all_dev_ports, 
     ensure_ports_free, 
     force_clear_all_ports,

@@ -2,7 +2,7 @@
 """
 CLI entry point for the magic command
 """
-from automation.menu import MainMenu
+from .menu import MainMenu
 
 
 def main():

@@ -427,20 +427,20 @@ validate_files() {
         all_valid=false
     fi
     
-    # Check automation directory
-    if [ -d "$SCRIPT_DIR/automation" ]; then
-        print_success "Found automation/ directory"
+    # Check src directory
+    if [ -d "$SCRIPT_DIR/src" ]; then
+        print_success "Found src/ directory"
     else
-        print_error "automation/ directory not found"
+        print_error "src/ directory not found"
         all_valid=false
     fi
     
     # Check critical modules
     local critical_modules=(
-        "automation/__init__.py"
-        "automation/menu.py"
-        "automation/git_operations.py"
-        "automation/folder_navigator.py"
+        "src/__init__.py"
+        "src/menu.py"
+        "src/git_operations.py"
+        "src/folder_navigator.py"
     )
     
     for module in "${critical_modules[@]}"; do
@@ -552,10 +552,10 @@ configure_shell_alias() {
     local alias_cmd=""
     case "$shell_type" in
         fish)
-            alias_cmd="alias $COMMAND_ALIAS='$PYTHON_CMD \"$MAIN_PY\"'"
+            alias_cmd="alias $COMMAND_ALIAS='set PYTHONIOENCODING=utf-8 && $PYTHON_CMD \"$MAIN_PY\"'"
             ;;
         *)
-            alias_cmd="alias $COMMAND_ALIAS='$PYTHON_CMD \"$MAIN_PY\"'"
+            alias_cmd="alias $COMMAND_ALIAS='PYTHONIOENCODING=utf-8 $PYTHON_CMD \"$MAIN_PY\"'"
             ;;
     esac
     
@@ -624,14 +624,15 @@ test_installation() {
     # Test 1: Python module imports
     print_step "Testing Python module imports..."
     
-    if $PYTHON_CMD -c "
+if $PYTHON_CMD -c "
 import sys
-sys.path.insert(0, '$SCRIPT_DIR')
+import os
+if sys.platform == 'win32':
+    os.system('chcp 65001 > nul')
+sys.path.insert(0, '$SCRIPT_DIR/src')
 try:
-    from automation.menu import MainMenu
-    print('✓ Module import successful')
+    from menu import MainMenu
 except Exception as e:
-    print(f'✗ Import failed: {e}')
     sys.exit(1)
 " 2>/dev/null; then
         print_success "Python module imports working"

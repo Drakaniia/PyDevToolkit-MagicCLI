@@ -3,12 +3,17 @@
 Main entry point for Python Automation System
 """
 import sys
+import os
 from pathlib import Path
 
-# Add automation modules to path
-sys.path.insert(0, str(Path(__file__).parent / "automation"))
+# Set UTF-8 encoding for Windows console
+if sys.platform == "win32":
+    os.system("chcp 65001 > nul")
 
-from automation.menu import MainMenu
+# Add automation modules to path
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+
+from menu import MainMenu
 
 
 def main():

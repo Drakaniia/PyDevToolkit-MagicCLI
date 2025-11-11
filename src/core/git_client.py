@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
-from automation.core.exceptions import (
+from .exceptions import (
     GitError,
     GitCommandError,
     NotGitRepositoryError,

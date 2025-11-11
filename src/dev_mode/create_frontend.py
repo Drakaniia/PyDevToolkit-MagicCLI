@@ -8,8 +8,8 @@ import re
 import sys
 from pathlib import Path
 from typing import Optional, Dict, Any
-from automation.dev_mode._base import DevModeCommand
-from automation.dev_mode.menu_utils import get_choice_with_arrows
+from ._base import DevModeCommand
+from .menu_utils import get_choice_with_arrows
 
 
 class CreateFrontendCommand(DevModeCommand):

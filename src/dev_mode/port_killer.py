@@ -10,7 +10,7 @@ import re
 import time
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
-from automation.core.loading import LoadingSpinner
+from core.loading import LoadingSpinner
 
 
 class PortKiller:
