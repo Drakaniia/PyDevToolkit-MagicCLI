@@ -423,6 +423,7 @@ class MainMenu(Menu):
         self._structure_viewer = None
         self._folder_nav = None
         self._dev_mode_menu = None
+        self._backend_dev_menu = None
 
         super().__init__("🚀 Python Automation System - Main Menu")
 
@@ -437,6 +438,7 @@ class MainMenu(Menu):
         from structure_viewer import StructureViewer
         from folder_navigator import FolderNavigator
         from dev_mode import DevModeMenu
+        from backend.backend_menu import BackendDevMenu
 
         # Create instances once and reuse them
         if self._git_menu is None:
@@ -447,6 +449,8 @@ class MainMenu(Menu):
             self._folder_nav = FolderNavigator()
         if self._dev_mode_menu is None:
             self._dev_mode_menu = DevModeMenu()
+        if self._backend_dev_menu is None:
+            self._backend_dev_menu = BackendDevMenu()
 
         # Create menu items with bound methods
         self.items = [
@@ -454,6 +458,7 @@ class MainMenu(Menu):
             MenuItem("Show Project Structure", self._show_structure),
             MenuItem("Navigate Folders", self._navigate_folders),
             MenuItem("Dev Mode (Web Dev Automation)", self._run_dev_mode),
+            MenuItem("Backend Dev (Backend Automation)", self._run_backend_dev),
             MenuItem("Exit", self._exit_program)
         ]
     
@@ -475,6 +480,11 @@ class MainMenu(Menu):
     def _run_dev_mode(self):
         """Run Dev Mode menu"""
         self._dev_mode_menu.run()
+        return None
+    
+    def _run_backend_dev(self):
+        """Run Backend Dev menu"""
+        self._backend_dev_menu.run()
         return None
     
     def _exit_program(self):

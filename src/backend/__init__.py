@@ -3,14 +3,14 @@ automation/backend/__init__.py
 Backend development automation tools
 """
 
-from .database_assistant import DatabaseAssistantCommand
-from .api_generator import APIGeneratorCommand
-from .auth_helper import AuthHelperCommand
-from .migration_assistant import MigrationAssistantCommand
+from .database.db_manager import DatabaseManager
+from .api.api_generator import APIGenerator
+from .auth.auth_manager import AuthManager
+from .framework.framework_tools import FrameworkTools
 
 __all__ = [
-    'DatabaseAssistantCommand',
-    'APIGeneratorCommand', 
-    'AuthHelperCommand',
-    'MigrationAssistantCommand'
+    'DatabaseManager',
+    'APIGenerator', 
+    'AuthManager',
+    'FrameworkTools'
 ]
