@@ -44,6 +44,33 @@ class GitLog:
             print("Git is not installed or not in PATH")
             return False
 
+    def show_advanced_log_menu(self):
+        """Show submenu for advanced log operations after fetching remote changes"""
+        from menu import Menu, MenuItem
+
+        # First, fetch remote changes
+        self.fetch_remote_commits()
+
+        class AdvancedLogMenu(Menu):
+            """Advanced log operations submenu"""
+
+            def __init__(self, git_log_instance):
+                self.git_log_instance = git_log_instance
+                super().__init__("Advanced Git Log Operations - After Fetching Remote Changes")
+
+            def setup_items(self):
+                self.items = [
+                    MenuItem("Log (Last 10 commits)", lambda: self.git_log_instance.show_log(limit=10, fetch_remote=False)),
+                    MenuItem("git log --graph - Show commit history as a graph", lambda: self.git_log_instance.show_graph_log()),
+                    MenuItem("git log --stat - Show commit changes statistics", lambda: self.git_log_instance.show_stat_log()),
+                    MenuItem("git log --oneline --graph --all - Visual branch history", lambda: self.git_log_instance.show_visual_branch_history()),
+                    MenuItem("git shortlog - Condensed commit log by author", lambda: self.git_log_instance.show_shortlog()),
+                    MenuItem("Back to Git Operations Menu", lambda: "exit")
+                ]
+
+        submenu = AdvancedLogMenu(self)
+        submenu.run()
+
     def show_log(self, limit=10, fetch_remote=True):
         """Display git commit log with option to fetch remote commits first"""
         if fetch_remote:
@@ -59,6 +86,62 @@ class GitLog:
             return
 
         self._run_command(["git", "log", "--oneline", f"-{limit}"])
+        input("\nPress Enter to continue...")
+
+    def show_graph_log(self):
+        """Show commit history as a graph"""
+        print("\n" + "="*70)
+        print("GIT LOG --GRAPH (Commit history as a graph)")
+        print("="*70 + "\n")
+
+        if not self._is_git_repo():
+            print("Not a git repository. Please initialize git first.")
+            input("\nPress Enter to continue...")
+            return
+
+        self._run_command(["git", "log", "--graph", "--oneline", "--all"])
+        input("\nPress Enter to continue...")
+
+    def show_stat_log(self):
+        """Show commit changes statistics"""
+        print("\n" + "="*70)
+        print("GIT LOG --STAT (Commit changes statistics)")
+        print("="*70 + "\n")
+
+        if not self._is_git_repo():
+            print("Not a git repository. Please initialize git first.")
+            input("\nPress Enter to continue...")
+            return
+
+        self._run_command(["git", "log", "--stat"])
+        input("\nPress Enter to continue...")
+
+    def show_visual_branch_history(self):
+        """Show visual branch history"""
+        print("\n" + "="*70)
+        print("GIT LOG --ONELINE --GRAPH --ALL (Visual branch history)")
+        print("="*70 + "\n")
+
+        if not self._is_git_repo():
+            print("Not a git repository. Please initialize git first.")
+            input("\nPress Enter to continue...")
+            return
+
+        self._run_command(["git", "log", "--oneline", "--graph", "--all"])
+        input("\nPress Enter to continue...")
+
+    def show_shortlog(self):
+        """Show condensed commit log by author"""
+        print("\n" + "="*70)
+        print("GIT SHORTLOG (Condensed commit log by author)")
+        print("="*70 + "\n")
+
+        if not self._is_git_repo():
+            print("Not a git repository. Please initialize git first.")
+            input("\nPress Enter to continue...")
+            return
+
+        self._run_command(["git", "shortlog", "-s", "-n"])
         input("\nPress Enter to continue...")
 
     def get_commit_history(self, limit=50, fetch_remote=True):

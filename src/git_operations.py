@@ -42,6 +42,11 @@ class GitOperations:
         """Show git log"""
         log_handler = GitLog()
         log_handler.show_log(limit=10)
+
+    def show_advanced_log_menu(self):
+        """Show advanced log menu (delegated to GitLog class)"""
+        log_handler = GitLog()
+        log_handler.show_advanced_log_menu()
     
     def pull(self):
         """Pull from remote"""
@@ -95,7 +100,7 @@ class GitMenu(Menu):
         """Setup menu items with all Git operations"""
         self.items = [
             MenuItem("Status", lambda: self.git_ops.status()),
-            MenuItem("Log (Last 10 commits)", lambda: self.git_ops.log()),
+            MenuItem("Advanced Log Operations", lambda: self.git_ops.show_advanced_log_menu()),
             MenuItem("Pull", lambda: self.git_ops.pull()),
             MenuItem("Push (Add, Commit & Push)", lambda: self.git_ops.push()),
             MenuItem("Initialize Git & Push to GitHub", lambda: self.git_ops.initialize_and_push()),
