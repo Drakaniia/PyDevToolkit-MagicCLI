@@ -30,10 +30,10 @@ class ChangelogGenerator:
         'max_message_length': 72,  # Truncate long messages
     }
     
-    # Enhanced commit type detection patterns
+    # Enhanced commit type detection patterns with conventional commits support
     COMMIT_TYPES = {
         'breaking': {
-            'keywords': ['breaking', 'major', 'breaking change', 'incompatible'],
+            'keywords': ['breaking', 'major', 'breaking change', 'incompatible', 'BREAKING CHANGE'],
             'emoji': '💥',
             'label': 'Breaking Changes',
             'priority': 1
@@ -44,26 +44,26 @@ class ChangelogGenerator:
             'label': 'Security Fixes',
             'priority': 2
         },
-        'feature': {
-            'keywords': ['add', 'new', 'feature', 'implement', 'create', 'introduce'],
+        'feat': {
+            'keywords': ['feat:', 'feat(', 'feature', 'add', 'new', 'implement', 'create', 'introduce'],
             'emoji': '✨',
             'label': 'New Features',
             'priority': 3
         },
         'fix': {
-            'keywords': ['fix', 'bug', 'patch', 'resolve', 'correct', 'repair'],
+            'keywords': ['fix:', 'fix(', 'bug', 'patch', 'resolve', 'correct', 'repair', 'hotfix'],
             'emoji': '🐛',
             'label': 'Bug Fixes',
             'priority': 4
         },
-        'performance': {
-            'keywords': ['performance', 'optimize', 'speed', 'faster', 'cache', 'memory'],
+        'perf': {
+            'keywords': ['perf:', 'perf(', 'performance', 'optimize', 'speed', 'faster', 'cache', 'memory'],
             'emoji': '⚡',
             'label': 'Performance Improvements',
             'priority': 5
         },
         'refactor': {
-            'keywords': ['refactor', 'restructure', 'reorganize', 'clean', 'improve', 'simplify'],
+            'keywords': ['refactor:', 'refactor(', 'restructure', 'reorganize', 'clean', 'improve', 'simplify'],
             'emoji': '♻️',
             'label': 'Code Refactoring',
             'priority': 6
@@ -87,51 +87,71 @@ class ChangelogGenerator:
             'priority': 9
         },
         'docs': {
-            'keywords': ['doc', 'readme', 'comment', 'documentation'],
+            'keywords': ['docs:', 'docs(', 'doc', 'readme', 'comment', 'documentation', 'changelog'],
             'emoji': '📚',
             'label': 'Documentation',
             'priority': 10
         },
         'test': {
-            'keywords': ['test', 'spec', 'testing', 'coverage'],
+            'keywords': ['test:', 'test(', 'spec', 'testing', 'coverage'],
             'emoji': '✅',
             'label': 'Tests',
             'priority': 11
         },
         'style': {
-            'keywords': ['style', 'format', 'lint', 'prettier', 'eslint'],
+            'keywords': ['style:', 'style(', 'format', 'lint', 'prettier', 'eslint', 'beautify'],
             'emoji': '💄',
             'label': 'Style Changes',
             'priority': 12
         },
         'build': {
-            'keywords': ['build', 'webpack', 'rollup', 'vite', 'compile'],
+            'keywords': ['build:', 'build(', 'webpack', 'rollup', 'vite', 'compile', 'ci', 'cd'],
             'emoji': '📦',
             'label': 'Build System',
             'priority': 13
         },
         'deps': {
-            'keywords': ['dependency', 'dependencies', 'package', 'npm', 'pip', 'requirements'],
+            'keywords': ['dependency', 'dependencies', 'package', 'npm', 'pip', 'requirements', 'upgrade', 'downgrade'],
             'emoji': '📌',
             'label': 'Dependencies',
             'priority': 14
         },
         'chore': {
-            'keywords': ['chore', 'update', 'upgrade', 'cleanup', 'maintenance'],
+            'keywords': ['chore:', 'chore(', 'update', 'upgrade', 'cleanup', 'maintenance', 'wip'],
             'emoji': '🔧',
             'label': 'Maintenance',
             'priority': 15
         }
     }
+
+    # Conventional commit types for direct matching
+    CONVENTIONAL_COMMIT_TYPES = {
+        'feat': '✨ New Features',
+        'fix': '🐛 Bug Fixes',
+        'perf': '⚡ Performance Improvements',
+        'refactor': '♻️ Code Refactoring',
+        'docs': '📚 Documentation',
+        'test': '✅ Tests',
+        'style': '💄 Style Changes',
+        'build': '📦 Build System',
+        'chore': '🔧 Maintenance'
+    }
     
-    # File type patterns for smarter detection
+    # Comprehensive file type patterns for smarter detection
     FILE_PATTERNS = {
-        'frontend': ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte', '.html', '.css', '.scss', '.less'],
-        'backend': ['.py', '.java', '.php', '.rb', '.go', '.rs', '.cs', '.cpp', '.c'],
-        'config': ['.json', '.yaml', '.yml', '.toml', '.ini', '.env', '.config'],
-        'docs': ['.md', '.rst', '.txt', '.pdf'],
-        'test': ['test_', '_test.', '.test.', '.spec.', 'tests/'],
-        'build': ['package.json', 'requirements.txt', 'Dockerfile', 'docker-compose', 'Makefile']
+        'frontend': ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte', '.html', '.htm', '.css', '.scss', '.sass', '.less', '.styl', '.vue', '.astro'],
+        'backend': ['.py', '.java', '.php', '.rb', '.go', '.rs', '.cs', '.cpp', '.c', '.h', '.hpp', '.swift', '.kt', '.scala'],
+        'config': ['.json', '.yaml', '.yml', '.toml', '.ini', '.env', '.config', '.conf', '.properties', '.xml', '.rc'],
+        'docs': ['.md', '.rst', '.txt', '.pdf', '.doc', '.docx', '.asciidoc', '.adoc', 'README', 'CHANGELOG', 'CONTRIBUTING'],
+        'test': ['test_', '_test.', '.test.', '.spec.', 'tests/', 'spec/', 'test/', 'Test', 'Spec'],
+        'build': ['package.json', 'package-lock.json', 'yarn.lock', 'requirements.txt', 'Pipfile', 'Pipfile.lock', 'pyproject.toml', 'setup.py',
+                  'Dockerfile', 'docker-compose', 'Makefile', 'CMakeLists.txt', 'build.gradle', 'pom.xml', 'webpack.config', 'vite.config', 'rollup.config'],
+        'api': ['.proto', '.graphql', '.gql', 'openapi', 'swagger', '.api', 'api/'],
+        'database': ['.sql', '.db', '.sqlite', '.sqlite3', 'migration', 'migrations/', 'schema', 'model/'],
+        'mobile': ['.dart', '.m', '.mm', '.xib', '.storyboard', '.plist', 'ios/', 'android/', 'mobile/'],
+        'desktop': ['.app', '.exe', '.msi', '.dmg', '.deb', '.rpm', 'electron/', 'tauri/', 'flutter/'],
+        'security': ['.pem', '.crt', '.key', '.cert', '.pub', 'ssl/', 'certs/', 'keys/'],
+        'monitoring': ['.prometheus', 'grafana', 'alert', 'metric', 'log', '.log']
     }
     
     def __init__(self):
@@ -223,37 +243,89 @@ class ChangelogGenerator:
     
     def _classify_commit(self, commit_data: Dict) -> str:
         """
-        Enhanced commit classification using message and file analysis
-        
+        Enhanced commit classification using message and file analysis with conventional commits support
+
         Args:
             commit_data: Dictionary containing commit information including hash and message
-        
+
         Returns:
             Commit type (feature, fix, refactor, etc.)
         """
         message = commit_data['message']
         message_lower = message.lower()
         commit_hash = commit_data['hash']
-        
+
+        # Parse conventional commit format (e.g., "feat(scope): description")
+        conventional_type = self._parse_conventional_commit(message)
+
         # Get files changed in this commit for context
         changed_files = self._get_commit_files(commit_hash)
         file_context = self._analyze_file_context(changed_files)
-        
+
+        if conventional_type:
+            return conventional_type
+
+        # Fallback to keyword-based classification if no conventional commit detected
         # Priority-based classification (higher priority = more specific)
         best_match = 'chore'
         best_priority = 999
-        
+
         # Check each type's keywords with priority
         for commit_type, config in self.COMMIT_TYPES.items():
             if any(keyword in message_lower for keyword in config['keywords']):
                 if config['priority'] < best_priority:
                     best_match = commit_type
                     best_priority = config['priority']
-        
+
         # Enhance classification with file context
         enhanced_type = self._enhance_with_file_context(best_match, file_context, message_lower)
-        
+
         return enhanced_type
+
+    def _parse_conventional_commit(self, message: str) -> Optional[str]:
+        """
+        Parse conventional commit format (type(scope): description)
+        Examples: feat(auth): add login functionality
+                  fix(api)!: resolve timeout issue
+                  feat: implement new feature
+        """
+        import re
+
+        # Regular expression for conventional commits
+        # Matches: type(scope): description or type: description
+        pattern = r'^(\w+)(?:\(([^)]+)\))?(!)?\s*:\s*(.+)$'
+        match = re.match(pattern, message.strip())
+
+        if match:
+            commit_type = match.group(1).lower()
+
+            # Check if it's a breaking change (! in the message)
+            if match.group(3) or 'BREAKING CHANGE' in message or commit_type == 'breaking':
+                return 'breaking'
+
+            # Map conventional commit types to our internal types
+            if commit_type in self.CONVENTIONAL_COMMIT_TYPES:
+                # Map to our internal type names (some differ)
+                if commit_type == 'perf':
+                    return 'perf'
+                elif commit_type == 'feat':
+                    return 'feat'
+                elif commit_type == 'fix':
+                    return 'fix'
+                elif commit_type == 'docs':
+                    return 'docs'
+                elif commit_type == 'test':
+                    return 'test'
+                elif commit_type == 'style':
+                    return 'style'
+                elif commit_type == 'refactor':
+                    return 'refactor'
+                elif commit_type == 'build':
+                    return 'build'
+                elif commit_type == 'chore':
+                    return 'chore'
+
+        return None
     
     def _get_commit_files(self, commit_hash: str) -> List[str]:
         """Get list of files changed in a commit"""
@@ -280,32 +352,46 @@ class ChangelogGenerator:
             'config': 0,
             'docs': 0,
             'test': 0,
-            'build': 0
+            'build': 0,
+            'api': 0,
+            'database': 0,
+            'mobile': 0,
+            'desktop': 0,
+            'security': 0,
+            'monitoring': 0
         }
-        
+
         for file_path in files:
             file_lower = file_path.lower()
-            
+
             # Check each pattern category
             for category, patterns in self.FILE_PATTERNS.items():
                 for pattern in patterns:
-                    if pattern in file_lower or file_path.endswith(pattern):
-                        context[category] += 1
-                        break
-        
+                    # Check if pattern is part of the path or if it's a file extension
+                    if pattern.startswith('.'):
+                        # Check for file extension
+                        if file_path.lower().endswith(pattern):
+                            context[category] = context.get(category, 0) + 1
+                            break
+                    else:
+                        # Check if pattern is in the path
+                        if pattern.lower() in file_lower:
+                            context[category] = context.get(category, 0) + 1
+                            break
+
         return context
     
     def _enhance_with_file_context(self, base_type: str, file_context: Dict[str, int], message: str) -> str:
         """Enhance classification based on file context"""
         # If we have strong file context indicators, adjust classification
         total_files = sum(file_context.values())
-        
+
         if total_files == 0:
             return base_type
-        
+
         # Calculate percentages
         context_percentages = {k: (v / total_files) for k, v in file_context.items()}
-        
+
         # Override based on strong file context (>70% of files)
         if context_percentages.get('test', 0) > 0.7:
             return 'test'
@@ -315,17 +401,31 @@ class ChangelogGenerator:
             return 'config'
         elif context_percentages.get('build', 0) > 0.7:
             return 'build'
-        
+        elif context_percentages.get('api', 0) > 0.7:
+            return 'api'
+        elif context_percentages.get('database', 0) > 0.7:
+            return 'chore'  # database is for context only, use more specific types
+        elif context_percentages.get('security', 0) > 0.7:
+            return 'security'
+
         # For mixed changes, use original classification but with context awareness
         if base_type == 'chore':
             # Try to infer better type from file context
             max_context = max(context_percentages.items(), key=lambda x: x[1])
             if max_context[1] > 0.5:  # >50% of files are of one type
-                if max_context[0] == 'frontend' and any(word in message for word in ['ui', 'interface', 'style']):
+                if max_context[0] in ['frontend', 'ui', 'css', 'html'] and any(word in message for word in ['ui', 'interface', 'style', 'design']):
                     return 'ui'
-                elif max_context[0] == 'backend' and any(word in message for word in ['api', 'endpoint', 'service']):
+                elif max_context[0] in ['backend', 'api', 'server'] and any(word in message for word in ['api', 'endpoint', 'service', 'server']):
                     return 'api'
-        
+                elif max_context[0] in ['database', 'sql'] and any(word in message for word in ['db', 'database', 'migration', 'model']):
+                    return 'chore'  # Could map to a dedicated DB type if needed
+                elif max_context[0] in ['config', 'env'] and any(word in message for word in ['config', 'env', 'setting']):
+                    return 'config'
+                elif max_context[0] in ['build', 'ci', 'cd'] and any(word in message for word in ['build', 'deploy', 'ci', 'cd', 'pipeline']):
+                    return 'build'
+                elif max_context[0] in ['test', 'spec'] and any(word in message for word in ['test', 'spec', 'coverage']):
+                    return 'test'
+
         return base_type
     
     def _generate_file_summary(self, files: List[str]) -> str:
@@ -342,68 +442,115 @@ class ChangelogGenerator:
         
         # Generate summary based on file types
         summary_parts = []
-        
-        if categories['test'] > 0:
-            summary_parts.append(f"{categories['test']} test file{'s' if categories['test'] > 1 else ''}")
-        
-        if categories['docs'] > 0:
-            summary_parts.append(f"{categories['docs']} doc file{'s' if categories['docs'] > 1 else ''}")
-        
-        if categories['config'] > 0:
-            summary_parts.append(f"{categories['config']} config file{'s' if categories['config'] > 1 else ''}")
-        
+
         if categories['frontend'] > 0:
             summary_parts.append(f"{categories['frontend']} frontend file{'s' if categories['frontend'] > 1 else ''}")
-        
+
         if categories['backend'] > 0:
             summary_parts.append(f"{categories['backend']} backend file{'s' if categories['backend'] > 1 else ''}")
-        
+
+        if categories['api'] > 0:
+            summary_parts.append(f"{categories['api']} API file{'s' if categories['api'] > 1 else ''}")
+
+        if categories['database'] > 0:
+            summary_parts.append(f"{categories['database']} database file{'s' if categories['database'] > 1 else ''}")
+
+        if categories['test'] > 0:
+            summary_parts.append(f"{categories['test']} test file{'s' if categories['test'] > 1 else ''}")
+
+        if categories['docs'] > 0:
+            summary_parts.append(f"{categories['docs']} doc file{'s' if categories['docs'] > 1 else ''}")
+
+        if categories['config'] > 0:
+            summary_parts.append(f"{categories['config']} config file{'s' if categories['config'] > 1 else ''}")
+
+        if categories['build'] > 0:
+            summary_parts.append(f"{categories['build']} build file{'s' if categories['build'] > 1 else ''}")
+
+        if categories['mobile'] > 0:
+            summary_parts.append(f"{categories['mobile']} mobile file{'s' if categories['mobile'] > 1 else ''}")
+
+        if categories['security'] > 0:
+            summary_parts.append(f"{categories['security']} security file{'s' if categories['security'] > 1 else ''}")
+
+        if categories['monitoring'] > 0:
+            summary_parts.append(f"{categories['monitoring']} monitoring file{'s' if categories['monitoring'] > 1 else ''}")
+
         # If we have uncategorized files
         categorized_count = sum(categories.values())
         if categorized_count < total_files:
             other_count = total_files - categorized_count
             summary_parts.append(f"{other_count} other file{'s' if other_count > 1 else ''}")
-        
+
         if summary_parts:
             return f"📁 {', '.join(summary_parts)}"
         else:
             return f"📁 {total_files} file{'s' if total_files > 1 else ''}"
     
     def _analyze_change_impact(self, files: List[str], message: str) -> str:
-        """Analyze the potential impact of changes"""
+        """Analyze the potential impact of changes with improved metrics"""
         if not files:
             return ""
-        
+
         impact_indicators = []
-        
-        # Check for breaking changes
-        if any(keyword in message.lower() for keyword in ['breaking', 'major', 'incompatible']):
-            impact_indicators.append("⚠️ Breaking change")
-        
-        # Check for large changes
-        if len(files) > 10:
-            impact_indicators.append(f"Large change ({len(files)} files)")
-        elif len(files) > 5:
-            impact_indicators.append(f"Medium change ({len(files)} files)")
-        
-        # Check for critical file types
-        critical_files = [f for f in files if any(critical in f.lower() 
-                         for critical in ['package.json', 'requirements.txt', 'dockerfile', 'config', 'env'])]
+        message_lower = message.lower()
+
+        # Check for breaking changes (highest priority)
+        if any(keyword in message_lower for keyword in ['breaking', 'major', 'incompatible', 'BREAKING CHANGE']):
+            impact_indicators.append("💥 **BREAKING CHANGE**")
+
+        # Check for security-related changes
+        if any(keyword in message_lower for keyword in ['security', 'vulnerability', 'cve', 'auth', 'authentication', 'permission', 'privilege']):
+            impact_indicators.append("🔒 **Security Impact**")
+
+        # Analyze change scale based on number of files and lines changed
+        file_count = len(files)
+        if file_count > 15:
+            impact_indicators.append(f"📈 **LARGE SCALE** ({file_count} files)")
+        elif file_count > 8:
+            impact_indicators.append(f"📈 **MEDIUM SCALE** ({file_count} files)")
+        elif file_count > 3:
+            impact_indicators.append(f"📈 **SMALL SCALE** ({file_count} files)")
+
+        # Check for critical file types with severity levels
+        critical_files = []
+        high_risk_files = []
+        medium_risk_files = []
+
+        for f in files:
+            f_lower = f.lower()
+            if any(critical in f_lower for critical in ['package.json', 'requirements.txt', 'pyproject.toml', 'Cargo.toml', 'go.mod', 'Gemfile.lock']):
+                critical_files.append(f)
+            elif any(high_risk in f_lower for high_risk in ['docker', 'k8s', 'kubernetes', 'docker-compose', 'config', 'env']):
+                high_risk_files.append(f)
+            elif any(medium_risk in f_lower for medium_risk in ['api', 'route', 'endpoint', 'controller']):
+                medium_risk_files.append(f)
+
         if critical_files:
-            impact_indicators.append("Config changes")
-        
-        # Check for API changes
-        api_files = [f for f in files if any(api_term in f.lower() 
-                    for api_term in ['api', 'route', 'endpoint', 'controller'])]
-        if api_files:
-            impact_indicators.append("API changes")
-        
-        # Check for database changes
-        db_files = [f for f in files if any(db_term in f.lower() 
-                   for db_term in ['migration', 'schema', 'model', 'database'])]
-        if db_files:
-            impact_indicators.append("Database changes")
-        
+            impact_indicators.append(f"⚠️ **CRITICAL DEPENDENCIES** ({len(critical_files)} file{'s' if len(critical_files) > 1 else ''})")
+        if high_risk_files:
+            impact_indicators.append(f"⚠️ **HIGH RISK** ({len(high_risk_files)} file{'s' if len(high_risk_files) > 1 else ''})")
+        if medium_risk_files:
+            impact_indicators.append(f"⚠️ **MEDIUM RISK** ({len(medium_risk_files)} file{'s' if len(medium_risk_files) > 1 else ''})")
+
+        # Check for potential breaking changes based on file types
+        breaking_file_patterns = [
+            'api', 'interface', 'protocol', 'contract', 'schema', 'migration',
+            'model', 'database', 'auth', 'permission'
+        ]
+        breaking_files = [f for f in files if any(pattern in f.lower() for pattern in breaking_file_patterns)]
+        if breaking_files and not any('breaking' in msg for msg in impact_indicators):
+            impact_indicators.append(f"⚠️ **POTENTIAL BREAKING** ({len(breaking_files)} file{'s' if len(breaking_files) > 1 else ''})")
+
+        # Check for test coverage changes
+        test_files = [f for f in files if any(test_pattern in f.lower() for test_pattern in ['test', 'spec', 'testing'])]
+        if len(test_files) > 0 and len(test_files) >= file_count * 0.5:  # If more than 50% are test files
+            impact_indicators.append(f"✅ **TEST IMPROVEMENT**")
+        elif len(test_files) == 0 and 'test' not in message_lower:
+            # Only flag if no tests were added and commit doesn't mention testing
+            if any(kw in message_lower for kw in ['fix', 'bug', 'resolve']):
+                impact_indicators.append(f"⚠️ **NO TESTS ADDED** for bug fix")
+
         return ', '.join(impact_indicators) if impact_indicators else ""
     
     def _group_commits_by_date(self, commits: List[Dict]) -> Dict[str, List[Dict]]:

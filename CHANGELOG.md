@@ -14,6 +14,18 @@
 
 #### ✨ New Features
 
+- **❤️ Added validation to check if there are changes to sync before disp...** (`81fa4f7`) - *Qwenzy*
+  - 📁 1 doc file, 1 backend file
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-15
+
+#### ✨ New Features
+
 - **❤️ Added Loading Animation in git pull** (`3c47ccf`) - *Qwenzy*
   - 📁 1 test file, 1 doc file, 2 backend files
 
