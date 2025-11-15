@@ -10,6 +10,18 @@
 
 ---
 
+### 2025-11-13
+
+#### 📚 Documentation
+
+- **❤️ add changelog** (`7783cf9`) - *Qwenzy*
+  - 📄 `CHANGELOG.md`
+
+**Total**: 1 commit(s)
+
+---
+
+
 ### 2025-11-12
 
 #### ✨ New Features
