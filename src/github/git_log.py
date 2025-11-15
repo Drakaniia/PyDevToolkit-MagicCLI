@@ -4,6 +4,7 @@ Handles commit history viewing and log operations
 """
 import subprocess
 from datetime import datetime
+from core.loading import LoadingSpinner, loading_animation
 
 
 class GitLog:
@@ -14,8 +15,10 @@ class GitLog:
 
     def fetch_remote_commits(self):
         """Fetch commits from all remotes before displaying local log"""
-        print("\nFetching remote changes...")
         try:
+            spinner = LoadingSpinner("Fetching remote changes", style='classic')
+            spinner.start()
+
             result = subprocess.run(
                 ["git", "fetch", "--all"],
                 capture_output=True,
@@ -24,15 +27,20 @@ class GitLog:
                 encoding='utf-8',
                 errors='replace'
             )
+
+            spinner.stop(success=True, final_message="Fetching complete: Remote changes fetched successfully!")
+
             if result.stdout:
                 print("Remote changes fetched successfully!")
             return True
         except subprocess.CalledProcessError as e:
+            spinner.stop(success=False, final_message="Fetching failed: Error fetching remote changes")
             print(f"Error fetching remote changes: {e}")
             if e.stderr:
                 print(f"Error details: {e.stderr}")
             return False
         except FileNotFoundError:
+            spinner.stop(success=False, final_message="Fetching failed: Git is not installed or not in PATH")
             print("Git is not installed or not in PATH")
             return False
 

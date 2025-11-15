@@ -71,7 +71,7 @@ class LoadingSpinner:
         sys.stdout.write('\r' + ' ' * (len(self.message) + 10) + '\r')
         sys.stdout.flush()
         
-        icon = "✅" if success else "❌"
+        icon = "[OK]" if success else "[ERROR]"
         message = final_message or self.message
         print(f"{icon} {message}")
     
@@ -199,7 +199,7 @@ class LoadingDots:
         sys.stdout.write('\r' + ' ' * (len(self.message) + self.max_dots + 5) + '\r')
         sys.stdout.flush()
         
-        icon = "✅" if success else "❌"
+        icon = "[OK]" if success else "[ERROR]"
         message = final_message or self.message
         print(f"{icon} {message}")
     
