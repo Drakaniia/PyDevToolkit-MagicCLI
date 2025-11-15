@@ -8,26 +8,56 @@ from datetime import datetime
 
 class GitLog:
     """Handles git log and commit history operations"""
-    
+
     def __init__(self):
         pass
-    
-    def show_log(self, limit=10):
-        """Display git commit log"""
+
+    def fetch_remote_commits(self):
+        """Fetch commits from all remotes before displaying local log"""
+        print("\nFetching remote changes...")
+        try:
+            result = subprocess.run(
+                ["git", "fetch", "--all"],
+                capture_output=True,
+                text=True,
+                check=True,
+                encoding='utf-8',
+                errors='replace'
+            )
+            if result.stdout:
+                print("Remote changes fetched successfully!")
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Error fetching remote changes: {e}")
+            if e.stderr:
+                print(f"Error details: {e.stderr}")
+            return False
+        except FileNotFoundError:
+            print("Git is not installed or not in PATH")
+            return False
+
+    def show_log(self, limit=10, fetch_remote=True):
+        """Display git commit log with option to fetch remote commits first"""
+        if fetch_remote:
+            self.fetch_remote_commits()
+
         print("\n" + "="*70)
-        print(f"📜 GIT LOG (Last {limit} commits)")
+        print(f"GIT LOG (Last {limit} commits)")
         print("="*70 + "\n")
-        
+
         if not self._is_git_repo():
-            print("❌ Not a git repository. Please initialize git first.")
+            print("Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
             return
-        
+
         self._run_command(["git", "log", "--oneline", f"-{limit}"])
         input("\nPress Enter to continue...")
-    
-    def get_commit_history(self, limit=50):
-        """Get detailed commit history with metadata"""
+
+    def get_commit_history(self, limit=50, fetch_remote=True):
+        """Get detailed commit history with metadata, with option to fetch remote commits first"""
+        if fetch_remote:
+            self.fetch_remote_commits()
+
         try:
             # Format: hash|author|date|message
             result = subprocess.run(
@@ -38,10 +68,10 @@ class GitLog:
                 encoding='utf-8',
                 errors='replace'
             )
-            
+
             if not result.stdout:
                 return []
-            
+
             commits = []
             for line in result.stdout.strip().split('\n'):
                 if line:
@@ -54,14 +84,14 @@ class GitLog:
                             formatted_date = dt.strftime('%Y-%m-%d %H:%M:%S')
                         except:
                             formatted_date = date[:19]  # Fallback
-                        
+
                         commits.append({
                             'hash': commit_hash,
                             'author': author,
                             'date': formatted_date,
                             'message': message
                         })
-            
+
             return commits
         except subprocess.CalledProcessError as e:
             print(f"Error getting commit history: {e}")
@@ -73,8 +103,11 @@ class GitLog:
             print(f"Unexpected error: {e}")
             return []
     
-    def get_commit_details(self, commit_id):
-        """Get details for a specific commit"""
+    def get_commit_details(self, commit_id, fetch_remote=False):
+        """Get details for a specific commit with option to fetch remote commits first"""
+        if fetch_remote:
+            self.fetch_remote_commits()
+
         try:
             result = subprocess.run(
                 ["git", "log", "-1", "--pretty=format:%H|%an|%ai|%s", commit_id],
@@ -84,10 +117,10 @@ class GitLog:
                 encoding='utf-8',
                 errors='replace'
             )
-            
+
             if not result.stdout:
                 return None
-            
+
             parts = result.stdout.strip().split('|', 3)
             if len(parts) == 4:
                 commit_hash, author, date, message = parts
@@ -96,7 +129,7 @@ class GitLog:
                     formatted_date = dt.strftime('%Y-%m-%d %H:%M:%S')
                 except:
                     formatted_date = date[:19]
-                
+
                 return {
                     'hash': commit_hash,
                     'author': author,
@@ -106,11 +139,14 @@ class GitLog:
         except Exception as e:
             print(f"Error getting commit details: {e}")
             pass
-        
+
         return None
     
-    def verify_commit_exists(self, commit_id):
-        """Verify if a commit exists in the repository"""
+    def verify_commit_exists(self, commit_id, fetch_remote=False):
+        """Verify if a commit exists in the repository with option to fetch remote commits first"""
+        if fetch_remote:
+            self.fetch_remote_commits()
+
         result = subprocess.run(
             ["git", "cat-file", "-t", commit_id],
             capture_output=True,
@@ -148,12 +184,12 @@ class GitLog:
                 print(result.stderr)
             return True
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error: {e}")
+            print(f"Error: {e}")
             if e.stdout:
                 print(e.stdout)
             if e.stderr:
                 print(e.stderr)
             return False
         except FileNotFoundError:
-            print("❌ Git is not installed or not in PATH")
+            print("Git is not installed or not in PATH")
             return False

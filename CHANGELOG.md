@@ -12,6 +12,19 @@
 
 ### 2025-11-15
 
+#### 🔧 Maintenance
+
+- **❤️ remove tests** (`acbce7a`) - *Qwenzy*
+  - 📁 11 backend files, 12 test files, 3 doc files, 1 monitoring file
+  - 📊 *📈 **MEDIUM SCALE** (14 files), ✅ **TEST IMPROVEMENT***
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-15
+
 #### ✨ New Features
 
 - **❤️ enhance the changelog_generator.py by improving the commit type de...** (`5e17966`) - *Qwenzy*
