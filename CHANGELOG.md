@@ -14,6 +14,18 @@
 
 #### ✨ New Features
 
+- **❤️ enhance the changelog_generator.py by improving the commit type de...** (`5e17966`) - *Qwenzy*
+  - 📁 1 backend file, 2 doc files, 2 monitoring files
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-15
+
+#### ✨ New Features
+
 - **❤️ Added validation to check if there are changes to sync before disp...** (`81fa4f7`) - *Qwenzy*
   - 📁 1 doc file, 1 backend file
 
