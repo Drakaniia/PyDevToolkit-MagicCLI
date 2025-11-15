@@ -12,6 +12,7 @@ from github.git_initializer import GitInitializer
 from github.git_recover import GitRecover
 from github.git_removesubmodule import GitRemoveSubmodule
 from github.git_cache import GitCache
+from github.git_diff import GitDiff
 from menu import Menu, MenuItem
 from core.git_client import get_git_client
 
@@ -88,6 +89,11 @@ class GitOperations:
         cache_handler = GitCache()
         cache_handler.show_cache_menu()
 
+    def show_diff_menu(self):
+        """Show comprehensive diff operations menu"""
+        diff_handler = GitDiff()
+        diff_handler.show_diff_menu()
+
 
 class GitMenu(Menu):
     """Unified menu for all Git operations"""
@@ -101,6 +107,7 @@ class GitMenu(Menu):
         self.items = [
             MenuItem("Status", lambda: self.git_ops.status()),
             MenuItem("Advanced Log Operations", lambda: self.git_ops.show_advanced_log_menu()),
+            MenuItem("Diff Operations", lambda: self.git_ops.show_diff_menu()),
             MenuItem("Pull", lambda: self.git_ops.pull()),
             MenuItem("Push (Add, Commit & Push)", lambda: self.git_ops.push()),
             MenuItem("Initialize Git & Push to GitHub", lambda: self.git_ops.initialize_and_push()),
