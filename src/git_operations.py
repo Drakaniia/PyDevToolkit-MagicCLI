@@ -111,11 +111,11 @@ class GitMenu(Menu):
     def setup_items(self):
         """Setup menu items with all Git operations"""
         self.items = [
+            MenuItem("Push (Add, Commit & Push)", lambda: self.git_ops.push()),
             MenuItem("Status", lambda: self.git_ops.status()),
             MenuItem("Advanced Log Operations", lambda: self.git_ops.show_advanced_log_menu()),
             MenuItem("Diff Operations", lambda: self.git_ops.show_diff_menu()),
             MenuItem("Pull", lambda: self.git_ops.pull()),
-            MenuItem("Push (Add, Commit & Push)", lambda: self.git_ops.push()),
             MenuItem("Initialize Git & Push to GitHub", lambda: self.git_ops.initialize_and_push()),
             MenuItem("Git Recovery (Revert to Previous Commit)", lambda: self.git_ops.show_recovery_menu()),
             MenuItem("Git Cache (Handle Sensitive Files)", lambda: self.git_ops.manage_cache()),

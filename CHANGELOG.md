@@ -14,6 +14,18 @@
 
 #### ✨ New Features
 
+- **❤️ add menu handler in \core** (`dff205f`) - *Qwenzy*
+  - 📁 1 backend file, 1 doc file, 1 monitoring file
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-16
+
+#### ✨ New Features
+
 - **❤️ add   Use ↑/↓ arrow keys to navigate, Enter to select, or type num...** (`1ba38a1`) - *Qwenzy*
   - 📁 1 backend file, 1 doc file, 1 monitoring file
 
