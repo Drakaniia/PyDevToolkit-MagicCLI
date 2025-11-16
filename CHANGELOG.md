@@ -14,6 +14,18 @@
 
 #### ✨ New Features
 
+- **❤️ add   Use ↑/↓ arrow keys to navigate, Enter to select, or type num...** (`1ba38a1`) - *Qwenzy*
+  - 📁 1 backend file, 1 doc file, 1 monitoring file
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-16
+
+#### ✨ New Features
+
 - **❤️ add git stash feature in github operations** (`8d853bd`) - *Qwenzy*
   - 📁 5 backend files, 2 doc files, 1 monitoring file
   - 📊 *📈 **SMALL SCALE** (7 files)*
