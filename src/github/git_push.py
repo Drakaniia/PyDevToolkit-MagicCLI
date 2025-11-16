@@ -144,6 +144,9 @@ class GitPushRetry:
         # Pre-flight checks
         if not self._pre_push_checks():
             return False
+
+        # Check for potential conflicts and provide guidance
+        self._check_for_potential_conflicts_internal()
         
         # Get current branch if not specified
         if not branch:
@@ -300,43 +303,63 @@ class GitPushRetry:
         """Analyze error and decide whether to continue"""
         if not error:
             return False, 0
-        
+
         error_msg = str(error).lower()
         if hasattr(error, 'stderr'):
             error_msg = error_msg + " " + str(error.stderr).lower()
-        
+
         is_auth = any(x in error_msg for x in [
             'authentication', 'permission denied', 'credentials',
-            'authentication failed', 'could not authenticate'
+            'authentication failed', 'could not authenticate',
+            '403', '401', 'fatal:.*authentication', 'http.*403'
         ])
-        
+
         is_network = any(x in error_msg for x in [
             'network', 'timeout', 'connection', 'could not resolve',
-            'connection refused', 'connection timed out'
+            'connection refused', 'connection timed out', 'host unreachable',
+            'could not read from remote', 'send pack', 'fetch failed'
         ])
-        
+
         is_hook_error = any(x in error_msg for x in [
-            'pre-push hook', 'hook declined', 'hook failed'
+            'pre-push hook', 'hook declined', 'hook failed',
+            'husky', 'lint-staged'
         ])
-        
+
         is_diverged = any(x in error_msg for x in [
-            'diverged', 'non-fast-forward', 'rejected'
+            'diverged', 'non-fast-forward', 'rejected',
+            'fetch first', 'pull is required', 'fast-forward'
         ])
-        
+
         is_no_upstream = any(x in error_msg for x in [
-            'no upstream', 'no tracking', 'upstream branch'
+            'no upstream', 'no tracking', 'upstream branch',
+            'origin/', 'does not exist upstream'
         ])
-        
+
+        is_permission = any(x in error_msg for x in [
+            'permission denied', 'insufficient permissions', 'protected branch',
+            'push declined', 'branch is protected'
+        ])
+
+        is_large_file = any(x in error_msg for x in [
+            'large file', 'lfs', 'file too large', 'size exceeds',
+            'upload-pack', 'unpack error'
+        ])
+
+        is_rate_limit = any(x in error_msg for x in [
+            'rate limit', 'api rate', 'too many requests',
+            'exceeded rate', 'abuse detection'
+        ])
+
         print(f"\n   🔍 Error Analysis:")
-        
+
         if is_auth:
-            print(f"      • Authentication failure")
-            print(f"      → Action: Check credentials")
+            print(f"      • Authentication failure - Invalid credentials or token")
+            print(f"      → Action: Check Git credentials/token in credential manager or SSH keys")
             return False, 0
-        
+
         if is_network:
-            print(f"      • Network/connection issue")
-            print(f"      → Next: Retry with backoff")
+            print(f"      • Network/connection issue - Possible internet problems")
+            print(f"      → Action: Check internet connection, firewall, or proxy settings")
             wait_time = 0
             if self.config.exponential_backoff:
                 wait_time = min(2 ** attempt, 8)
@@ -344,20 +367,32 @@ class GitPushRetry:
                 wait_time = self.config.retry_delay
             should_continue = attempt < len(self.config.strategies)
             return should_continue, wait_time
-        
+
+        if is_permission:
+            print(f"      • Permission denied - Insufficient repository access")
+            print(f"      → Action: Verify repository permissions or branch protection rules")
+            return False, 0
+
         if is_hook_error:
-            print(f"      • Pre-push hooks blocking push")
-            print(f"      → Next: Retry with --no-verify")
+            print(f"      • Pre-push hooks blocking push - CI/CD validation failed")
+            print(f"      → Next: Retry with --no-verify to bypass hooks temporarily")
         elif is_diverged:
-            print(f"      • Remote branch has diverged")
-            print(f"      → Next: Force push with confirmation")
+            print(f"      • Remote branch has diverged - Both local and remote have new commits")
+            print(f"      → Suggestion: Pull changes first or use merge strategy")
+        elif is_large_file:
+            print(f"      • Large file upload blocked - Git might have size limits")
+            print(f"      → Suggestion: Use Git LFS for large files or remove large files")
+        elif is_rate_limit:
+            print(f"      • API rate limit exceeded - Too many requests to Git host")
+            print(f"      → Suggestion: Wait before pushing again or check rate limit")
         elif is_no_upstream:
-            print(f"      • Upstream branch not set")
-            print(f"      → Next: Retry with --set-upstream")
+            print(f"      • Upstream branch not set - Tracking info missing")
+            print(f"      → Next: Retry with --set-upstream to establish tracking")
         else:
-            print(f"      • Unknown error type")
-            print(f"      → Next: Try next strategy")
-        
+            print(f"      • Unknown error type - Check detailed error message")
+            print(f"      → Suggestion: Check Git configuration or repository status")
+            print(f"      → Detailed error: {str(error)[:100]}...")
+
         should_continue = attempt < len(self.config.strategies)
         return should_continue, 0
     
@@ -397,41 +432,198 @@ class GitPushRetry:
     def _pre_push_checks(self) -> bool:
         """Run pre-push validation checks"""
         print("🔍 Pre-push validation...\n")
-        
+
         checks = [
             ("Git repository", self.git.is_repo),
             ("Remote configured", lambda: self.git.has_remote('origin')),
+            ("Network connectivity", self._check_network_connectivity),
+            ("Remote accessibility", self._check_remote_accessibility),
+            ("Local changes", self._has_local_changes),
+            ("Branch exists remotely", self._check_remote_branch_exists),
+            ("Diverged commits", self._check_for_diverged_commits),
         ]
-        
+
         all_passed = True
-        
+        check_results = {}
+
         for check_name, check_func in checks:
             try:
                 result = check_func()
+                check_results[check_name.lower()] = result
                 status = "✅" if result else "❌"
                 print(f"   {status} {check_name}")
-                if not result:
-                    all_passed = False
             except Exception as e:
                 print(f"   ❌ {check_name}: {e}")
-                all_passed = False
-        
+                check_results[check_name.lower()] = False
+                # For local changes and network connectivity, we don't want to fail completely
+                if check_name not in ["Local changes", "Network connectivity"]:
+                    all_passed = False
+
         print()
-        
+
+        # Determine if critical checks failed (not including local changes and network connectivity)
+        critical_checks_passed = True
+        for check_name, check_func in checks:
+            if check_name in ["Local changes", "Network connectivity"]:
+                continue  # Skip these in critical check
+            try:
+                result = check_results.get(check_name.lower(), True)
+                if not result:
+                    critical_checks_passed = False
+            except:
+                critical_checks_passed = False
+
+        all_passed = critical_checks_passed
+
+        # Provide specific error diagnosis based on failed checks
         if not all_passed:
             print("⚠️  Pre-push checks failed\n")
-            print("💡 Suggestions:")
-            
-            if not self.git.is_repo():
+            print("🔍 Detailed diagnosis:")
+
+            if not check_results.get("git repository", True):
+                print("   • Not in a Git repository - Initialize first")
+            elif not check_results.get("remote configured", True):
+                print("   • No remote repository configured - Set up remote first")
+            elif not check_results.get("network connectivity", True):
+                # Only show network issue if remote accessibility also failed
+                if not check_results.get("remote accessibility", True):
+                    print("   • No internet connection - Check your network")
+                else:
+                    # Network ping failed but git remote access worked, so not a real issue
+                    print("   • Network ping failed but remote Git access works - Continuing")
+            elif not check_results.get("remote accessibility", True):
+                print("   • Cannot access remote repository - Check internet or repository permission")
+            elif not check_results.get("local changes", True):
+                print("   • No staged changes detected - Will attempt to stage and commit")
+            elif not check_results.get("diverged commits", True):
+                print("   • Local and remote branches have diverged - Pull first or use merge strategy")
+            elif not check_results.get("branch exists remotely", True):
+                print("   • Remote branch doesn't exist - Push with upstream flag")
+
+            print("\n💡 Suggestions:")
+            if not check_results.get("git repository", True):
                 print("   • Initialize Git: magic → Initialize Git & Push to GitHub")
-            
-            if not self.git.has_remote('origin'):
+            elif not check_results.get("remote configured", True):
                 print("   • Configure remote: git remote add origin <url>")
-            
+            elif not check_results.get("network connectivity", True) and not check_results.get("remote accessibility", True):
+                print("   • Check internet connection and firewall settings")
+            elif not check_results.get("remote accessibility", True):
+                print("   • Verify repository URL and access permissions")
+            elif not check_results.get("local changes", True):
+                print("   • Changes will be automatically staged and committed")
+            else:
+                print("   • Address the specific issues identified above")
+
             print()
+            # If network connectivity failed but git remote access worked, continue anyway
+            if (not check_results.get("network connectivity", True) and
+                check_results.get("remote accessibility", True)):
+                print("💡 Network ping failed but Git remote access succeeded - continuing with push...")
+                return True
             input("Press Enter to continue...")
-        
+
         return all_passed
+
+    def _check_network_connectivity(self) -> bool:
+        """Check if there's internet connectivity"""
+        import subprocess
+        try:
+            # On Windows, ping count is -n, not -c
+            import sys
+            if sys.platform == "win32":
+                result = subprocess.run(
+                    ['ping', '-n', '1', '8.8.8.8'],  # Google DNS
+                    timeout=5,
+                    capture_output=True,
+                    text=True
+                )
+            else:
+                result = subprocess.run(
+                    ['ping', '-c', '1', '8.8.8.8'],  # Google DNS
+                    timeout=5,
+                    capture_output=True,
+                    text=True
+                )
+            return result.returncode == 0
+        except:
+            # Fallback: try to reach a common domain
+            try:
+                import socket
+                socket.create_connection(("8.8.8.8", 53), timeout=5)  # DNS port
+                return True
+            except:
+                try:
+                    import urllib.request
+                    urllib.request.urlopen('https://www.google.com', timeout=5)
+                    return True
+                except:
+                    return False
+
+    def _check_remote_accessibility(self) -> bool:
+        """Check if remote repository is accessible"""
+        try:
+            if not self.git.has_remote('origin'):
+                return False
+
+            # Try to fetch from remote to check accessibility
+            result = self.git._run_command(['git', 'fetch', 'origin'], check=False)
+            return result.returncode == 0
+        except:
+            return False
+
+    def _has_local_changes(self) -> bool:
+        """Check if there are staged changes ready to be pushed"""
+        try:
+            # Check for staged changes - if no staged changes, check for any changes to prompt user
+            result = self.git._run_command(['git', 'diff', '--cached', '--quiet'], check=False)
+            # Return True if there are staged changes (return code != 0 means changes exist)
+            if result.returncode != 0:
+                return True
+            # If no staged changes, check if there are uncommitted changes (staging needed)
+            status_result = self.git.status(porcelain=True)
+            return bool(status_result.strip())
+        except:
+            # If we can't check directly, use git status
+            try:
+                status_result = self.git.status(porcelain=True)
+                return bool(status_result.strip())
+            except:
+                return False
+
+    def _check_remote_branch_exists(self) -> bool:
+        """Check if the remote branch exists"""
+        try:
+            current_branch = self.git.current_branch()
+            result = self.git._run_command(['git', 'ls-remote', '--heads', 'origin', current_branch], check=False)
+            return len(result.stdout.strip()) > 0
+        except:
+            return False
+
+    def _check_for_diverged_commits(self) -> bool:
+        """Check if local and remote branches have diverged"""
+        try:
+            current_branch = self.git.current_branch()
+
+            # Get the current commit count difference between local and remote
+            result = self.git._run_command(
+                ['git', 'rev-list', '--left-right', '--count', f'origin/{current_branch}...HEAD'],
+                check=False
+            )
+
+            if result.returncode == 0 and result.stdout.strip():
+                left, right = result.stdout.strip().split()
+                left_count = int(left)
+                right_count = int(right)
+
+                # If both have commits that the other doesn't have, they've diverged
+                if left_count > 0 and right_count > 0:
+                    print(f"   ⚠️  Branch divergence detected: +{right_count} local, +{left_count} remote")
+                    return False
+                return True
+            return True
+        except:
+            # If we can't determine, be permissive
+            return True
     
     def _has_changes(self) -> bool:
         """Check if there are uncommitted changes or untracked files"""
@@ -1110,6 +1302,48 @@ class GitPushRetry:
         
         return lines[0][:100] if lines else "Unknown error"
 
+    def _check_for_potential_conflicts_internal(self):
+        """Check for potential conflicts before pushing and provide guidance"""
+        try:
+            current_branch = self.git.current_branch()
+            print("🔍 Checking for potential conflicts...\n")
+
+            # Fetch latest changes to compare with local
+            fetch_result = self.git._run_command(['git', 'fetch', 'origin'], check=False)
+            if fetch_result.returncode != 0:
+                print("⚠️  Could not fetch latest changes from remote")
+                return True  # Continue anyway
+
+            # Check if there are commits on remote that aren't on local
+            try:
+                result = self.git._run_command(
+                    ['git', 'rev-list', 'HEAD..origin/' + current_branch],
+                    check=False
+                )
+
+                remote_ahead_count = len(result.stdout.strip().split()) if result.stdout.strip() else 0
+
+                if remote_ahead_count > 0:
+                    print(f"⚠️  Remote branch is {remote_ahead_count} commit(s) ahead of your local branch")
+                    print("💡 This may cause a push failure. Consider pulling changes first:")
+                    print(f"   $ git pull origin {current_branch}")
+                    print()
+                    response = input("Do you want to continue with push? (y/N): ").strip().lower()
+                    if response not in ['y', 'yes']:
+                        print("❌ Push cancelled by user due to potential conflicts")
+                        return False
+                else:
+                    print("✅ No conflicts detected - your branch is up to date with remote")
+                    print()
+
+            except Exception as e:
+                print(f"⚠️  Could not determine remote status: {e}")
+
+        except Exception as e:
+            print(f"⚠️  Could not check for conflicts: {e}")
+
+        return True
+
 
 class GitPush:
     """Backward-compatible GitPush class with enhanced retry and auto-changelog"""
@@ -1298,7 +1532,49 @@ class GitPush:
         
         except Exception as e:
             print(f"  ⚠️  Could not get summary: {e}\n")
-    
+
+    def _check_for_potential_conflicts(self):
+        """Check for potential conflicts before pushing and provide guidance"""
+        try:
+            current_branch = self.git.current_branch()
+            print("🔍 Checking for potential conflicts...\n")
+
+            # Fetch latest changes to compare with local
+            fetch_result = self.git._run_command(['git', 'fetch', 'origin'], check=False)
+            if fetch_result.returncode != 0:
+                print("⚠️  Could not fetch latest changes from remote")
+                return True  # Continue anyway
+
+            # Check if there are commits on remote that aren't on local
+            try:
+                result = self.git._run_command(
+                    ['git', 'rev-list', 'HEAD..origin/' + current_branch],
+                    check=False
+                )
+
+                remote_ahead_count = len(result.stdout.strip().split()) if result.stdout.strip() else 0
+
+                if remote_ahead_count > 0:
+                    print(f"⚠️  Remote branch is {remote_ahead_count} commit(s) ahead of your local branch")
+                    print("💡 This may cause a push failure. Consider pulling changes first:")
+                    print(f"   $ git pull origin {current_branch}")
+                    print()
+                    response = input("Do you want to continue with push? (y/N): ").strip().lower()
+                    if response not in ['y', 'yes']:
+                        print("❌ Push cancelled by user due to potential conflicts")
+                        return False
+                else:
+                    print("✅ No conflicts detected - your branch is up to date with remote")
+                    print()
+
+            except Exception as e:
+                print(f"⚠️  Could not determine remote status: {e}")
+
+        except Exception as e:
+            print(f"⚠️  Could not check for conflicts: {e}")
+
+        return True
+
     def _get_commit_message(self) -> Optional[str]:
         """Get commit message from user"""
         # Get user input without pre-filling
