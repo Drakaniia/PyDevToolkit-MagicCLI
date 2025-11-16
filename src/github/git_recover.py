@@ -6,7 +6,15 @@ import subprocess
 import sys
 
 # Import the menu system from the main module
-from src.menu import Menu, MenuItem
+try:
+    from ..menu import Menu, MenuItem
+except (ImportError, ValueError):
+    # If relative import fails, try absolute import
+    try:
+        from src.menu import Menu, MenuItem
+    except ImportError:
+        # If that also fails, try importing directly
+        from menu import Menu, MenuItem
 
 
 class GitRecover:

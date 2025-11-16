@@ -12,6 +12,18 @@
 
 ### 2025-11-16
 
+#### 🔧 Maintenance
+
+- **❤️ move git operation option menu 1st in the git operations menu** (`e19fdcb`) - *Qwenzy*
+  - 📁 1 backend file, 1 doc file, 1 monitoring file
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-16
+
 #### ✨ New Features
 
 - **❤️ add menu handler in \core** (`dff205f`) - *Qwenzy*

@@ -2,7 +2,10 @@
 """
 CLI entry point for the magic command
 """
-from .menu import MainMenu
+try:
+    from .menu import MainMenu
+except ImportError:
+    from menu import MainMenu
 
 
 def main():

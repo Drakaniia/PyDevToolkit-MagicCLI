@@ -7,7 +7,10 @@ that can be used throughout the application for consistent UI/UX.
 
 from abc import ABC, abstractmethod
 from typing import Any, Callable, List, Optional
-from src.menu import Menu, MenuItem
+try:
+    from ..menu import Menu, MenuItem
+except ImportError:
+    from menu import Menu, MenuItem
 
 
 class BaseMenuHandler:

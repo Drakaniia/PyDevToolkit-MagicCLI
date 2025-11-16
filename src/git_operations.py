@@ -14,7 +14,10 @@ from github.git_removesubmodule import GitRemoveSubmodule
 from github.git_cache import GitCache
 from github.git_diff import GitDiff
 from github.git_stash import GitStash
-from menu import Menu, MenuItem
+try:
+    from .menu import Menu, MenuItem
+except ImportError:
+    from menu import Menu, MenuItem
 from core.git_client import get_git_client
 
 
