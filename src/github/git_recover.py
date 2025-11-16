@@ -17,16 +17,13 @@ class GitRecover:
     
     def show_recovery_menu(self, commit_history_func, commit_details_func, verify_commit_func):
         """
-        Show the commit recovery interface
+        Show the commit recovery interface using the menu system
 
         Args:
             commit_history_func: Function to get commit history
             commit_details_func: Function to get commit details by ID
             verify_commit_func: Function to verify commit exists
         """
-        print("\n" + "="*70)
-        print("GIT COMMIT RECOVERY")
-        print("="*70 + "\n")
 
         # Check if we're in a git repository
         if not self._is_git_repo():
@@ -42,41 +39,74 @@ class GitRecover:
             input("\nPress Enter to continue...")
             return
 
-        # Display commits
-        print("Commit History:\n")
-        print(f"{'#':<5} {'Commit ID':<12} {'Date & Time':<25} {'Message'}")
-        print("-" * 70)
+        class GitRecoveryMenu(Menu):
+            def __init__(self, git_recover_instance, commits):
+                self.git_recover = git_recover_instance
+                self.commits = commits
+                super().__init__("Git Commit Recovery")
 
-        for idx, commit in enumerate(commits, 1):
-            commit_id = commit['hash'][:10]
-            timestamp = commit['date']
-            message = commit['message'][:40] + "..." if len(commit['message']) > 40 else commit['message']
-            print(f"{idx:<5} {commit_id:<12} {timestamp:<25} {message}")
+            def setup_items(self):
+                self.items = [
+                    MenuItem("Select commit from list", self._select_from_list),
+                    MenuItem("Enter commit ID directly", self._select_by_id),
+                    MenuItem("Reset & Revert Operations", self._show_reset_revert_menu),
+                    MenuItem("Cancel and return to menu", self._exit_menu)
+                ]
 
-        print("-" * 70 + "\n")
+            def _select_from_list(self):
+                self.clear_screen()
+                return self.git_recover._select_by_number_with_menu(self.commits)
 
-        # Ask user how they want to select
-        print("How would you like to select a commit?")
-        print("  1. By commit number (from the list above)")
-        print("  2. By entering commit ID directly")
-        print("  3. Reset & Revert Operations")
-        print("  4. Cancel and return to menu\n")
+            def _select_by_id(self):
+                return self.git_recover._select_by_id(
+                    commit_details_func,
+                    verify_commit_func
+                )
 
-        choice = input("Your choice (1/2/3/4): ").strip()
+            def _show_reset_revert_menu(self):
+                return self.git_recover._show_reset_revert_menu()
 
-        if choice == '1':
-            self._select_by_number(commits)
-        elif choice == '2':
-            self._select_by_id(commit_details_func, verify_commit_func)
-        elif choice == '3':
-            self._show_reset_revert_menu()
-        elif choice == '4':
+            def _exit_menu(self):
+                print("\nOperation cancelled.")
+                return "exit"
+
+        recovery_menu = GitRecoveryMenu(self, commits)
+        recovery_menu.run()
+    
+    def _select_by_number_with_menu(self, commits):
+        """Select commit by using the menu system"""
+        class CommitSelectionMenu(Menu):
+            def __init__(self, commits):
+                self.commits = commits
+                super().__init__("Select a Commit to Recover")
+
+            def setup_items(self):
+                # Add commit options to the menu
+                for idx, commit in enumerate(self.commits):
+                    commit_id = commit['hash'][:10]
+                    timestamp = commit['date']
+                    message = commit['message'][:40] + "..." if len(commit['message']) > 40 else commit['message']
+                    display_text = f"{idx+1}. {commit_id} - {message} ({timestamp})"
+                    self.items.append(MenuItem(display_text, lambda commit=commit: commit))
+
+                # Add a cancel option
+                self.items.append(MenuItem("Cancel", lambda: None))
+
+        commit_menu = CommitSelectionMenu(commits)
+        selected_commit = commit_menu.get_choice_with_arrows()
+
+        # Adjust for 0-based indexing, and account for the cancel option
+        if selected_commit == len(commits) + 1:  # This is the cancel option
             print("\nOperation cancelled.")
             input("\nPress Enter to continue...")
+            return
+        elif 1 <= selected_commit <= len(commits):  # Valid commit selection
+            commit = commits[selected_commit - 1]
+            self._confirm_and_revert(commit)
         else:
-            print("\nInvalid choice.")
+            print("\nOperation cancelled.")
             input("\nPress Enter to continue...")
-    
+
     def _select_by_number(self, commits):
         """Select commit by number from list"""
         try:
@@ -235,34 +265,39 @@ class GitRecover:
         return result.returncode == 0
 
     def _show_reset_revert_menu(self):
-        """Show menu for reset and revert operations"""
-        print("\n" + "="*70)
-        print("GIT RESET & REVERT OPERATIONS")
-        print("="*70 + "\n")
+        """Show menu for reset and revert operations using menu system"""
 
-        print("Recovery Options:")
-        print("  1. git revert - Create new commit reverting changes (safer than reset)")
-        print("  2. git reset HEAD - Unstage files")
-        print("  3. git restore <file> - Discard changes in working directory (modern replacement for git checkout --)")
-        print("  4. Cancel and return to main menu\n")
+        class ResetRevertMenu(Menu):
+            def __init__(self, git_recover_instance):
+                self.git_recover = git_recover_instance
+                super().__init__("Git Reset & Revert Operations")
 
-        choice = input("Your choice (1/2/3/4): ").strip()
+            def setup_items(self):
+                self.items = [
+                    MenuItem("git revert - Create new commit reverting changes (safer than reset)", self._show_git_revert),
+                    MenuItem("git reset HEAD - Unstage files", self._show_git_reset_head),
+                    MenuItem("git restore <file> - Discard changes in working directory", self._show_git_checkout_file),
+                    MenuItem("Cancel and return to main menu", self._exit_menu)
+                ]
 
-        if choice == '1':
-            self._show_git_revert()
-        elif choice == '2':
-            self._show_git_reset_head()
-        elif choice == '3':
-            self._show_git_checkout_file()
-        elif choice == '4':
-            print("\nOperation cancelled.")
-            input("\nPress Enter to continue...")
-        else:
-            print("\nInvalid choice.")
-            input("\nPress Enter to continue...")
+            def _show_git_revert(self):
+                return self.git_recover._show_git_revert()
+
+            def _show_git_reset_head(self):
+                return self.git_recover._show_git_reset_head()
+
+            def _show_git_checkout_file(self):
+                return self.git_recover._show_git_checkout_file()
+
+            def _exit_menu(self):
+                print("\nOperation cancelled.")
+                return "exit"
+
+        reset_menu = ResetRevertMenu(self)
+        reset_menu.run()
 
     def _show_git_revert(self):
-        """Show git revert operation"""
+        """Show git revert operation using menu system"""
         print("\n" + "="*50)
         print("GIT REVERT - Create new commit reverting changes")
         print("="*50)
@@ -276,35 +311,48 @@ class GitRecover:
             input("\nPress Enter to continue...")
             return
 
-        # Display commits for selection
-        print("Recent commits:")
-        print(f"{'#':<5} {'Commit ID':<12} {'Date & Time':<25} {'Message'}")
-        print("-" * 70)
+        class GitRevertMenu(Menu):
+            def __init__(self, git_recover_instance, commits):
+                self.git_recover = git_recover_instance
+                self.commits = commits
+                super().__init__("Git Revert - Select a Commit")
 
-        for idx, commit in enumerate(commits, 1):
-            commit_id = commit['hash'][:10]
-            timestamp = commit['date']
-            message = commit['message'][:40] + "..." if len(commit['message']) > 40 else commit['message']
-            print(f"{idx:<5} {commit_id:<12} {timestamp:<25} {message}")
+            def setup_items(self):
+                # Add commit options to the menu
+                for idx, commit in enumerate(self.commits):
+                    commit_id = commit['hash'][:10]
+                    timestamp = commit['date']
+                    message = commit['message'][:40] + "..." if len(commit['message']) > 40 else commit['message']
+                    display_text = f"{idx+1}. {commit_id} - {message} ({timestamp})"
+                    self.items.append(MenuItem(display_text, lambda commit=commit: commit))
 
-        print("-" * 70 + "\n")
+                # Add other options
+                self.items.extend([
+                    MenuItem("Enter commit ID directly", self._enter_commit_id),
+                    MenuItem("Cancel", self._exit_menu)
+                ])
 
-        print("How would you like to select a commit to revert?")
-        print("  1. By commit number (from the list above)")
-        print("  2. By entering commit ID directly")
-        print("  3. Cancel\n")
+            def _enter_commit_id(self):
+                return self.git_recover._select_commit_for_revert_by_id()
 
-        choice = input("Your choice (1/2/3): ").strip()
+            def _exit_menu(self):
+                print("\nOperation cancelled.")
+                return "exit"
 
-        if choice == '1':
-            self._select_commit_for_revert_by_number(commits)
-        elif choice == '2':
+        revert_menu = GitRevertMenu(self, commits)
+        selected_commit = revert_menu.get_choice_with_arrows()
+
+        # Adjust for 0-based indexing, and account for the last two options (direct entry and cancel)
+        if selected_commit == len(commits) + 1:  # Enter commit ID directly
             self._select_commit_for_revert_by_id()
-        elif choice == '3':
+        elif selected_commit == len(commits) + 2:  # Cancel
             print("\nOperation cancelled.")
             input("\nPress Enter to continue...")
+        elif 1 <= selected_commit <= len(commits):  # Valid commit selection
+            commit = commits[selected_commit - 1]
+            self._confirm_and_perform_revert(commit)
         else:
-            print("\nInvalid choice.")
+            print("\nOperation cancelled.")
             input("\nPress Enter to continue...")
 
     def _select_commit_for_revert_by_number(self, commits):
@@ -662,114 +710,3 @@ class GitRecover:
 
         return None
 
-    def _print_commit_list_with_selection(self, commits, selected_idx=0):
-        """Print commit list with visual selection indicator"""
-        print("Commit History:\n")
-        print(f"{'#':<5} {'Commit ID':<12} {'Date & Time':<25} {'Message'}")
-        print("-" * 70)
-
-        for idx, commit in enumerate(commits, 1):
-            commit_id = commit['hash'][:10]
-            timestamp = commit['date']
-            message = commit['message'][:40] + "..." if len(commit['message']) > 40 else commit['message']
-
-            if idx - 1 == selected_idx:
-                print(f">> {idx:<3} {commit_id:<12} {timestamp:<25} {message}")
-            else:
-                print(f"   {idx:<3} {commit_id:<12} {timestamp:<25} {message}")
-
-        print("-" * 70 + "\n")
-
-    def _getch(self):
-        """Get a single character from stdin, cross-platform"""
-        if HAS_MSVCRT:  # Windows
-            char = msvcrt.getch()
-            try:
-                return char.decode('utf-8')
-            except:
-                return chr(ord(char))
-        elif HAS_TERMIOS:  # Unix/Linux/Mac
-            fd = sys.stdin.fileno()
-            old_settings = termios.tcgetattr(fd)
-            try:
-                tty.setraw(fd)
-                ch = sys.stdin.read(1)
-            finally:
-                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-            return ch
-        else:
-            # Fallback to input if no platform-specific methods available
-            return input()
-
-    def _arrow_selection_menu(self, commits, title="Select a commit"):
-        """Display a menu with arrow key navigation for commit selection"""
-        if not commits:
-            return -1
-
-        selected_idx = 0
-        total_items = len(commits)
-
-        while True:
-            # Clear screen and display menu
-            print("\033[2J\033[H", end='')  # ANSI escape codes to clear screen
-            print("\n" + "="*70)
-            print(f"{title}")
-            print("="*70 + "\n")
-
-            self._print_commit_list_with_selection(commits, selected_idx)
-
-            print("Use ↑/↓ to navigate, Enter to select, 'q' to cancel")
-
-            # Get key press
-            key = self._getch()
-
-            if HAS_MSVCRT:  # Windows
-                if key in ('\xe0', '\x00'):  # Special keys
-                    arrow = self._getch()
-                    if arrow == 'H':  # Up arrow
-                        selected_idx = (selected_idx - 1) % total_items
-                    elif arrow == 'P':  # Down arrow
-                        selected_idx = (selected_idx + 1) % total_items
-                elif key.lower() == 'q':  # Quit
-                    return -1
-                elif key == '\r':  # Enter
-                    return selected_idx
-            else:  # Unix/Linux/Mac
-                if key == '\x1b':  # ESC sequence for special keys
-                    next_key = self._getch()
-                    if next_key == '[':
-                        arrow = self._getch()
-                        if arrow == 'A':  # Up arrow
-                            selected_idx = (selected_idx - 1) % total_items
-                        elif arrow == 'B':  # Down arrow
-                            selected_idx = (selected_idx + 1) % total_items
-                elif key.lower() == 'q':  # Quit
-                    return -1
-                elif key in ['\r', '\n']:  # Enter
-                    return selected_idx
-
-    def _select_by_number_with_arrows(self, commits):
-        """Select commit by number using arrow key navigation"""
-        title = "Select a commit to recover"
-        selected_idx = self._arrow_selection_menu(commits, title)
-
-        if selected_idx == -1:  # User cancelled
-            print("\nOperation cancelled.")
-            input("\nPress Enter to continue...")
-            return
-
-        commit = commits[selected_idx]
-        self._confirm_and_revert(commit)
-
-    def _select_commit_for_revert_by_number_with_arrows(self, commits):
-        """Select commit by number for revert using arrow key navigation"""
-        title = "Select a commit to revert"
-        selected_idx = self._arrow_selection_menu(commits, title)
-
-        if selected_idx == -1:  # User cancelled
-            print("\nOperation cancelled.")
-            input("\nPress Enter to continue...")
-            return
-
-        commit = commits[selected_idx]
-        self._confirm_and_perform_revert(commit)
