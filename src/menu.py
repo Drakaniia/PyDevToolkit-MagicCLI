@@ -182,30 +182,32 @@ class Menu(ABC):
     def _update_visible_items(self, selected_idx, available_lines):
         """
         Update only the visible menu items for smooth navigation
-        
+
         This is much faster than full redraw and prevents flickering
         """
         visible_start = self._scroll_offset
         visible_end = min(visible_start + available_lines, len(self.items))
         cols, _ = TerminalInfo.get_size()
-        
+
         # Calculate cursor position for updates
         # Header is 5 lines, scroll indicator adds 1 if present
         base_line = 5
         if self._scroll_offset > 0:
             base_line += 1
-        
-        # Update each visible item
+
+        # Update each visible item individually
         for i in range(visible_start, visible_end):
             line_number = base_line + (i - visible_start)
-            
+
             # Move cursor to the line
             sys.stdout.write(f'\033[{line_number + 1};1H')
             sys.stdout.write(self.CLEAR_LINE)
-            
-            # Redraw the item
+
+            # Redraw the item with proper selection state
+            # Reset formatting first, then add content
+            sys.stdout.write('\033[0m')  # Reset all formatting
             self._print_item_inline(i, self.items[i], i == selected_idx, cols)
-        
+
         sys.stdout.flush()
 
     def _print_item(self, index, item, is_selected, cols):
@@ -229,18 +231,20 @@ class Menu(ABC):
     def _print_item_inline(self, index, item, is_selected, cols):
         """Print item inline (without newline) for updates"""
         line_text = f"{index + 1}. {item.label}"
-        
+
         max_text_width = cols - 6
         if len(line_text) > max_text_width:
             line_text = line_text[:max_text_width-3] + "..."
-        
+
         if is_selected:
             full_line = f"  ► {line_text}"
             full_line = full_line.ljust(min(70, cols - 2))
+            # Apply highlight and then reset formatting
             sys.stdout.write(f"\033[1;46m{full_line}\033[0m")
         else:
             full_line = f"    {line_text}"
-            sys.stdout.write(full_line)
+            # Ensure we reset formatting first, then write content
+            sys.stdout.write(f"\033[0m{full_line}")
 
     def get_choice_with_arrows(self):
         """Get user choice using arrow keys (if available)"""
@@ -352,7 +356,6 @@ class Menu(ABC):
                 except KeyboardInterrupt:
                     sys.stdout.write(self.SHOW_CURSOR)
                     sys.stdout.flush()
-                    print("\n\nExiting...")
                     return len(self.items)
                 except Exception as e:
                     # Log error but continue

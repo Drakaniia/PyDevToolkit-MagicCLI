@@ -94,7 +94,7 @@ class GitRecover:
                     commit_id = commit['hash'][:10]
                     timestamp = commit['date']
                     message = commit['message'][:40] + "..." if len(commit['message']) > 40 else commit['message']
-                    display_text = f"{idx+1}. {commit_id} - {message} ({timestamp})"
+                    display_text = f"{commit_id} - {message} ({timestamp})"
                     self.items.append(MenuItem(display_text, lambda commit=commit: commit))
 
                 # Add a cancel option
@@ -331,7 +331,7 @@ class GitRecover:
                     commit_id = commit['hash'][:10]
                     timestamp = commit['date']
                     message = commit['message'][:40] + "..." if len(commit['message']) > 40 else commit['message']
-                    display_text = f"{idx+1}. {commit_id} - {message} ({timestamp})"
+                    display_text = f"{commit_id} - {message} ({timestamp})"
                     self.items.append(MenuItem(display_text, lambda commit=commit: commit))
 
                 # Add other options
@@ -344,8 +344,7 @@ class GitRecover:
                 return self.git_recover._select_commit_for_revert_by_id()
 
             def _exit_menu(self):
-                print("\nOperation cancelled.")
-                return "exit"
+                return None  # Just return None to allow the calling code to handle cancellation
 
         revert_menu = GitRevertMenu(self, commits)
         selected_commit = revert_menu.get_choice_with_arrows()
