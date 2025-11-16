@@ -11,6 +11,7 @@ from github.git_initializer import GitInitializer
 from github.git_recover import GitRecover
 from github.git_removesubmodule import GitRemoveSubmodule
 from github.git_cache import GitCache
+from github.git_stash import GitStash
 from changelog_generator import ChangelogGenerator
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     'GitRecover',
     'GitRemoveSubmodule',
     'GitCache',
+    'GitStash',
     'ChangelogGenerator',
 ]

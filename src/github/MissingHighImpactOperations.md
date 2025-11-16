@@ -10,9 +10,11 @@ Looking at the current GitHub operations in your project, here are the most comm
 - `git branch -D` - Delete local branches
 
 ### 2. **Stash Operations**
-- `git stash` - Stash changes temporarily
-- `git stash list` - View stashed changes
-- `git stash pop/apply` - Apply stashed changes
+- `git stash` - Stash changes temporarily **[IMPLEMENTED]**
+- `git stash list` - View stashed changes **[IMPLEMENTED]**
+- `git stash pop/apply` - Apply stashed changes **[IMPLEMENTED]**
+- `git stash drop` - Remove specific stash **[IMPLEMENTED]**
+- `git stash clear` - Remove all stashes **[IMPLEMENTED]**
 
 ### 3. **Remote Operations**
 - `git remote` - List/add/remove remote repositories

@@ -13,6 +13,7 @@ from github.git_recover import GitRecover
 from github.git_removesubmodule import GitRemoveSubmodule
 from github.git_cache import GitCache
 from github.git_diff import GitDiff
+from github.git_stash import GitStash
 from menu import Menu, MenuItem
 from core.git_client import get_git_client
 
@@ -94,6 +95,11 @@ class GitOperations:
         diff_handler = GitDiff()
         diff_handler.show_diff_menu()
 
+    def show_stash_menu(self):
+        """Show comprehensive git stash operations menu"""
+        stash_handler = GitStash()
+        stash_handler.execute_stash_operations()
+
 
 class GitMenu(Menu):
     """Unified menu for all Git operations"""
@@ -114,5 +120,6 @@ class GitMenu(Menu):
             MenuItem("Git Recovery (Revert to Previous Commit)", lambda: self.git_ops.show_recovery_menu()),
             MenuItem("Git Cache (Handle Sensitive Files)", lambda: self.git_ops.manage_cache()),
             MenuItem("Manage Submodules/Nested Repos", lambda: self.git_ops.manage_submodules()),
+            MenuItem("Git Stash Operations", lambda: self.git_ops.show_stash_menu()),
             MenuItem("Back to Main Menu", lambda: "exit")
         ]

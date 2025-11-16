@@ -5,24 +5,13 @@ Handles commit recovery, rollback, and history management
 import subprocess
 import sys
 
-# Try to import platform-specific modules for keyboard input
-try:
-    import tty
-    import termios
-    HAS_TERMIOS = True
-except ImportError:
-    HAS_TERMIOS = False
-
-try:
-    import msvcrt
-    HAS_MSVCRT = True
-except ImportError:
-    HAS_MSVCRT = False
+# Import the menu system from the main module
+from src.menu import Menu, MenuItem
 
 
 class GitRecover:
     """Handles git commit recovery and rollback operations"""
-    
+
     def __init__(self):
         pass
     
