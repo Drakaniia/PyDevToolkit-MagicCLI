@@ -50,18 +50,18 @@ class GitDiff:
             # Define the menu options
             if HAS_TERMCOLOR:
                 options = [
-                    f"{colored('git diff', 'cyan')} - Show unstaged changes",
-                    f"{colored('git diff --staged', 'cyan')} - Show staged changes",
-                    f"{colored('git diff HEAD', 'cyan')} - Show all changes since last commit",
-                    f"{colored('git diff <branch1>..<branch2>', 'cyan')} - Compare branches",
+                    f"{colored('Show Unstaged Changes', 'cyan')} ({colored('git diff', 'white')})",
+                    f"{colored('Show Staged Changes', 'cyan')} ({colored('git diff --staged', 'white')})",
+                    f"{colored('Changes Since Last Commit', 'cyan')} ({colored('git diff HEAD', 'white')})",
+                    f"{colored('Compare Branches', 'cyan')} ({colored('git diff branch1..branch2', 'white')})",
                     f"{colored('Back to main menu', 'red')}"
                 ]
             else:
                 options = [
-                    "git diff - Show unstaged changes",
-                    "git diff --staged - Show staged changes",
-                    "git diff HEAD - Show all changes since last commit",
-                    "git diff <branch1>..<branch2> - Compare branches",
+                    "Show Unstaged Changes (git diff)",
+                    "Show Staged Changes (git diff --staged)",
+                    "Changes Since Last Commit (git diff HEAD)",
+                    "Compare Branches (git diff branch1..branch2)",
                     "Back to main menu"
                 ]
 

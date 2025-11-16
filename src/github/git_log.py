@@ -61,9 +61,9 @@ class GitLog:
             def setup_items(self):
                 self.items = [
                     MenuItem("Log (Last 10 commits)", lambda: self.git_log_instance.show_log(limit=10, fetch_remote=False)),
-                    MenuItem("git log --oneline --graph --all - Visual branch history", lambda: self.git_log_instance.show_visual_branch_history()),
-                    MenuItem("git log --stat - Show commit changes statistics", lambda: self.git_log_instance.show_stat_log()),
-                    MenuItem("git shortlog - Condensed commit log by author", lambda: self.git_log_instance.show_shortlog()),
+                    MenuItem("Visual Branch History (git log --oneline --graph --all)", lambda: self.git_log_instance.show_visual_branch_history()),
+                    MenuItem("Commit Changes Statistics (git log --stat)", lambda: self.git_log_instance.show_stat_log()),
+                    MenuItem("Author Commit Summary (git shortlog)", lambda: self.git_log_instance.show_shortlog()),
                     MenuItem("Back to Git Operations Menu", lambda: "exit")
                 ]
 
