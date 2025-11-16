@@ -12,6 +12,18 @@
 
 ### 2025-11-15
 
+#### ✨ New Features
+
+- **❤️ add git diff feature in git operations** (`fc56a86`) - *Qwenzy*
+  - 📁 3 backend files
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-15
+
 #### 🎨 UI/UX Changes
 
 - **❤️ design git log** (`4df3809`) - *Qwenzy*
