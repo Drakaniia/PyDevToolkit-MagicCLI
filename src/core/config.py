@@ -51,9 +51,9 @@ class ConfigManager:
     """Centralized configuration manager"""
     
     def __init__(self, config_file: Optional[str] = None):
-        self.config_file = config_file or self._get_default_config_path()
         self.security_config = SecurityConfig()
         self.operational_config = OperationalConfig()
+        self.config_file = config_file or self._get_default_config_path()
         self._load_config()
     
     def _get_default_config_path(self) -> str:

@@ -121,30 +121,6 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ---
 
-## 🧪 Testing & Quality Assurance
-
-Comprehensive test coverage ensures reliability and security:
-
-```bash
-# Run all tests
-python tests/testall.py
-
-# Run specific test categories
-python -m pytest tests/ -v
-
-# Security-focused tests
-python tests/test_security.py
-python tests/test_error_handling.py
-python tests/test_integration.py
-```
-
-Our test suite validates:
-- Security validation and input sanitization
-- Error handling and exception management
-- Cross-module integration
-- Real-world usage scenarios
-- Security pattern coverage
-
 ## 📄 License
 
 MIT License - feel free to use this in your own projects!

@@ -1300,24 +1300,20 @@ class GitPush:
             print(f"  ⚠️  Could not get summary: {e}\n")
     
     def _get_commit_message(self) -> Optional[str]:
-        """Get commit message from user with heart emoji auto-generated but deletable"""
+        """Get commit message from user"""
         # Get user input without pre-filling
         message = input("💬 Commit message: ").strip()
-        
+
         if not message:
             return None
-        
-        # Auto-add heart emoji at the beginning if not already present
-        if not message.startswith('❤️'):
-            message = f"❤️ {message}"
-        
+
         if len(message) < 3:
             print("\n⚠️  Commit message too short (minimum 3 characters)")
             retry = input("Try again? (y/n): ").strip().lower()
             if retry == 'y':
                 return self._get_commit_message()
             return None
-        
+
         return message
 
 

@@ -14,10 +14,10 @@ class SecurityValidator:
     """Centralized security validation and sanitization utilities"""
     
     # Patterns for validating inputs
-    SAFE_COMMAND_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\/\s]+$')
+    SAFE_COMMAND_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\:\/\s=]+$')
     SAFE_PATH_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\/\\]+$')
     SAFE_FILE_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.]+$')
-    SAFE_BRANCH_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\/]+$')
+    SAFE_BRANCH_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\:\/]+$')
     
     @staticmethod
     def validate_command_input(user_input: str) -> bool:
@@ -37,7 +37,7 @@ class SecurityValidator:
         dangerous_patterns = [
             r';',           # Command separators
             r'&&',          # Command execution
-            r'||',          # Command execution
+            r'\|\|',        # Command execution (OR operator)
             r'\|',          # Pipe
             r'\$\(',        # Command substitution
             r'`',           # Command substitution

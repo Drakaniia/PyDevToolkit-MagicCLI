@@ -41,13 +41,47 @@ class GitClient:
     
     # ========== Repository Checks ==========
     
+    def _run_internal_command(
+        self,
+        cmd: List[str],
+        timeout: int = 10
+    ) -> subprocess.CompletedProcess:
+        """
+        Run Git command for internal operations without security validation
+        Used for operations that need to work before full security validation is set up
+
+        Args:
+            cmd: Command to run
+            timeout: Command timeout in seconds
+        """
+        try:
+            result = subprocess.run(
+                cmd,
+                cwd=self.working_dir,
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                errors='replace',
+                timeout=timeout
+            )
+            return result
+        except subprocess.TimeoutExpired:
+            raise GitError(
+                f"Command timed out after {timeout}s: {' '.join(cmd)}",
+                suggestion="Check for hung processes or network issues"
+            )
+        except FileNotFoundError:
+            raise GitNotInstalledError()
+        except Exception as e:
+            raise GitError(
+                f"Command failed: {' '.join(cmd)}",
+                details={"error": str(e)}
+            )
+
     def is_repo(self) -> bool:
         """Check if current directory is a Git repository"""
         try:
-            result = self._run_command(
-                ['git', 'rev-parse', '--is-inside-work-tree'],
-                check=False
-            )
+            result = self._run_internal_command(['git', 'rev-parse', '--is-inside-work-tree'])
             return result.returncode == 0
         except Exception:
             return False
@@ -378,12 +412,13 @@ class GitClient:
     def _verify_git_installed(self) -> None:
         """Verify Git is installed"""
         try:
-            subprocess.run(
+            result = subprocess.run(
                 ['git', '--version'],
                 capture_output=True,
-                check=True,
                 timeout=5
             )
+            if result.returncode != 0:
+                raise GitNotInstalledError()
         except FileNotFoundError:
             raise GitNotInstalledError()
         except subprocess.TimeoutExpired:
