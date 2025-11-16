@@ -8,6 +8,8 @@ import re
 from pathlib import Path
 from typing import Optional, Dict, List, Tuple
 from . import _base
+
+# Import security and logging modules inside functions to avoid circular imports
 from . import menu_utils
 from ._base import DevModeCommand
 from .menu_utils import get_choice_with_arrows
@@ -339,10 +341,28 @@ class DockerQuickCommand(DevModeCommand):
                 print(f"   {i}. {suggestion}")
             
             default_cmd = suggestions[0]
-            user_input = input(f"\nWhat command do you want to use to start the app? (default: {default_cmd}): ").strip()
+            # Import security modules locally to avoid circular imports
+            from core.security import SecurityValidator, safe_input
+            user_input = safe_input(f"\nWhat command do you want to use to start the app? (default: {default_cmd}): ").strip()
+            # Validate command input for safety
+            if user_input and not SecurityValidator.validate_command_input(user_input):
+                from core.exceptions import AutomationError
+                raise AutomationError(
+                    "Command input contains potentially dangerous characters",
+                    suggestion="Use only alphanumeric characters, hyphens, underscores, dots, and slashes"
+                )
             return user_input or default_cmd
         else:
-            return input("What command do you want to use to start the app?: ").strip()
+            from core.security import SecurityValidator, safe_input
+            user_input = safe_input("What command do you want to use to start the app?: ").strip()
+            # Validate command input for safety
+            if user_input and not SecurityValidator.validate_command_input(user_input):
+                from core.exceptions import AutomationError
+                raise AutomationError(
+                    "Command input contains potentially dangerous characters",
+                    suggestion="Use only alphanumeric characters, hyphens, underscores, dots, and slashes"
+                )
+            return user_input
     
     def _prompt_port(self, project_info: Dict[str, str]) -> str:
         """Prompt for port with intelligent detection"""
@@ -826,10 +846,26 @@ CMD {json.dumps(start_command.split())}
                 return
             
             # Get Dockerfile path
-            dockerfile = input("Dockerfile path (default: ./Dockerfile): ").strip() or 'Dockerfile'
+            from core.security import SecurityValidator, safe_input
+            from core.exceptions import AutomationError
+            dockerfile = safe_input("Dockerfile path (default: ./Dockerfile): ").strip() or 'Dockerfile'
+            # Validate path for safety
+            if dockerfile and not SecurityValidator.validate_path(dockerfile):
+                raise AutomationError(
+                    "Dockerfile path contains potentially dangerous elements",
+                    suggestion="Use only relative paths within the project directory"
+                )
             
             # Get build context
-            context = input("Build context (default: .): ").strip() or '.'
+            from core.security import SecurityValidator, safe_input
+            from core.exceptions import AutomationError
+            context = safe_input("Build context (default: .): ").strip() or '.'
+            # Validate path for safety
+            if context and not SecurityValidator.validate_path(context):
+                raise AutomationError(
+                    "Build context path contains potentially dangerous elements",
+                    suggestion="Use only relative paths within the project directory"
+                )
         else:
             image_name = kwargs.get('image_name')
             dockerfile = kwargs.get('dockerfile', 'Dockerfile')
@@ -844,13 +880,28 @@ CMD {json.dumps(start_command.split())}
             print(f"❌ Dockerfile not found: {dockerfile_path}")
             return
         
+        # Import security modules locally to avoid circular imports
+        from core.security import SecurityValidator
+        from core.logging import log_command_execution
+        from core.exceptions import AutomationError
+
         # Build command
         cmd = ['docker', 'build', '-t', image_name, '-f', dockerfile, context]
-        
+
+        # Validate the command elements for security
+        for element in cmd:
+            if not SecurityValidator.validate_command_input(str(element)):
+                raise AutomationError(
+                    f"Command contains potentially dangerous element: {element}",
+                    suggestion="Use only safe command elements without shell metacharacters"
+                )
+
         print(f"$ {' '.join(cmd)}\n")
-        
+
         try:
-            subprocess.run(cmd, check=True)
+            # Use secure subprocess run with logging
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
+            log_command_execution('docker build', f"image: {image_name}, dockerfile: {dockerfile}, context: {context}", True)
             print(f"\n✅ Image '{image_name}' built successfully!")
             
             # Offer to run the container after successful build

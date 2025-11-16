@@ -15,6 +15,7 @@ from .exceptions import (
     GitNotInstalledError,
     UncommittedChangesError
 )
+# Import security and logging modules inside functions to avoid circular imports
 
 
 class GitClient:
@@ -396,12 +397,24 @@ class GitClient:
     ) -> subprocess.CompletedProcess:
         """
         Run Git command with proper error handling
-        
+
         Args:
             cmd: Command to run
             check: Raise on non-zero return code
             timeout: Command timeout in seconds
         """
+        # Import security and logging modules here to avoid circular imports
+        from core.security import SecurityValidator
+        from core.logging import log_command_execution
+
+        # Validate the command for security
+        for element in cmd:
+            if not SecurityValidator.validate_command_input(str(element)):
+                raise GitError(
+                    f"Command contains potentially dangerous element: {element}",
+                    suggestion="Use only safe command elements without shell metacharacters"
+                )
+
         try:
             result = subprocess.run(
                 cmd,
@@ -412,24 +425,30 @@ class GitClient:
                 errors='replace',
                 timeout=timeout
             )
-            
+
+            # Log command execution for audit purposes
+            log_command_execution(' '.join(cmd), 'N/A', result.returncode == 0)
+
             if check and result.returncode != 0:
                 raise GitCommandError(
                     command=' '.join(cmd),
                     return_code=result.returncode,
                     stderr=result.stderr
                 )
-            
+
             return result
-        
+
         except subprocess.TimeoutExpired:
+            log_command_execution(' '.join(cmd), 'N/A', False)
             raise GitError(
                 f"Command timed out after {timeout}s: {' '.join(cmd)}",
                 suggestion="Check for hung processes or network issues"
             )
         except FileNotFoundError:
+            log_command_execution(' '.join(cmd), 'N/A', False)
             raise GitNotInstalledError()
         except Exception as e:
+            log_command_execution(' '.join(cmd), 'N/A', False)
             raise GitError(
                 f"Command failed: {' '.join(cmd)}",
                 details={"error": str(e)}

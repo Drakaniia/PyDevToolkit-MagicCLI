@@ -8,3 +8,6 @@ pytest-benchmark>=4.0.0
 
 # Additional utilities
 coverage>=7.3.0
+
+# Configuration
+pyyaml>=6.0

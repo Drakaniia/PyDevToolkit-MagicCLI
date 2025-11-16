@@ -34,13 +34,14 @@ setup(
     ],
     python_requires=">=3.7",
     install_requires=[
-        # No external dependencies for core functionality
+        "pyyaml>=6.0 ; python_version>='3.7'",  # Optional dependency that can be missing
     ],
     extras_require={
         "test": [
             "pytest>=7.4.0",
             "pytest-cov>=4.1.0",
             "pytest-mock>=3.11.0",
+            "pyyaml>=6.0",
         ],
     },
     entry_points={

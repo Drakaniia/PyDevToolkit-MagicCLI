@@ -275,13 +275,17 @@ class TestIntegration(unittest.TestCase):
 
 class TestCommandExecution(unittest.TestCase):
     """Test command execution capabilities"""
-    
+
     def test_python_imports_work(self):
         """Test that all modules can be imported without errors"""
         modules_to_test = [
             'git_operations',
             'menu',
             'core.git_client',
+            'core.security',
+            'core.config',
+            'core.logging',
+            'core.exceptions',
             'github.git_status',
             'github.git_push',
             'github.git_pull',
@@ -295,7 +299,7 @@ class TestCommandExecution(unittest.TestCase):
             'core.command_handler',
             'core.menu_handler',
         ]
-        
+
         for module_name in modules_to_test:
             try:
                 __import__(module_name)
@@ -305,6 +309,37 @@ class TestCommandExecution(unittest.TestCase):
                 continue
             except Exception as e:
                 self.fail(f"Unexpected error importing {module_name}: {e}")
+
+
+class TestSecurityFeatures(unittest.TestCase):
+    """Test security-specific features"""
+
+    def test_security_imports(self):
+        """Test that security modules can be imported"""
+        try:
+            from core.security import SecurityValidator, safe_input
+            self.assertIsNotNone(SecurityValidator)
+            self.assertIsNotNone(safe_input)
+        except ImportError as e:
+            self.fail(f"Failed to import security components: {e}")
+
+    def test_config_imports(self):
+        """Test that config modules can be imported"""
+        try:
+            from core.config import ConfigManager, get_security_config
+            self.assertIsNotNone(ConfigManager)
+            self.assertIsNotNone(get_security_config)
+        except ImportError as e:
+            self.fail(f"Failed to import config components: {e}")
+
+    def test_logging_imports(self):
+        """Test that logging modules can be imported"""
+        try:
+            from core.logging import SecurityAuditLogger, get_security_logger
+            self.assertIsNotNone(SecurityAuditLogger)
+            self.assertIsNotNone(get_security_logger)
+        except ImportError as e:
+            self.fail(f"Failed to import logging components: {e}")
 
 
 def discover_and_test_all_modules():
@@ -368,6 +403,7 @@ def discover_and_test_all_modules():
     suite.addTests(loader.loadTestsFromTestCase(TestBackend))
     suite.addTests(loader.loadTestsFromTestCase(TestIntegration))
     suite.addTests(loader.loadTestsFromTestCase(TestCommandExecution))
+    suite.addTests(loader.loadTestsFromTestCase(TestSecurityFeatures))
 
     # Add a new test class to test all discovered modules
     class AllModuleImportTests(unittest.TestCase):

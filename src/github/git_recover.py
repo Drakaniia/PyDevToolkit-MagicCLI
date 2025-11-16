@@ -4,10 +4,14 @@ Handles commit recovery, rollback, and history management
 """
 import subprocess
 import sys
+from pathlib import Path
 
 # Import the menu system from the main module
 try:
     from ..menu import Menu, MenuItem
+    from ..core.git_client import get_git_client
+    from ..core.loading import LoadingSpinner
+    # Import security and logging modules inside functions to avoid circular imports
 except (ImportError, ValueError):
     # If relative import fails, try absolute import
     try:
@@ -193,13 +197,29 @@ class GitRecover:
 
         if confirm == 'YES':
             print("\nPerforming hard reset...")
-            result = subprocess.run(
+            # Import security modules locally to avoid circular imports
+            from core.security import SecurityValidator
+            from core.logging import log_command_execution
+            from core.exceptions import AutomationError
+
+            # Validate command elements for security
+            cmd = ["git", "reset", "--hard", commit_hash]
+            for element in cmd:
+                if not SecurityValidator.validate_command_input(str(element)):
+                    raise AutomationError(
+                        f"Command contains potentially dangerous element: {element}",
+                        suggestion="Use only safe command elements without shell metacharacters"
+                    )
+
+            result = SecurityValidator.safe_subprocess_run(
                 ["git", "reset", "--hard", commit_hash],
                 capture_output=True,
                 text=True,
                 encoding='utf-8',
                 errors='replace'
             )
+            # Log command execution for audit purposes
+            log_command_execution('git reset --hard', commit_hash, result.returncode == 0)
 
             if result.returncode == 0:
                 print("\nSuccessfully reset to commit!")
@@ -525,7 +545,22 @@ class GitRecover:
 
     def _unstage_specific_file(self):
         """Unstage specific file using git reset HEAD <file>"""
-        file_path = input("\nEnter file path to unstage (e.g., src/main.py): ").strip()
+        # Import security modules locally to avoid circular imports
+        from core.security import SecurityValidator, safe_input
+        from core.exceptions import AutomationError
+        file_path = safe_input("\nEnter file path to unstage (e.g., src/main.py): ").strip()
+        # Validate the file path for security
+        if file_path and file_path.lower() != 'all':
+            if not SecurityValidator.validate_path(file_path):
+                raise AutomationError(
+                    "File path contains potentially dangerous elements",
+                    suggestion="Use only relative paths within the project directory"
+                )
+            if not SecurityValidator.validate_file_name(file_path):
+                raise AutomationError(
+                    "File name contains potentially dangerous characters",
+                    suggestion="Use only safe file name characters"
+                )
 
         if not file_path:
             print("\nFile path cannot be empty.")
@@ -573,7 +608,22 @@ class GitRecover:
         else:
             print("Working directory is clean (no changes).")
 
-        file_path = input("\nEnter file path to discard changes (e.g., src/main.py) or 'all' for all files: ").strip()
+        # Import security modules locally to avoid circular imports
+        from core.security import SecurityValidator, safe_input
+        from core.exceptions import AutomationError
+        file_path = safe_input("\nEnter file path to discard changes (e.g., src/main.py) or 'all' for all files: ").strip()
+        # Validate the file path for security
+        if file_path and file_path.lower() != 'all':
+            if not SecurityValidator.validate_path(file_path):
+                raise AutomationError(
+                    "File path contains potentially dangerous elements",
+                    suggestion="Use only relative paths within the project directory"
+                )
+            if not SecurityValidator.validate_file_name(file_path):
+                raise AutomationError(
+                    "File name contains potentially dangerous characters",
+                    suggestion="Use only safe file name characters"
+                )
 
         if not file_path:
             print("\nFile path cannot be empty.")

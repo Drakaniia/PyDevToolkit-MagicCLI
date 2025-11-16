@@ -1,16 +1,29 @@
 # ✨ Magic CLI
 
-**One command to rule them all** - A powerful developer toolkit that puts Git operations, project management, and web development automation at your fingertips.
+**One command to rule them all** - A powerful, secure developer toolkit that puts Git operations, project management, and web development automation at your fingertips.
 
 ![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)
+![Security](https://img.shields.io/badge/security-audited-brightgreen)
 
 ---
 
 **Just type `magic` in your terminal and get instant access to powerful development automation.**
 
 ---
+
+## 🔒 Security-First Architecture
+
+PyDevToolkit-MagicCLI implements comprehensive security measures:
+
+- **Input Sanitization**: All user inputs are validated against safe patterns
+- **Command Injection Prevention**: Dangerous command sequences are blocked
+- **Path Traversal Protection**: Directory traversal attempts are prevented
+- **Secure Subprocess Execution**: Commands are validated before execution
+- **Configuration Management**: Security parameters centrally managed
+- **Audit Logging**: Security-relevant events are logged for monitoring
+- **Error Handling**: Comprehensive exception hierarchy with safe error messages
 
 ## 🎯 How to Use
 
@@ -107,6 +120,30 @@ $ magic
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
+
+## 🧪 Testing & Quality Assurance
+
+Comprehensive test coverage ensures reliability and security:
+
+```bash
+# Run all tests
+python tests/testall.py
+
+# Run specific test categories
+python -m pytest tests/ -v
+
+# Security-focused tests
+python tests/test_security.py
+python tests/test_error_handling.py
+python tests/test_integration.py
+```
+
+Our test suite validates:
+- Security validation and input sanitization
+- Error handling and exception management
+- Cross-module integration
+- Real-world usage scenarios
+- Security pattern coverage
 
 ## 📄 License
 
