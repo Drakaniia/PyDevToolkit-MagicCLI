@@ -411,14 +411,65 @@ configure_git_user() {
 }
 
 # ============================================================
+# DEPENDENCY INSTALLATION
+# ============================================================
+
+install_dependencies() {
+    print_section "📦 Installing Python Dependencies"
+
+    # Check if requirements.txt exists
+    if [ -f "$SCRIPT_DIR/requirements.txt" ]; then
+        print_info "Found requirements.txt, installing dependencies..."
+
+        if $PYTHON_CMD -m pip install --upgrade pip; then
+            print_success "Updated pip"
+        else
+            print_error "Failed to update pip, attempting to continue..."
+        fi
+
+        if $PYTHON_CMD -m pip install -r "$SCRIPT_DIR/requirements.txt"; then
+            print_success "Successfully installed all dependencies"
+        else
+            print_error "Failed to install dependencies"
+            echo ""
+            print_info "Trying alternative installation with --user flag..."
+            if $PYTHON_CMD -m pip install --user -r "$SCRIPT_DIR/requirements.txt"; then
+                print_success "Successfully installed dependencies with --user flag"
+            else
+                print_error "Failed to install dependencies with --user flag"
+                echo -e "${YELLOW}You may need to install dependencies manually later.${NC}"
+            fi
+        fi
+    else
+        # Fallback to setup.py if requirements.txt doesn't exist
+        print_info "Installing from setup.py..."
+
+        if $PYTHON_CMD -m pip install --upgrade pip; then
+            print_success "Updated pip"
+        else
+            print_error "Failed to update pip, attempting to continue..."
+        fi
+
+        if $PYTHON_CMD -m pip install -e .; then
+            print_success "Successfully installed from setup.py"
+        else
+            print_error "Failed to install from setup.py"
+            echo -e "${YELLOW}You may need to install dependencies manually later.${NC}"
+        fi
+    fi
+
+    echo ""
+}
+
+# ============================================================
 # FILE STRUCTURE VALIDATION
 # ============================================================
 
 validate_files() {
     print_section "📁 File Structure Validation"
-    
+
     local all_valid=true
-    
+
     # Check main.py
     if [ -f "$MAIN_PY" ]; then
         print_success "Found main.py"
@@ -426,7 +477,14 @@ validate_files() {
         print_error "main.py not found at: $MAIN_PY"
         all_valid=false
     fi
-    
+
+    # Check requirements.txt
+    if [ -f "$SCRIPT_DIR/requirements.txt" ]; then
+        print_success "Found requirements.txt"
+    else
+        print_info "Note: requirements.txt not found, will install from setup.py"
+    fi
+
     # Check src directory
     if [ -d "$SCRIPT_DIR/src" ]; then
         print_success "Found src/ directory"
@@ -434,7 +492,7 @@ validate_files() {
         print_error "src/ directory not found"
         all_valid=false
     fi
-    
+
     # Check critical modules
     local critical_modules=(
         "src/__init__.py"
@@ -442,7 +500,7 @@ validate_files() {
         "src/git_operations.py"
         "src/folder_navigator.py"
     )
-    
+
     for module in "${critical_modules[@]}"; do
         if [ -f "$SCRIPT_DIR/$module" ]; then
             print_success "Found $module"
@@ -451,9 +509,9 @@ validate_files() {
             all_valid=false
         fi
     done
-    
+
     echo ""
-    
+
     if [ "$all_valid" = false ]; then
         print_error "File structure validation failed"
         echo ""
@@ -462,7 +520,7 @@ validate_files() {
         echo ""
         exit 1
     fi
-    
+
     return 0
 }
 
@@ -791,7 +849,10 @@ main() {
     validate_git || true  # Git is optional
     validate_files || exit 1
     validate_permissions || exit 1
-    
+
+    # Install dependencies
+    install_dependencies
+
     # Configure alias
     configure_shell_alias
     

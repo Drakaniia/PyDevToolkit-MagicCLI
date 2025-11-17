@@ -34,7 +34,21 @@ setup(
     ],
     python_requires=">=3.7",
     install_requires=[
-        "pyyaml>=6.0 ; python_version>='3.7'",  # Optional dependency that can be missing
+        "pyyaml>=6.0 ; python_version>='3.7'",
+        "colorama>=0.4.4",
+        "pyfiglet>=0.7",
+        "termcolor>=1.1.0",
+        "fastapi>=0.100.0",
+        "pydantic>=2.0.0",
+        "sqlalchemy>=2.0.0",
+        "python-jose[cryptography]>=3.3.0",
+        "passlib>=1.7.0",
+        "flask>=2.0.0",
+        "flask-sqlalchemy>=3.0.0",
+        "flask-migrate>=4.0.0",
+        "flask-cors>=4.0.0",
+        "flask-jwt-extended>=4.0.0",
+        "djangorestframework>=3.0.0",
     ],
     extras_require={
         "test": [
