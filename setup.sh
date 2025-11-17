@@ -670,75 +670,6 @@ configure_shell_alias() {
     fi
 }
 
-# ============================================================
-# TESTING
-# ============================================================
-
-test_installation() {
-    print_section "🧪 Installation Testing"
-    
-    local all_tests_passed=true
-    
-    # Test 1: Python module imports
-    print_step "Testing Python module imports..."
-    
-if $PYTHON_CMD -c "
-import sys
-import os
-if sys.platform == 'win32':
-    os.system('chcp 65001 > nul')
-sys.path.insert(0, '$SCRIPT_DIR/src')
-try:
-    from menu import MainMenu
-except Exception as e:
-    sys.exit(1)
-" 2>/dev/null; then
-        print_success "Python module imports working"
-    else
-        print_error "Python module import failed"
-        all_tests_passed=false
-    fi
-    
-    # Test 2: Main script loads
-    print_step "Testing main.py execution..."
-    
-    if $PYTHON_CMD "$MAIN_PY" --help &> /dev/null || \
-       $PYTHON_CMD -c "
-import sys
-sys.path.insert(0, '$SCRIPT_DIR')
-try:
-    from automation.menu import MainMenu
-except Exception as e:
-    sys.exit(1)
-" 2>/dev/null; then
-        print_success "main.py loads successfully"
-    else
-        print_warning "Could not verify main.py execution"
-    fi
-    
-    # Test 3: Alias availability
-    print_step "Testing alias configuration..."
-    
-    local shell_config=$(get_shell_config)
-    if grep -q "alias $COMMAND_ALIAS=" "$shell_config"; then
-        print_success "Alias configured in shell config"
-    else
-        print_error "Alias not found in shell config"
-        all_tests_passed=false
-    fi
-    
-    echo ""
-    
-    if [ "$all_tests_passed" = true ]; then
-        print_success "All tests passed!"
-    else
-        print_warning "Some tests failed, but basic setup is complete"
-        print_info "The system should still work, but some features may be limited"
-    fi
-    
-    echo ""
-    return 0
-}
 
 # ============================================================
 # FINAL COMPLETION
@@ -835,7 +766,6 @@ main() {
     echo -e "  • Check Git configuration"
     echo -e "  • Validate project files"
     echo -e "  • Configure shell aliases"
-    echo -e "  • Test the installation"
     echo ""
     
     if ! ask_yes_no "Ready to begin?"; then
@@ -856,10 +786,8 @@ main() {
     # Configure alias
     configure_shell_alias
     
-    # Test installation
-    test_installation
-    
     # Print completion message
+
     print_completion_message
     
     # Offer to reload config

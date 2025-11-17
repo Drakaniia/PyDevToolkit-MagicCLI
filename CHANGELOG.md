@@ -12,6 +12,19 @@
 
 ### 2025-11-17
 
+#### 🔧 Maintenance
+
+- **fix setup script** (`adc3f8b`) - *Drakaniia*
+  - 📁 2 backend files
+  - 📊 *⚠️ **NO TESTS ADDED** for bug fix*
+
+**Total**: 1 commit(s)
+
+---
+
+
+### 2025-11-17
+
 #### 🔒 Security Fixes
 
 - **Fixed the security regex pattern** (`6bc82dc`) - *Qwenzy*
