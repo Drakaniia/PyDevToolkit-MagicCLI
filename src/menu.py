@@ -428,7 +428,13 @@ class MainMenu(Menu):
         self._dev_mode_menu = None
         self._backend_dev_menu = None
 
-        super().__init__("🚀 Python Automation System - Main Menu")
+        # Use different title based on system to avoid Unicode encoding issues
+        import sys
+        if sys.platform == "win32":
+            title = "Python Automation System - Main Menu"
+        else:
+            title = "🚀 Python Automation System - Main Menu"
+        super().__init__(title)
 
     def setup_items(self):
         """Setup main menu items - called only once during initialization"""
