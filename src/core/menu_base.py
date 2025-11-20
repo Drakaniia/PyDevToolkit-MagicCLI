@@ -1,0 +1,67 @@
+"""
+Base menu class and menu item definitions
+"""
+from abc import ABC, abstractmethod
+from typing import List, Optional, Callable, Any
+from .menu_renderer import MenuRenderer
+from .menu_navigation import MenuNavigation
+
+
+class MenuItem:
+    """Represents a single menu item"""
+
+    def __init__(self, label: str, action: Callable[[], Any]):
+        self.label: str = label
+        self.action: Callable[[], Any] = action
+
+    def __repr__(self) -> str:
+        return f"MenuItem(label='{self.label}')"
+
+
+class Menu(ABC):
+    """
+    Abstract base class for all menus with responsive viewport adaptation
+    
+    Features:
+    - Automatic terminal size detection
+    - Smooth scrolling for small viewports
+    - Optimized redraw for large menus
+    - Arrow key navigation with proper cursor positioning
+    """
+
+    def __init__(self, title: str):
+        self.title: str = title
+        self.items: List[MenuItem] = []
+        self._items_initialized: bool = False
+        self._renderer: MenuRenderer = MenuRenderer(title)
+        self._navigation: MenuNavigation = MenuNavigation()
+        self.setup_items()
+        self._items_initialized = True
+
+    @abstractmethod
+    def setup_items(self) -> None:
+        """Setup menu items - must be implemented by subclasses"""
+        pass
+
+    def display(self, selected_idx: int = 0, initial: bool = True, 
+                force_full_redraw: bool = False) -> None:
+        """Display menu using renderer"""
+        self._renderer.display(self.items, selected_idx, initial, force_full_redraw)
+
+    def get_choice_with_arrows(self) -> int:
+        """Get user choice using arrow keys (if available)"""
+        return self._navigation.get_choice_with_arrows(self.items, self._renderer)
+
+    def run(self) -> None:
+        """Run menu loop"""
+        while True:
+            choice = self.get_choice_with_arrows()
+            self._renderer.clear_screen()
+            result = self.items[choice - 1].action()
+            if result == "exit":
+                break
+
+    @staticmethod
+    def clear_screen() -> None:
+        """Clear terminal screen"""
+        MenuRenderer.clear_screen()

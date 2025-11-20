@@ -530,15 +530,17 @@ class GitPushRetry:
         try:
             # On Windows, ping count is -n, not -c
             import sys
+            from ..core.security import SecurityValidator
+            
             if sys.platform == "win32":
-                result = subprocess.run(
+                result = SecurityValidator.safe_subprocess_run(
                     ['ping', '-n', '1', '8.8.8.8'],  # Google DNS
                     timeout=5,
                     capture_output=True,
                     text=True
                 )
             else:
-                result = subprocess.run(
+                result = SecurityValidator.safe_subprocess_run(
                     ['ping', '-c', '1', '8.8.8.8'],  # Google DNS
                     timeout=5,
                     capture_output=True,
@@ -1373,7 +1375,8 @@ class GitPush:
         
         # Also refresh the Git index to ensure we see all filesystem changes
         try:
-            subprocess.run(['git', 'status'], capture_output=True, cwd=Path.cwd(), timeout=5)
+            from ..core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(['git', 'status'], capture_output=True, cwd=Path.cwd(), timeout=5)
         except:
             pass  # Not critical if this fails
         
@@ -1430,7 +1433,8 @@ class GitPush:
             # This bypasses any potential caching issues
             if not has_changes:
                 print("🔄 Double-checking for changes with direct Git command...")
-                result = subprocess.run(
+                from ..core.security import SecurityValidator
+                result = SecurityValidator.safe_subprocess_run(
                     ['git', 'status', '--porcelain', '--untracked-files=all'],
                     capture_output=True,
                     text=True,
@@ -1448,7 +1452,7 @@ class GitPush:
             
             # Also check for staged changes that might not show in porcelain
             if not has_changes:
-                staged_result = subprocess.run(
+                staged_result = SecurityValidator.safe_subprocess_run(
                     ['git', 'diff', '--cached', '--name-only'],
                     capture_output=True,
                     text=True,
@@ -1469,7 +1473,7 @@ class GitPush:
             # In case of error, be conservative and assume there might be changes
             print("🔄 Attempting direct git status as fallback...")
             try:
-                fallback_result = subprocess.run(
+                fallback_result = SecurityValidator.safe_subprocess_run(
                     ['git', 'status', '--porcelain'],
                     capture_output=True,
                     text=True,

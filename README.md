@@ -13,18 +13,6 @@
 
 ---
 
-## 🔒 Security-First Architecture
-
-PyDevToolkit-MagicCLI implements comprehensive security measures:
-
-- **Input Sanitization**: All user inputs are validated against safe patterns
-- **Command Injection Prevention**: Dangerous command sequences are blocked
-- **Path Traversal Protection**: Directory traversal attempts are prevented
-- **Secure Subprocess Execution**: Commands are validated before execution
-- **Configuration Management**: Security parameters centrally managed
-- **Audit Logging**: Security-relevant events are logged for monitoring
-- **Error Handling**: Comprehensive exception hierarchy with safe error messages
-
 ## 🎯 How to Use
 
 ### Installation

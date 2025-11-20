@@ -12,7 +12,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from menu import Menu, MenuItem
+from core.menu_base import Menu, MenuItem
 
 
 class AuthManager(Menu):
@@ -70,7 +70,7 @@ class AuthManager(Menu):
         print("\n🔑 Creating JWT Authentication System...")
         
         # Generate JWT secret key
-        secret_key = secrets.token_urlsafe(32)
+        secret_key = os.environ.get('JWT_SECRET_KEY') or secrets.token_urlsafe(32)
         
         # Create JWT authentication module
         jwt_auth_content = f'''"""
@@ -1009,7 +1009,7 @@ def role_required(role_name):
         print("\n🔐 Configuring JWT Settings...")
         
         # Generate new JWT secret
-        secret_key = secrets.token_urlsafe(32)
+        secret_key = os.environ.get('JWT_SECRET_KEY') or secrets.token_urlsafe(32)
         
         jwt_config = {
             "jwt": {
