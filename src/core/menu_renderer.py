@@ -10,28 +10,40 @@ from typing import List, Tuple, Optional, Any
 
 class TerminalInfo:
     """Handle terminal size and viewport information"""
-    
-    @staticmethod
-    def get_size() -> Tuple[int, int]:
-        """Get current terminal size (columns, lines)"""
+
+    _cached_size: Optional[Tuple[int, int]] = None
+
+    @classmethod
+    def get_size(cls) -> Tuple[int, int]:
+        """Get current terminal size (columns, lines) with caching"""
+        if cls._cached_size is not None:
+            return cls._cached_size
+
         try:
             size = shutil.get_terminal_size(fallback=(80, 24))
-            return size.columns, size.lines
+            cls._cached_size = (size.columns, size.lines)
+            return cls._cached_size
         except Exception:
-            return 80, 24
-    
-    @staticmethod
-    def is_small_viewport() -> bool:
+            cls._cached_size = (80, 24)
+            return cls._cached_size
+
+    @classmethod
+    def is_small_viewport(cls) -> bool:
         """Check if terminal viewport is small"""
-        cols, lines = TerminalInfo.get_size()
+        cols, lines = cls.get_size()
         return lines < 20 or cols < 70
-    
-    @staticmethod
-    def get_available_lines() -> int:
+
+    @classmethod
+    def get_available_lines(cls) -> int:
         """Get number of lines available for menu items"""
-        _, lines = TerminalInfo.get_size()
+        _, lines = cls.get_size()
         # Reserve space for header (5) + footer (3) + padding
         return max(5, lines - 8)
+
+    @classmethod
+    def invalidate_cache(cls) -> None:
+        """Invalidate the cached terminal size"""
+        cls._cached_size = None
 
 
 class MenuRenderer:
@@ -48,11 +60,11 @@ class MenuRenderer:
         self.title: str = title
         self._scroll_offset: int = 0
     
-    def display(self, items: List[Any], selected_idx: int = 0, initial: bool = True, 
+    def display(self, items: List[Any], selected_idx: int = 0, initial: bool = True,
                 force_full_redraw: bool = False) -> None:
         """
         Display the menu with responsive viewport handling
-        
+
         Args:
             items: List of menu items to display
             selected_idx: Currently selected item index
@@ -220,5 +232,7 @@ class MenuRenderer:
     
     @staticmethod
     def clear_screen() -> None:
-        """Clear the terminal screen"""
+        """Clear the terminal screen and invalidate terminal size cache"""
         os.system('cls' if os.name == 'nt' else 'clear')
+        # Invalidate terminal size cache since window dimensions might change after clear
+        TerminalInfo.invalidate_cache()

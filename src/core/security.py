@@ -23,16 +23,16 @@ class SecurityValidator:
     def validate_command_input(user_input: str) -> bool:
         """
         Validate command input for safety
-        
+
         Args:
             user_input: The command input to validate
-            
+
         Returns:
             bool: True if safe, False otherwise
         """
         if not user_input:
             return True  # Empty input is safe
-            
+
         # Check for dangerous characters/sequences
         dangerous_patterns = [
             r';',           # Command separators
@@ -42,12 +42,18 @@ class SecurityValidator:
             r'\$\(',        # Command substitution
             r'`',           # Command substitution
             r'&',           # Background execution
+            r'\$\{',        # Variable expansion
+            r'\$\[',        # Array expansion
+            r'\\x[0-9a-fA-F]{2}',  # Hex escape sequences
+            r'\\u[0-9a-fA-F]{4}',  # Unicode escape sequences
+            r'\x00',        # Null bytes (null byte injection)
+            r'%00',         # URL encoded null bytes
         ]
-        
+
         for pattern in dangerous_patterns:
-            if re.search(pattern, user_input):
+            if re.search(pattern, user_input, re.IGNORECASE):
                 return False
-                
+
         # Check against safe command pattern
         return bool(SecurityValidator.SAFE_COMMAND_PATTERN.match(user_input))
     
@@ -55,20 +61,20 @@ class SecurityValidator:
     def validate_path(path: str) -> bool:
         """
         Validate file path for safety
-        
+
         Args:
             path: The path to validate
-            
+
         Returns:
             bool: True if safe, False otherwise
         """
         if not path:
             return True  # Empty path is safe
-            
+
         # Check for directory traversal
         if '..' in path.replace('\\', '/').split('/'):
             return False
-            
+
         # Check for absolute paths that might lead outside project
         try:
             abs_path = Path(path).resolve()
@@ -78,45 +84,79 @@ class SecurityValidator:
         except ValueError:
             # Path is outside project root
             return False
-            
+
         # Check against safe path pattern
         if not SecurityValidator.SAFE_PATH_PATTERN.match(path):
             return False
-            
+
+        # Additional check: prohibit certain dangerous patterns
+        dangerous_path_patterns = [
+            r'\x00',  # Null bytes (null byte injection)
+            r'%00',   # URL encoded null bytes
+        ]
+
+        for pattern in dangerous_path_patterns:
+            if re.search(pattern, path, re.IGNORECASE):
+                return False
+
         return True
     
     @staticmethod
     def validate_file_name(filename: str) -> bool:
         """
         Validate file name for safety
-        
+
         Args:
             filename: The file name to validate
-            
+
         Returns:
             bool: True if safe, False otherwise
         """
         if not filename:
             return True  # Empty filename is safe
-            
+
         # Get just the filename part (not the path)
         file_part = Path(filename).name
+
+        # Prevent directory traversal even in filename
+        if '..' in file_part or '/' in file_part or '\\' in file_part:
+            return False
+
+        # Check for null bytes
+        if '\x00' in file_part:
+            return False
+
         return bool(SecurityValidator.SAFE_FILE_NAME_PATTERN.match(file_part))
     
     @staticmethod
     def validate_branch_name(branch_name: str) -> bool:
         """
         Validate Git branch name for safety
-        
+
         Args:
             branch_name: The branch name to validate
-            
+
         Returns:
             bool: True if safe, False otherwise
         """
         if not branch_name:
             return True  # Empty branch name is safe
-            
+
+        # Git has specific rules for branch names - validate against them
+        dangerous_patterns = [
+            r'\.\..',        # Cannot contain .lock or .. in them.
+            r'@{',          # Cannot end with .lock or contain sequence @{.
+            r'\.$',         # Cannot end with .
+            r'^/',          # Cannot begin with /
+            r'//',          # Cannot contain double /
+            r'\s+$',        # Cannot end with whitespace
+            r'^\s+',        # Cannot begin with whitespace
+        ]
+
+        for pattern in dangerous_patterns:
+            if re.search(pattern, branch_name):
+                return False
+
         return bool(SecurityValidator.SAFE_BRANCH_NAME_PATTERN.match(branch_name))
     
     @staticmethod
@@ -180,14 +220,14 @@ class SecurityValidator:
     def safe_subprocess_run(cmd: List[str], **kwargs) -> subprocess.CompletedProcess:
         """
         Safely run a subprocess command with validation
-        
+
         Args:
             cmd: Command to run as a list of strings
             **kwargs: Additional arguments for subprocess.run
-            
+
         Returns:
             subprocess.CompletedProcess: Result of the command execution
-            
+
         Raises:
             AutomationError: If command contains potentially dangerous elements
         """
@@ -199,8 +239,12 @@ class SecurityValidator:
                     ErrorSeverity.ERROR,
                     suggestion="Use only safe command elements without shell metacharacters"
                 )
-        
-        # Execute the command with subprocess
+
+        # Ensure shell=False to prevent shell injection
+        if 'shell' in kwargs:
+            kwargs.pop('shell')  # Remove any shell parameter to enforce shell=False
+
+        # Execute the command with subprocess using shell=False (default)
         return subprocess.run(cmd, **kwargs)
 
 

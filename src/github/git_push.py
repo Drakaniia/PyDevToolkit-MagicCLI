@@ -526,40 +526,20 @@ class GitPushRetry:
 
     def _check_network_connectivity(self) -> bool:
         """Check if there's internet connectivity"""
-        import subprocess
+        from ..core.security import SecurityValidator
+
         try:
-            # On Windows, ping count is -n, not -c
-            import sys
-            from ..core.security import SecurityValidator
-            
-            if sys.platform == "win32":
-                result = SecurityValidator.safe_subprocess_run(
-                    ['ping', '-n', '1', '8.8.8.8'],  # Google DNS
-                    timeout=5,
-                    capture_output=True,
-                    text=True
-                )
-            else:
-                result = SecurityValidator.safe_subprocess_run(
-                    ['ping', '-c', '1', '8.8.8.8'],  # Google DNS
-                    timeout=5,
-                    capture_output=True,
-                    text=True
-                )
-            return result.returncode == 0
+            # Use a safe connection method without system commands
+            import socket
+            socket.create_connection(("8.8.8.8", 53), timeout=5)  # DNS port
+            return True
         except:
-            # Fallback: try to reach a common domain
             try:
-                import socket
-                socket.create_connection(("8.8.8.8", 53), timeout=5)  # DNS port
+                import urllib.request
+                urllib.request.urlopen('https://www.google.com', timeout=5)
                 return True
             except:
-                try:
-                    import urllib.request
-                    urllib.request.urlopen('https://www.google.com', timeout=5)
-                    return True
-                except:
-                    return False
+                return False
 
     def _check_remote_accessibility(self) -> bool:
         """Check if remote repository is accessible"""

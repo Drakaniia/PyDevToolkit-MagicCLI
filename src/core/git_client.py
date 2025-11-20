@@ -451,6 +451,7 @@ class GitClient:
                 )
 
         try:
+            # Ensure shell=False to prevent shell injection
             result = subprocess.run(
                 cmd,
                 cwd=self.working_dir,
@@ -458,7 +459,8 @@ class GitClient:
                 text=True,
                 encoding='utf-8',
                 errors='replace',
-                timeout=timeout
+                timeout=timeout,
+                shell=False  # Explicitly disable shell to prevent injection
             )
 
             # Log command execution for audit purposes

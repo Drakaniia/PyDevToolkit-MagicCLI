@@ -4,6 +4,7 @@ Responsive Menu System with Adaptive Viewport Handling
 Refactored: Split into modular components for better maintainability
 """
 from core.menu_base import Menu, MenuItem
+from typing import Any, Optional
 
 
 class MainMenu(Menu):
@@ -25,7 +26,7 @@ class MainMenu(Menu):
             title = "🚀 Python Automation System - Main Menu"
         super().__init__(title)
 
-    def setup_items(self):
+    def setup_items(self) -> None:
         """Setup main menu items - called only once during initialization"""
         # Only create items if not already initialized
         if self.items:
@@ -59,33 +60,33 @@ class MainMenu(Menu):
             MenuItem("Backend Dev (Backend Automation)", self._run_backend_dev),
             MenuItem("Exit", self._exit_program)
         ]
-    
-    def _run_git_operations(self):
+
+    def _run_git_operations(self) -> Optional[str]:
         """Run GitHub operations menu"""
         self._git_menu.run()
         return None
-    
-    def _show_structure(self):
+
+    def _show_structure(self) -> Optional[str]:
         """Show project structure"""
         self._structure_viewer.show_structure()
         return None
-    
-    def _navigate_folders(self):
+
+    def _navigate_folders(self) -> Optional[str]:
         """Navigate folders"""
         self._folder_nav.navigate()
         return None
-    
-    def _run_dev_mode(self):
+
+    def _run_dev_mode(self) -> Optional[str]:
         """Run Dev Mode menu"""
         self._dev_mode_menu.run()
         return None
-    
-    def _run_backend_dev(self):
+
+    def _run_backend_dev(self) -> Optional[str]:
         """Run Backend Dev menu"""
         self._backend_dev_menu.run()
         return None
-    
-    def _exit_program(self):
+
+    def _exit_program(self) -> str:
         """Exit the program"""
         self.clear_screen()
         print("\n" + "="*70)

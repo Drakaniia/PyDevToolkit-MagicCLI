@@ -260,20 +260,30 @@ class StructureViewer:
     def _should_exclude(self, path: Path, is_dir: bool = False) -> bool:
         """
         Determine if path should be excluded
-        
+
         Enhanced Strategy:
         1. NEVER exclude if it's an ALWAYS_SHOW file
         2. ALWAYS exclude hidden folders (starting with .) UNLESS they contain only important files
         3. NEVER exclude non-hidden directories with source code (including deep nested ones)
         4. ONLY exclude if it's in EXCLUDE_DIRS/FILES or .gitignore
-        
+
         Args:
             path: Path to check
             is_dir: Whether it's a directory
-        
+
         Returns:
             True if should be excluded
         """
+        # Validate path for security (check for path traversal)
+        try:
+            # Resolve path to prevent directory traversal
+            resolved_path = path.resolve()
+            # Ensure the path is within the current directory
+            resolved_path.relative_to(self.current_dir.resolve())
+        except ValueError:
+            # Path is outside the current directory, exclude it for security
+            return True
+
         name = path.name
         
         # Rule 1: Never exclude always-show files
@@ -446,38 +456,41 @@ class StructureViewer:
         """
         Deep recursive check for source code with more thorough scanning
         This is used to ensure important directories like src/app are never hidden
-        
+
         Args:
             directory: Directory to check
             depth: Current recursion depth
-            
+
         Returns:
             True if directory or any subdirectory contains source files
         """
         # Prevent infinite recursion and limit depth for performance
         if depth > 4:  # Allow deeper checking than shallow version
             return False
-        
+
         try:
-            for item in directory.iterdir():
-                # Skip hidden directories and known excluded directories
-                if item.name.startswith('.') or item.name in self.EXCLUDE_DIRS:
-                    continue
-                    
-                if item.is_file():
-                    # Check if it's a source file
-                    if item.suffix in self.SOURCE_EXTENSIONS:
-                        return True
-                    # Check if it's an important file
-                    if item.name in self.ALWAYS_SHOW_FILES:
-                        return True
-                elif item.is_dir():
-                    # Recursively check subdirectories
-                    if self._has_source_code_deep(item, depth + 1):
-                        return True
-        except (PermissionError, OSError):
+            # Use scandir for better performance when available (Python 3.5+)
+            # This is faster than iterdir() for directories with many files
+            with os.scandir(directory) as entries:
+                for entry in entries:
+                    # Use entry methods to avoid extra stat calls
+                    if entry.is_file():
+                        # Check if it's a source file
+                        if Path(entry.name).suffix in self.SOURCE_EXTENSIONS:
+                            return True
+                        # Check if it's an important file
+                        if entry.name in self.ALWAYS_SHOW_FILES:
+                            return True
+                    elif entry.is_dir():
+                        # Skip hidden directories and known excluded directories
+                        if entry.name.startswith('.') or entry.name in self.EXCLUDE_DIRS:
+                            continue
+                        # Recursively check subdirectories
+                        if self._has_source_code_deep(Path(entry.path), depth + 1):
+                            return True
+        except (PermissionError, OSError, FileNotFoundError):
             pass
-        
+
         return False
     
     def _matches_pattern(self, name: str, pattern: str) -> bool:
