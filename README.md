@@ -19,10 +19,10 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Drakaniia/python-automation.git
-cd python-src
+git clone https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
+cd PyDevToolkit-MagicCLI
 
-# 2. Run the setup script
+# 2. Run the setup script (Linux/macOS or Git Bash on Windows)
 bash setup.sh
 
 # 3. Reload your shell
@@ -100,6 +100,30 @@ $ magic
 - **Python 3.7+**
 - **Git**
 - **Bash shell** (Linux/macOS) or **Git Bash** (Windows)
+
+---
+
+## 🧭 Development notes
+
+- The main entrypoint for the menu is `main.py` (or `src/magic.py` when using the `magic` alias).
+- **Dev Mode (Web Dev Automation)**: from the main menu, opens tools for:
+  - Creating modern frontend/mobile projects (React, Next.js, Vue, Svelte, React Native, etc.).
+  - Running Node-based dev servers (`npm run dev`, `npm run start`, etc.).
+  - Running JS/Python tests via the "Run Tests (All Types)" option.
+- **Backend Dev (Backend Automation)**: from the main menu, opens tools for:
+  - Database setup and connection config.
+  - API scaffolding (FastAPI, Flask, DRF, Express.js).
+  - Auth and user-management scaffolding.
+- **Running tests directly** (when Python tests are present under `tests/`):
+  - All tests via pytest:
+    ```bash
+    python -m pytest tests/ -v
+    ```
+  - Or a specific test file:
+    ```bash
+    python tests/test_security.py
+    ```
+- For Warp users, repository-specific agent rules and commands are documented in `WARP.md`.
 
 ---
 
