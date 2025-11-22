@@ -3,6 +3,14 @@ automation/menu.py
 Responsive Menu System with Adaptive Viewport Handling
 Refactored: Split into modular components for better maintainability
 """
+import sys
+from pathlib import Path
+
+# Ensure the src directory is in the Python path
+src_path = Path(__file__).parent
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
+
 from core.menu_base import Menu, MenuItem
 from typing import Any, Optional
 
@@ -36,7 +44,7 @@ class MainMenu(Menu):
         from git_operations import GitMenu
         from structure_viewer import StructureViewer
         from folder_navigator import FolderNavigator
-        from dev_mode import DevModeMenu
+        from dev_mode.dev_mode import DevModeMenu
         from backend.backend_menu import BackendDevMenu
 
         # Create instances once and reuse them

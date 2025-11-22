@@ -114,7 +114,7 @@ class MenuRenderer:
             # Show last part of path
             current_dir = "..." + current_dir[-(cols-28):]
         
-        print(f"  📍 Current Directory: {current_dir}")
+        print(f"  [DIR] Current Directory: {current_dir}")
         print("=" * sep_width)
         
         # Calculate visible range
@@ -123,7 +123,7 @@ class MenuRenderer:
         
         # Show scroll indicator at top if needed
         if self._scroll_offset > 0:
-            scroll_info = f"  ↑ {self._scroll_offset} more above..."
+            scroll_info = f"  ^ {self._scroll_offset} more above..."
             print(scroll_info[:cols-2])
         
         # Display visible menu items
@@ -133,7 +133,7 @@ class MenuRenderer:
         # Show scroll indicator at bottom if needed
         if visible_end < len(items):
             remaining = len(items) - visible_end
-            scroll_info = f"  ↓ {remaining} more below..."
+            scroll_info = f"  v {remaining} more below..."
             print(scroll_info[:cols-2])
         
         print("=" * sep_width)
@@ -141,12 +141,12 @@ class MenuRenderer:
         # Footer - adapt instructions based on viewport and capabilities
         if is_small:
             if self._has_arrow_support():
-                print("\n  ↑/↓: Navigate | Enter: Select")
+                print("\n  ^/v: Navigate | Enter: Select")
             else:
                 print("\n  Type number + Enter")
         else:
             if self._has_arrow_support():
-                print("\n  Use ↑/↓ arrow keys to navigate, Enter to select, or type number")
+                print("\n  Use ^/v arrow keys to navigate, Enter to select, or type number")
             else:
                 print("\n  Type number and press Enter to select")
     
@@ -191,7 +191,7 @@ class MenuRenderer:
             line_text = line_text[:max_text_width-3] + "..."
         
         if is_selected:
-            full_line = f"  ► {line_text}"
+            full_line = f"  > {line_text}"
             # Pad to full width for consistent highlight
             full_line = full_line.ljust(min(70, cols - 2))
             print(f"\033[1;46m{full_line}\033[0m")
@@ -208,7 +208,7 @@ class MenuRenderer:
             line_text = line_text[:max_text_width-3] + "..."
 
         if is_selected:
-            full_line = f"  ► {line_text}"
+            full_line = f"  > {line_text}"
             full_line = full_line.ljust(min(70, cols - 2))
             # Apply highlight and then reset formatting
             sys.stdout.write(f"\033[1;46m{full_line}\033[0m")

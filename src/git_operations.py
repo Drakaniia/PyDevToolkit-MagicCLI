@@ -3,8 +3,15 @@ Consolidated Git Operations Module
 Main orchestrator for all Git operations using modular components
 UPDATED: Changelog is now auto-generated after successful push
 """
+import sys
 from pathlib import Path
 from typing import Any, Optional
+
+# Add src directory to path to enable imports
+src_path = Path(__file__).parent
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
+
 from github.git_status import GitStatus
 from github.git_log import GitLog
 from github.git_pull import GitPull
@@ -15,10 +22,7 @@ from github.git_removesubmodule import GitRemoveSubmodule
 from github.git_cache import GitCache
 from github.git_diff import GitDiff
 from github.git_stash import GitStash
-try:
-    from .menu import Menu, MenuItem
-except ImportError:
-    from menu import Menu, MenuItem
+from menu import Menu, MenuItem
 from core.git_client import get_git_client
 
 
