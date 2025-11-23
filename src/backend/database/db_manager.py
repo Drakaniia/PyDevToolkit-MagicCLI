@@ -131,16 +131,10 @@ class DatabaseManager(Menu):
             shadow_conn = sqlite3.connect(shadow_name)
             shadow_conn.close()
 
-            # Create connection strings for both databases
-            main_conn_str = f"sqlite:///{Path(db_name).absolute()}"
-            shadow_conn_str = f"sqlite:///{Path(shadow_name).absolute()}"
-
             # Save SQLite configuration to config file
             config = {
                 "database": {
                     "type": "sqlite",
-                    "connection_string": main_conn_str,
-                    "shadow_connection_string": shadow_conn_str,
                     "name": db_name,
                     "shadow_name": shadow_name,
                     "path": str(Path(db_name).absolute()),
@@ -155,8 +149,9 @@ class DatabaseManager(Menu):
             print(f"  - Main: {db_name}")
             print(f"  - Shadow: {shadow_name}")
             print(f"✅ Configuration saved to database_config.json")
-            print(f"   - Main Database URL: {main_conn_str}")
-            print(f"   - Shadow Database URL: {shadow_conn_str}")
+
+            # Generate .env for SQLite
+            self._generate_sqlite_env(config)
 
         elif db_type == 'postgresql':
             self._setup_postgresql()
@@ -166,6 +161,29 @@ class DatabaseManager(Menu):
             self._setup_mongodb()
         elif db_type == 'redis':
             self._setup_redis()
+
+    def _generate_sqlite_env(self, config):
+        """Generate .env file for SQLite configuration"""
+        env_content = f"""# SQLite Database Configuration
+DB_TYPE=sqlite
+DB_NAME={config['database']['name']}
+DB_SHADOW_NAME={config['database']['shadow_name']}
+DB_PATH={config['database']['path']}
+DB_SHADOW_PATH={config['database']['shadow_path']}
+
+# Database URLs
+DATABASE_URL=sqlite:///{config['database']['path']}
+SHADOW_DATABASE_URL=sqlite:///{config['database']['shadow_path']}
+
+# Connection Settings
+SQLITE_TIMEOUT=30
+"""
+
+        with open('.env', 'w') as f:
+            f.write(env_content)
+
+        print(f"✅ Environment file (.env) generated with SQLite configuration")
+        print(f"💡 Use these environment variables in your application")
 
     def _setup_postgresql(self):
         """Setup PostgreSQL database"""
