@@ -17,7 +17,7 @@ class APIGenerator(Menu):
     """API Development Tools Menu"""
 
     def __init__(self):
-        super().__init__("🚀 API Development Tools")
+        super().__init__("API Development Tools")
 
     def setup_items(self):
         """Setup API development menu items"""
@@ -25,20 +25,20 @@ class APIGenerator(Menu):
             return
 
         self.items = [
-            MenuItem("🔧 REST API Generator", self._generate_rest_api),
-            MenuItem("📊 GraphQL API Generator", self._generate_graphql_api),
-            MenuItem("📚 API Documentation Generator", self._generate_api_docs),
-            MenuItem("🧪 API Testing Suite", self._create_api_tests),
-            MenuItem("🎭 Mock Data Generator", self._generate_mock_data),
-            MenuItem("🔍 API Validator", self._validate_api),
-            MenuItem("🔙 Back to Backend Dev", self._back_to_backend)
+            MenuItem("REST API Generator", self._generate_rest_api),
+            MenuItem("GraphQL API Generator", self._generate_graphql_api),
+            MenuItem("API Documentation Generator", self._generate_api_docs),
+            MenuItem("API Testing Suite", self._create_api_tests),
+            MenuItem("Mock Data Generator", self._generate_mock_data),
+            MenuItem("API Validator", self._validate_api),
+            MenuItem("Back to Backend Dev", self._back_to_backend)
         ]
 
     def _generate_rest_api(self):
         """Generate REST API endpoints"""
         self.clear_screen()
         print("=" * 60)
-        print("  🔧 REST API Generator")
+        print("  REST API Generator")
         print("=" * 60)
         
         print("\nSelect framework:")
@@ -82,7 +82,7 @@ class APIGenerator(Menu):
         elif framework == 'express':
             self._create_express_api(resource_name, endpoints)
         
-        print(f"✅ REST API for {resource_name} created successfully!")
+        print(f"REST API for {resource_name} created successfully!")
 
     def _generate_crud_endpoints(self, resource, base_path, framework):
         """Generate CRUD endpoints"""
@@ -184,7 +184,7 @@ async def delete_{resource.lower()}(item_id: int):
         with open(filename, 'w') as f:
             f.write(content)
         
-        print(f"✅ Created {filename}")
+        print(f"Created {filename}")
 
     def _create_flask_api(self, resource, endpoints):
         """Create Flask endpoints"""
@@ -248,7 +248,7 @@ def delete_{resource.lower()}(item_id):
         with open(filename, 'w') as f:
             f.write(content)
         
-        print(f"✅ Created {filename}")
+        print(f"Created {filename}")
 
     def _create_django_api(self, resource, endpoints):
         """Create Django REST Framework endpoints"""
@@ -321,7 +321,7 @@ class {resource}(models.Model):
         with open('models.py', 'w') as f:
             f.write(models_content)
         
-        print("✅ Created Django REST Framework files")
+        print("Created Django REST Framework files")
 
     def _create_express_api(self, resource, endpoints):
         """Create Express.js endpoints"""
@@ -395,13 +395,13 @@ module.exports = router;
         with open(filename, 'w') as f:
             f.write(content)
         
-        print(f"✅ Created {filename}")
+        print(f"Created {filename}")
 
     def _generate_graphql_api(self):
         """Generate GraphQL API"""
         self.clear_screen()
         print("=" * 60)
-        print("  📊 GraphQL API Generator")
+        print("  GraphQL API Generator")
         print("=" * 60)
         
         resource_name = input("Enter resource name: ")
@@ -483,7 +483,7 @@ schema = Schema(query=Query, mutation=Mutation)
         with open(f'{resource_name.lower()}_schema.py', 'w') as f:
             f.write(schema_content)
         
-        print(f"✅ GraphQL schema for {resource_name} created!")
+        print(f"GraphQL schema for {resource_name} created!")
         
         input("\nPress Enter to continue...")
         return None
@@ -492,7 +492,7 @@ schema = Schema(query=Query, mutation=Mutation)
         """Generate API documentation"""
         self.clear_screen()
         print("=" * 60)
-        print("  📚 API Documentation Generator")
+        print("  API Documentation Generator")
         print("=" * 60)
         
         print("\nSelect documentation format:")
@@ -516,7 +516,7 @@ schema = Schema(query=Query, mutation=Mutation)
 
     def _generate_openapi_docs(self):
         """Generate OpenAPI/Swagger documentation"""
-        print("\n📚 Generating OpenAPI/Swagger documentation...")
+        print("\nGenerating OpenAPI/Swagger documentation...")
         
         openapi_spec = {
             "openapi": "3.0.0",
@@ -550,7 +550,7 @@ schema = Schema(query=Query, mutation=Mutation)
         with open('openapi.json', 'w') as f:
             json.dump(openapi_spec, f, indent=2)
         
-        print("✅ OpenAPI specification generated!")
+        print("OpenAPI specification generated!")
 
     def _generate_postman_collection(self):
         """Generate Postman collection"""
@@ -575,7 +575,7 @@ schema = Schema(query=Query, mutation=Mutation)
         with open('api_collection.postman_collection.json', 'w') as f:
             json.dump(collection, f, indent=2)
         
-        print("✅ Postman collection generated!")
+        print("Postman collection generated!")
 
     def _generate_markdown_docs(self):
         """Generate Markdown documentation"""
@@ -625,13 +625,13 @@ Create a new item
         with open('API_DOCUMENTATION.md', 'w') as f:
             f.write(docs_content)
         
-        print("✅ Markdown documentation generated!")
+        print("Markdown documentation generated!")
 
     def _create_api_tests(self):
         """Create API testing suite"""
         self.clear_screen()
         print("=" * 60)
-        print("  🧪 API Testing Suite")
+        print("  API Testing Suite")
         print("=" * 60)
         
         print("\nSelect testing framework:")
@@ -727,7 +727,7 @@ def test_delete_item():
         with open('test_api.py', 'w') as f:
             f.write(test_content)
         
-        print("✅ pytest test suite created!")
+        print("pytest test suite created!")
 
     def _create_jest_tests(self):
         """Create Jest tests"""
@@ -826,7 +826,7 @@ describe('API Endpoints', () => {
         with open('api.test.js', 'w') as f:
             f.write(test_content)
         
-        print("✅ Jest test suite created!")
+        print("Jest test suite created!")
 
     def _create_mocha_tests(self):
         """Create Mocha tests"""
@@ -906,19 +906,19 @@ describe('API Endpoints', () => {
         with open('api.test.js', 'w') as f:
             f.write(test_content)
         
-        print("✅ Mocha test suite created!")
+        print("Mocha test suite created!")
 
     def _generate_mock_data(self):
         """Generate mock data for API testing"""
         self.clear_screen()
         print("=" * 60)
-        print("  🎭 Mock Data Generator")
+        print("  Mock Data Generator")
         print("=" * 60)
         
         data_type = input("Enter data type (user, product, post, etc.): ")
         count = int(input("Number of records to generate: "))
         
-        print(f"\n🎭 Generating {count} mock {data_type} records...")
+        print(f"\nGenerating {count} mock {data_type} records...")
         
         # Generate mock data based on type
         if data_type.lower() == 'user':
@@ -930,7 +930,7 @@ describe('API Endpoints', () => {
         else:
             self._generate_generic_mock_data(data_type, count)
         
-        print("✅ Mock data generated!")
+        print("Mock data generated!")
         
         input("\nPress Enter to continue...")
         return None
@@ -961,7 +961,7 @@ describe('API Endpoints', () => {
         with open('mock_users.json', 'w') as f:
             json.dump(users, f, indent=2)
         
-        print(f"✅ Generated {count} user records in mock_users.json")
+        print(f"Generated {count} user records in mock_users.json")
 
     def _generate_product_mock_data(self, count):
         """Generate product mock data"""
@@ -985,7 +985,7 @@ describe('API Endpoints', () => {
         with open('mock_products.json', 'w') as f:
             json.dump(products, f, indent=2)
         
-        print(f"✅ Generated {count} product records in mock_products.json")
+        print(f"Generated {count} product records in mock_products.json")
 
     def _generate_post_mock_data(self, count):
         """Generate post mock data"""
@@ -1008,7 +1008,7 @@ describe('API Endpoints', () => {
         with open('mock_posts.json', 'w') as f:
             json.dump(posts, f, indent=2)
         
-        print(f"✅ Generated {count} post records in mock_posts.json")
+        print(f"Generated {count} post records in mock_posts.json")
 
     def _generate_generic_mock_data(self, data_type, count):
         """Generate generic mock data"""
@@ -1026,17 +1026,17 @@ describe('API Endpoints', () => {
         with open(filename, 'w') as f:
             json.dump(data, f, indent=2)
         
-        print(f"✅ Generated {count} {data_type} records in {filename}")
+        print(f"Generated {count} {data_type} records in {filename}")
 
     def _validate_api(self):
         """Validate API endpoints"""
         self.clear_screen()
         print("=" * 60)
-        print("  🔍 API Validator")
+        print("  API Validator")
         print("=" * 60)
         
-        print("\n🔍 Validating API endpoints...")
-        print("✅ All endpoints are valid!")
+        print("\nValidating API endpoints...")
+        print("All endpoints are valid!")
         print("📊 Response formats are correct")
         print("🔒 Authentication is properly configured")
         print("📝 Documentation is up to date")

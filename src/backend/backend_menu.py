@@ -24,7 +24,7 @@ class BackendDevMenu(Menu):
         self._auth_manager = None
         self._framework_tools = None
         
-        super().__init__("🔧 Backend Development Automation")
+        super().__init__("Backend Development Automation")
 
     def setup_items(self):
         """Setup backend development menu items"""
@@ -49,11 +49,11 @@ class BackendDevMenu(Menu):
 
         # Create menu items
         self.items = [
-            MenuItem("🗄️  Database Management", self._run_database_manager),
-            MenuItem("🚀 API Development Tools", self._run_api_generator),
-            MenuItem("🔐 Authentication & Security", self._run_auth_manager),
-            MenuItem("⚙️  Backend Framework Tools", self._run_framework_tools),
-            MenuItem("🔙 Back to Main Menu", self._back_to_main)
+            MenuItem("Database Management", self._run_database_manager),
+            MenuItem("API Development Tools", self._run_api_generator),
+            MenuItem("Authentication & Security", self._run_auth_manager),
+            MenuItem("Backend Framework Tools", self._run_framework_tools),
+            MenuItem("Back to Main Menu", self._back_to_main)
         ]
 
     def _run_database_manager(self):

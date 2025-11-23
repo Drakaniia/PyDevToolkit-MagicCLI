@@ -17,7 +17,7 @@ class FrameworkTools(Menu):
     """Backend Framework Integration Tools Menu"""
 
     def __init__(self):
-        super().__init__("⚙️  Backend Framework Tools")
+        super().__init__("Backend Framework Tools")
 
     def setup_items(self):
         """Setup framework tools menu items"""
@@ -25,25 +25,25 @@ class FrameworkTools(Menu):
             return
 
         self.items = [
-            MenuItem("🚀 FastAPI Project Setup", self._setup_fastapi),
-            MenuItem("🐍 Django/Flask Management", self._manage_django_flask),
-            MenuItem("☕ Spring Boot Configuration", self._configure_spring_boot),
-            MenuItem("📦 Express.js Helpers", self._express_helpers),
-            MenuItem("🔧 Framework Migration Tools", self._framework_migration),
-            MenuItem("📋 Code Generators", self._code_generators),
-            MenuItem("🔙 Back to Backend Dev", self._back_to_backend)
+            MenuItem("FastAPI Project Setup", self._setup_fastapi),
+            MenuItem("Django/Flask Management", self._manage_django_flask),
+            MenuItem("Spring Boot Configuration", self._configure_spring_boot),
+            MenuItem("Express.js Helpers", self._express_helpers),
+            MenuItem("Framework Migration Tools", self._framework_migration),
+            MenuItem("Code Generators", self._code_generators),
+            MenuItem("Back to Backend Dev", self._back_to_backend)
         ]
 
     def _setup_fastapi(self):
         """Setup FastAPI project"""
         self.clear_screen()
         print("=" * 60)
-        print("  🚀 FastAPI Project Setup")
+        print("  FastAPI Project Setup")
         print("=" * 60)
         
         project_name = input("Enter project name: ")
         
-        print(f"\n🚀 Setting up FastAPI project: {project_name}")
+        print(f"\nSetting up FastAPI project: {project_name}")
         
         # Create project structure
         project_structure = {
@@ -94,7 +94,7 @@ class FrameworkTools(Menu):
         
         self._create_project_structure(project_structure)
         
-        print("✅ FastAPI project setup completed!")
+        print("FastAPI project setup completed!")
         print(f"📁 Project created: {project_name}/")
         print("🚀 Run: cd {} && uvicorn app.main:app --reload".format(project_name))
         
@@ -652,7 +652,7 @@ volumes:
         """Manage Django/Flask projects"""
         self.clear_screen()
         print("=" * 60)
-        print("  🐍 Django/Flask Management")
+        print("  Django/Flask Management")
         print("=" * 60)
         
         print("\nSelect framework:")
@@ -676,7 +676,7 @@ volumes:
 
     def _manage_django(self):
         """Django management tools"""
-        print("\n🐍 Django Management Tools")
+        print("\nDjango Management Tools")
         print("1. Create Django project")
         print("2. Generate Django app")
         print("3. Create Django models")
@@ -695,7 +695,7 @@ volumes:
     def _create_django_project(self):
         """Create Django project"""
         project_name = input("Enter project name: ")
-        print(f"\n🐍 Creating Django project: {project_name}")
+        print(f"\nCreating Django project: {project_name}")
         
         django_settings_content = f'''"""
 Django Settings for {project_name}
@@ -806,12 +806,12 @@ CORS_ALLOWED_ORIGINS = [
         with open('django_settings.py', 'w') as f:
             f.write(django_settings_content)
         
-        print("✅ Django project template created!")
+        print("Django project template created!")
 
     def _create_django_app(self):
         """Create Django app"""
         app_name = input("Enter app name: ")
-        print(f"\n🐍 Creating Django app: {app_name}")
+        print(f"\nCreating Django app: {app_name}")
         
         # Create app structure
         app_structure = {
@@ -831,7 +831,7 @@ CORS_ALLOWED_ORIGINS = [
         }
         
         self._create_project_structure(app_structure)
-        print(f"✅ Django app '{app_name}' created!")
+        print(f"Django app '{app_name}' created!")
 
     def _get_django_admin_content(self, app_name):
         return f'''"""
@@ -1003,11 +1003,11 @@ def create_app(config_name='development'):
         with open('app.py', 'w') as f:
             f.write(flask_app_content)
         
-        print("✅ Flask application created!")
+        print("Flask application created!")
 
     def _manage_drf(self):
         """Django REST Framework management"""
-        print("\n🔧 Django REST Framework Tools")
+        print("\nDjango REST Framework Tools")
         print("1. Create DRF ViewSets")
         print("2. Create DRF Serializers")
         print("3. Setup DRF authentication")
@@ -1024,13 +1024,13 @@ def create_app(config_name='development'):
         """Configure Spring Boot project"""
         self.clear_screen()
         print("=" * 60)
-        print("  ☕ Spring Boot Configuration")
+        print("  Spring Boot Configuration")
         print("=" * 60)
         
         project_name = input("Enter project name: ")
         package_name = input("Enter package name (e.g., com.example.app): ")
         
-        print(f"\n☕ Configuring Spring Boot project: {project_name}")
+        print(f"\nConfiguring Spring Boot project: {project_name}")
         
         # Create Spring Boot structure
         spring_structure = {
@@ -1068,7 +1068,7 @@ def create_app(config_name='development'):
         }
         
         self._create_project_structure(spring_structure)
-        print("✅ Spring Boot project configured!")
+        print("Spring Boot project configured!")
         
         input("\nPress Enter to continue...")
         return None
@@ -1438,10 +1438,10 @@ logging.level.org.springframework=WARN
         """Express.js helpers and generators"""
         self.clear_screen()
         print("=" * 60)
-        print("  📦 Express.js Helpers")
+        print("  Express.js Helpers")
         print("=" * 60)
         
-        print("\n📦 Express.js Tools:")
+        print("\nExpress.js Tools:")
         print("1. Create Express.js app")
         print("2. Add middleware")
         print("3. Create routes")
@@ -1466,7 +1466,7 @@ logging.level.org.springframework=WARN
     def _create_express_app(self):
         """Create Express.js application"""
         app_name = input("Enter app name: ")
-        print(f"\n📦 Creating Express.js app: {app_name}")
+        print(f"\nCreating Express.js app: {app_name}")
         
         express_app_content = f'''/**
  * Express.js Application: {app_name}
@@ -1579,16 +1579,16 @@ module.exports = app;
         with open('package.json', 'w') as f:
             f.write(package_json_content)
         
-        print("✅ Express.js application created!")
+        print("Express.js application created!")
 
     def _framework_migration(self):
         """Framework migration tools"""
         self.clear_screen()
         print("=" * 60)
-        print("  🔧 Framework Migration Tools")
+        print("  Framework Migration Tools")
         print("=" * 60)
         
-        print("\n🔧 Migration Options:")
+        print("\nMigration Options:")
         print("1. Flask to FastAPI")
         print("2. Express.js to NestJS")
         print("3. Django to Flask")
@@ -1614,10 +1614,10 @@ module.exports = app;
         """Code generators for various frameworks"""
         self.clear_screen()
         print("=" * 60)
-        print("  📋 Code Generators")
+        print("  Code Generators")
         print("=" * 60)
         
-        print("\n📋 Code Generation Options:")
+        print("\nCode Generation Options:")
         print("1. Generate CRUD operations")
         print("2. Generate API documentation")
         print("3. Generate database models")

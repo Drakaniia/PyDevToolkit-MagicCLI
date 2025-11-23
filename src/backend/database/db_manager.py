@@ -23,9 +23,9 @@ class DatabaseManager(Menu):
             return
 
         self.items = [
-            MenuItem("🐘 PostgreSQL Quick Commands", self._run_postgres_commands),
-            MenuItem("🔷 Prisma Database Tools", self._run_prisma_tools),
-            MenuItem("🔙 Back to Backend Dev", self._back_to_backend)
+            MenuItem("PostgreSQL Quick Commands", self._run_postgres_commands),
+            MenuItem("Prisma Database Tools", self._run_prisma_tools),
+            MenuItem("Back to Backend Dev", self._back_to_backend)
         ]
 
     def _run_postgres_commands(self):

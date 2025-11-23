@@ -19,7 +19,7 @@ class AuthManager(Menu):
     """Authentication & Security Menu"""
 
     def __init__(self):
-        super().__init__("🔐 Authentication & Security")
+        super().__init__("Authentication & Security")
 
     def setup_items(self):
         """Setup authentication & security menu items"""
@@ -27,13 +27,13 @@ class AuthManager(Menu):
             return
 
         self.items = [
-            MenuItem("🔑 Auth System Generator", self._generate_auth_system),
-            MenuItem("👥 User Management System", self._create_user_management),
-            MenuItem("🛡️  Permission & Role Management", self._create_role_management),
-            MenuItem("🔍 Security Scanner", self._run_security_scan),
-            MenuItem("🔐 JWT Configuration", self._configure_jwt),
-            MenuItem("🌐 OAuth Setup", self._setup_oauth),
-            MenuItem("🔙 Back to Backend Dev", self._back_to_backend)
+            MenuItem("Auth System Generator", self._generate_auth_system),
+            MenuItem("User Management System", self._create_user_management),
+            MenuItem("Permission & Role Management", self._create_role_management),
+            MenuItem("Security Scanner", self._run_security_scan),
+            MenuItem("JWT Configuration", self._configure_jwt),
+            MenuItem("OAuth Setup", self._setup_oauth),
+            MenuItem("Back to Backend Dev", self._back_to_backend)
         ]
 
     def _generate_auth_system(self):
@@ -350,13 +350,13 @@ def logout():
         with open('jwt_config.json', 'w') as f:
             json.dump(jwt_config, f, indent=2)
         
-        print("✅ JWT Authentication System created successfully!")
+        print("JWT Authentication System created successfully!")
         print(f"🔑 Secret Key: {secret_key}")
         print("📁 Files created: jwt_auth.py, user_model.py, auth_routes.py, jwt_config.json")
 
     def _create_session_auth(self):
         """Create session-based authentication"""
-        print("\n🔐 Creating Session-based Authentication...")
+        print("\nCreating Session-based Authentication...")
         
         session_auth_content = '''"""
 Session-based Authentication Module
@@ -406,11 +406,11 @@ def is_authenticated():
         with open('session_auth.py', 'w') as f:
             f.write(session_auth_content)
         
-        print("✅ Session-based Authentication created!")
+        print("Session-based Authentication created!")
 
     def _create_oauth_auth(self):
         """Create OAuth 2.0 authentication"""
-        print("\n🌐 Creating OAuth 2.0 Authentication...")
+        print("\nCreating OAuth 2.0 Authentication...")
         
         oauth_content = '''"""
 OAuth 2.0 Authentication Module
@@ -478,7 +478,7 @@ def oauth_authorize(provider):
         with open('oauth_auth.py', 'w') as f:
             f.write(oauth_content)
         
-        print("✅ OAuth 2.0 Authentication created!")
+        print("OAuth 2.0 Authentication created!")
 
     def _create_api_key_auth(self):
         """Create API Key authentication"""
@@ -574,7 +574,7 @@ class APIKeyManager:
         with open('api_key_auth.py', 'w') as f:
             f.write(api_key_content)
         
-        print("✅ API Key Authentication created!")
+        print("API Key Authentication created!")
 
     def _create_user_management(self):
         """Create user management system"""
@@ -719,7 +719,7 @@ class UserService:
         with open('user_management.py', 'w') as f:
             f.write(user_management_content)
         
-        print("✅ User Management System created!")
+        print("User Management System created!")
 
         input("\nPress Enter to continue...")
         return None
@@ -728,10 +728,10 @@ class UserService:
         """Create role and permission management"""
         self.clear_screen()
         print("=" * 60)
-        print("  🛡️  Permission & Role Management")
+        print("  Permission & Role Management")
         print("=" * 60)
         
-        print("\n🛡️ Creating Role & Permission Management...")
+        print("\nCreating Role & Permission Management...")
         
         role_management_content = '''"""
 Role and Permission Management System
@@ -957,7 +957,7 @@ def role_required(role_name):
         with open('role_management.py', 'w') as f:
             f.write(role_management_content)
         
-        print("✅ Role & Permission Management created!")
+        print("Role & Permission Management created!")
 
         input("\nPress Enter to continue...")
         return None
@@ -966,10 +966,10 @@ def role_required(role_name):
         """Run security scanner"""
         self.clear_screen()
         print("=" * 60)
-        print("  🔍 Security Scanner")
+        print("  Security Scanner")
         print("=" * 60)
         
-        print("\n🔍 Running Security Scan...")
+        print("\nRunning Security Scan...")
         
         # Check for common security issues
         security_checks = [
@@ -984,10 +984,10 @@ def role_required(role_name):
         for check in security_checks:
             print(f"  ✓ {check}")
         
-        print("\n📊 Security Scan Results:")
+        print("\nSecurity Scan Results:")
         print("  ✅ No critical vulnerabilities found")
-        print("  ⚠️  3 medium priority issues detected")
-        print("  ℹ️  5 low priority recommendations")
+        print("  3 medium priority issues detected")
+        print("  5 low priority recommendations")
         
         print("\n🔧 Recommendations:")
         print("  1. Update dependencies to latest versions")
@@ -1003,10 +1003,10 @@ def role_required(role_name):
         """Configure JWT settings"""
         self.clear_screen()
         print("=" * 60)
-        print("  🔐 JWT Configuration")
+        print("  JWT Configuration")
         print("=" * 60)
         
-        print("\n🔐 Configuring JWT Settings...")
+        print("\nConfiguring JWT Settings...")
         
         # Generate new JWT secret
         secret_key = os.environ.get('JWT_SECRET_KEY') or secrets.token_urlsafe(32)
@@ -1034,7 +1034,7 @@ def role_required(role_name):
         with open('jwt_security_config.json', 'w') as f:
             json.dump(jwt_config, f, indent=2)
         
-        print(f"✅ JWT Configuration saved!")
+        print("JWT Configuration saved!")
         print(f"🔑 New Secret Key: {secret_key}")
         print("📁 Configuration saved to: jwt_security_config.json")
         
@@ -1045,10 +1045,10 @@ def role_required(role_name):
         """Setup OAuth providers"""
         self.clear_screen()
         print("=" * 60)
-        print("  🌐 OAuth Setup")
+        print("  OAuth Setup")
         print("=" * 60)
         
-        print("\n🌐 Setting up OAuth Providers...")
+        print("\nSetting up OAuth Providers...")
         
         oauth_config = {
             "oauth": {
@@ -1078,7 +1078,7 @@ def role_required(role_name):
         with open('oauth_config.json', 'w') as f:
             json.dump(oauth_config, f, indent=2)
         
-        print("✅ OAuth Configuration template created!")
+        print("OAuth Configuration template created!")
         print("📝 Please update the client IDs and secrets in oauth_config.json")
         print("🔗 Configure redirect URIs in your OAuth provider's dashboard")
         
