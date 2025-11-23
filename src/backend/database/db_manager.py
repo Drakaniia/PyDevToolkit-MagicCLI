@@ -43,9 +43,25 @@ class DatabaseManager(Menu):
         print("=" * 60)
         print("  🔍 Database Type Detection")
         print("=" * 60)
-        
+
         detected = []
-        
+
+        # First check for database_config.json to see if database was already configured
+        if Path('database_config.json').exists():
+            try:
+                with open('database_config.json', 'r') as f:
+                    config = json.load(f)
+                db_type = config.get('database', {}).get('type', '')
+                if db_type:
+                    detected.append(db_type)
+                    print(f"\n✅ Detected database from configuration: {db_type.title()}")
+                    print(f"💡 Database configured in database_config.json")
+                    input("\nPress Enter to continue...")
+                    return None
+            except Exception:
+                # If there's an error reading the config, continue with other checks
+                pass
+
         # Check for common database files and configurations
         checks = {
             'postgresql': ['requirements.txt', 'Pipfile', 'pyproject.toml'],
@@ -54,7 +70,7 @@ class DatabaseManager(Menu):
             'redis': ['requirements.txt', 'Pipfile', 'pyproject.toml'],
             'sqlite': ['*.db', '*.sqlite', '*.sqlite3']
         }
-        
+
         for db_type, files in checks.items():
             for file_pattern in files:
                 if '*' in file_pattern:
@@ -67,12 +83,12 @@ class DatabaseManager(Menu):
                         if db_type in content.lower():
                             detected.append(db_type)
                             break
-        
+
         if detected:
             print(f"\n✅ Detected databases: {', '.join(set(detected))}")
         else:
             print("\n❌ No database detected in current project")
-        
+
         input("\nPress Enter to continue...")
         return None
 
@@ -103,13 +119,27 @@ class DatabaseManager(Menu):
     def _initialize_database(self, db_type):
         """Initialize specific database type"""
         print(f"\n🚀 Initializing {db_type.title()} database...")
-        
+
         if db_type == 'sqlite':
             db_name = input("Enter database name (default: app.db): ") or "app.db"
             conn = sqlite3.connect(db_name)
             conn.close()
+
+            # Save SQLite configuration to config file
+            config = {
+                "database": {
+                    "type": "sqlite",
+                    "name": db_name,
+                    "path": str(Path(db_name).absolute())
+                }
+            }
+
+            with open('database_config.json', 'w') as f:
+                json.dump(config, f, indent=2)
+
             print(f"✅ SQLite database '{db_name}' created successfully!")
-            
+            print(f"✅ Configuration saved to database_config.json")
+
         elif db_type == 'postgresql':
             self._setup_postgresql()
         elif db_type == 'mysql':
@@ -293,8 +323,138 @@ class DatabaseManager(Menu):
     def _test_connection(self):
         """Test database connection"""
         print("\n🏥 Testing database connection...")
-        # Implementation would test actual connection
-        print("✅ Connection test completed!")
+
+        # Check if database configuration exists
+        if not Path('database_config.json').exists():
+            print("❌ No database configuration found!")
+            print("💡 Run 'Configure Connection' first to set up database configuration")
+            input("\nPress Enter to continue...")
+            return
+
+        try:
+            with open('database_config.json', 'r') as f:
+                config = json.load(f)
+
+            db_type = config.get('database', {}).get('type', '').lower()
+
+            if not db_type:
+                print("❌ Database type not specified in configuration!")
+                input("\nPress Enter to continue...")
+                return
+
+            # Test the connection based on database type
+            if db_type == 'sqlite':
+                self._test_sqlite_connection(config)
+            elif db_type == 'postgresql':
+                self._test_postgresql_connection(config)
+            elif db_type == 'mysql':
+                self._test_mysql_connection(config)
+            elif db_type == 'mongodb':
+                self._test_mongodb_connection(config)
+            elif db_type == 'redis':
+                self._test_redis_connection(config)
+            else:
+                print(f"❌ Unsupported database type: {db_type}")
+                input("\nPress Enter to continue...")
+                return
+
+        except Exception as e:
+            print(f"❌ Error testing connection: {str(e)}")
+            input("\nPress Enter to continue...")
+            return
+
+    def _test_sqlite_connection(self, config):
+        """Test SQLite connection"""
+        db_config = config.get('database', {})
+        db_name = db_config.get('name', 'app.db')
+
+        # Try to get the path from config, otherwise use name
+        db_path = db_config.get('path', db_name)
+        if not db_name or db_name == '':
+            db_name = 'app.db'
+            db_path = 'app.db'
+
+        try:
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute('SELECT 1')
+            conn.close()
+            print("✅ SQLite connection successful!")
+        except Exception as e:
+            print(f"❌ SQLite connection failed: {str(e)}")
+
+    def _test_postgresql_connection(self, config):
+        """Test PostgreSQL connection"""
+        try:
+            import psycopg2
+            db_config = config.get('database', {})
+            conn = psycopg2.connect(
+                host=db_config.get('host', 'localhost'),
+                port=db_config.get('port', 5432),
+                database=db_config.get('name', ''),
+                user=db_config.get('user', ''),
+                password=db_config.get('password', '')
+            )
+            conn.close()
+            print("✅ PostgreSQL connection successful!")
+        except ImportError:
+            print("❌ psycopg2 library not installed. Run: pip install psycopg2")
+        except Exception as e:
+            print(f"❌ PostgreSQL connection failed: {str(e)}")
+
+    def _test_mysql_connection(self, config):
+        """Test MySQL connection"""
+        try:
+            import mysql.connector
+            db_config = config.get('database', {})
+            conn = mysql.connector.connect(
+                host=db_config.get('host', 'localhost'),
+                port=db_config.get('port', 3306),
+                database=db_config.get('name', ''),
+                user=db_config.get('user', ''),
+                password=db_config.get('password', '')
+            )
+            conn.close()
+            print("✅ MySQL connection successful!")
+        except ImportError:
+            print("❌ mysql-connector-python library not installed. Run: pip install mysql-connector-python")
+        except Exception as e:
+            print(f"❌ MySQL connection failed: {str(e)}")
+
+    def _test_mongodb_connection(self, config):
+        """Test MongoDB connection"""
+        try:
+            from pymongo import MongoClient
+            db_config = config.get('database', {})
+            connection_string = db_config.get('connection_string', f"mongodb://{db_config.get('host', 'localhost')}:{db_config.get('port', 27017)}/{db_config.get('name', '')}")
+
+            client = MongoClient(connection_string)
+            client.admin.command('ping')  # This will test the connection
+            client.close()
+            print("✅ MongoDB connection successful!")
+        except ImportError:
+            print("❌ pymongo library not installed. Run: pip install pymongo")
+        except Exception as e:
+            print(f"❌ MongoDB connection failed: {str(e)}")
+
+    def _test_redis_connection(self, config):
+        """Test Redis connection"""
+        try:
+            import redis
+            db_config = config.get('database', {})
+            r = redis.Redis(
+                host=db_config.get('host', 'localhost'),
+                port=db_config.get('port', 6379),
+                db=db_config.get('db', 0),
+                password=db_config.get('password', None)
+            )
+            r.ping()  # This will test the connection
+            r.close()
+            print("✅ Redis connection successful!")
+        except ImportError:
+            print("❌ redis library not installed. Run: pip install redis")
+        except Exception as e:
+            print(f"❌ Redis connection failed: {str(e)}")
 
     def _manage_schema(self):
         """Manage database schemas"""
@@ -416,15 +576,239 @@ class DatabaseManager(Menu):
         print("=" * 60)
         print("  🏥 Database Health Check")
         print("=" * 60)
-        
+
         print("\n🔍 Checking database health...")
-        print("✅ Database is healthy!")
-        print("📊 Connection status: Active")
-        print("⚡ Response time: 12ms")
-        print("💾 Storage usage: 45MB")
-        
-        input("\nPress Enter to continue...")
-        return None
+
+        # Check if database configuration exists
+        if not Path('database_config.json').exists():
+            print("❌ No database configuration found!")
+            print("💡 Database has not been initialized yet.")
+            print("💡 Run 'Configure Connection' or 'Database Setup & Initialization' first.")
+            input("\nPress Enter to continue...")
+            return
+
+        try:
+            with open('database_config.json', 'r') as f:
+                config = json.load(f)
+
+            db_type = config.get('database', {}).get('type', '').lower()
+
+            if not db_type:
+                print("❌ Database type not specified in configuration!")
+                print("💡 Please reconfigure your database connection.")
+                input("\nPress Enter to continue...")
+                return
+
+            # Test the connection based on database type to determine health
+            if db_type == 'sqlite':
+                self._check_sqlite_health(config)
+            elif db_type == 'postgresql':
+                self._check_postgresql_health(config)
+            elif db_type == 'mysql':
+                self._check_mysql_health(config)
+            elif db_type == 'mongodb':
+                self._check_mongodb_health(config)
+            elif db_type == 'redis':
+                self._check_redis_health(config)
+            else:
+                print(f"❌ Unsupported database type: {db_type}")
+                input("\nPress Enter to continue...")
+                return
+
+        except Exception as e:
+            print(f"❌ Error performing health check: {str(e)}")
+            input("\nPress Enter to continue...")
+            return
+
+    def _check_sqlite_health(self, config):
+        """Check SQLite health"""
+        db_config = config.get('database', {})
+        db_name = db_config.get('name', 'app.db')
+
+        # Try to get the path from config, otherwise use name
+        db_path = db_config.get('path', db_name)
+        if not db_name or db_name == '':
+            db_name = 'app.db'
+            db_path = 'app.db'
+
+        try:
+            # Check if file exists
+            if not Path(db_path).exists():
+                print("❌ SQLite database file does not exist!")
+                print(f"💡 Database file '{db_path}' not found.")
+                print("💡 Run 'Database Setup & Initialization' to create the database.")
+                input("\nPress Enter to continue...")
+                return
+
+            # Test connection
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute('SELECT 1')
+            conn.close()
+
+            # Get basic stats for health report
+            import os
+            size = os.path.getsize(db_path)
+            size_mb = size / (1024 * 1024)
+
+            print("✅ Database is healthy!")
+            print("📊 Connection status: Active")
+            print("⚡ Response time: <1ms")
+            print(f"💾 Storage usage: {size_mb:.2f}MB")
+            print(f"📁 Database file: {db_path}")
+
+        except Exception as e:
+            print(f"❌ Database is not accessible: {str(e)}")
+            print("💡 The database may not be running or properly initialized.")
+            input("\nPress Enter to continue...")
+
+    def _check_postgresql_health(self, config):
+        """Check PostgreSQL health"""
+        try:
+            import psycopg2
+            db_config = config.get('database', {})
+
+            # Check if required fields exist
+            if not db_config.get('name') or db_config['name'] == '':
+                print("❌ Database name not specified in configuration!")
+                print("💡 Please configure your database name in the connection settings.")
+                input("\nPress Enter to continue...")
+                return
+
+            conn = psycopg2.connect(
+                host=db_config.get('host', 'localhost'),
+                port=db_config.get('port', 5432),
+                database=db_config.get('name', ''),
+                user=db_config.get('user', ''),
+                password=db_config.get('password', '')
+            )
+
+            # Test query
+            cursor = conn.cursor()
+            cursor.execute('SELECT version();')
+            result = cursor.fetchone()
+            conn.close()
+
+            print("✅ Database is healthy!")
+            print("📊 Connection status: Active")
+            print("⚡ Response time: Good")
+            print(f"📦 PostgreSQL version: {result[0][:50]}..." if result[0] else "📦 PostgreSQL")
+
+        except ImportError:
+            print("❌ psycopg2 library not installed.")
+            print("💡 Run: pip install psycopg2 to enable PostgreSQL support.")
+            input("\nPress Enter to continue...")
+        except Exception as e:
+            print(f"❌ Database is not accessible: {str(e)}")
+            print("💡 The PostgreSQL server may not be running or properly configured.")
+            input("\nPress Enter to continue...")
+
+    def _check_mysql_health(self, config):
+        """Check MySQL health"""
+        try:
+            import mysql.connector
+            db_config = config.get('database', {})
+
+            # Check if required fields exist
+            if not db_config.get('name') or db_config['name'] == '':
+                print("❌ Database name not specified in configuration!")
+                print("💡 Please configure your database name in the connection settings.")
+                input("\nPress Enter to continue...")
+                return
+
+            conn = mysql.connector.connect(
+                host=db_config.get('host', 'localhost'),
+                port=db_config.get('port', 3306),
+                database=db_config.get('name', ''),
+                user=db_config.get('user', ''),
+                password=db_config.get('password', '')
+            )
+
+            # Test query
+            cursor = conn.cursor()
+            cursor.execute('SELECT VERSION();')
+            result = cursor.fetchone()
+            conn.close()
+
+            print("✅ Database is healthy!")
+            print("📊 Connection status: Active")
+            print("⚡ Response time: Good")
+            print(f"📦 MySQL version: {result[0] if result else 'Unknown'}")
+
+        except ImportError:
+            print("❌ mysql-connector-python library not installed.")
+            print("💡 Run: pip install mysql-connector-python to enable MySQL support.")
+            input("\nPress Enter to continue...")
+        except Exception as e:
+            print(f"❌ Database is not accessible: {str(e)}")
+            print("💡 The MySQL server may not be running or properly configured.")
+            input("\nPress Enter to continue...")
+
+    def _check_mongodb_health(self, config):
+        """Check MongoDB health"""
+        try:
+            from pymongo import MongoClient
+            db_config = config.get('database', {})
+
+            connection_string = db_config.get('connection_string', f"mongodb://{db_config.get('host', 'localhost')}:{db_config.get('port', 27017)}/")
+
+            client = MongoClient(connection_string, serverSelectionTimeoutMS=2000)  # 2 second timeout
+            client.admin.command('ping')  # This will test the connection
+            server_info = client.server_info()
+            client.close()
+
+            print("✅ Database is healthy!")
+            print("📊 Connection status: Active")
+            print("⚡ Response time: Good")
+            print(f"📦 MongoDB version: {server_info.get('version', 'Unknown')}")
+
+        except ImportError:
+            print("❌ pymongo library not installed.")
+            print("💡 Run: pip install pymongo to enable MongoDB support.")
+            input("\nPress Enter to continue...")
+        except Exception as e:
+            print(f"❌ Database is not accessible: {str(e)}")
+            print("💡 The MongoDB server may not be running or properly configured.")
+            input("\nPress Enter to continue...")
+
+    def _check_redis_health(self, config):
+        """Check Redis health"""
+        try:
+            import redis
+            db_config = config.get('database', {})
+
+            r = redis.Redis(
+                host=db_config.get('host', 'localhost'),
+                port=db_config.get('port', 6379),
+                db=db_config.get('db', 0),
+                password=db_config.get('password', None),
+                socket_connect_timeout=2,  # 2 second timeout
+                socket_timeout=2  # 2 second timeout
+            )
+
+            response = r.ping()  # This will test the connection
+            info = r.info()
+            r.close()
+
+            if response:
+                print("✅ Database is healthy!")
+                print("📊 Connection status: Active")
+                print("⚡ Response time: Good")
+                print(f"📦 Redis version: {info.get('redis_version', 'Unknown')}")
+                print(f"💾 Memory usage: {info.get('used_memory_human', 'Unknown')}")
+            else:
+                print("❌ Database is not responding properly!")
+                print("💡 The Redis server may not be accessible.")
+                input("\nPress Enter to continue...")
+
+        except ImportError:
+            print("❌ redis library not installed.")
+            print("💡 Run: pip install redis to enable Redis support.")
+            input("\nPress Enter to continue...")
+        except Exception as e:
+            print(f"❌ Database is not accessible: {str(e)}")
+            print("💡 The Redis server may not be running or properly configured.")
+            input("\nPress Enter to continue...")
 
     def _back_to_backend(self):
         """Return to backend development menu"""

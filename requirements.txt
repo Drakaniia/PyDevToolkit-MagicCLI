@@ -14,3 +14,8 @@ flask-migrate>=4.0.0
 flask-cors>=4.0.0
 flask-jwt-extended>=4.0.0
 djangorestframework>=3.0.0
+# Database connectivity libraries
+psycopg2-binary>=2.9.0
+mysql-connector-python>=8.0.0
+pymongo>=4.0.0
+redis>=4.0.0
