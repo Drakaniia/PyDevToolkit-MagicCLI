@@ -40,7 +40,7 @@ class AuthManager(Menu):
         """Generate authentication system"""
         self.clear_screen()
         print("=" * 60)
-        print("  🔑 Auth System Generator")
+        print("  Auth System Generator")
         print("=" * 60)
         
         print("\nSelect authentication type:")
@@ -67,7 +67,7 @@ class AuthManager(Menu):
 
     def _create_jwt_auth(self):
         """Create JWT authentication system"""
-        print("\n🔑 Creating JWT Authentication System...")
+        print("\nCreating JWT Authentication System...")
         
         # Generate JWT secret key
         secret_key = os.environ.get('JWT_SECRET_KEY') or secrets.token_urlsafe(32)
@@ -351,7 +351,7 @@ def logout():
             json.dump(jwt_config, f, indent=2)
         
         print("JWT Authentication System created successfully!")
-        print(f"🔑 Secret Key: {secret_key}")
+        print(f"Secret Key: {secret_key}")
         print("📁 Files created: jwt_auth.py, user_model.py, auth_routes.py, jwt_config.json")
 
     def _create_session_auth(self):
@@ -482,7 +482,7 @@ def oauth_authorize(provider):
 
     def _create_api_key_auth(self):
         """Create API Key authentication"""
-        print("\n🔑 Creating API Key Authentication...")
+        print("\nCreating API Key Authentication...")
         
         api_key_content = '''"""
 API Key Authentication Module
@@ -580,10 +580,10 @@ class APIKeyManager:
         """Create user management system"""
         self.clear_screen()
         print("=" * 60)
-        print("  👥 User Management System")
+        print("  User Management System")
         print("=" * 60)
         
-        print("\n👥 Creating User Management System...")
+        print("\nCreating User Management System...")
         
         user_management_content = '''"""
 User Management System
@@ -985,11 +985,11 @@ def role_required(role_name):
             print(f"  ✓ {check}")
         
         print("\nSecurity Scan Results:")
-        print("  ✅ No critical vulnerabilities found")
+        print("  No critical vulnerabilities found")
         print("  3 medium priority issues detected")
         print("  5 low priority recommendations")
         
-        print("\n🔧 Recommendations:")
+        print("\nRecommendations:")
         print("  1. Update dependencies to latest versions")
         print("  2. Implement rate limiting on authentication endpoints")
         print("  3. Add input validation and sanitization")
@@ -1035,7 +1035,7 @@ def role_required(role_name):
             json.dump(jwt_config, f, indent=2)
         
         print("JWT Configuration saved!")
-        print(f"🔑 New Secret Key: {secret_key}")
+        print(f"New Secret Key: {secret_key}")
         print("📁 Configuration saved to: jwt_security_config.json")
         
         input("\nPress Enter to continue...")

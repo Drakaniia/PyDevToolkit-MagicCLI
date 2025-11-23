@@ -15,7 +15,7 @@ class DatabaseManager(Menu):
     """Database Management Menu with PostgreSQL and Prisma tools"""
 
     def __init__(self):
-        super().__init__("🗄️ Database Management")
+        super().__init__("Database Management")
 
     def setup_items(self):
         """Setup database management menu items"""

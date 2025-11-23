@@ -63,7 +63,7 @@ class APIGenerator(Menu):
 
     def _create_rest_endpoints(self, framework):
         """Create REST endpoints for selected framework"""
-        print(f"\n🚀 Creating REST API with {framework.title()}...")
+        print(f"\nCreating REST API with {framework.title()}...")
         
         # Get API details
         resource_name = input("Enter resource name (e.g., User, Product): ")
@@ -97,7 +97,7 @@ class APIGenerator(Menu):
             'delete': f'DELETE {base_path}/{resource_plural}/{{id}}'
         }
         
-        print(f"\n📋 Generated endpoints:")
+        print(f"\nGenerated endpoints:")
         for endpoint_type, endpoint in endpoints.items():
             print(f"  {endpoint_type.title()}: {endpoint}")
         
@@ -406,7 +406,7 @@ module.exports = router;
         
         resource_name = input("Enter resource name: ")
         
-        print(f"\n🚀 Generating GraphQL API for {resource_name}...")
+        print(f"\nGenerating GraphQL API for {resource_name}...")
         
         # Generate GraphQL schema
         schema_content = f'''"""
@@ -1037,7 +1037,7 @@ describe('API Endpoints', () => {
         
         print("\nValidating API endpoints...")
         print("All endpoints are valid!")
-        print("📊 Response formats are correct")
+        print("Response formats are correct")
         print("🔒 Authentication is properly configured")
         print("📝 Documentation is up to date")
         
