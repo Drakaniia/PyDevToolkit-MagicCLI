@@ -123,23 +123,35 @@ class DatabaseManager(Menu):
 
         if db_type == 'sqlite':
             db_name = input("Enter database name (default: app.db): ") or "app.db"
+            shadow_name = input(f"Enter shadow/testing database name (default: {db_name.replace('.db', '_shadow.db')}): ") or db_name.replace('.db', '_shadow.db')
             conn = sqlite3.connect(db_name)
             conn.close()
+
+            # Also create shadow database
+            shadow_conn = sqlite3.connect(shadow_name)
+            shadow_conn.close()
 
             # Save SQLite configuration to config file
             config = {
                 "database": {
                     "type": "sqlite",
                     "name": db_name,
-                    "path": str(Path(db_name).absolute())
+                    "shadow_name": shadow_name,
+                    "path": str(Path(db_name).absolute()),
+                    "shadow_path": str(Path(shadow_name).absolute())
                 }
             }
 
             with open('database_config.json', 'w') as f:
                 json.dump(config, f, indent=2)
 
-            print(f"✅ SQLite database '{db_name}' created successfully!")
+            print(f"✅ SQLite databases created successfully!")
+            print(f"  - Main: {db_name}")
+            print(f"  - Shadow: {shadow_name}")
             print(f"✅ Configuration saved to database_config.json")
+
+            # Generate .env for SQLite
+            self._generate_sqlite_env(config)
 
         elif db_type == 'postgresql':
             self._setup_postgresql()
@@ -150,18 +162,65 @@ class DatabaseManager(Menu):
         elif db_type == 'redis':
             self._setup_redis()
 
+    def _generate_sqlite_env(self, config):
+        """Generate .env file for SQLite configuration"""
+        env_content = f"""# SQLite Database Configuration
+DB_TYPE=sqlite
+DB_NAME={config['database']['name']}
+DB_SHADOW_NAME={config['database']['shadow_name']}
+DB_PATH={config['database']['path']}
+DB_SHADOW_PATH={config['database']['shadow_path']}
+
+# Database URLs
+DATABASE_URL=sqlite:///{config['database']['path']}
+SHADOW_DATABASE_URL=sqlite:///{config['database']['shadow_path']}
+
+# Connection Settings
+SQLITE_TIMEOUT=30
+"""
+
+        with open('.env', 'w') as f:
+            f.write(env_content)
+
+        print(f"✅ Environment file (.env) generated with SQLite configuration")
+        print(f"💡 Use these environment variables in your application")
+
     def _setup_postgresql(self):
         """Setup PostgreSQL database"""
         print("\n🐘 PostgreSQL Setup")
-        db_name = input("Database name: ")
-        user = input("Username: ")
-        password = input("Password: ")
+        print("Enter PostgreSQL connection details:")
+
         host = input("Host (default: localhost): ") or "localhost"
         port = input("Port (default: 5432): ") or "5432"
-        
-        # Generate connection string
-        conn_str = f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
-        
+        default_user = input("Superuser (default: postgres): ") or "postgres"
+        default_password = input(f"Superuser password: ")
+
+        print("\n" + "="*50)
+        print("Database Configuration")
+        print("="*50)
+
+        # Create multiple databases for application (e.g., main and test/shadow)
+        main_db = input("Main database name (default: app_db): ") or "app_db"
+        shadow_db = input("Shadow/Testing database name (default: app_db_shadow): ") or f"{main_db}_shadow"
+
+        app_user = input(f"Application database user (default: {main_db}_user): ") or f"{main_db}_user"
+        app_password = input(f"Application user password: ")
+
+        print(f"\n📝 PostgreSQL commands to run in psql:")
+        print(f"  1. psql -U {default_user} -h {host} -p {port}")
+        print(f"  2. Run these commands in psql:")
+        print(f"     CREATE USER {app_user} WITH PASSWORD '{app_password}';")
+        print(f"     CREATE DATABASE {main_db} OWNER {app_user};")
+        print(f"     CREATE DATABASE {shadow_db} OWNER {app_user};")
+        print(f"     GRANT ALL PRIVILEGES ON DATABASE {main_db} TO {app_user};")
+        print(f"     GRANT ALL PRIVILEGES ON DATABASE {shadow_db} TO {app_user};")
+        print(f"     \\du  -- to list users")
+        print(f"     \\l   -- to list databases")
+        print(f"     \\q   -- to quit")
+
+        # Generate connection string for main database
+        conn_str = f"postgresql://{app_user}:{app_password}@{host}:{port}/{main_db}"
+
         # Save to config file
         config = {
             "database": {
@@ -169,90 +228,351 @@ class DatabaseManager(Menu):
                 "connection_string": conn_str,
                 "host": host,
                 "port": port,
-                "name": db_name,
-                "user": user
+                "name": main_db,
+                "shadow_name": shadow_db,
+                "user": app_user,
+                "password": app_password,
+                "superuser": default_user,
+                "superuser_password": default_password
             }
         }
-        
+
         with open('database_config.json', 'w') as f:
             json.dump(config, f, indent=2)
-        
-        print(f"✅ PostgreSQL configuration saved to database_config.json")
+
+        print(f"\n✅ PostgreSQL configuration saved to database_config.json")
+
+        # Also generate .env file
+        self._generate_postgresql_env(config)
+
+    def _generate_postgresql_env(self, config):
+        """Generate .env file for PostgreSQL configuration"""
+        env_content = f"""# PostgreSQL Database Configuration
+DB_HOST={config['database']['host']}
+DB_PORT={config['database']['port']}
+DB_NAME={config['database']['name']}
+DB_SHADOW_NAME={config['database']['shadow_name']}
+DB_USER={config['database']['user']}
+DB_PASSWORD={config['database']['password']}
+DB_SUPERUSER={config['database']['superuser']}
+DB_TYPE=postgresql
+
+# Database URLs
+DATABASE_URL=postgresql://{config['database']['user']}:{config['database']['password']}@{config['database']['host']}:{config['database']['port']}/{config['database']['name']}
+SHADOW_DATABASE_URL=postgresql://{config['database']['user']}:{config['database']['password']}@{config['database']['host']}:{config['database']['port']}/{config['database']['shadow_name']}
+
+# Connection Pool Settings
+DB_POOL_SIZE=10
+DB_POOL_OVERFLOW=20
+DB_POOL_RECYCLE=300
+"""
+
+        with open('.env', 'w') as f:
+            f.write(env_content)
+
+        print(f"✅ Environment file (.env) generated with PostgreSQL configuration")
+        print(f"💡 Use these environment variables in your application")
 
     def _setup_mysql(self):
         """Setup MySQL database"""
         print("\n🐬 MySQL Setup")
-        db_name = input("Database name: ")
-        user = input("Username: ")
-        password = input("Password: ")
+        print("Enter MySQL connection details:")
+
         host = input("Host (default: localhost): ") or "localhost"
         port = input("Port (default: 3306): ") or "3306"
-        
-        conn_str = f"mysql://{user}:{password}@{host}:{port}/{db_name}"
-        
+        default_user = input("Admin user (default: root): ") or "root"
+        default_password = input(f"Admin password: ")
+
+        print("\n" + "="*50)
+        print("Database Configuration")
+        print("="*50)
+
+        # Create multiple databases for application (e.g., main and test/shadow)
+        main_db = input("Main database name (default: app_db): ") or "app_db"
+        shadow_db = input("Shadow/Testing database name (default: app_db_shadow): ") or f"{main_db}_shadow"
+
+        app_user = input(f"Application database user (default: {main_db}_user): ") or f"{main_db}_user"
+        app_password = input(f"Application user password: ")
+
+        print(f"\n📝 MySQL commands to run in mysql shell:")
+        print(f"  1. mysql -u {default_user} -p -h {host} -P {port}")
+        print(f"  2. Enter password: {default_password}")
+        print(f"  3. Run these commands in mysql:")
+        print(f"     CREATE DATABASE {main_db};")
+        print(f"     CREATE DATABASE {shadow_db};")
+        print(f"     CREATE USER '{app_user}'@'%' IDENTIFIED BY '{app_password}';")
+        print(f"     GRANT ALL PRIVILEGES ON {main_db}.* TO '{app_user}'@'%';")
+        print(f"     GRANT ALL PRIVILEGES ON {shadow_db}.* TO '{app_user}'@'%';")
+        print(f"     FLUSH PRIVILEGES;")
+        print(f"     SHOW DATABASES;")
+        print(f"     SELECT User, Host FROM mysql.user WHERE User = '{app_user}';")
+        print(f"     EXIT;")
+
+        # Generate connection string for main database
+        conn_str = f"mysql://{app_user}:{app_password}@{host}:{port}/{main_db}"
+
+        # Save to config file
         config = {
             "database": {
                 "type": "mysql",
                 "connection_string": conn_str,
                 "host": host,
                 "port": port,
-                "name": db_name,
-                "user": user
+                "name": main_db,
+                "shadow_name": shadow_db,
+                "user": app_user,
+                "password": app_password,
+                "admin_user": default_user,
+                "admin_password": default_password
             }
         }
-        
+
         with open('database_config.json', 'w') as f:
             json.dump(config, f, indent=2)
-        
-        print(f"✅ MySQL configuration saved to database_config.json")
+
+        print(f"\n✅ MySQL configuration saved to database_config.json")
+
+        # Also generate .env file
+        self._generate_mysql_env(config)
+
+    def _generate_mysql_env(self, config):
+        """Generate .env file for MySQL configuration"""
+        env_content = f"""# MySQL Database Configuration
+DB_HOST={config['database']['host']}
+DB_PORT={config['database']['port']}
+DB_NAME={config['database']['name']}
+DB_SHADOW_NAME={config['database']['shadow_name']}
+DB_USER={config['database']['user']}
+DB_PASSWORD={config['database']['password']}
+DB_ADMIN_USER={config['database']['admin_user']}
+DB_TYPE=mysql
+
+# Database URLs
+DATABASE_URL=mysql://{config['database']['user']}:{config['database']['password']}@{config['database']['host']}:{config['database']['port']}/{config['database']['name']}
+SHADOW_DATABASE_URL=mysql://{config['database']['user']}:{config['database']['password']}@{config['database']['host']}:{config['database']['port']}/{config['database']['shadow_name']}
+
+# Connection Pool Settings
+DB_POOL_SIZE=10
+DB_POOL_OVERFLOW=20
+DB_POOL_RECYCLE=300
+"""
+
+        with open('.env', 'w') as f:
+            f.write(env_content)
+
+        print(f"✅ Environment file (.env) generated with MySQL configuration")
+        print(f"💡 Use these environment variables in your application")
 
     def _setup_mongodb(self):
         """Setup MongoDB database"""
         print("\n🍃 MongoDB Setup")
-        db_name = input("Database name: ")
+        print("Enter MongoDB connection details:")
+
         host = input("Host (default: localhost): ") or "localhost"
         port = input("Port (default: 27017): ") or "27017"
-        
-        conn_str = f"mongodb://{host}:{port}/{db_name}"
-        
-        config = {
+        username = input("Username (optional, press Enter to skip): ") or ""
+        password = input("Password (optional, press Enter to skip): ") or ""
+
+        print("\n" + "="*50)
+        print("Database Configuration")
+        print("="*50)
+
+        # Create multiple databases for application (e.g., main and test/shadow)
+        main_db = input("Main database name (default: app_db): ") or "app_db"
+        shadow_db = input("Shadow/Testing database name (default: app_db_shadow): ") or f"{main_db}_shadow"
+
+        if username and password:
+            conn_str = f"mongodb://{username}:{password}@{host}:{port}/{main_db}"
+            print(f"\n📝 MongoDB commands to run in mongo shell:")
+            print(f"  1. mongo {host}:{port}")
+            print(f"  2. Run these commands in mongo:")
+            print(f"     use admin")
+            print(f"     db.createUser({{")
+            print(f"       user: '{username}',")
+            print(f"       pwd: '{password}',")
+            print(f"       roles: [")
+            print(f"         {{role: 'readWrite', db: '{main_db}'}},")
+            print(f"         {{role: 'readWrite', db: '{shadow_db}'}},")
+            print(f"         {{role: 'dbAdmin', db: '{main_db}'}},")
+            print(f"         {{role: 'dbAdmin', db: '{shadow_db}'}}")
+            print(f"       ]")
+            print(f"     }})")
+            print(f"     show dbs  -- to list databases")
+            print(f"     exit      -- to quit")
+        else:
+            conn_str = f"mongodb://{host}:{port}/{main_db}"
+            print(f"\n📝 MongoDB commands to run in mongo shell:")
+            print(f"  1. mongo {host}:{port}")
+            print(f"  2. Run these commands in mongo:")
+            print(f"     use {main_db}")
+            print(f"     db.createCollection('test')  -- to create the database")
+            print(f"     use {shadow_db}")
+            print(f"     db.createCollection('test')  -- to create the shadow database")
+            print(f"     show dbs  -- to list databases")
+            print(f"     exit      -- to quit")
+
+        # Save to config file
+        config_data = {
             "database": {
                 "type": "mongodb",
                 "connection_string": conn_str,
                 "host": host,
                 "port": port,
-                "name": db_name
+                "name": main_db,
+                "shadow_name": shadow_db
             }
         }
-        
+
+        if username:
+            config_data["database"]["username"] = username
+        if password:
+            config_data["database"]["password"] = password
+
         with open('database_config.json', 'w') as f:
-            json.dump(config, f, indent=2)
-        
-        print(f"✅ MongoDB configuration saved to database_config.json")
+            json.dump(config_data, f, indent=2)
+
+        print(f"\n✅ MongoDB configuration saved to database_config.json")
+
+        # Also generate .env file
+        self._generate_mongodb_env(config_data)
+
+    def _generate_mongodb_env(self, config):
+        """Generate .env file for MongoDB configuration"""
+        username = config['database'].get('username', '')
+        password = config['database'].get('password', '')
+
+        if username and password:
+            conn_str = f"mongodb://{username}:{password}@{config['database']['host']}:{config['database']['port']}/{config['database']['name']}"
+            shadow_conn_str = f"mongodb://{username}:{password}@{config['database']['host']}:{config['database']['port']}/{config['database']['shadow_name']}"
+        else:
+            conn_str = f"mongodb://{config['database']['host']}:{config['database']['port']}/{config['database']['name']}"
+            shadow_conn_str = f"mongodb://{config['database']['host']}:{config['database']['port']}/{config['database']['shadow_name']}"
+
+        env_content = f"""# MongoDB Database Configuration
+DB_HOST={config['database']['host']}
+DB_PORT={config['database']['port']}
+DB_NAME={config['database']['name']}
+DB_SHADOW_NAME={config['database']['shadow_name']}
+DB_TYPE=mongodb
+"""
+        if username:
+            env_content += f"DB_USERNAME={username}\n"
+        if password:
+            env_content += f"DB_PASSWORD={password}\n"
+
+        env_content += f"""
+# Database URLs
+DATABASE_URL={conn_str}
+SHADOW_DATABASE_URL={shadow_conn_str}
+
+# Connection Settings
+DB_POOL_SIZE=10
+DB_POOL_TIMEOUT=30
+"""
+
+        with open('.env', 'w') as f:
+            f.write(env_content)
+
+        print(f"✅ Environment file (.env) generated with MongoDB configuration")
+        print(f"💡 Use these environment variables in your application")
 
     def _setup_redis(self):
         """Setup Redis database"""
         print("\n🔴 Redis Setup")
+        print("Enter Redis connection details:")
+
         host = input("Host (default: localhost): ") or "localhost"
         port = input("Port (default: 6379): ") or "6379"
-        db_num = input("Database number (default: 0): ") or "0"
-        
-        conn_str = f"redis://{host}:{port}/{db_num}"
-        
-        config = {
+        password = input("Password (optional, press Enter to skip): ") or ""
+
+        print("\n" + "="*50)
+        print("Database Configuration")
+        print("="*50)
+
+        # Using multiple database numbers instead of separate databases
+        main_db = input("Main database number (default: 0): ") or "0"
+        shadow_db = input("Shadow/Testing database number (default: 1): ") or "1"
+
+        print(f"\n📝 Redis commands to run in redis-cli:")
+        print(f"  1. redis-cli -h {host} -p {port}")
+        if password:
+            print(f"  2. AUTH {password}")
+        print(f"  3. Run these commands in redis-cli:")
+        print(f"     SELECT {main_db}          # Switch to main database")
+        print(f"     SET test_key 'test_value' # Test the connection")
+        print(f"     GET test_key              # Verify the value")
+        print(f"     SELECT {shadow_db}        # Switch to shadow database")
+        print(f"     SET test_key 'test_value' # Test the shadow connection")
+        print(f"     KEYS *                    # List keys in database")
+        print(f"     INFO                      # Get server info")
+        print(f"     QUIT                      # Exit redis-cli")
+
+        if password:
+            conn_str = f"redis://:{password}@{host}:{port}/{main_db}"
+        else:
+            conn_str = f"redis://{host}:{port}/{main_db}"
+
+        config_data = {
             "database": {
                 "type": "redis",
                 "connection_string": conn_str,
                 "host": host,
                 "port": port,
-                "db": db_num
+                "name": f"redis_db_{main_db}",  # Naming for consistency
+                "shadow_name": f"redis_db_{shadow_db}",
+                "db": int(main_db),
+                "shadow_db": int(shadow_db)
             }
         }
-        
+
+        if password:
+            config_data["database"]["password"] = password
+
         with open('database_config.json', 'w') as f:
-            json.dump(config, f, indent=2)
-        
-        print(f"✅ Redis configuration saved to database_config.json")
+            json.dump(config_data, f, indent=2)
+
+        print(f"\n✅ Redis configuration saved to database_config.json")
+
+        # Also generate .env file
+        self._generate_redis_env(config_data)
+
+    def _generate_redis_env(self, config):
+        """Generate .env file for Redis configuration"""
+        password = config['database'].get('password', '')
+
+        if password:
+            conn_str = f"redis://:{password}@{config['database']['host']}:{config['database']['port']}/{config['database']['db']}"
+            shadow_conn_str = f"redis://:{password}@{config['database']['host']}:{config['database']['port']}/{config['database']['shadow_db']}"
+        else:
+            conn_str = f"redis://{config['database']['host']}:{config['database']['port']}/{config['database']['db']}"
+            shadow_conn_str = f"redis://{config['database']['host']}:{config['database']['port']}/{config['database']['shadow_db']}"
+
+        env_content = f"""# Redis Database Configuration
+REDIS_HOST={config['database']['host']}
+REDIS_PORT={config['database']['port']}
+REDIS_MAIN_DB={config['database']['db']}
+REDIS_SHADOW_DB={config['database']['shadow_db']}
+REDIS_TYPE=redis
+"""
+        if password:
+            env_content += f"REDIS_PASSWORD={password}\n"
+
+        env_content += f"""
+# Redis URLs
+REDIS_URL={conn_str}
+REDIS_SHADOW_URL={shadow_conn_str}
+
+# Connection Settings
+REDIS_POOL_SIZE=10
+REDIS_POOL_TIMEOUT=30
+REDIS_SOCKET_TIMEOUT=5
+"""
+
+        with open('.env', 'w') as f:
+            f.write(env_content)
+
+        print(f"✅ Environment file (.env) generated with Redis configuration")
+        print(f"💡 Use these environment variables in your application")
 
     def _configure_connection(self):
         """Configure database connections"""
