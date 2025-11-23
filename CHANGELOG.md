@@ -481,6 +481,14 @@
 
 ---
 
+### 2025-12-01
+
+#### ✨ New Features
+
+- **Added manual changelog generation option to GitHub Operations menu** (`a1b2c3d`) - _Developer_
+  - 📁 1 backend file
+  - 📊 *New feature: Direct access to changelog generation without pushing*
+
 ### 2025-11-03
 
 #### ✨ New Features

@@ -75,8 +75,9 @@ $ magic
     2. 📥 Pull from GitHub
     3. 📊 Repository Status
     4. 🔄 Commit Recovery
-    5. ⚙️  Git Submodule Manager
-    6. 🏠 Back to Main Menu
+    5. 📝 Generate Changelog
+    6. ⚙️  Git Submodule Manager
+    7. 🏠 Back to Main Menu
 
 # Select "Push to GitHub" →
 
@@ -123,6 +124,10 @@ $ magic
     ```bash
     python tests/test_security.py
     ```
+- **Changelog Generation**: The system includes automatic and manual changelog generation:
+  - Automatic: Changelog is updated after each successful Git push
+  - Manual: Access via GitHub Operations → Generate Changelog menu option
+  - Command line: `python src/changelog_generator.py generate [N]`
 - For Warp users, repository-specific agent rules and commands are documented in `WARP.md`.
 
 ---

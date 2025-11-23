@@ -135,9 +135,53 @@ class GitMenu(Menu):
             MenuItem("Diff Operations", lambda: self.git_ops.show_diff_menu()),
             MenuItem("Pull", lambda: self.git_ops.pull()),
             MenuItem("Initialize Git & Push to GitHub", lambda: self.git_ops.initialize_and_push()),
+            MenuItem("Generate Changelog", lambda: self._generate_changelog()),
             MenuItem("Git Recovery (Revert to Previous Commit)", lambda: self.git_ops.show_recovery_menu()),
             MenuItem("Git Cache (Handle Sensitive Files)", lambda: self.git_ops.manage_cache()),
             MenuItem("Manage Submodules/Nested Repos", lambda: self.git_ops.manage_submodules()),
             MenuItem("Git Stash Operations", lambda: self.git_ops.show_stash_menu()),
             MenuItem("Back to Main Menu", lambda: "exit")
         ]
+
+    def _generate_changelog(self) -> None:
+        """Generate changelog manually without pushing"""
+        try:
+            from changelog_generator import ChangelogGenerator
+            print("\n" + "="*70)
+            print("📝 CHANGLOG GENERATOR")
+            print("="*70 + "\n")
+
+            # Ask user for number of commits to process
+            try:
+                num_commits_input = input("Enter number of recent commits to include in changelog (default 1): ").strip()
+                num_commits = int(num_commits_input) if num_commits_input else 1
+            except ValueError:
+                num_commits = 1
+                print("Using default value of 1 commit\n")
+
+            if num_commits <= 0:
+                print("❌ Invalid number of commits. Must be positive.")
+                input("\nPress Enter to continue...")
+                return
+
+            print(f"🔄 Processing last {num_commits} commit(s)...\n")
+
+            generator = ChangelogGenerator()
+            success = generator.generate_changelog(num_commits=num_commits)
+
+            if success:
+                print(f"✅ Changelog updated successfully!")
+                print(f"📄 File: {generator.CONFIG['changelog_file']}\n")
+            else:
+                print("ℹ️  No new commits to process or changelog already up to date\n")
+
+            input("Press Enter to continue...")
+
+        except ImportError as e:
+            print(f"❌ Error importing ChangelogGenerator: {e}")
+            input("Press Enter to continue...")
+        except Exception as e:
+            print(f"❌ Error generating changelog: {e}")
+            import traceback
+            traceback.print_exc()
+            input("Press Enter to continue...")
