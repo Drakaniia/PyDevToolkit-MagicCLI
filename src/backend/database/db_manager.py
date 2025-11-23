@@ -31,6 +31,7 @@ class DatabaseManager(Menu):
             MenuItem("🔍 Auto-detect Database Type", self._detect_database),
             MenuItem("⚙️  Database Setup & Initialization", self._setup_database),
             MenuItem("🔗 Connection Configuration", self._configure_connection),
+            MenuItem("🧪 Comprehensive Connection Test", self._test_connection),
             MenuItem("📋 Schema Management", self._manage_schema),
             MenuItem("💾 Data Operations", self._data_operations),
             MenuItem("🏥 Database Health Check", self._health_check),
