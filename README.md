@@ -172,4 +172,4 @@ MIT License - feel free to use this in your own projects!
 
 ---
 
-**Made with love for developers who love automation**
+**Made with ❤️ for developers who love automation**

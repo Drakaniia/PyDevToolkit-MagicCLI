@@ -619,64 +619,46 @@ configure_shell_alias() {
     # Backup existing config
     local backup_path=$(backup_shell_config "$shell_config")
     
-    # Build alias command based on shell - use the bin/magic script if available
-    local alias_cmd=""
-    if [ -f "$PROJECT_ROOT/bin/magic" ]; then
-        case "$shell_type" in
-            fish)
-                alias_cmd="alias $COMMAND_ALIAS='set PYTHONIOENCODING=utf-8 && \"$PROJECT_ROOT/bin/magic\"'"
-                ;;
-            *)
-                alias_cmd="alias $COMMAND_ALIAS='PYTHONIOENCODING=utf-8 \"$PROJECT_ROOT/bin/magic\"'"
-                ;;
-        esac
-    else
-        case "$shell_type" in
-            fish)
-                alias_cmd="alias $COMMAND_ALIAS='set PYTHONIOENCODING=utf-8 && cd \"$PROJECT_ROOT\" && $PYTHON_CMD \"$MAIN_PY\"'"
-                ;;
-            *)
-                alias_cmd="alias $COMMAND_ALIAS='PYTHONIOENCODING=utf-8 cd \"$PROJECT_ROOT\" && $PYTHON_CMD \"$MAIN_PY\"'"
-                ;;
-        esac
-    fi
+    # Remove existing alias (if any) - using the working approach from fix scripts
+    sed -i '/# PyDevToolkit MagicCLI/,+3d' "$shell_config" 2>/dev/null || true
     
-    # Check if alias already exists
-    if grep -q "alias $COMMAND_ALIAS=" "$shell_config" 2>/dev/null; then
-        print_warning "Alias '$COMMAND_ALIAS' already exists in $shell_config"
-        echo ""
-        
-        # Show current alias
-        local current_alias=$(grep "alias $COMMAND_ALIAS=" "$shell_config" | tail -1)
-        print_info "Current: $current_alias"
-        echo ""
-        
-        if ask_yes_no "Update existing alias?"; then
-            # Remove old alias lines
-            if [ "$(uname)" = "Darwin" ]; then
-                # macOS
-                sed -i '' "/alias $COMMAND_ALIAS=/d" "$shell_config"
-                sed -i '' '/# PyDevToolkit MagicCLI/d' "$shell_config"
-            else
-                # Linux/Git Bash
-                sed -i "/alias $COMMAND_ALIAS=/d" "$shell_config" 2>/dev/null || true
-                sed -i '/# PyDevToolkit MagicCLI/d' "$shell_config" 2>/dev/null || true
-            fi
-            
-            print_success "Removed old alias configuration"
+    # Build alias command based on working fix scripts for Windows Git Bash
+    local alias_cmd=""
+    local os=$(detect_os)
+    
+    if [ "$os" = "windows" ]; then
+        # Windows Git Bash specific fix - convert Windows path to Git Bash format
+        local git_bash_path=$(echo "$PROJECT_ROOT" | sed 's|C:|/c|g' | sed 's|\\|/|g')
+        alias_cmd="alias magic='python \"$git_bash_path/src/main.py\" \"\$@\"'"
+    else
+        # Unix-like systems
+        if [ -f "$PROJECT_ROOT/bin/magic" ]; then
+            case "$shell_type" in
+                fish)
+                    alias_cmd="alias $COMMAND_ALIAS='set PYTHONIOENCODING=utf-8 && \"$PROJECT_ROOT/bin/magic\"'"
+                    ;;
+                *)
+                    alias_cmd="alias $COMMAND_ALIAS='PYTHONIOENCODING=utf-8 \"$PROJECT_ROOT/bin/magic\"'"
+                    ;;
+            esac
         else
-            print_info "Keeping existing alias"
-            echo ""
-            return 0
+            case "$shell_type" in
+                fish)
+                    alias_cmd="alias $COMMAND_ALIAS='set PYTHONIOENCODING=utf-8 && $PYTHON_CMD \"$MAIN_PY\"'"
+                    ;;
+                *)
+                    alias_cmd="alias $COMMAND_ALIAS='PYTHONIOENCODING=utf-8 $PYTHON_CMD \"$MAIN_PY\"'"
+                    ;;
+            esac
         fi
     fi
     
-    # Add new alias
+    # Add new alias using the working format from fix scripts
     {
         echo ""
         echo "# ============================================"
         echo "# PyDevToolkit MagicCLI"
-        echo "# Installed: $(date)"
+        echo "# Fixed setup: $(date)"
         echo "# ============================================"
         echo "$alias_cmd"
         echo ""
@@ -699,6 +681,24 @@ configure_shell_alias() {
 # FINAL COMPLETION
 # ============================================================
 
+clear_terminal_cache() {
+    print_step "Clearing Terminal Cache"
+    
+    # Clear command hash table
+    hash -r 2>/dev/null || true
+    
+    # Clear any potential Python cache
+    if [ -d "$PROJECT_ROOT/__pycache__" ]; then
+        rm -rf "$PROJECT_ROOT/__pycache__" 2>/dev/null || true
+        print_info "Cleared Python cache"
+    fi
+    
+    # Clear any potential pip cache issues
+    $PYTHON_CMD -m pip cache purge 2>/dev/null || true
+    
+    print_success "Terminal cache cleared"
+}
+
 print_completion_message() {
     print_section "🎉 Setup Complete!"
     
@@ -712,19 +712,33 @@ print_completion_message() {
     echo -e "  ${GREEN}✓${NC} Shell config: $(get_shell_config)"
     echo -e "  ${GREEN}✓${NC} Command alias: ${YELLOW}${BOLD}$COMMAND_ALIAS${NC}"
     
-    echo -e "\n${CYAN}${BOLD}🚀 Next Steps:${NC}"
-    echo -e "  ${BLUE}1.${NC} Reload your shell configuration:"
-    echo -e "     ${YELLOW}source $(get_shell_config)${NC}"
-    echo -e "     ${MAGENTA}OR restart your terminal${NC}"
+    echo -e "\n${YELLOW}${BOLD}⚠️  IMPORTANT: Terminal Restart Required${NC}"
+    echo -e "${YELLOW}The '$COMMAND_ALIAS' command will NOT work until you:${NC}"
+    echo ""
     
-    echo -e "\n  ${BLUE}2.${NC} Test the installation:"
-    echo -e "     ${YELLOW}$COMMAND_ALIAS${NC}"
+    echo -e "${CYAN}${BOLD}🔄 REQUIRED - Choose ONE option:${NC}"
+    echo -e "  ${RED}1.${NC} ${BOLD}RESTART TERMINAL (Recommended)${NC}"
+    echo -e "     • Close this terminal completely"
+    echo -e "     • Open a new terminal window"
+    echo -e "     • Type: ${YELLOW}$COMMAND_ALIAS${NC}"
+    echo ""
     
-    echo -e "\n  ${BLUE}3.${NC} Navigate to any project and run:"
-    echo -e "     ${YELLOW}cd /path/to/your/project${NC}"
-    echo -e "     ${YELLOW}$COMMAND_ALIAS${NC}"
+    echo -e "  ${RED}2.${NC} ${BOLD}RELOAD SHELL (May not work in all terminals)${NC}"
+    echo -e "     • Type: ${YELLOW}source $(get_shell_config)${NC}"
+    echo -e "     • Then: ${YELLOW}hash -r${NC}"
+    echo -e "     • Try: ${YELLOW}$COMMAND_ALIAS${NC}"
+    echo ""
     
-    echo -e "\n${CYAN}${BOLD}💡 Quick Start Guide:${NC}"
+    if [ "$(detect_os)" = "windows" ]; then
+        echo -e "  ${RED}3.${NC} ${BOLD}IDE USERS (VS Code, etc.)${NC}"
+        echo -e "     • Save all files"
+        echo -e "     • Close terminal panel (${YELLOW}Ctrl+Shift+\`${NC})"
+        echo -e "     • Open new terminal (${YELLOW}Ctrl+Shift+\`${NC})"
+        echo -e "     • Try: ${YELLOW}$COMMAND_ALIAS${NC}"
+        echo ""
+    fi
+    
+    echo -e "${CYAN}${BOLD}💡 Quick Start Guide:${NC}"
     echo -e "  • ${BLUE}GitHub Operations:${NC} Push, pull, commit management"
     echo -e "  • ${BLUE}Project Management:${NC} View structure, navigate folders"
     echo -e "  • ${BLUE}Web Development:${NC} Modern frontend project automation"
@@ -746,7 +760,14 @@ reload_shell_config() {
     local shell_config=$(get_shell_config)
     
     echo ""
-    if ask_yes_no "Would you like to reload your shell configuration now?"; then
+    print_step "Shell Configuration Reload Options"
+    echo ""
+    
+    echo -e "${CYAN}The shell configuration has been updated, but the current session needs to be refreshed.${NC}"
+    echo ""
+    
+    # Option 1: Try to reload the current shell
+    if ask_yes_no "Option 1: Reload current shell configuration now?"; then
         if [ -f "$shell_config" ]; then
             print_info "Reloading $shell_config..."
             
@@ -756,25 +777,100 @@ reload_shell_config() {
             source "$shell_config" 2>/dev/null || true
             set -e
             
-            print_success "Configuration reloaded!"
-            echo ""
-            print_info "You can now use: ${YELLOW}${BOLD}$COMMAND_ALIAS${NC}"
+            # Clear command hash cache
+            hash -r 2>/dev/null || true
             
+            print_success "Configuration reloaded!"
+            print_success "Command cache cleared!"
             echo ""
-            echo -e "${CYAN}${BOLD}Try it now:${NC}"
-            echo -e "  ${YELLOW}$COMMAND_ALIAS${NC}"
+            print_info "You should now be able to use: ${YELLOW}${BOLD}$COMMAND_ALIAS${NC}"
+            
+            # Test if the alias is now available
+            if command -v "$COMMAND_ALIAS" &> /dev/null || alias "$COMMAND_ALIAS" &> /dev/null; then
+                print_success "✓ '$COMMAND_ALIAS' command is now available!"
+                echo ""
+                echo -e "${CYAN}${BOLD}Try it now:${NC}"
+                echo -e "  ${YELLOW}$COMMAND_ALIAS${NC}"
+            else
+                print_warning "Alias not detected in current session"
+                print_info "This sometimes happens in Git Bash - restarting is recommended"
+                echo ""
+                offer_restart_options
+            fi
         else
             print_warning "Could not reload configuration"
             print_info "Please restart your terminal or run: source $shell_config"
+            offer_restart_options
         fi
     else
-        echo ""
-        print_info "Remember to reload your shell:"
-        echo -e "  ${YELLOW}source $shell_config${NC}"
-        echo -e "  ${MAGENTA}OR restart your terminal${NC}"
+        offer_restart_options
     fi
     
     echo ""
+}
+
+offer_restart_options() {
+    local shell_config=$(get_shell_config)
+    local os=$(detect_os)
+    
+    echo ""
+    print_step "Alternative Restart Options"
+    echo ""
+    
+    echo -e "${YELLOW}To ensure the '$COMMAND_ALIAS' command works, choose one of these options:${NC}"
+    echo ""
+    
+    echo -e "${BLUE}Option A: Restart Terminal (Recommended)${NC}"
+    echo -e "  • Close this terminal window"
+    echo -e "  • Open a new terminal"
+    echo -e "  • Type: ${YELLOW}$COMMAND_ALIAS${NC}"
+    echo ""
+    
+    echo -e "${BLUE}Option B: Manual Reload${NC}"
+    echo -e "  • Run: ${YELLOW}source $shell_config${NC}"
+    echo -e "  • Then: ${YELLOW}hash -r${NC} (clears command cache)"
+    echo -e "  • Then: ${YELLOW}$COMMAND_ALIAS${NC}"
+    echo ""
+    
+    if [ "$os" = "windows" ]; then
+        echo -e "${BLUE}Option C: IDE/Editor Restart${NC}"
+        echo -e "  • If using VS Code or other IDE:"
+        echo -e "    1. Save all files"
+        echo -e "  • 2. Close the terminal panel"
+        echo -e "  • 3. Open a new terminal panel"
+        echo -e "  • 4. Type: ${YELLOW}$COMMAND_ALIAS${NC}"
+        echo ""
+        
+        echo -e "${BLUE}Option D: VS Code Specific${NC}"
+        echo -e "  • Press ${YELLOW}Ctrl+Shift+P${NC}"
+        echo -e "  • Type: ${YELLOW}Terminal: Kill Active Terminal Instance${NC}"
+        echo -e "  • Open new terminal and try: ${YELLOW}$COMMAND_ALIAS${NC}"
+        echo ""
+    fi
+    
+    echo -e "${MAGENTA}${BOLD}Why restart is needed:${NC}"
+    echo -e "  • Shell aliases are loaded when the shell starts"
+    echo -e "  • The current session has cached the command list"
+    echo -e "  • Reloading clears this cache and reads new aliases"
+    echo ""
+    
+    # Offer to test the command
+    if ask_yes_no "Would you like to test the '$COMMAND_ALIAS' command now?"; then
+        echo ""
+        print_info "Testing: $COMMAND_ALIAS"
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        
+        # Try to run the command with error handling
+        if eval "$COMMAND_ALIAS --help" 2>&1 || eval "$COMMAND_ALIAS -h" 2>&1 || eval "$COMMAND_ALIAS" 2>&1; then
+            echo ""
+            print_success "✓ '$COMMAND_ALIAS' command is working!"
+        else
+            echo ""
+            print_warning "Command test failed - you may need to restart your terminal"
+            print_info "After restarting, try: $COMMAND_ALIAS"
+        fi
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    fi
 }
 
 # ============================================================
@@ -810,8 +906,10 @@ main() {
     # Configure alias
     configure_shell_alias
     
+    # Clear terminal cache
+    clear_terminal_cache
+    
     # Print completion message
-
     print_completion_message
     
     # Offer to reload config
