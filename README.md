@@ -1,4 +1,4 @@
-# ✨ Magic CLI
+# Magic CLI
 
 **One command to rule them all** - A powerful, secure developer toolkit that puts Git operations, project management, and web development automation at your fingertips.
 
@@ -13,7 +13,7 @@
 
 ---
 
-## 🎯 How to Use
+## How to Use
 
 ### Installation
 
@@ -42,15 +42,15 @@ $ magic
 
 Then use arrow keys ↑↓ to navigate and Enter to select!
 
-## 📺 Sample Terminal Output
+## Sample Terminal Output
 
 ```bash
 $ magic
 
 ======================================================================
-  🚀 Python Automation System - Main Menu
+  Python Automation System - Main Menu
 ======================================================================
-  📍 Current Directory: /home/user/my-project
+  Current Directory: /home/user/my-project
 ======================================================================
 
   ► 1. GitHub Operations
@@ -66,43 +66,43 @@ $ magic
 # Select "GitHub Operations" →
 
 ======================================================================
-  🔧 GitHub Operations
+  GitHub Operations
 ======================================================================
-  📍 Current Directory: /home/user/my-project
+  Current Directory: /home/user/my-project
 ======================================================================
 
-    1. 📤 Push to GitHub (Auto-commit)
-    2. 📥 Pull from GitHub
-    3. 📊 Repository Status
-    4. 🔄 Commit Recovery
-    5. 📝 Generate Changelog
-    6. ⚙️  Git Submodule Manager
-    7. 🏠 Back to Main Menu
+    1. Push to GitHub (Auto-commit)
+    2. Pull from GitHub
+    3. Repository Status
+    4. Commit Recovery
+    5. Generate Changelog
+    6. Git Submodule Manager
+    7. Back to Main Menu
 
 # Select "Push to GitHub" →
 
 ======================================================================
-⬆️  GIT PUSH (With Auto-Retry & Auto-Changelog)
+GIT PUSH (With Auto-Retry & Auto-Changelog)
 ======================================================================
 
-🔄 Refreshing Git state...
-✅ Found 3 changed files:
+Refreshing Git state...
+Found 3 changed files:
    M  src/components/Button.tsx
    A  src/utils/helpers.ts
    M  README.md
 
-💭 Commit message:
+Commit message:
 ```
 
 ---
 
-## ⚙️ Prerequisites
+## Prerequisites
 
 - **Python 3.7+**
 - **Git** (optional but recommended for full functionality)
 - **Bash shell** (Linux/macOS) or **Git Bash** (Windows)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 PyDevToolkit-MagicCLI/
@@ -126,7 +126,7 @@ PyDevToolkit-MagicCLI/
 
 ---
 
-## 🧭 Development notes
+## Development notes
 
 - The main entrypoint for the menu is `src/main.py` (executed via the `magic` alias or `bin/magic` script).
 - **Project Structure**: The codebase has been reorganized with a modular architecture:
@@ -160,16 +160,16 @@ PyDevToolkit-MagicCLI/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
-## 📄 License
+## License
 
 MIT License - feel free to use this in your own projects!
 
 ---
 
-**Made with ❤️ for developers who love automation**
+**Made with love for developers who love automation**
