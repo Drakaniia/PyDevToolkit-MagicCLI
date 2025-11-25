@@ -22,7 +22,8 @@ set -e  # Exit on error
 # ============================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MAIN_PY="$SCRIPT_DIR/main.py"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+MAIN_PY="$PROJECT_ROOT/src/main.py"
 MIN_PYTHON_VERSION="3.7"
 COMMAND_ALIAS="magic"
 
@@ -417,8 +418,11 @@ configure_git_user() {
 install_dependencies() {
     print_section "📦 Installing Python Dependencies"
 
+    # Change to project root for installation
+    cd "$PROJECT_ROOT"
+
     # Check if requirements.txt exists
-    if [ -f "$SCRIPT_DIR/requirements.txt" ]; then
+    if [ -f "$PROJECT_ROOT/requirements.txt" ]; then
         print_info "Found requirements.txt, installing dependencies..."
 
         if $PYTHON_CMD -m pip install --upgrade pip; then
@@ -427,13 +431,13 @@ install_dependencies() {
             print_error "Failed to update pip, attempting to continue..."
         fi
 
-        if $PYTHON_CMD -m pip install -r "$SCRIPT_DIR/requirements.txt"; then
+        if $PYTHON_CMD -m pip install -r "$PROJECT_ROOT/requirements.txt"; then
             print_success "Successfully installed all dependencies"
         else
             print_error "Failed to install dependencies"
             echo ""
             print_info "Trying alternative installation with --user flag..."
-            if $PYTHON_CMD -m pip install --user -r "$SCRIPT_DIR/requirements.txt"; then
+            if $PYTHON_CMD -m pip install --user -r "$PROJECT_ROOT/requirements.txt"; then
                 print_success "Successfully installed dependencies with --user flag"
             else
                 print_error "Failed to install dependencies with --user flag"
@@ -479,14 +483,14 @@ validate_files() {
     fi
 
     # Check requirements.txt
-    if [ -f "$SCRIPT_DIR/requirements.txt" ]; then
+    if [ -f "$PROJECT_ROOT/requirements.txt" ]; then
         print_success "Found requirements.txt"
     else
         print_info "Note: requirements.txt not found, will install from setup.py"
     fi
 
     # Check src directory
-    if [ -d "$SCRIPT_DIR/src" ]; then
+    if [ -d "$PROJECT_ROOT/src" ]; then
         print_success "Found src/ directory"
     else
         print_error "src/ directory not found"
@@ -497,12 +501,12 @@ validate_files() {
     local critical_modules=(
         "src/__init__.py"
         "src/menu.py"
-        "src/git_operations.py"
-        "src/folder_navigator.py"
+        "src/modules/git_operations/menu.py"
+        "src/modules/project_management/folder_navigator.py"
     )
 
     for module in "${critical_modules[@]}"; do
-        if [ -f "$SCRIPT_DIR/$module" ]; then
+        if [ -f "$PROJECT_ROOT/$module" ]; then
             print_success "Found $module"
         else
             print_error "Missing critical module: $module"
@@ -536,6 +540,15 @@ validate_permissions() {
         print_success "Set executable permissions on main.py"
     else
         print_warning "Could not set executable permissions (may not be needed on Windows)"
+    fi
+    
+    # Make bin/magic executable if it exists
+    if [ -f "$PROJECT_ROOT/bin/magic" ]; then
+        if chmod +x "$PROJECT_ROOT/bin/magic" 2>/dev/null; then
+            print_success "Set executable permissions on bin/magic"
+        else
+            print_warning "Could not set executable permissions on bin/magic"
+        fi
     fi
     
     # Check write permissions on shell config
@@ -606,16 +619,27 @@ configure_shell_alias() {
     # Backup existing config
     local backup_path=$(backup_shell_config "$shell_config")
     
-    # Build alias command based on shell
+    # Build alias command based on shell - use the bin/magic script if available
     local alias_cmd=""
-    case "$shell_type" in
-        fish)
-            alias_cmd="alias $COMMAND_ALIAS='set PYTHONIOENCODING=utf-8 && $PYTHON_CMD \"$MAIN_PY\"'"
-            ;;
-        *)
-            alias_cmd="alias $COMMAND_ALIAS='PYTHONIOENCODING=utf-8 $PYTHON_CMD \"$MAIN_PY\"'"
-            ;;
-    esac
+    if [ -f "$PROJECT_ROOT/bin/magic" ]; then
+        case "$shell_type" in
+            fish)
+                alias_cmd="alias $COMMAND_ALIAS='set PYTHONIOENCODING=utf-8 && \"$PROJECT_ROOT/bin/magic\"'"
+                ;;
+            *)
+                alias_cmd="alias $COMMAND_ALIAS='PYTHONIOENCODING=utf-8 \"$PROJECT_ROOT/bin/magic\"'"
+                ;;
+        esac
+    else
+        case "$shell_type" in
+            fish)
+                alias_cmd="alias $COMMAND_ALIAS='set PYTHONIOENCODING=utf-8 && cd \"$PROJECT_ROOT\" && $PYTHON_CMD \"$MAIN_PY\"'"
+                ;;
+            *)
+                alias_cmd="alias $COMMAND_ALIAS='PYTHONIOENCODING=utf-8 cd \"$PROJECT_ROOT\" && $PYTHON_CMD \"$MAIN_PY\"'"
+                ;;
+        esac
+    fi
     
     # Check if alias already exists
     if grep -q "alias $COMMAND_ALIAS=" "$shell_config" 2>/dev/null; then
@@ -632,11 +656,11 @@ configure_shell_alias() {
             if [ "$(uname)" = "Darwin" ]; then
                 # macOS
                 sed -i '' "/alias $COMMAND_ALIAS=/d" "$shell_config"
-                sed -i '' '/# Python Automation System/d' "$shell_config"
+                sed -i '' '/# PyDevToolkit MagicCLI/d' "$shell_config"
             else
                 # Linux/Git Bash
                 sed -i "/alias $COMMAND_ALIAS=/d" "$shell_config" 2>/dev/null || true
-                sed -i '/# Python Automation System/d' "$shell_config" 2>/dev/null || true
+                sed -i '/# PyDevToolkit MagicCLI/d' "$shell_config" 2>/dev/null || true
             fi
             
             print_success "Removed old alias configuration"
@@ -651,7 +675,7 @@ configure_shell_alias() {
     {
         echo ""
         echo "# ============================================"
-        echo "# Python Automation System"
+        echo "# PyDevToolkit MagicCLI"
         echo "# Installed: $(date)"
         echo "# ============================================"
         echo "$alias_cmd"
@@ -679,12 +703,12 @@ print_completion_message() {
     print_section "🎉 Setup Complete!"
     
     echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}${BOLD}║  Python Automation System is ready to use!                    ║${NC}"
+    echo -e "${GREEN}${BOLD}║  PyDevToolkit MagicCLI is ready to use!                      ║${NC}"
     echo -e "${GREEN}${BOLD}╚════════════════════════════════════════════════════════════════╝${NC}"
     
     echo -e "\n${CYAN}${BOLD}📋 Installation Summary:${NC}"
     echo -e "  ${GREEN}✓${NC} Python: $PYTHON_CMD ($PYTHON_VERSION)"
-    echo -e "  ${GREEN}✓${NC} Install location: $SCRIPT_DIR"
+    echo -e "  ${GREEN}✓${NC} Install location: $PROJECT_ROOT"
     echo -e "  ${GREEN}✓${NC} Shell config: $(get_shell_config)"
     echo -e "  ${GREEN}✓${NC} Command alias: ${YELLOW}${BOLD}$COMMAND_ALIAS${NC}"
     
@@ -702,14 +726,14 @@ print_completion_message() {
     
     echo -e "\n${CYAN}${BOLD}💡 Quick Start Guide:${NC}"
     echo -e "  • ${BLUE}GitHub Operations:${NC} Push, pull, commit management"
-    echo -e "  • ${BLUE}Project Structure:${NC} View and share project layout"
-    echo -e "  • ${BLUE}Folder Navigator:${NC} Interactive directory navigation"
-    echo -e "  • ${BLUE}Dev Mode:${NC} Web development automation tools"
+    echo -e "  • ${BLUE}Project Management:${NC} View structure, navigate folders"
+    echo -e "  • ${BLUE}Web Development:${NC} Modern frontend project automation"
+    echo -e "  • ${BLUE}Backend Development:${NC} API scaffolding, database tools"
     
     echo -e "\n${CYAN}${BOLD}📚 Resources:${NC}"
-    echo -e "  • README: $SCRIPT_DIR/README.md"
-    echo -e "  • Repository: https://github.com/Drakaniia/python-automation"
-    echo -e "  • Issues: https://github.com/Drakaniia/python-automation/issues"
+    echo -e "  • README: $PROJECT_ROOT/README.md"
+    echo -e "  • Repository: https://github.com/Drakaniia/PyDevToolkit-MagicCLI"
+    echo -e "  • Issues: https://github.com/Drakaniia/PyDevToolkit-MagicCLI/issues"
     
     echo -e "\n${CYAN}${BOLD}❓ Need Help?${NC}"
     echo -e "  • Email: alistairybaez574@gmail.com"
