@@ -1,6 +1,6 @@
 """
 setup.py
-Package configuration for Python Automation System
+Legacy setup.py for PyDevToolkit MagicCLI - Use pyproject.toml for modern builds
 """
 from setuptools import setup, find_packages
 from pathlib import Path
@@ -17,8 +17,9 @@ setup(
     description="A powerful CLI automation toolkit with AI-powered Git operations",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Drakaniia/python-automation",
-    packages=find_packages(exclude=["tests", "tests.*", "backups", "backups.*"]),
+    url="https://github.com/Drakaniia/PyDevToolkit-MagicCLI",
+    packages=find_packages(where="src", exclude=["tests", "tests.*"]),
+    package_dir={"": "src"},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -62,9 +63,12 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "magic=src.magic:main",
+            "magic=main:main",
         ],
     },
     include_package_data=True,
+    package_data={
+        "": ["*.yaml", "*.yml", "*.json", "*.md"],
+    },
     zip_safe=False,
 )

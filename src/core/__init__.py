@@ -3,8 +3,8 @@ automation/core/__init__.py
 Core Git operations and utilities
 """
 
-from .git_client import GitClient, get_git_client
-from .exceptions import (
+from .utils.git_client import GitClient, get_git_client
+from .utils.exceptions import (
     AutomationError,
     GitError,
     GitCommandError,
@@ -12,6 +12,8 @@ from .exceptions import (
     NoRemoteError,
     GitNotInstalledError,
     UncommittedChangesError,
+    SSHConfigError,
+    GitHubAPIError,
     ErrorSeverity,
     ExceptionHandler,
     handle_errors
@@ -27,6 +29,8 @@ __all__ = [
     'NoRemoteError',
     'GitNotInstalledError',
     'UncommittedChangesError',
+    'SSHConfigError',
+    'GitHubAPIError',
     'ErrorSeverity',
     'ExceptionHandler',
     'handle_errors'

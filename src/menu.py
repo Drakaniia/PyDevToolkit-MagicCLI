@@ -11,7 +11,7 @@ src_path = Path(__file__).parent
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from core.menu_base import Menu, MenuItem
+from core.menu import Menu, MenuItem
 from typing import Any, Optional
 
 
@@ -41,11 +41,10 @@ class MainMenu(Menu):
             return
 
         # Import here to avoid circular imports
-        from git_operations import GitMenu
-        from structure_viewer import StructureViewer
-        from folder_navigator import FolderNavigator
-        from dev_mode.dev_mode import DevModeMenu
-        from backend.backend_menu import BackendDevMenu
+        from modules.git_operations import GitMenu
+        from modules.project_management import StructureViewer, FolderNavigator
+        from modules.web_development import DevModeMenu
+        from modules.backend_development import BackendDevMenu
 
         # Create instances once and reuse them
         if self._git_menu is None:

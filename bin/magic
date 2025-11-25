@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+"""
+Main entry point for PyDevToolkit MagicCLI
+"""
+import sys
+import os
+import io
+from pathlib import Path
+
+# Set UTF-8 encoding for Windows console
+if sys.platform == "win32":
+    os.system("chcp 65001 > nul")
+    # Ensure stdout uses UTF-8 encoding
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
+# Add src directory to path
+project_root = Path(__file__).parent.parent
+src_path = project_root / "src"
+sys.path.insert(0, str(src_path))
+
+from main import main
+
+if __name__ == "__main__":
+    main()
