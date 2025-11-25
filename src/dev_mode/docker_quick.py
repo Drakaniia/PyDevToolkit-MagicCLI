@@ -203,20 +203,17 @@ class DockerQuickCommand(DevModeCommand):
         elif (cwd / "requirements.txt").exists() or (cwd / "setup.py").exists() or (cwd / "pyproject.toml").exists():
             project_info['type'] = 'python'
             
-            # Check for specific Python frameworks
-            requirements_files = [cwd / "requirements.txt", cwd / "requirements-test.txt"]
-            for req_file in requirements_files:
-                if req_file.exists():
-                    try:
-                        content = req_file.read_text()
-                        if 'django' in content.lower():
-                            project_info['framework'] = 'django'
-                        elif 'flask' in content.lower():
-                            project_info['framework'] = 'flask'
-                        elif 'fastapi' in content.lower():
-                            project_info['framework'] = 'fastapi'
-                    except:
-                        pass
+            try:
+                with open(requirements_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    if 'django' in content.lower():
+                        project_info['framework'] = 'django'
+                    elif 'flask' in content.lower():
+                        project_info['framework'] = 'flask'
+                    elif 'fastapi' in content.lower():
+                        project_info['framework'] = 'fastapi'
+            except (FileNotFoundError, PermissionError, UnicodeDecodeError):
+                pass
         
         # Check for Java projects
         elif (cwd / "pom.xml").exists():
@@ -301,7 +298,7 @@ class DockerQuickCommand(DevModeCommand):
                             if script_name in scripts:
                                 pkg_mgr = project_info.get('package_manager', 'npm')
                                 suggestions.append(f"{pkg_mgr} run {script_name}")
-                except:
+                except (FileNotFoundError, PermissionError, json.JSONDecodeError):
                     pass
             
             # Framework-specific defaults
@@ -422,7 +419,7 @@ class DockerQuickCommand(DevModeCommand):
                         matches = re.findall(pattern, content, re.IGNORECASE)
                         if matches:
                             return int(matches[0])
-                except:
+                except (FileNotFoundError, PermissionError, UnicodeDecodeError, ValueError):
                     continue
         
         return None
@@ -794,19 +791,21 @@ CMD {json.dumps(start_command.split())}
     def _is_docker_running(self) -> bool:
         """Check if Docker daemon is running"""
         try:
-            result = subprocess.run(
+            from core.security import SecurityValidator
+            result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'info'],
                 capture_output=True,
                 timeout=5
             )
             return result.returncode == 0
-        except:
+        except (subprocess.CalledProcessError, OSError, TimeoutError):
             return False
     
     def _get_available_images(self) -> list:
         """Get list of available Docker images"""
         try:
-            result = subprocess.run(
+            from core.security import SecurityValidator
+            result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'images', '--format', '{{.Repository}}:{{.Tag}}'],
                 capture_output=True,
                 text=True,
@@ -824,13 +823,14 @@ CMD {json.dumps(start_command.split())}
     def _image_exists(self, image_name: str) -> bool:
         """Check if a Docker image exists"""
         try:
-            result = subprocess.run(
+            from core.security import SecurityValidator
+            result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'image', 'inspect', image_name],
                 capture_output=True,
                 timeout=5
             )
             return result.returncode == 0
-        except:
+        except (subprocess.CalledProcessError, OSError, TimeoutError):
             return False
     
     def _build_image(self, interactive: bool = True, **kwargs):
@@ -1008,7 +1008,8 @@ CMD {json.dumps(start_command.split())}
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+            from core.security import SecurityValidator
+            result = SecurityValidator.safe_subprocess_run(cmd, check=True, capture_output=True, text=True)
             
             if detached:
                 container_id = result.stdout.strip()[:12]
@@ -1091,7 +1092,8 @@ CMD {json.dumps(start_command.split())}
         print(f"\n$ {' '.join(cmd)}\n")
         
         try:
-            result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+            from core.security import SecurityValidator
+            result = SecurityValidator.safe_subprocess_run(cmd, check=True, capture_output=True, text=True)
             
             if detached:
                 container_id = result.stdout.strip()[:12]
@@ -1130,7 +1132,8 @@ CMD {json.dumps(start_command.split())}
         
         # List running containers
         try:
-            result = subprocess.run(
+            from core.security import SecurityValidator
+            result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'ps', '--format', '{{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}'],
                 capture_output=True,
                 text=True,
@@ -1178,7 +1181,8 @@ CMD {json.dumps(start_command.split())}
             cmd = ['docker', 'stop', container_id]
             print(f"\n$ {' '.join(cmd)}\n")
             
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(f"✅ Container {container_id} stopped")
         
         except subprocess.CalledProcessError as e:
@@ -1190,7 +1194,8 @@ CMD {json.dumps(start_command.split())}
         """Stop all running containers"""
         try:
             # Get all running container IDs
-            result = subprocess.run(
+            from core.security import SecurityValidator
+            result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'ps', '-q'],
                 capture_output=True,
                 text=True,
@@ -1210,7 +1215,8 @@ CMD {json.dumps(start_command.split())}
             cmd = ['docker', 'stop'] + container_ids
             print(f"$ {' '.join(cmd[:3])} [...]")
             
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(f"✅ All containers stopped successfully!")
             
         except subprocess.CalledProcessError as e:
@@ -1228,7 +1234,8 @@ CMD {json.dumps(start_command.split())}
             cmd.append('-a')
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             print(f"\n❌ Failed to list containers: {e}")
     
@@ -1238,7 +1245,8 @@ CMD {json.dumps(start_command.split())}
         print("="*70 + "\n")
         
         try:
-            subprocess.run(['docker', 'images'], check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(['docker', 'images'], check=True)
         except subprocess.CalledProcessError as e:
             print(f"\n❌ Failed to list images: {e}")
     
@@ -1262,7 +1270,8 @@ CMD {json.dumps(start_command.split())}
         print("\n🔨 Pruning resources...\n")
         
         try:
-            subprocess.run(['docker', 'system', 'prune', '-f'], check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(['docker', 'system', 'prune', '-f'], check=True)
             print("\n✅ Resources pruned successfully!")
         except subprocess.CalledProcessError as e:
             print(f"\n❌ Prune failed: {e}")
@@ -1583,7 +1592,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             if detached:
                 print("✅ Services started successfully!")
                 self._docker_compose_ps(show_output=False)
@@ -1611,7 +1621,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             print("✅ Services stopped successfully!")
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to stop services: {e}")
@@ -1629,7 +1640,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             print("✅ Services restarted successfully!")
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to restart services: {e}")
@@ -1657,7 +1669,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to view logs: {e}")
         except KeyboardInterrupt:
@@ -1680,7 +1693,8 @@ http {{
             print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             if show_output:
                 print(f"❌ Failed to list services: {e}")
@@ -1708,7 +1722,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(f"✅ Service '{service}' scaled to {replicas} replicas!")
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to scale service: {e}")
@@ -1736,7 +1751,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             print("✅ Services built successfully!")
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to build services: {e}")
@@ -1759,7 +1775,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             print("✅ Images pulled successfully!")
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to pull images: {e}")
@@ -1856,7 +1873,8 @@ http {{
     def _get_swarm_status(self) -> Dict[str, str]:
         """Get Docker Swarm status"""
         try:
-            result = subprocess.run(
+            from core.security import SecurityValidator
+            result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'info', '--format', '{{.Swarm.LocalNodeState}}'],
                 capture_output=True,
                 text=True,
@@ -1867,7 +1885,7 @@ http {{
             
             if state == 'active':
                 # Get more details
-                info_result = subprocess.run(
+                info_result = SecurityValidator.safe_subprocess_run(
                     ['docker', 'info', '--format', '{{.Swarm.NodeID}} {{.Swarm.NodeAddr}}'],
                     capture_output=True,
                     text=True,
@@ -1907,7 +1925,8 @@ http {{
             
             # Leave current swarm first
             try:
-                subprocess.run(['docker', 'swarm', 'leave', '-f'], check=True)
+                from core.security import SecurityValidator
+                SecurityValidator.safe_subprocess_run(['docker', 'swarm', 'leave', '-f'], check=True)
                 print("✅ Left current Swarm")
             except subprocess.CalledProcessError:
                 print("⚠️  Could not leave current Swarm")
@@ -1929,7 +1948,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+            from core.security import SecurityValidator
+            result = SecurityValidator.safe_subprocess_run(cmd, check=True, capture_output=True, text=True)
             print("✅ Swarm initialized successfully!")
             
             # Show join token for workers
@@ -1939,7 +1959,7 @@ http {{
             
             # Get manager join token
             try:
-                token_result = subprocess.run(
+                token_result = SecurityValidator.safe_subprocess_run(
                     ['docker', 'swarm', 'join-token', 'manager'],
                     capture_output=True,
                     text=True,
@@ -1948,7 +1968,7 @@ http {{
                 if token_result.stdout:
                     print("\n📋 To add manager nodes, run:")
                     print(token_result.stdout.strip())
-            except:
+            except (subprocess.CalledProcessError, OSError, TimeoutError):
                 pass
                 
         except subprocess.CalledProcessError as e:
@@ -1998,7 +2018,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(f"✅ Successfully joined Swarm as {role}!")
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to join Swarm: {e}")
@@ -2024,7 +2045,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             print("✅ Successfully left Swarm!")
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to leave Swarm: {e}")
@@ -2066,7 +2088,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(f"✅ Stack '{stack_name}' deployed successfully!")
             
             # Show services
@@ -2095,7 +2118,8 @@ http {{
             print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             if show_output:
                 print(f"❌ Failed to list services: {e}")
@@ -2115,7 +2139,8 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
         
         try:
-            subprocess.run(cmd, check=True)
+            from core.security import SecurityValidator
+            SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to list nodes: {e}")
     

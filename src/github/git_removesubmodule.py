@@ -190,7 +190,7 @@ class GitRemoveSubmodule:
             try:
                 if os.path.exists(disabled_path) and not os.path.exists(git_path):
                     os.rename(disabled_path, git_path)
-            except:
+            except (OSError, PermissionError, FileNotFoundError):
                 pass
             print(f"❌ Error in disable and remove operation: {str(e)}")
             return False

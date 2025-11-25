@@ -464,7 +464,7 @@ class GitLog:
                         try:
                             dt = datetime.fromisoformat(date.replace(' +', '+').replace(' -', '-'))
                             formatted_date = dt.strftime('%Y-%m-%d %H:%M:%S')
-                        except:
+                        except (ValueError, AttributeError):
                             formatted_date = date[:19]  # Fallback
 
                         commits.append({
@@ -509,7 +509,7 @@ class GitLog:
                 try:
                     dt = datetime.fromisoformat(date.replace(' +', '+').replace(' -', '-'))
                     formatted_date = dt.strftime('%Y-%m-%d %H:%M:%S')
-                except:
+                except (ValueError, AttributeError):
                     formatted_date = date[:19]
 
                 return {

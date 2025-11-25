@@ -620,7 +620,7 @@ class StructureViewer:
                             display_name = f"{item.name} ({size})"
                         else:
                             display_name = item.name
-                    except:
+                    except (OSError, PermissionError):
                         display_name = item.name
                 
                 lines.append(f"{prefix}{current_prefix}{display_name}")

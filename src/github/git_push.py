@@ -470,7 +470,7 @@ class GitPushRetry:
                 result = check_results.get(check_name.lower(), True)
                 if not result:
                     critical_checks_passed = False
-            except:
+            except (KeyError, AttributeError):
                 critical_checks_passed = False
 
         all_passed = critical_checks_passed
@@ -533,12 +533,12 @@ class GitPushRetry:
             import socket
             socket.create_connection(("8.8.8.8", 53), timeout=5)  # DNS port
             return True
-        except:
+        except (OSError, TimeoutError, socket.error):
             try:
                 import urllib.request
                 urllib.request.urlopen('https://www.google.com', timeout=5)
                 return True
-            except:
+            except (OSError, TimeoutError, urllib.error.URLError):
                 return False
 
     def _check_remote_accessibility(self) -> bool:
@@ -550,7 +550,7 @@ class GitPushRetry:
             # Try to fetch from remote to check accessibility
             result = self.git._run_command(['git', 'fetch', 'origin'], check=False)
             return result.returncode == 0
-        except:
+        except (subprocess.CalledProcessError, OSError, TimeoutError):
             return False
 
     def _has_local_changes(self) -> bool:
@@ -564,12 +564,12 @@ class GitPushRetry:
             # If no staged changes, check if there are uncommitted changes (staging needed)
             status_result = self.git.status(porcelain=True)
             return bool(status_result.strip())
-        except:
+        except (subprocess.CalledProcessError, OSError):
             # If we can't check directly, use git status
             try:
                 status_result = self.git.status(porcelain=True)
                 return bool(status_result.strip())
-            except:
+            except (subprocess.CalledProcessError, OSError):
                 return False
 
     def _check_remote_branch_exists(self) -> bool:
@@ -578,7 +578,7 @@ class GitPushRetry:
             current_branch = self.git.current_branch()
             result = self.git._run_command(['git', 'ls-remote', '--heads', 'origin', current_branch], check=False)
             return len(result.stdout.strip()) > 0
-        except:
+        except (subprocess.CalledProcessError, OSError, TimeoutError):
             return False
 
     def _check_for_diverged_commits(self) -> bool:
@@ -603,7 +603,7 @@ class GitPushRetry:
                     return False
                 return True
             return True
-        except:
+        except (subprocess.CalledProcessError, ValueError, OSError, TimeoutError):
             # If we can't determine, be permissive
             return True
     
@@ -710,7 +710,7 @@ class GitPushRetry:
                         file_obj = Path(self.git.working_dir) / file_path
                         if file_obj.exists() and file_obj.stat().st_size > 100 * 1024 * 1024:  # 100MB
                             issues.append(f"Large file detected (>100MB): {file_path}")
-                    except:
+                    except (OSError, PermissionError, FileNotFoundError):
                         pass
                     
                     # Check for deleted files
@@ -1064,7 +1064,7 @@ class GitPushRetry:
                             staged_count += 1
                         else:
                             print(f"   ⚠️  Skipped problematic file: {file_path}")
-                    except:
+                    except (subprocess.CalledProcessError, OSError, PermissionError):
                         print(f"   ⚠️  Skipped problematic file: {file_path}")
             
             return staged_count > 0
@@ -1357,7 +1357,7 @@ class GitPush:
         try:
             from ..core.security import SecurityValidator
             SecurityValidator.safe_subprocess_run(['git', 'status'], capture_output=True, cwd=Path.cwd(), timeout=5)
-        except:
+        except (subprocess.CalledProcessError, OSError, TimeoutError, ImportError):
             pass  # Not critical if this fails
         
         # Check for changes
@@ -1461,7 +1461,7 @@ class GitPush:
                     timeout=5
                 )
                 return bool(fallback_result.stdout.strip())
-            except:
+            except (subprocess.CalledProcessError, OSError, TimeoutError):
                 print("⚠️  All change detection methods failed")
                 return False
     

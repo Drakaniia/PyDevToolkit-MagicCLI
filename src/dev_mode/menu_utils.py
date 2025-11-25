@@ -192,7 +192,7 @@ def _getch():
         char = msvcrt.getch()
         try:
             return char.decode('utf-8')
-        except:
+        except (UnicodeDecodeError, AttributeError):
             return chr(ord(char))
     elif HAS_TERMIOS:  # Unix/Linux/Mac
         fd = sys.stdin.fileno()

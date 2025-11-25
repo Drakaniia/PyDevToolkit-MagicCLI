@@ -193,10 +193,10 @@ class RunProjectCommand(DevModeCommand):
             try:
                 process.terminate()
                 process.wait(timeout=5)
-            except:
+            except (OSError, TimeoutError, subprocess.TimeoutExpired):
                 try:
                     process.kill()
-                except:
+                except (OSError, PermissionError):
                     pass
         
         except FileNotFoundError:

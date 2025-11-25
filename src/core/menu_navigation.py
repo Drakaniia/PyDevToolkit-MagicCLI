@@ -156,7 +156,7 @@ class MenuNavigation:
             char = msvcrt.getch()
             try:
                 return char.decode('utf-8')
-            except:
+            except (UnicodeDecodeError, AttributeError):
                 return chr(ord(char))
         elif self._has_termios:  # Unix/Linux/Mac
             import tty
