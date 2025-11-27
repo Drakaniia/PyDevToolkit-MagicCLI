@@ -39,23 +39,23 @@ class RunProjectCommand(DevModeCommand):
         current_dir = Path.cwd()
         
         print("\n" + "="*70)
-        print("▶️  RUN PROJECT")
+        print("  RUN PROJECT")
         print("="*70)
-        print(f"📍 Current Directory: {current_dir}")
+        print(f" Current Directory: {current_dir}")
         print("="*70 + "\n")
         
         # Check for package.json
         package_json = current_dir / 'package.json'
         if not package_json.exists():
-            print("❌ No package.json found in current directory")
-            print("💡 Navigate to a Node.js project directory first")
+            print(" No package.json found in current directory")
+            print(" Navigate to a Node.js project directory first")
             input("\nPress Enter to continue...")
             return
         
         # Detect project type and available scripts
         scripts = self._detect_scripts(package_json)
         if not scripts:
-            print("❌ No dev or build scripts found in package.json")
+            print(" No dev or build scripts found in package.json")
             input("\nPress Enter to continue...")
             return
         
@@ -66,7 +66,7 @@ class RunProjectCommand(DevModeCommand):
         choice = get_choice_with_arrows(script_options, "Available Scripts")
         
         if choice == len(scripts) + 1:
-            print("\n❌ Operation cancelled")
+            print("\n Operation cancelled")
             input("\nPress Enter to continue...")
             return
         
@@ -74,7 +74,7 @@ class RunProjectCommand(DevModeCommand):
             script_name = list(scripts.keys())[choice - 1]
             self._run_script(script_name, current_dir)
         else:
-            print("❌ Invalid choice")
+            print(" Invalid choice")
             input("\nPress Enter to continue...")
     
     def _noninteractive_run(
@@ -113,12 +113,12 @@ class RunProjectCommand(DevModeCommand):
             return relevant_scripts
         
         except (json.JSONDecodeError, FileNotFoundError) as e:
-            print(f"⚠️  Error reading package.json: {e}")
+            print(f"  Error reading package.json: {e}")
             return {}
     
     def _run_script(self, script_name: str, cwd: Path, attach: bool = True):
         """Execute npm script with proper encoding handling"""
-        print(f"\n🚀 Running script: {script_name}")
+        print(f"\n Running script: {script_name}")
         print("="*70 + "\n")
         
         # Detect package manager
@@ -128,7 +128,7 @@ class RunProjectCommand(DevModeCommand):
         cmd = [pkg_manager, 'run', script_name]
         
         print(f"$ {' '.join(cmd)}")
-        print(f"\n💡 Press Ctrl+C to stop the server")
+        print(f"\n Press Ctrl+C to stop the server")
         print("="*70 + "\n")
         
         try:
@@ -181,14 +181,14 @@ class RunProjectCommand(DevModeCommand):
             process.wait()
             
             if process.returncode == 0:
-                print("\n\n✅ Script completed successfully")
+                print("\n\n Script completed successfully")
             elif process.returncode is None:
-                print("\n\n⚠️  Script was interrupted")
+                print("\n\n  Script was interrupted")
             else:
-                print(f"\n\n⚠️  Script exited with code {process.returncode}")
+                print(f"\n\n  Script exited with code {process.returncode}")
         
         except KeyboardInterrupt:
-            print("\n\n⚠️  Process interrupted by user")
+            print("\n\n  Process interrupted by user")
             # Try to terminate gracefully
             try:
                 process.terminate()
@@ -200,11 +200,11 @@ class RunProjectCommand(DevModeCommand):
                     pass
         
         except FileNotFoundError:
-            print(f"\n❌ Error: '{pkg_manager}' not found in PATH")
-            print(f"💡 Make sure {pkg_manager} is installed and in your PATH")
+            print(f"\n Error: '{pkg_manager}' not found in PATH")
+            print(f" Make sure {pkg_manager} is installed and in your PATH")
         
         except Exception as e:
-            print(f"\n❌ Error running script: {e}")
+            print(f"\n Error running script: {e}")
             import traceback
             traceback.print_exc()
         

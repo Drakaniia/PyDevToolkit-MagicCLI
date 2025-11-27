@@ -106,7 +106,7 @@ class GitRemoveSubmodule:
             print("No nested repositories found in the codebase.")
             return
         
-        print("\n🔍 Found nested repositories/submodules:")
+        print("\n Found nested repositories/submodules:")
         print("=" * 50)
         for i, (folder_name, full_path) in enumerate(self.nested_repos, 1):
             print(f"{i}. {folder_name}")
@@ -148,16 +148,16 @@ class GitRemoveSubmodule:
         
         try:
             if not os.path.exists(git_path):
-                print(f"❌ No .git directory found in {repo_path}")
+                print(f" No .git directory found in {repo_path}")
                 return False
             
             if os.path.exists(disabled_path):
-                print(f"❌ Repository already appears to be disabled (.git_disable exists)")
+                print(f" Repository already appears to be disabled (.git_disable exists)")
                 return False
             
             # Step 1: Rename .git to .git_disable
             os.rename(git_path, disabled_path)
-            print(f"✅ Repository disabled: .git → .git_disable")
+            print(f" Repository disabled: .git → .git_disable")
             
             # Step 2: Remove from git cache
             rel_path = os.path.relpath(repo_path)
@@ -169,7 +169,7 @@ class GitRemoveSubmodule:
             )
             
             if result.returncode == 0:
-                print(f"✅ Removed {rel_path} from git cache")
+                print(f" Removed {rel_path} from git cache")
                 print("   The folder is now pushable as regular files")
                 
                 # Add to disabled repos list for recovery tracking
@@ -181,7 +181,7 @@ class GitRemoveSubmodule:
             else:
                 # If git rm failed, revert the .git rename
                 os.rename(disabled_path, git_path)
-                print(f"❌ Error removing from git cache: {result.stderr}")
+                print(f" Error removing from git cache: {result.stderr}")
                 print("   Reverted repository disable operation")
                 return False
                 
@@ -192,7 +192,7 @@ class GitRemoveSubmodule:
                     os.rename(disabled_path, git_path)
             except (OSError, PermissionError, FileNotFoundError):
                 pass
-            print(f"❌ Error in disable and remove operation: {str(e)}")
+            print(f" Error in disable and remove operation: {str(e)}")
             return False
     
     def remove_from_git_cache(self, repo_path: str) -> bool:
@@ -218,15 +218,15 @@ class GitRemoveSubmodule:
             )
             
             if result.returncode == 0:
-                print(f"✅ Removed {rel_path} from git cache")
+                print(f" Removed {rel_path} from git cache")
                 print("   The folder is now pushable as regular files")
                 return True
             else:
-                print(f"❌ Error removing from git cache: {result.stderr}")
+                print(f" Error removing from git cache: {result.stderr}")
                 return False
                 
         except Exception as e:
-            print(f"❌ Error running git rm --cached: {str(e)}")
+            print(f" Error running git rm --cached: {str(e)}")
             return False
     
     def recover_repository(self, repo_path: str) -> bool:
@@ -244,11 +244,11 @@ class GitRemoveSubmodule:
         
         try:
             if not os.path.exists(disabled_path):
-                print(f"❌ No .git_disable directory found in {repo_path}")
+                print(f" No .git_disable directory found in {repo_path}")
                 return False
             
             if os.path.exists(git_path):
-                print(f"❌ .git directory already exists in {repo_path}")
+                print(f" .git directory already exists in {repo_path}")
                 return False
             
             # Rename .git_disable back to .git
@@ -262,11 +262,11 @@ class GitRemoveSubmodule:
             ]
             self.save_state()  # Persist state
             
-            print(f"✅ Repository recovered: .git_disable → .git")
+            print(f" Repository recovered: .git_disable → .git")
             return True
             
         except Exception as e:
-            print(f"❌ Error recovering repository: {str(e)}")
+            print(f" Error recovering repository: {str(e)}")
             return False
     
     def display_disabled_repositories(self) -> None:
@@ -275,7 +275,7 @@ class GitRemoveSubmodule:
             print("No disabled repositories found.")
             return
         
-        print("\n🔄 Currently disabled repositories:")
+        print("\n Currently disabled repositories:")
         print("=" * 40)
         for i, (folder_name, full_path) in enumerate(self.disabled_repos, 1):
             print(f"{i}. {folder_name}")
@@ -293,7 +293,7 @@ class GitRemoveSubmodule:
         has_disabled_repos = len(disabled_repos) > 0
         
         if not has_active_repos and not has_disabled_repos:
-            print("\n❌ No nested repositories or disabled repositories found in the current directory.")
+            print("\n No nested repositories or disabled repositories found in the current directory.")
             print("   The submodule manager requires nested repositories (.git) or disabled repositories (.git_disable) to function.")
             input("\nPress Enter to return to the previous menu...")
             return
@@ -303,15 +303,15 @@ class GitRemoveSubmodule:
         
         # Display detailed repository information
         if has_active_repos:
-            print(f"\n✅ Active Repositories ({len(active_repos)}):")
+            print(f"\n Active Repositories ({len(active_repos)}):")
             self.display_nested_repositories()
         
         if has_disabled_repos:
-            print(f"\n🔄 Disabled Repositories ({len(disabled_repos)}):")
+            print(f"\n Disabled Repositories ({len(disabled_repos)}):")
             self.display_disabled_repositories()
         
         if not has_active_repos:
-            print("\n📝 Note: Only disabled repositories found. You can recover them to make them active again.")
+            print("\n Note: Only disabled repositories found. You can recover them to make them active again.")
         
         menu = SubmoduleMenu(self)
         menu.run()
@@ -319,22 +319,22 @@ class GitRemoveSubmodule:
     def _display_repositories_header(self, active_repos: List[Tuple[str, str]], disabled_repos: List[Tuple[str, str]]) -> None:
         """Display a quick summary header of found repositories"""
         print("\n" + "="*80)
-        print("📂 REPOSITORY SCAN RESULTS")
+        print(" REPOSITORY SCAN RESULTS")
         print("="*80)
         
         # Active repositories header
         if active_repos:
             active_names = [name for name, _ in active_repos]
-            print(f"✅ Active (.git): {', '.join(active_names)}")
+            print(f" Active (.git): {', '.join(active_names)}")
         else:
-            print("✅ Active (.git): None")
+            print(" Active (.git): None")
         
         # Disabled repositories header  
         if disabled_repos:
             disabled_names = [name for name, _ in disabled_repos]
-            print(f"🔄 Disabled (.git_disable): {', '.join(disabled_names)}")
+            print(f" Disabled (.git_disable): {', '.join(disabled_names)}")
         else:
-            print("🔄 Disabled (.git_disable): None")
+            print(" Disabled (.git_disable): None")
             
         print("="*80)
     
@@ -364,7 +364,7 @@ class SubmoduleMenu(Menu):
     
     def __init__(self, submodule_manager: GitRemoveSubmodule):
         self.manager = submodule_manager
-        super().__init__("🔧 Git Submodule/Nested Repository Manager")
+        super().__init__(" Git Submodule/Nested Repository Manager")
         
         # Show disabled repositories if any exist
         self._show_disabled_repos()
@@ -373,7 +373,7 @@ class SubmoduleMenu(Menu):
         """Display disabled repositories if any exist"""
         if self.manager.disabled_repos:
             print("\n" + "="*60)
-            print("🔄 Previously disabled repositories:")
+            print(" Previously disabled repositories:")
             self.manager.display_disabled_repositories()
             print("="*60)
     
@@ -396,15 +396,15 @@ class SubmoduleMenu(Menu):
         selected = self.manager.choose_repository()
         if selected:
             folder_name, repo_path = selected
-            print(f"\n🔄 Processing repository: {folder_name}")
+            print(f"\n Processing repository: {folder_name}")
             print("   1. Disabling repository (.git → .git_disable)")
             print("   2. Removing from git cache (git rm --cached)")
             
             if self.manager.disable_and_remove_repository(repo_path):
-                print(f"\n🎉 Successfully processed repository: {folder_name}")
-                print("   ✅ Repository disabled and removed from git cache")
-                print("   📁 Folder is now pushable as regular files")
-                print("   💾 State saved - will remember this change")
+                print(f"\n Successfully processed repository: {folder_name}")
+                print("    Repository disabled and removed from git cache")
+                print("    Folder is now pushable as regular files")
+                print("    State saved - will remember this change")
             input("\nPress Enter to continue...")
         return None
     
@@ -418,18 +418,18 @@ class SubmoduleMenu(Menu):
         has_disabled_repos = len(disabled_repos) > 0
         
         if not has_active_repos and not has_disabled_repos:
-            print("\n❌ No repositories found (neither active nor disabled).")
+            print("\n No repositories found (neither active nor disabled).")
         else:
             # Show header summary
             self.manager._display_repositories_header(active_repos, disabled_repos)
             
             # Show detailed information
             if has_active_repos:
-                print(f"\n✅ Active Repositories ({len(active_repos)}):")
+                print(f"\n Active Repositories ({len(active_repos)}):")
                 self.manager.display_nested_repositories()
             
             if has_disabled_repos:
-                print(f"\n🔄 Disabled Repositories ({len(disabled_repos)}):")
+                print(f"\n Disabled Repositories ({len(disabled_repos)}):")
                 self.manager.display_disabled_repositories()
         
         input("\nPress Enter to continue...")
@@ -445,13 +445,13 @@ class SubmoduleMenu(Menu):
         selected = self.manager.choose_disabled_repository()
         if selected:
             folder_name, repo_path = selected
-            print(f"\n🔄 Recovering repository: {folder_name}")
+            print(f"\n Recovering repository: {folder_name}")
             print("   Restoring .git_disable → .git")
             
             if self.manager.recover_repository(repo_path):
-                print(f"\n🎉 Successfully recovered repository: {folder_name}")
-                print("   ✅ Repository is now active again")
-                print("   💾 State saved - change remembered")
+                print(f"\n Successfully recovered repository: {folder_name}")
+                print("    Repository is now active again")
+                print("    State saved - change remembered")
             input("\nPress Enter to continue...")
         return None
 
@@ -461,7 +461,7 @@ class RepositorySelectionMenu(Menu):
     
     def __init__(self, repositories: List[Tuple[str, str]]):
         self.repositories = repositories
-        super().__init__("📂 Select Repository")
+        super().__init__(" Select Repository")
     
     def setup_items(self):
         """Setup menu items for repository selection"""
@@ -487,7 +487,7 @@ class DisabledRepositorySelectionMenu(Menu):
     
     def __init__(self, repositories: List[Tuple[str, str]]):
         self.repositories = repositories
-        super().__init__("🔄 Select Disabled Repository to Recover")
+        super().__init__(" Select Disabled Repository to Recover")
     
     def setup_items(self):
         """Setup menu items for disabled repository selection"""
@@ -516,7 +516,7 @@ def main():
     except KeyboardInterrupt:
         print("\n\nOperation cancelled by user.")
     except Exception as e:
-        print(f"\n❌ An error occurred: {str(e)}")
+        print(f"\n An error occurred: {str(e)}")
 
 
 if __name__ == "__main__":

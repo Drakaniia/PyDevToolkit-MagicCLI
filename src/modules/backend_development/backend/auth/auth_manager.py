@@ -352,7 +352,7 @@ def logout():
         
         print("JWT Authentication System created successfully!")
         print(f"Secret Key: {secret_key}")
-        print("📁 Files created: jwt_auth.py, user_model.py, auth_routes.py, jwt_config.json")
+        print(" Files created: jwt_auth.py, user_model.py, auth_routes.py, jwt_config.json")
 
     def _create_session_auth(self):
         """Create session-based authentication"""
@@ -982,7 +982,7 @@ def role_required(role_name):
         ]
         
         for check in security_checks:
-            print(f"  ✓ {check}")
+            print(f"   {check}")
         
         print("\nSecurity Scan Results:")
         print("  No critical vulnerabilities found")
@@ -1036,7 +1036,7 @@ def role_required(role_name):
         
         print("JWT Configuration saved!")
         print(f"New Secret Key: {secret_key}")
-        print("📁 Configuration saved to: jwt_security_config.json")
+        print(" Configuration saved to: jwt_security_config.json")
         
         input("\nPress Enter to continue...")
         return None
@@ -1079,8 +1079,8 @@ def role_required(role_name):
             json.dump(oauth_config, f, indent=2)
         
         print("OAuth Configuration template created!")
-        print("📝 Please update the client IDs and secrets in oauth_config.json")
-        print("🔗 Configure redirect URIs in your OAuth provider's dashboard")
+        print(" Please update the client IDs and secrets in oauth_config.json")
+        print(" Configure redirect URIs in your OAuth provider's dashboard")
         
         input("\nPress Enter to continue...")
         return None

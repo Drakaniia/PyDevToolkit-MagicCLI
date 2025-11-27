@@ -33,16 +33,16 @@ class GitDiff:
         """Display the comprehensive diff operations menu with arrow navigation"""
         print("\n" + "="*70)
         if HAS_TERMCOLOR:
-            print(colored("🔍 GIT DIFF OPERATIONS", 'cyan', attrs=['bold']))
+            print(colored(" GIT DIFF OPERATIONS", 'cyan', attrs=['bold']))
         else:
-            print("🔍 GIT DIFF OPERATIONS")
+            print(" GIT DIFF OPERATIONS")
         print("="*70)
 
         if not self._is_git_repo():
             if HAS_TERMCOLOR:
-                print(colored("❌ Not a git repository. Please initialize git first.", 'red'))
+                print(colored(" Not a git repository. Please initialize git first.", 'red'))
             else:
-                print("❌ Not a git repository. Please initialize git first.")
+                print(" Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
             return
 
@@ -104,22 +104,22 @@ class GitDiff:
                 break
             else:
                 if HAS_TERMCOLOR:
-                    print(colored("\n❌ Invalid choice. Please enter 1-5.", 'red'))
+                    print(colored("\n Invalid choice. Please enter 1-5.", 'red'))
                 else:
-                    print("\n❌ Invalid choice. Please enter 1-5.")
+                    print("\n Invalid choice. Please enter 1-5.")
                 input("\nPress Enter to continue...")
 
     def show_unstaged_diff(self):
         """Show unstaged changes (git diff)"""
         print("\n" + "="*70)
         if HAS_TERMCOLOR:
-            print(colored("🔍 GIT DIFF - Unstaged Changes", 'cyan', attrs=['bold']))
+            print(colored(" GIT DIFF - Unstaged Changes", 'cyan', attrs=['bold']))
         else:
-            print("🔍 GIT DIFF - Unstaged Changes")
+            print(" GIT DIFF - Unstaged Changes")
         print("="*70)
 
         if not self._is_git_repo():
-            print("❌ Not a git repository. Please initialize git first.")
+            print(" Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
             return
 
@@ -132,14 +132,14 @@ class GitDiff:
         )
 
         if result.stdout:
-            print("\n📋 Unstaged changes:")
+            print("\n Unstaged changes:")
             print("-" * 70)
             self._print_colored_diff(result.stdout)
         else:
             if HAS_TERMCOLOR:
-                print(colored("\n✅ No unstaged changes found.", 'green'))
+                print(colored("\n No unstaged changes found.", 'green'))
             else:
-                print("\n✅ No unstaged changes found.")
+                print("\n No unstaged changes found.")
 
         input("\nPress Enter to continue...")
 
@@ -147,13 +147,13 @@ class GitDiff:
         """Show staged changes (git diff --staged)"""
         print("\n" + "="*70)
         if HAS_TERMCOLOR:
-            print(colored("🔍 GIT DIFF --STAGED - Staged Changes", 'cyan', attrs=['bold']))
+            print(colored(" GIT DIFF --STAGED - Staged Changes", 'cyan', attrs=['bold']))
         else:
-            print("🔍 GIT DIFF --STAGED - Staged Changes")
+            print(" GIT DIFF --STAGED - Staged Changes")
         print("="*70)
 
         if not self._is_git_repo():
-            print("❌ Not a git repository. Please initialize git first.")
+            print(" Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
             return
 
@@ -166,14 +166,14 @@ class GitDiff:
         )
 
         if result.stdout:
-            print("\n📋 Staged changes (to be committed):")
+            print("\n Staged changes (to be committed):")
             print("-" * 70)
             self._print_colored_diff(result.stdout)
         else:
             if HAS_TERMCOLOR:
-                print(colored("\n✅ No staged changes found (nothing to commit).", 'green'))
+                print(colored("\n No staged changes found (nothing to commit).", 'green'))
             else:
-                print("\n✅ No staged changes found (nothing to commit).")
+                print("\n No staged changes found (nothing to commit).")
 
         input("\nPress Enter to continue...")
 
@@ -181,13 +181,13 @@ class GitDiff:
         """Show all changes since last commit (git diff HEAD)"""
         print("\n" + "="*70)
         if HAS_TERMCOLOR:
-            print(colored("🔍 GIT DIFF HEAD - All Changes Since Last Commit", 'cyan', attrs=['bold']))
+            print(colored(" GIT DIFF HEAD - All Changes Since Last Commit", 'cyan', attrs=['bold']))
         else:
-            print("🔍 GIT DIFF HEAD - All Changes Since Last Commit")
+            print(" GIT DIFF HEAD - All Changes Since Last Commit")
         print("="*70)
 
         if not self._is_git_repo():
-            print("❌ Not a git repository. Please initialize git first.")
+            print(" Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
             return
 
@@ -200,14 +200,14 @@ class GitDiff:
         )
 
         if result.stdout:
-            print("\n📋 All changes since last commit (staged + unstaged):")
+            print("\n All changes since last commit (staged + unstaged):")
             print("-" * 70)
             self._print_colored_diff(result.stdout)
         else:
             if HAS_TERMCOLOR:
-                print(colored("\n✅ No changes found since last commit.", 'green'))
+                print(colored("\n No changes found since last commit.", 'green'))
             else:
-                print("\n✅ No changes found since last commit.")
+                print("\n No changes found since last commit.")
 
         input("\nPress Enter to continue...")
 
@@ -215,13 +215,13 @@ class GitDiff:
         """Show differences between two branches (git diff branch1..branch2)"""
         print("\n" + "="*70)
         if HAS_TERMCOLOR:
-            print(colored("🔍 GIT DIFF Branch Comparison", 'cyan', attrs=['bold']))
+            print(colored(" GIT DIFF Branch Comparison", 'cyan', attrs=['bold']))
         else:
-            print("🔍 GIT DIFF Branch Comparison")
+            print(" GIT DIFF Branch Comparison")
         print("="*70)
 
         if not self._is_git_repo():
-            print("❌ Not a git repository. Please initialize git first.")
+            print(" Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
             return
 
@@ -234,7 +234,7 @@ class GitDiff:
             errors='replace'
         )
 
-        print("\n📋 Available branches:")
+        print("\n Available branches:")
         if branches_result.stdout:
             branches = [branch.strip().replace('*', '').strip() for branch in branches_result.stdout.split('\n') if branch.strip()]
             for i, branch in enumerate(branches, 1):
@@ -251,11 +251,11 @@ class GitDiff:
         branch2 = input("Enter the second branch name: ").strip()
 
         if not branch1 or not branch2:
-            print("\n❌ Both branch names must be provided.")
+            print("\n Both branch names must be provided.")
             input("\nPress Enter to continue...")
             return
 
-        print(f"\n📋 Differences between '{branch1}' and '{branch2}':")
+        print(f"\n Differences between '{branch1}' and '{branch2}':")
         print("-" * 70)
 
         result = subprocess.run(
@@ -276,9 +276,9 @@ class GitDiff:
                     print(f"No differences found between '{branch1}' and '{branch2}'.")
         else:
             if HAS_TERMCOLOR:
-                print(colored(f"❌ Error comparing branches: {result.stderr}", 'red'))
+                print(colored(f" Error comparing branches: {result.stderr}", 'red'))
             else:
-                print(f"❌ Error comparing branches: {result.stderr}")
+                print(f" Error comparing branches: {result.stderr}")
 
         input("\nPress Enter to continue...")
 

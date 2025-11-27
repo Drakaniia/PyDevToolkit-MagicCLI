@@ -31,7 +31,7 @@ class DockerQuickCommand(DevModeCommand):
     def _interactive_docker(self):
         """Interactive Docker operations"""
         print("\n" + "="*70)
-        print("🐳 DOCKER QUICK COMMANDS")
+        print("DOCKER QUICK COMMANDS")
         print("="*70 + "\n")
         
         # Check if Docker is installed
@@ -45,8 +45,8 @@ class DockerQuickCommand(DevModeCommand):
         
         # Check if Docker is running
         if not self._is_docker_running():
-            print("⚠️  Docker daemon is not running")
-            print("💡 Start Docker Desktop or run: sudo systemctl start docker")
+            print("Docker daemon is not running")
+            print("Start Docker Desktop or run: sudo systemctl start docker")
             input("\nPress Enter to continue...")
             return
         
@@ -88,23 +88,23 @@ class DockerQuickCommand(DevModeCommand):
         elif choice == 10:
             self._prune_resources()
         elif choice == 11:
-            print("\n❌ Operation cancelled")
+            print("\n Operation cancelled")
         else:
-            print("❌ Invalid choice")
+            print(" Invalid choice")
         
         input("\nPress Enter to continue...")
     
     def _docker_init(self):
         """Initialize Docker for the project with intelligent defaults"""
-        print("\n🐳 DOCKER INITIALIZE")
+        print("\n DOCKER INITIALIZE")
         print("="*70 + "\n")
         
         # Detect project type and structure
         project_info = self._detect_project_type()
         
-        print(f"📋 Detected project type: {project_info['type']}")
+        print(f" Detected project type: {project_info['type']}")
         if project_info['framework']:
-            print(f"🔧 Framework: {project_info['framework']}")
+            print(f" Framework: {project_info['framework']}")
         print()
         
         # Get build output directory
@@ -119,32 +119,32 @@ class DockerQuickCommand(DevModeCommand):
         # Generate Dockerfile if it doesn't exist
         dockerfile_path = Path("Dockerfile")
         if not dockerfile_path.exists():
-            print(f"\n📝 Generating Dockerfile for {project_info['type']} project...")
+            print(f"\n Generating Dockerfile for {project_info['type']} project...")
             self._generate_dockerfile(project_info, build_dir, start_command, port)
-            print("✅ Dockerfile created successfully!")
+            print(" Dockerfile created successfully!")
         else:
-            print(f"\n⚠️  Dockerfile already exists at {dockerfile_path}")
+            print(f"\n  Dockerfile already exists at {dockerfile_path}")
             overwrite = input("Do you want to overwrite it? (y/n, default: n): ").strip().lower()
             if overwrite in ['y', 'yes']:
                 self._generate_dockerfile(project_info, build_dir, start_command, port)
-                print("✅ Dockerfile updated successfully!")
+                print(" Dockerfile updated successfully!")
         
         # Optionally generate .dockerignore
         dockerignore_path = Path(".dockerignore")
         if not dockerignore_path.exists():
-            generate_ignore = input("\n📝 Generate .dockerignore file? (y/n, default: y): ").strip().lower()
+            generate_ignore = input("\n Generate .dockerignore file? (y/n, default: y): ").strip().lower()
             if generate_ignore != 'n' and generate_ignore != 'no':
                 self._generate_dockerignore(project_info)
-                print("✅ .dockerignore created successfully!")
+                print(" .dockerignore created successfully!")
         
         # Summary
-        print(f"\n🎉 Docker initialization complete!")
-        print(f"📁 Build directory: {build_dir}")
-        print(f"🚀 Start command: {start_command}")
-        print(f"🌐 Port: {port}")
+        print(f"\n Docker initialization complete!")
+        print(f" Build directory: {build_dir}")
+        print(f" Start command: {start_command}")
+        print(f" Port: {port}")
         
         # Offer to build image now
-        build_now = input(f"\n🔨 Build Docker image now? (y/n, default: y): ").strip().lower()
+        build_now = input(f"\n Build Docker image now? (y/n, default: y): ").strip().lower()
         if build_now != 'n' and build_now != 'no':
             project_name = Path.cwd().name.lower()
             self._build_image(interactive=False, 
@@ -235,7 +235,7 @@ class DockerQuickCommand(DevModeCommand):
     
     def _prompt_build_directory(self, project_info: Dict[str, str]) -> str:
         """Prompt for build output directory with intelligent defaults"""
-        print("📁 Build Output Directory")
+        print(" Build Output Directory")
         print("-" * 25)
         
         # Auto-detect common build directories
@@ -267,7 +267,7 @@ class DockerQuickCommand(DevModeCommand):
         all_suggestions = list(dict.fromkeys(detected_dirs + suggested_dirs))
         
         if detected_dirs:
-            print(f"🔍 Found existing directories: {', '.join(detected_dirs)}")
+            print(f" Found existing directories: {', '.join(detected_dirs)}")
         
         if all_suggestions:
             default_dir = all_suggestions[0]
@@ -279,7 +279,7 @@ class DockerQuickCommand(DevModeCommand):
     
     def _prompt_start_command(self, project_info: Dict[str, str]) -> str:
         """Prompt for start command with intelligent suggestions"""
-        print(f"\n🚀 Start Command")
+        print(f"\n Start Command")
         print("-" * 15)
         
         suggestions = []
@@ -333,7 +333,7 @@ class DockerQuickCommand(DevModeCommand):
         
         # Show suggestions
         if suggestions:
-            print("💡 Suggestions:")
+            print(" Suggestions:")
             for i, suggestion in enumerate(suggestions[:3], 1):
                 print(f"   {i}. {suggestion}")
             
@@ -363,13 +363,13 @@ class DockerQuickCommand(DevModeCommand):
     
     def _prompt_port(self, project_info: Dict[str, str]) -> str:
         """Prompt for port with intelligent detection"""
-        print(f"\n🌐 Port Configuration")
+        print(f"\n Port Configuration")
         print("-" * 20)
         
         detected_port = self._detect_port(project_info)
         
         if detected_port:
-            print(f"🔍 Detected port: {detected_port}")
+            print(f" Detected port: {detected_port}")
             user_input = input(f"What port does your server listen on? (default: {detected_port}): ").strip()
             return user_input or str(detected_port)
         else:
@@ -835,14 +835,14 @@ CMD {json.dumps(start_command.split())}
     
     def _build_image(self, interactive: bool = True, **kwargs):
         """Build Docker image"""
-        print("\n🔨 BUILD DOCKER IMAGE")
+        print("\n BUILD DOCKER IMAGE")
         print("="*70 + "\n")
         
         if interactive:
             # Get image name
             image_name = input("Image name (e.g., myapp:latest): ").strip()
             if not image_name:
-                print("❌ Image name cannot be empty")
+                print(" Image name cannot be empty")
                 return
             
             # Get Dockerfile path
@@ -877,7 +877,7 @@ CMD {json.dumps(start_command.split())}
         # Check if Dockerfile exists
         dockerfile_path = Path(context) / dockerfile
         if not dockerfile_path.exists():
-            print(f"❌ Dockerfile not found: {dockerfile_path}")
+            print(f" Dockerfile not found: {dockerfile_path}")
             return
         
         # Import security modules locally to avoid circular imports
@@ -902,24 +902,24 @@ CMD {json.dumps(start_command.split())}
             # Use secure subprocess run with logging
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             log_command_execution('docker build', f"image: {image_name}, dockerfile: {dockerfile}, context: {context}", True)
-            print(f"\n✅ Image '{image_name}' built successfully!")
+            print(f"\n Image '{image_name}' built successfully!")
             
             # Offer to run the container after successful build
             if interactive:
-                run_now = input(f"\n🚀 Run container from '{image_name}' now? (y/n, default: n): ").strip().lower()
+                run_now = input(f"\n Run container from '{image_name}' now? (y/n, default: n): ").strip().lower()
                 if run_now in ['y', 'yes']:
                     print("\n" + "="*70)
                     # Pass the image name to run container function
                     self._run_container_with_image(image_name)
                     
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ Build failed with exit code {e.returncode}")
+            print(f"\n Build failed with exit code {e.returncode}")
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\n Error: {e}")
     
     def _run_container(self, interactive: bool = True, **kwargs):
         """Run Docker container"""
-        print("\n▶️  RUN DOCKER CONTAINER")
+        print("\n  RUN DOCKER CONTAINER")
         print("="*70 + "\n")
         
         if interactive:
@@ -927,8 +927,8 @@ CMD {json.dumps(start_command.split())}
             available_images = self._get_available_images()
             
             if not available_images:
-                print("❌ No Docker images available")
-                print("💡 Build an image first using option 1")
+                print(" No Docker images available")
+                print(" Build an image first using option 1")
                 return
             
             # Display available images with arrow navigation
@@ -940,16 +940,16 @@ CMD {json.dumps(start_command.split())}
             elif choice == len(available_images) + 1:
                 image_name = input("Enter image name: ").strip()
                 if not image_name:
-                    print("❌ Image name cannot be empty")
+                    print(" Image name cannot be empty")
                     return
             else:
-                print("❌ Invalid choice")
+                print(" Invalid choice")
                 return
             
             # Verify image exists
             if not self._image_exists(image_name):
-                print(f"❌ Image '{image_name}' not found")
-                print("💡 Available images are listed above")
+                print(f" Image '{image_name}' not found")
+                print(" Available images are listed above")
                 return
             
             # Get container name
@@ -1013,18 +1013,18 @@ CMD {json.dumps(start_command.split())}
             
             if detached:
                 container_id = result.stdout.strip()[:12]
-                print(f"✅ Container started: {container_id}")
+                print(f" Container started: {container_id}")
                 if container_name:
-                    print(f"📝 Container name: {container_name}")
+                    print(f" Container name: {container_name}")
                 if port_map:
                     host_port = port_map.split(':')[0]
-                    print(f"🌐 Access at: http://localhost:{host_port}")
-                print(f"🔍 View logs: docker logs {container_id}")
+                    print(f" Access at: http://localhost:{host_port}")
+                print(f" View logs: docker logs {container_id}")
             else:
-                print("✅ Container stopped")
+                print(" Container stopped")
         
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ Failed to run container:")
+            print(f"\n Failed to run container:")
             print(f"   Exit code: {e.returncode}")
             if e.stderr:
                 print(f"   Error: {e.stderr.strip()}")
@@ -1033,17 +1033,17 @@ CMD {json.dumps(start_command.split())}
             
             # Common error suggestions
             if e.returncode == 125:
-                print("\n💡 Common solutions for exit code 125:")
+                print("\n Common solutions for exit code 125:")
                 print("   • Check if the image name is correct")
                 print("   • Verify the image exists: docker images")
                 print("   • Check if port is already in use")
                 print("   • Ensure container name is unique")
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\n Error: {e}")
     
     def _run_container_with_image(self, image_name: str):
         """Run container with pre-selected image"""
-        print(f"▶️  RUN CONTAINER: {image_name}")
+        print(f"  RUN CONTAINER: {image_name}")
         print("="*70 + "\n")
         
         # Get container name
@@ -1097,18 +1097,18 @@ CMD {json.dumps(start_command.split())}
             
             if detached:
                 container_id = result.stdout.strip()[:12]
-                print(f"✅ Container started: {container_id}")
+                print(f" Container started: {container_id}")
                 if container_name:
-                    print(f"📝 Container name: {container_name}")
+                    print(f" Container name: {container_name}")
                 if port_map:
                     host_port = port_map.split(':')[0]
-                    print(f"🌐 Access at: http://localhost:{host_port}")
-                print(f"🔍 View logs: docker logs {container_id}")
+                    print(f" Access at: http://localhost:{host_port}")
+                print(f" View logs: docker logs {container_id}")
             else:
-                print("✅ Container stopped")
+                print(" Container stopped")
         
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ Failed to run container:")
+            print(f"\n Failed to run container:")
             print(f"   Exit code: {e.returncode}")
             if e.stderr:
                 print(f"   Error: {e.stderr.strip()}")
@@ -1117,17 +1117,17 @@ CMD {json.dumps(start_command.split())}
             
             # Common error suggestions
             if e.returncode == 125:
-                print("\n💡 Common solutions for exit code 125:")
+                print("\n Common solutions for exit code 125:")
                 print("   • Check if the image name is correct")
                 print("   • Verify the image exists: docker images")
                 print("   • Check if port is already in use")
                 print("   • Ensure container name is unique")
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\n Error: {e}")
     
     def _stop_container(self, interactive: bool = True, **kwargs):
         """Stop Docker container"""
-        print("\n🛑 STOP DOCKER CONTAINER")
+        print("\n STOP DOCKER CONTAINER")
         print("="*70 + "\n")
         
         # List running containers
@@ -1144,7 +1144,7 @@ CMD {json.dumps(start_command.split())}
             containers = [c for c in containers if c]
             
             if not containers:
-                print("ℹ️  No running containers")
+                print("ℹ  No running containers")
                 return
             
             if interactive:
@@ -1170,7 +1170,7 @@ CMD {json.dumps(start_command.split())}
                     self._stop_all_containers()
                     return
                 else:
-                    print("❌ Invalid choice")
+                    print(" Invalid choice")
                     return
             else:
                 container_id = kwargs.get('container_id')
@@ -1183,12 +1183,12 @@ CMD {json.dumps(start_command.split())}
             
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print(f"✅ Container {container_id} stopped")
+            print(f" Container {container_id} stopped")
         
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ Failed to stop container: {e}")
+            print(f"\n Failed to stop container: {e}")
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\n Error: {e}")
     
     def _stop_all_containers(self):
         """Stop all running containers"""
@@ -1206,10 +1206,10 @@ CMD {json.dumps(start_command.split())}
             container_ids = [cid for cid in container_ids if cid]
             
             if not container_ids:
-                print("ℹ️  No running containers to stop")
+                print("ℹ  No running containers to stop")
                 return
             
-            print(f"🛑 Stopping {len(container_ids)} container(s)...")
+            print(f" Stopping {len(container_ids)} container(s)...")
             
             # Stop all containers
             cmd = ['docker', 'stop'] + container_ids
@@ -1217,16 +1217,16 @@ CMD {json.dumps(start_command.split())}
             
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print(f"✅ All containers stopped successfully!")
+            print(f" All containers stopped successfully!")
             
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ Failed to stop all containers: {e}")
+            print(f"\n Failed to stop all containers: {e}")
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\n Error: {e}")
     
     def _list_containers(self, interactive: bool = True, all_containers: bool = False):
         """List Docker containers"""
-        print("\n📋 DOCKER CONTAINERS")
+        print("\n DOCKER CONTAINERS")
         print("="*70 + "\n")
         
         cmd = ['docker', 'ps']
@@ -1237,25 +1237,25 @@ CMD {json.dumps(start_command.split())}
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ Failed to list containers: {e}")
+            print(f"\n Failed to list containers: {e}")
     
     def _list_images(self):
         """List Docker images"""
-        print("\n📋 DOCKER IMAGES")
+        print("\n DOCKER IMAGES")
         print("="*70 + "\n")
         
         try:
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(['docker', 'images'], check=True)
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ Failed to list images: {e}")
+            print(f"\n Failed to list images: {e}")
     
     def _prune_resources(self, interactive: bool = True):
         """Prune unused Docker resources"""
-        print("\n🧹 PRUNE UNUSED RESOURCES")
+        print("\nPRUNE UNUSED RESOURCES")
         print("="*70 + "\n")
         
-        print("⚠️  This will remove:")
+        print("  This will remove:")
         print("  • All stopped containers")
         print("  • All unused networks")
         print("  • All dangling images")
@@ -1264,22 +1264,22 @@ CMD {json.dumps(start_command.split())}
         if interactive:
             confirm = input("\nProceed? (yes/no): ").strip().lower()
             if confirm != 'yes':
-                print("❌ Operation cancelled")
+                print(" Operation cancelled")
                 return
         
-        print("\n🔨 Pruning resources...\n")
+        print("\n Pruning resources...\n")
         
         try:
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(['docker', 'system', 'prune', '-f'], check=True)
-            print("\n✅ Resources pruned successfully!")
+            print("\n Resources pruned successfully!")
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ Prune failed: {e}")
+            print(f"\n Prune failed: {e}")
     
     def _docker_compose_menu(self):
         """Docker Compose operations menu"""
         print("\n" + "="*70)
-        print("🐳 DOCKER COMPOSE INTEGRATION")
+        print(" DOCKER COMPOSE INTEGRATION")
         print("="*70 + "\n")
         
         # Check if docker-compose is installed
@@ -1331,13 +1331,13 @@ CMD {json.dumps(start_command.split())}
         elif choice == 11:
             return
         else:
-            print("❌ Invalid choice")
+            print(" Invalid choice")
         
         input("\nPress Enter to continue...")
     
     def _docker_compose_init(self):
         """Initialize docker-compose.yml with intelligent service detection"""
-        print("\n📝 DOCKER COMPOSE INITIALIZATION")
+        print("\n DOCKER COMPOSE INITIALIZATION")
         print("="*70 + "\n")
         
         # Detect project type and existing Dockerfile
@@ -1345,17 +1345,17 @@ CMD {json.dumps(start_command.split())}
         dockerfile_exists = Path("Dockerfile").exists()
         compose_file_exists = Path("docker-compose.yml").exists() or Path("docker-compose.yaml").exists()
         
-        print(f"📋 Detected project type: {project_info['type']}")
+        print(f" Detected project type: {project_info['type']}")
         if project_info['framework']:
-            print(f"🔧 Framework: {project_info['framework']}")
-        print(f"🐳 Dockerfile exists: {'Yes' if dockerfile_exists else 'No'}")
-        print(f"📄 Compose file exists: {'Yes' if compose_file_exists else 'No'}")
+            print(f" Framework: {project_info['framework']}")
+        print(f" Dockerfile exists: {'Yes' if dockerfile_exists else 'No'}")
+        print(f" Compose file exists: {'Yes' if compose_file_exists else 'No'}")
         print()
         
         if compose_file_exists:
             overwrite = input("docker-compose.yml already exists. Overwrite? (y/n, default: n): ").strip().lower()
             if overwrite not in ['y', 'yes']:
-                print("❌ Operation cancelled")
+                print(" Operation cancelled")
                 return
         
         # Get service configuration
@@ -1363,7 +1363,7 @@ CMD {json.dumps(start_command.split())}
         app_port = input("Application port (default: 3000): ").strip() or "3000"
         
         # Ask about additional services
-        print("\n🔧 ADDITIONAL SERVICES")
+        print("\n ADDITIONAL SERVICES")
         print("-" * 25)
         
         services = {}
@@ -1416,7 +1416,7 @@ CMD {json.dumps(start_command.split())}
         with open(compose_file, 'w') as f:
             f.write(compose_content)
         
-        print(f"\n✅ docker-compose.yml created successfully!")
+        print(f"\n docker-compose.yml created successfully!")
         
         # Generate .env file if services have environment variables
         if services:
@@ -1426,9 +1426,9 @@ CMD {json.dumps(start_command.split())}
         if 'nginx' in services:
             self._generate_nginx_conf(app_name, app_port)
         
-        print(f"\n🎉 Docker Compose initialization complete!")
-        print(f"📄 Services configured: {len(services) + 1}")
-        print(f"🚀 Start with: docker-compose up -d")
+        print(f"\n Docker Compose initialization complete!")
+        print(f" Services configured: {len(services) + 1}")
+        print(f" Start with: docker-compose up -d")
     
     def _generate_docker_compose(self, project_info: Dict[str, str], app_name: str, app_port: str, services: Dict) -> str:
         """Generate docker-compose.yml content"""
@@ -1540,7 +1540,7 @@ networks:
         with open('.env', 'w') as f:
             f.write(env_content)
         
-        print("✅ .env file created successfully!")
+        print(" .env file created successfully!")
     
     def _generate_nginx_conf(self, app_name: str, app_port: str):
         """Generate nginx.conf for reverse proxy"""
@@ -1570,16 +1570,16 @@ http {{
         with open('nginx.conf', 'w') as f:
             f.write(nginx_content)
         
-        print("✅ nginx.conf created successfully!")
+        print(" nginx.conf created successfully!")
     
     def _docker_compose_up(self):
         """Start Docker Compose services"""
-        print("\n🚀 DOCKER COMPOSE UP")
+        print("\n DOCKER COMPOSE UP")
         print("="*70 + "\n")
         
         if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
-            print("❌ docker-compose.yml not found")
-            print("💡 Run 'Initialize docker-compose.yml' first")
+            print(" docker-compose.yml not found")
+            print(" Run 'Initialize docker-compose.yml' first")
             return
         
         detached = input("Run in detached mode? (Y/n, default: Y): ").strip().lower()
@@ -1595,20 +1595,20 @@ http {{
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             if detached:
-                print("✅ Services started successfully!")
+                print(" Services started successfully!")
                 self._docker_compose_ps(show_output=False)
             else:
-                print("✅ Services stopped")
+                print(" Services stopped")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to start services: {e}")
+            print(f" Failed to start services: {e}")
     
     def _docker_compose_down(self):
         """Stop Docker Compose services"""
-        print("\n🛑 DOCKER COMPOSE DOWN")
+        print("\n DOCKER COMPOSE DOWN")
         print("="*70 + "\n")
         
         if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
-            print("❌ docker-compose.yml not found")
+            print(" docker-compose.yml not found")
             return
         
         remove_volumes = input("Remove volumes? (y/N, default: N): ").strip().lower()
@@ -1623,17 +1623,17 @@ http {{
         try:
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print("✅ Services stopped successfully!")
+            print(" Services stopped successfully!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to stop services: {e}")
+            print(f" Failed to stop services: {e}")
     
     def _docker_compose_restart(self):
         """Restart Docker Compose services"""
-        print("\n🔄 DOCKER COMPOSE RESTART")
+        print("\n DOCKER COMPOSE RESTART")
         print("="*70 + "\n")
         
         if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
-            print("❌ docker-compose.yml not found")
+            print(" docker-compose.yml not found")
             return
         
         cmd = ['docker-compose', 'restart']
@@ -1642,17 +1642,17 @@ http {{
         try:
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print("✅ Services restarted successfully!")
+            print(" Services restarted successfully!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to restart services: {e}")
+            print(f" Failed to restart services: {e}")
     
     def _docker_compose_logs(self):
         """View Docker Compose service logs"""
-        print("\n📋 DOCKER COMPOSE LOGS")
+        print("\n DOCKER COMPOSE LOGS")
         print("="*70 + "\n")
         
         if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
-            print("❌ docker-compose.yml not found")
+            print(" docker-compose.yml not found")
             return
         
         follow = input("Follow logs? (Y/n, default: Y): ").strip().lower()
@@ -1672,19 +1672,19 @@ http {{
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to view logs: {e}")
+            print(f" Failed to view logs: {e}")
         except KeyboardInterrupt:
-            print("\n📋 Logs viewing stopped")
+            print("\n Logs viewing stopped")
     
     def _docker_compose_ps(self, show_output: bool = True):
         """List Docker Compose services"""
         if show_output:
-            print("\n📋 DOCKER COMPOSE SERVICES")
+            print("\n DOCKER COMPOSE SERVICES")
             print("="*70 + "\n")
         
         if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
             if show_output:
-                print("❌ docker-compose.yml not found")
+                print(" docker-compose.yml not found")
             return
         
         cmd = ['docker-compose', 'ps']
@@ -1697,25 +1697,25 @@ http {{
             SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             if show_output:
-                print(f"❌ Failed to list services: {e}")
+                print(f" Failed to list services: {e}")
     
     def _docker_compose_scale(self):
         """Scale Docker Compose services"""
-        print("\n📈 DOCKER COMPOSE SCALE")
+        print("\n DOCKER COMPOSE SCALE")
         print("="*70 + "\n")
         
         if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
-            print("❌ docker-compose.yml not found")
+            print(" docker-compose.yml not found")
             return
         
         service = input("Service name to scale: ").strip()
         if not service:
-            print("❌ Service name cannot be empty")
+            print(" Service name cannot be empty")
             return
         
         replicas = input("Number of replicas: ").strip()
         if not replicas.isdigit() or int(replicas) < 1:
-            print("❌ Invalid number of replicas")
+            print(" Invalid number of replicas")
             return
         
         cmd = ['docker-compose', 'up', '-d', '--scale', f'{service}={replicas}']
@@ -1724,17 +1724,17 @@ http {{
         try:
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print(f"✅ Service '{service}' scaled to {replicas} replicas!")
+            print(f" Service '{service}' scaled to {replicas} replicas!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to scale service: {e}")
+            print(f" Failed to scale service: {e}")
     
     def _docker_compose_build(self):
         """Build Docker Compose services"""
-        print("\n🔨 DOCKER COMPOSE BUILD")
+        print("\n DOCKER COMPOSE BUILD")
         print("="*70 + "\n")
         
         if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
-            print("❌ docker-compose.yml not found")
+            print(" docker-compose.yml not found")
             return
         
         no_cache = input("Build without cache? (y/N, default: N): ").strip().lower()
@@ -1753,17 +1753,17 @@ http {{
         try:
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print("✅ Services built successfully!")
+            print(" Services built successfully!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to build services: {e}")
+            print(f" Failed to build services: {e}")
     
     def _docker_compose_pull(self):
         """Pull Docker Compose service images"""
-        print("\n📥 DOCKER COMPOSE PULL")
+        print("\n DOCKER COMPOSE PULL")
         print("="*70 + "\n")
         
         if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
-            print("❌ docker-compose.yml not found")
+            print(" docker-compose.yml not found")
             return
         
         service = input("Specific service? (leave empty for all): ").strip()
@@ -1777,17 +1777,17 @@ http {{
         try:
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print("✅ Images pulled successfully!")
+            print(" Images pulled successfully!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to pull images: {e}")
+            print(f" Failed to pull images: {e}")
     
     def _docker_compose_rm(self):
         """Remove stopped Docker Compose containers"""
-        print("\n🗑️  DOCKER COMPOSE REMOVE")
+        print("\n  DOCKER COMPOSE REMOVE")
         print("="*70 + "\n")
         
         if not Path("docker-compose.yml").exists() and not Path("docker-compose.yaml").exists():
-            print("❌ docker-compose.yml not found")
+            print(" docker-compose.yml not found")
             return
         
         force = input("Force removal? (y/N, default: N): ").strip().lower()
@@ -1801,19 +1801,19 @@ http {{
         
         try:
             subprocess.run(cmd, check=True)
-            print("✅ Stopped containers removed successfully!")
+            print(" Stopped containers removed successfully!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to remove containers: {e}")
+            print(f" Failed to remove containers: {e}")
     
     def _container_orchestration_menu(self):
         """Container Orchestration (Docker Swarm) menu"""
         print("\n" + "="*70)
-        print("🐳 CONTAINER ORCHESTRATION (DOCKER SWARM)")
+        print(" CONTAINER ORCHESTRATION (DOCKER SWARM)")
         print("="*70 + "\n")
         
         # Check if Docker is running
         if not self._is_docker_running():
-            print("❌ Docker daemon is not running")
+            print(" Docker daemon is not running")
             input("\nPress Enter to continue...")
             return
         
@@ -1866,7 +1866,7 @@ http {{
         elif choice == 13:
             return
         else:
-            print("❌ Invalid choice")
+            print(" Invalid choice")
         
         input("\nPress Enter to continue...")
     
@@ -1909,13 +1909,13 @@ http {{
     
     def _swarm_init(self):
         """Initialize Docker Swarm"""
-        print("\n🚀 DOCKER SWARM INITIALIZATION")
+        print("\n DOCKER SWARM INITIALIZATION")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] == 'active':
-            print("ℹ️  This node is already part of a Swarm")
+            print("ℹ  This node is already part of a Swarm")
             print(f"   Node ID: {swarm_status.get('node_id', 'unknown')}")
             print(f"   Address: {swarm_status.get('node_addr', 'unknown')}")
             
@@ -1927,9 +1927,9 @@ http {{
             try:
                 from core.security.validator import SecurityValidator
                 SecurityValidator.safe_subprocess_run(['docker', 'swarm', 'leave', '-f'], check=True)
-                print("✅ Left current Swarm")
+                print(" Left current Swarm")
             except subprocess.CalledProcessError:
-                print("⚠️  Could not leave current Swarm")
+                print("  Could not leave current Swarm")
         
         # Get advertise address
         advertise_addr = input("Advertise address (default: auto-detect): ").strip()
@@ -1950,11 +1950,11 @@ http {{
         try:
             from core.security.validator import SecurityValidator
             result = SecurityValidator.safe_subprocess_run(cmd, check=True, capture_output=True, text=True)
-            print("✅ Swarm initialized successfully!")
+            print(" Swarm initialized successfully!")
             
             # Show join token for workers
             if result.stdout:
-                print("\n📋 To add worker nodes, run:")
+                print("\n To add worker nodes, run:")
                 print(result.stdout.strip())
             
             # Get manager join token
@@ -1966,35 +1966,35 @@ http {{
                     check=True
                 )
                 if token_result.stdout:
-                    print("\n📋 To add manager nodes, run:")
+                    print("\n To add manager nodes, run:")
                     print(token_result.stdout.strip())
             except (subprocess.CalledProcessError, OSError, TimeoutError):
                 pass
                 
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to initialize Swarm: {e}")
+            print(f" Failed to initialize Swarm: {e}")
     
     def _swarm_join(self):
         """Join existing Docker Swarm"""
-        print("\n🔗 DOCKER SWARM JOIN")
+        print("\n DOCKER SWARM JOIN")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] == 'active':
-            print("❌ This node is already part of a Swarm")
+            print(" This node is already part of a Swarm")
             return
         
         # Get join token
         join_token = input("Join token: ").strip()
         if not join_token:
-            print("❌ Join token cannot be empty")
+            print(" Join token cannot be empty")
             return
         
         # Get manager address
         manager_addr = input("Manager address (IP:PORT): ").strip()
         if not manager_addr:
-            print("❌ Manager address cannot be empty")
+            print(" Manager address cannot be empty")
             return
         
         # Ask if joining as worker or manager
@@ -2020,19 +2020,19 @@ http {{
         try:
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print(f"✅ Successfully joined Swarm as {role}!")
+            print(f" Successfully joined Swarm as {role}!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to join Swarm: {e}")
+            print(f" Failed to join Swarm: {e}")
     
     def _swarm_leave(self):
         """Leave Docker Swarm"""
-        print("\n👋 DOCKER SWARM LEAVE")
+        print("\n DOCKER SWARM LEAVE")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] != 'active':
-            print("❌ This node is not part of a Swarm")
+            print(" This node is not part of a Swarm")
             return
         
         force = input("Force leave? (y/N, default: N): ").strip().lower()
@@ -2047,19 +2047,19 @@ http {{
         try:
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print("✅ Successfully left Swarm!")
+            print(" Successfully left Swarm!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to leave Swarm: {e}")
+            print(f" Failed to leave Swarm: {e}")
     
     def _swarm_deploy(self):
         """Deploy stack to Docker Swarm"""
-        print("\n🚀 DOCKER SWARM DEPLOY")
+        print("\n DOCKER SWARM DEPLOY")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] != 'active':
-            print("❌ This node is not part of a Swarm")
+            print(" This node is not part of a Swarm")
             return
         
         # Check for compose file
@@ -2074,13 +2074,13 @@ http {{
             compose_file = "docker-stack.yaml"
         
         if not compose_file:
-            print("❌ No Docker Compose file found")
-            print("💡 Expected files: docker-compose.yml, docker-compose.yaml, docker-stack.yml, docker-stack.yaml")
+            print(" No Docker Compose file found")
+            print(" Expected files: docker-compose.yml, docker-compose.yaml, docker-stack.yml, docker-stack.yaml")
             return
         
         stack_name = input("Stack name: ").strip()
         if not stack_name:
-            print("❌ Stack name cannot be empty")
+            print(" Stack name cannot be empty")
             return
         
         cmd = ['docker', 'stack', 'deploy', '-c', compose_file, stack_name]
@@ -2090,26 +2090,26 @@ http {{
         try:
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print(f"✅ Stack '{stack_name}' deployed successfully!")
+            print(f" Stack '{stack_name}' deployed successfully!")
             
             # Show services
-            print("\n📋 Deployed services:")
+            print("\n Deployed services:")
             self._swarm_list_services(stack_name, show_output=False)
             
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to deploy stack: {e}")
+            print(f" Failed to deploy stack: {e}")
     
     def _swarm_list_services(self, stack_name: str = None, show_output: bool = True):
         """List Swarm services"""
         if show_output:
-            print("\n📋 SWARM SERVICES")
+            print("\n SWARM SERVICES")
             print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] != 'active':
             if show_output:
-                print("❌ This node is not part of a Swarm")
+                print(" This node is not part of a Swarm")
             return
         
         cmd = ['docker', 'service', 'ls', '--format', 'table {{.ID}}\t{{.Name}}\t{{.Mode}}\t{{.Replicas}}\t{{.Image}}\t{{.Ports}}']
@@ -2122,17 +2122,17 @@ http {{
             SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             if show_output:
-                print(f"❌ Failed to list services: {e}")
+                print(f" Failed to list services: {e}")
     
     def _swarm_list_nodes(self):
         """List Swarm nodes"""
-        print("\n📋 SWARM NODES")
+        print("\n SWARM NODES")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] != 'active':
-            print("❌ This node is not part of a Swarm")
+            print(" This node is not part of a Swarm")
             return
         
         cmd = ['docker', 'node', 'ls', '--format', 'table {{.ID}}\t{{.Hostname}}\t{{.Status}}\t{{.Availability}}\t{{.ManagerStatus}}']
@@ -2142,17 +2142,17 @@ http {{
             from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to list nodes: {e}")
+            print(f" Failed to list nodes: {e}")
     
     def _swarm_scale_service(self):
         """Scale Swarm service"""
-        print("\n📈 SWARM SCALE SERVICE")
+        print("\n SWARM SCALE SERVICE")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] != 'active':
-            print("❌ This node is not part of a Swarm")
+            print(" This node is not part of a Swarm")
             return
         
         # Get available services
@@ -2166,10 +2166,10 @@ http {{
             services = [s.strip() for s in result.stdout.strip().split('\n') if s.strip()]
             
             if not services:
-                print("❌ No services found")
+                print(" No services found")
                 return
             
-            print("📋 Available services:")
+            print(" Available services:")
             for i, service in enumerate(services, 1):
                 print(f"   {i}. {service}")
             
@@ -2180,19 +2180,19 @@ http {{
                 if 0 <= service_idx < len(services):
                     service_name = services[service_idx]
                 else:
-                    print("❌ Invalid selection")
+                    print(" Invalid selection")
                     return
             except ValueError:
-                print("❌ Invalid selection")
+                print(" Invalid selection")
                 return
                 
         except subprocess.CalledProcessError:
-            print("❌ Failed to get services list")
+            print(" Failed to get services list")
             return
         
         replicas = input("Number of replicas: ").strip()
         if not replicas.isdigit() or int(replicas) < 0:
-            print("❌ Invalid number of replicas")
+            print(" Invalid number of replicas")
             return
         
         cmd = ['docker', 'service', 'scale', f'{service_name}={replicas}']
@@ -2200,19 +2200,19 @@ http {{
         
         try:
             subprocess.run(cmd, check=True)
-            print(f"✅ Service '{service_name}' scaled to {replicas} replicas!")
+            print(f" Service '{service_name}' scaled to {replicas} replicas!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to scale service: {e}")
+            print(f" Failed to scale service: {e}")
     
     def _swarm_update_service(self):
         """Update Swarm service"""
-        print("\n🔄 SWARM UPDATE SERVICE")
+        print("\n SWARM UPDATE SERVICE")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] != 'active':
-            print("❌ This node is not part of a Swarm")
+            print(" This node is not part of a Swarm")
             return
         
         # Get available services
@@ -2226,10 +2226,10 @@ http {{
             services = [s.strip() for s in result.stdout.strip().split('\n') if s.strip()]
             
             if not services:
-                print("❌ No services found")
+                print(" No services found")
                 return
             
-            print("📋 Available services:")
+            print(" Available services:")
             for i, service in enumerate(services, 1):
                 print(f"   {i}. {service}")
             
@@ -2240,18 +2240,18 @@ http {{
                 if 0 <= service_idx < len(services):
                     service_name = services[service_idx]
                 else:
-                    print("❌ Invalid selection")
+                    print(" Invalid selection")
                     return
             except ValueError:
-                print("❌ Invalid selection")
+                print(" Invalid selection")
                 return
                 
         except subprocess.CalledProcessError:
-            print("❌ Failed to get services list")
+            print(" Failed to get services list")
             return
         
         # Update options
-        print("\n🔧 Update Options:")
+        print("\n Update Options:")
         print("1. Update image")
         print("2. Add/remove environment variables")
         print("3. Update replicas")
@@ -2286,26 +2286,26 @@ http {{
         elif update_choice == '5':
             cmd.append('--force')
         else:
-            print("❌ Invalid option")
+            print(" Invalid option")
             return
         
         print(f"$ {' '.join(cmd)}\n")
         
         try:
             subprocess.run(cmd, check=True)
-            print(f"✅ Service '{service_name}' updated successfully!")
+            print(f" Service '{service_name}' updated successfully!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to update service: {e}")
+            print(f" Failed to update service: {e}")
     
     def _swarm_remove_service(self):
         """Remove Swarm service"""
-        print("\n🗑️  SWARM REMOVE SERVICE")
+        print("\n  SWARM REMOVE SERVICE")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] != 'active':
-            print("❌ This node is not part of a Swarm")
+            print(" This node is not part of a Swarm")
             return
         
         # Get available services
@@ -2319,10 +2319,10 @@ http {{
             services = [s.strip() for s in result.stdout.strip().split('\n') if s.strip()]
             
             if not services:
-                print("❌ No services found")
+                print(" No services found")
                 return
             
-            print("📋 Available services:")
+            print(" Available services:")
             for i, service in enumerate(services, 1):
                 print(f"   {i}. {service}")
             
@@ -2333,19 +2333,19 @@ http {{
                 if 0 <= service_idx < len(services):
                     service_name = services[service_idx]
                 else:
-                    print("❌ Invalid selection")
+                    print(" Invalid selection")
                     return
             except ValueError:
-                print("❌ Invalid selection")
+                print(" Invalid selection")
                 return
                 
         except subprocess.CalledProcessError:
-            print("❌ Failed to get services list")
+            print(" Failed to get services list")
             return
         
         confirm = input(f"Remove service '{service_name}'? (yes/no): ").strip().lower()
         if confirm != 'yes':
-            print("❌ Operation cancelled")
+            print(" Operation cancelled")
             return
         
         cmd = ['docker', 'service', 'rm', service_name]
@@ -2353,19 +2353,19 @@ http {{
         
         try:
             subprocess.run(cmd, check=True)
-            print(f"✅ Service '{service_name}' removed successfully!")
+            print(f" Service '{service_name}' removed successfully!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to remove service: {e}")
+            print(f" Failed to remove service: {e}")
     
     def _swarm_list_stacks(self):
         """List Swarm stacks"""
-        print("\n📋 SWARM STACKS")
+        print("\n SWARM STACKS")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] != 'active':
-            print("❌ This node is not part of a Swarm")
+            print(" This node is not part of a Swarm")
             return
         
         cmd = ['docker', 'stack', 'ls', '--format', 'table {{.Name}}\t{{.Services}}']
@@ -2374,17 +2374,17 @@ http {{
         try:
             subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to list stacks: {e}")
+            print(f" Failed to list stacks: {e}")
     
     def _swarm_remove_stack(self):
         """Remove Swarm stack"""
-        print("\n🗑️  SWARM REMOVE STACK")
+        print("\n  SWARM REMOVE STACK")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
         if swarm_status['state'] != 'active':
-            print("❌ This node is not part of a Swarm")
+            print(" This node is not part of a Swarm")
             return
         
         # Get available stacks
@@ -2398,10 +2398,10 @@ http {{
             stacks = [s.strip() for s in result.stdout.strip().split('\n') if s.strip()]
             
             if not stacks:
-                print("❌ No stacks found")
+                print(" No stacks found")
                 return
             
-            print("📋 Available stacks:")
+            print(" Available stacks:")
             for i, stack in enumerate(stacks, 1):
                 print(f"   {i}. {stack}")
             
@@ -2412,19 +2412,19 @@ http {{
                 if 0 <= stack_idx < len(stacks):
                     stack_name = stacks[stack_idx]
                 else:
-                    print("❌ Invalid selection")
+                    print(" Invalid selection")
                     return
             except ValueError:
-                print("❌ Invalid selection")
+                print(" Invalid selection")
                 return
                 
         except subprocess.CalledProcessError:
-            print("❌ Failed to get stacks list")
+            print(" Failed to get stacks list")
             return
         
         confirm = input(f"Remove stack '{stack_name}' and all its services? (yes/no): ").strip().lower()
         if confirm != 'yes':
-            print("❌ Operation cancelled")
+            print(" Operation cancelled")
             return
         
         cmd = ['docker', 'stack', 'rm', stack_name]
@@ -2432,45 +2432,45 @@ http {{
         
         try:
             subprocess.run(cmd, check=True)
-            print(f"✅ Stack '{stack_name}' removed successfully!")
+            print(f" Stack '{stack_name}' removed successfully!")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to remove stack: {e}")
+            print(f" Failed to remove stack: {e}")
     
     def _swarm_status(self):
         """Show detailed Swarm status"""
-        print("\n📊 SWARM STATUS")
+        print("\n SWARM STATUS")
         print("="*70 + "\n")
         
         swarm_status = self._get_swarm_status()
         
-        print(f"🔸 Swarm State: {swarm_status['state']}")
+        print(f" Swarm State: {swarm_status['state']}")
         
         if swarm_status['state'] == 'active':
-            print(f"🔸 Node ID: {swarm_status.get('node_id', 'unknown')}")
-            print(f"🔸 Node Address: {swarm_status.get('node_addr', 'unknown')}")
+            print(f" Node ID: {swarm_status.get('node_id', 'unknown')}")
+            print(f" Node Address: {swarm_status.get('node_addr', 'unknown')}")
             
             # Show nodes
-            print("\n📋 Nodes:")
+            print("\n Nodes:")
             try:
                 subprocess.run(['docker', 'node', 'ls'], check=True)
             except subprocess.CalledProcessError:
                 print("   Could not retrieve node list")
             
             # Show services
-            print("\n📋 Services:")
+            print("\n Services:")
             try:
                 subprocess.run(['docker', 'service', 'ls'], check=True)
             except subprocess.CalledProcessError:
                 print("   Could not retrieve service list")
             
             # Show stacks
-            print("\n📋 Stacks:")
+            print("\n Stacks:")
             try:
                 subprocess.run(['docker', 'stack', 'ls'], check=True)
             except subprocess.CalledProcessError:
                 print("   Could not retrieve stack list")
         else:
-            print("💡 To initialize a Swarm, run 'Initialize Swarm' from the menu")
+            print(" To initialize a Swarm, run 'Initialize Swarm' from the menu")
 
 
 # Export command instance

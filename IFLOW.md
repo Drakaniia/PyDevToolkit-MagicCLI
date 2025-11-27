@@ -13,11 +13,11 @@ PyDevToolkit MagicCLI is a powerful Python developer toolkit that provides Git o
 ### Core Architecture
 ```
 src/
-├── core/           # Core functionality modules (menu base, configuration, security, etc.)
-├── dev_mode/       # Web development automation tools
-├── backend/        # Backend development automation tools
-├── github/         # Git operation tools
-└── menu.py         # Main menu system
+ core/           # Core functionality modules (menu base, configuration, security, etc.)
+ dev_mode/       # Web development automation tools
+ backend/        # Backend development automation tools
+ github/         # Git operation tools
+ menu.py         # Main menu system
 ```
 
 ## Build and Run
@@ -178,19 +178,19 @@ Package configuration file, defining:
 
 ```
 PyDevToolkit-MagicCLI/
-├── main.py                 # Main entry point
-├── src/                    # Source code directory
-│   ├── menu.py            # Main menu system
-│   ├── magic.py           # magic command entry point
-│   ├── core/              # Core functionality modules
-│   ├── dev_mode/          # Web development automation
-│   ├── backend/           # Backend development automation
-│   └── github/            # Git operation tools
-├── tests/                  # Test files
-├── config.yaml            # Main configuration file
-├── requirements.txt       # Production dependencies
-├── setup.py              # Package configuration
-└── setup.sh              # Installation script
+ main.py                 # Main entry point
+ src/                    # Source code directory
+    menu.py            # Main menu system
+    magic.py           # magic command entry point
+    core/              # Core functionality modules
+    dev_mode/          # Web development automation
+    backend/           # Backend development automation
+    github/            # Git operation tools
+ tests/                  # Test files
+ config.yaml            # Main configuration file
+ requirements.txt       # Production dependencies
+ setup.py              # Package configuration
+ setup.sh              # Installation script
 ```
 
 This project provides Python developers with a one-stop command-line development environment, especially suitable for scenarios that require frequent Git operations, project management, and web/backend development.

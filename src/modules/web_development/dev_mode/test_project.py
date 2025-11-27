@@ -30,17 +30,17 @@ class TestProjectCommand(DevModeCommand):
         current_dir = Path.cwd()
         
         print("\n" + "="*70)
-        print("🧪 RUN TESTS")
+        print("RUN TESTS")
         print("="*70)
-        print(f"📍 Current Directory: {current_dir}")
+        print(f" Current Directory: {current_dir}")
         print("="*70 + "\n")
         
         # Detect available test frameworks
         test_frameworks = self._detect_test_frameworks(current_dir)
         
         if not test_frameworks:
-            print("❌ No test frameworks detected in this project")
-            print("\n💡 Supported frameworks:")
+            print(" No test frameworks detected in this project")
+            print("\n Supported frameworks:")
             print("  • JavaScript/Node: Jest, Mocha, Vitest")
             print("  • Python: pytest, unittest")
             print("  • Other: Check package.json scripts")
@@ -54,7 +54,7 @@ class TestProjectCommand(DevModeCommand):
         choice = get_choice_with_arrows(test_options, "Available Test Commands")
         
         if choice == len(test_frameworks) + 1:
-            print("\n❌ Operation cancelled")
+            print("\n Operation cancelled")
             input("\nPress Enter to continue...")
             return
         
@@ -62,7 +62,7 @@ class TestProjectCommand(DevModeCommand):
             name, command, framework = test_frameworks[choice - 1]
             self._run_test_command(name, command, framework, current_dir)
         else:
-            print("❌ Invalid choice")
+            print(" Invalid choice")
             input("\nPress Enter to continue...")
     
     def _noninteractive_run(
@@ -160,7 +160,7 @@ class TestProjectCommand(DevModeCommand):
         attach: bool = True
     ):
         """Execute test command"""
-        print(f"\n🚀 Running tests: {name}")
+        print(f"\n Running tests: {name}")
         print(f"   Framework: {framework}")
         print("="*70 + "\n")
         
@@ -173,7 +173,7 @@ class TestProjectCommand(DevModeCommand):
                 name = name.replace('npm ', f'{pkg_manager} ')
         
         print(f"   $ {command}")
-        print(f"\n💡 Press Ctrl+C to stop the tests")
+        print(f"\n Press Ctrl+C to stop the tests")
         print("="*70 + "\n")
         
         try:
@@ -223,14 +223,14 @@ class TestProjectCommand(DevModeCommand):
             process.wait()
             
             if process.returncode == 0:
-                print("\n\n✅ All tests passed!")
+                print("\n\n All tests passed!")
             elif process.returncode is None:
-                print("\n\n⚠️  Tests were interrupted")
+                print("\n\n  Tests were interrupted")
             else:
-                print(f"\n\n❌ Tests failed with exit code {process.returncode}")
+                print(f"\n\n Tests failed with exit code {process.returncode}")
         
         except KeyboardInterrupt:
-            print("\n\n⚠️  Tests interrupted by user")
+            print("\n\n  Tests interrupted by user")
             try:
                 process.terminate()
                 process.wait(timeout=5)
@@ -241,11 +241,11 @@ class TestProjectCommand(DevModeCommand):
                     pass
         
         except FileNotFoundError as e:
-            print(f"\n❌ Error: Command not found")
-            print(f"💡 Make sure the test framework is installed")
+            print(f"\n Error: Command not found")
+            print(f" Make sure the test framework is installed")
         
         except Exception as e:
-            print(f"\n❌ Error running tests: {e}")
+            print(f"\n Error running tests: {e}")
             import traceback
             traceback.print_exc()
         

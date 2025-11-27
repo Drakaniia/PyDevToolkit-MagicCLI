@@ -15,7 +15,7 @@ class GitPull:
         self.loading_active = False
         self.loading_thread = None
 
-    def _start_loading(self, message="🔄 Loading"):
+    def _start_loading(self, message=" Loading"):
         """Start loading animation in a separate thread"""
         self.loading_active = True
         self.loading_thread = threading.Thread(target=self._loading_animation, args=(message,))
@@ -40,80 +40,80 @@ class GitPull:
     def pull(self):
         """Pull from remote repository"""
         print("\n" + "="*70)
-        print("⬇️  GIT PULL")
+        print("  GIT PULL")
         print("="*70 + "\n")
 
         if not self._is_git_repo():
-            print("❌ Not a git repository. Please initialize git first.")
+            print(" Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
             return False
 
         # Check if remote exists
         if not self._has_remote():
-            print("❌ No remote repository configured.")
-            print("💡 Use 'Initialize Git & Push to GitHub' to set up remote.")
+            print(" No remote repository configured.")
+            print(" Use 'Initialize Git & Push to GitHub' to set up remote.")
             input("\nPress Enter to continue...")
             return False
 
         # Sync first by fetching
-        print("🔄 Syncing with remote...")
-        self._start_loading("🔄 Fetching latest changes")
+        print(" Syncing with remote...")
+        self._start_loading(" Fetching latest changes")
         fetch_success = self.fetch()
         self._stop_loading()
 
         if not fetch_success:
-            print("\n❌ Sync failed. Cannot continue with pull.")
+            print("\n Sync failed. Cannot continue with pull.")
             input("\nPress Enter to continue...")
             return False
 
         # Check if there are changes to sync
         if self._has_changes_to_sync():
-            print("\n✅ Sync completed successfully!")
+            print("\n Sync completed successfully!")
 
             # Check for potential conflicts before pulling
             if self._has_local_changes():
-                print("\n⚠️  Warning: You have uncommitted changes in your local repository.")
+                print("\n  Warning: You have uncommitted changes in your local repository.")
                 print("Pulling now may cause merge conflicts.")
                 response = input("Do you want to continue with pull? (y/N) or discard changes first (d): ").strip().lower()
 
                 if response == 'd':
-                    print("⚠️  Discarding local changes...")
+                    print("  Discarding local changes...")
                     discard_response = input("This will permanently delete your uncommitted changes. Continue? (y/N): ").strip().lower()
                     if discard_response in ['y', 'yes']:
                         reset_success = self._run_command(["git", "reset", "--hard", "HEAD"])
                         if reset_success:
-                            print("✅ Local changes discarded successfully!")
+                            print(" Local changes discarded successfully!")
                         else:
-                            print("❌ Failed to discard changes. Pull operation cancelled.")
+                            print(" Failed to discard changes. Pull operation cancelled.")
                             input("\nPress Enter to continue...")
                             return False
                     else:
-                        print("❌ Pull operation cancelled by user.")
+                        print(" Pull operation cancelled by user.")
                         input("\nPress Enter to continue...")
                         return False
                 elif response not in ['y', 'yes']:
-                    print("❌ Pull operation cancelled by user.")
+                    print(" Pull operation cancelled by user.")
                     input("\nPress Enter to continue...")
                     return False
             else:
                 # Ask user if they want to proceed with pull
                 response = input("\nDo you want to pull the changes now? (y/N): ").strip().lower()
                 if response not in ['y', 'yes']:
-                    print("❌ Pull operation cancelled by user.")
+                    print(" Pull operation cancelled by user.")
                     input("\nPress Enter to continue...")
                     return False
         else:
-            print("\n✅ No changes to sync!")
+            print("\n No changes to sync!")
             input("\nPress Enter to continue...")
             return True  # Return True since there were no changes but operation was successful
 
-        print("\n🔄 Pulling changes from remote...")
+        print("\n Pulling changes from remote...")
         success = self._run_command(["git", "pull"])
 
         if success:
-            print("\n✅ Successfully pulled from remote!")
+            print("\n Successfully pulled from remote!")
         else:
-            print("\n❌ Pull failed. Check your network connection and remote configuration.")
+            print("\n Pull failed. Check your network connection and remote configuration.")
 
         input("\nPress Enter to continue...")
         return success
@@ -121,71 +121,71 @@ class GitPull:
     def pull_with_rebase(self):
         """Pull with rebase strategy"""
         print("\n" + "="*70)
-        print("⬇️  GIT PULL (with rebase)")
+        print("  GIT PULL (with rebase)")
         print("="*70 + "\n")
 
         if not self._is_git_repo():
-            print("❌ Not a git repository. Please initialize git first.")
+            print(" Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
             return False
 
         # Sync first by fetching
-        print("🔄 Syncing with remote...")
-        self._start_loading("🔄 Fetching latest changes")
+        print(" Syncing with remote...")
+        self._start_loading(" Fetching latest changes")
         fetch_success = self.fetch()
         self._stop_loading()
 
         if not fetch_success:
-            print("\n❌ Sync failed. Cannot continue with pull.")
+            print("\n Sync failed. Cannot continue with pull.")
             input("\nPress Enter to continue...")
             return False
 
         # Check if there are changes to sync
         if self._has_changes_to_sync():
-            print("\n✅ Sync completed successfully!")
+            print("\n Sync completed successfully!")
 
             # Check for potential conflicts before pulling
             if self._has_local_changes():
-                print("\n⚠️  Warning: You have uncommitted changes in your local repository.")
+                print("\n  Warning: You have uncommitted changes in your local repository.")
                 print("Pulling now may cause merge conflicts.")
                 response = input("Do you want to continue with pull? (y/N) or discard changes first (d): ").strip().lower()
 
                 if response == 'd':
-                    print("⚠️  Discarding local changes...")
+                    print("  Discarding local changes...")
                     discard_response = input("This will permanently delete your uncommitted changes. Continue? (y/N): ").strip().lower()
                     if discard_response in ['y', 'yes']:
                         reset_success = self._run_command(["git", "reset", "--hard", "HEAD"])
                         if reset_success:
-                            print("✅ Local changes discarded successfully!")
+                            print(" Local changes discarded successfully!")
                         else:
-                            print("❌ Failed to discard changes. Pull operation cancelled.")
+                            print(" Failed to discard changes. Pull operation cancelled.")
                             input("\nPress Enter to continue...")
                             return False
                     else:
-                        print("❌ Pull operation cancelled by user.")
+                        print(" Pull operation cancelled by user.")
                         input("\nPress Enter to continue...")
                         return False
                 elif response not in ['y', 'yes']:
-                    print("❌ Pull operation cancelled by user.")
+                    print(" Pull operation cancelled by user.")
                     input("\nPress Enter to continue...")
                     return False
             else:
                 # Ask user if they want to proceed with pull
                 response = input("\nDo you want to pull with rebase? (y/N): ").strip().lower()
                 if response not in ['y', 'yes']:
-                    print("❌ Pull operation cancelled by user.")
+                    print(" Pull operation cancelled by user.")
                     input("\nPress Enter to continue...")
                     return False
         else:
-            print("\n✅ No changes to sync!")
+            print("\n No changes to sync!")
             input("\nPress Enter to continue...")
             return True  # Return True since there were no changes but operation was successful
 
-        print("🔄 Pulling with rebase...")
+        print(" Pulling with rebase...")
         success = self._run_command(["git", "pull", "--rebase"])
 
         if success:
-            print("\n✅ Successfully pulled with rebase!")
+            print("\n Successfully pulled with rebase!")
 
         input("\nPress Enter to continue...")
         return success
@@ -205,14 +205,14 @@ class GitPull:
                 print(result.stderr)
             return True
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error: {e}")
+            print(f" Error: {e}")
             if e.stdout:
                 print(e.stdout)
             if e.stderr:
                 print(e.stderr)
             return False
         except FileNotFoundError:
-            print("❌ Git is not installed or not in PATH")
+            print(" Git is not installed or not in PATH")
             return False
 
     def get_remote_info(self):
@@ -327,12 +327,12 @@ class GitPull:
                 print(result.stderr)
             return True
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error: {e}")
+            print(f" Error: {e}")
             if e.stdout:
                 print(e.stdout)
             if e.stderr:
                 print(e.stderr)
             return False
         except FileNotFoundError:
-            print("❌ Git is not installed or not in PATH")
+            print(" Git is not installed or not in PATH")
             return False

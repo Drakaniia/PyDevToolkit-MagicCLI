@@ -161,10 +161,10 @@ class StructureViewer:
         self.current_dir = Path.cwd()
         
         print("\n" + "="*70)
-        print("📁 PROJECT STRUCTURE")
+        print("PROJECT STRUCTURE")
         print("="*70)
-        print(f"\n📍 Current Directory: {self.current_dir.name}")
-        print(f"📍 Absolute Path: {self.current_dir.absolute()}")
+        print(f"\nCurrent Directory: {self.current_dir.name}")
+        print(f"Absolute Path: {self.current_dir.absolute()}")
         
         # Load .gitignore patterns
         self._load_gitignore()
@@ -180,7 +180,7 @@ class StructureViewer:
         # Generate the tree structure (this will populate hidden_categories)
         tree_lines = self._generate_tree(self.current_dir)
         
-        print("\n💡 Showing: All source code and important files")
+        print("\nShowing: All source code and important files")
         
         # Smart hiding display - only show what's actually being hidden
         hidden_items = []
@@ -200,7 +200,7 @@ class StructureViewer:
         
         # Show summary first for AI context
         file_count, dir_count = self._count_items(self.current_dir)
-        print(f"\n📊 Summary: {dir_count} directories, {file_count} files")
+        print(f"\nSummary: {dir_count} directories, {file_count} files")
         
         print("\n```")
         print(f"{self.current_dir.name}/")
@@ -603,11 +603,11 @@ class StructureViewer:
                 
                 # Tree characters
                 if is_last:
-                    current_prefix = "└── "
+                    current_prefix = " "
                     next_prefix = "    "
                 else:
-                    current_prefix = "├── "
-                    next_prefix = "│   "
+                    current_prefix = " "
+                    next_prefix = "   "
                 
                 # Display name with size for files (optimized for AI readability)
                 if item.is_dir():
@@ -636,7 +636,7 @@ class StructureViewer:
             
             # Show hidden count if any
             if hidden_count > 0:
-                lines.append(f"{prefix}└── ... and {hidden_count} more items")
+                lines.append(f"{prefix} ... and {hidden_count} more items")
         
         except PermissionError:
             lines.append(f"{prefix}[Permission Denied]")

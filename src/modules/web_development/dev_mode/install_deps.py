@@ -28,14 +28,14 @@ class InstallDepsCommand(DevModeCommand):
     def _interactive_install(self):
         """Interactive dependency installation"""
         print("\n" + "="*70)
-        print("📦 INSTALL DEPENDENCIES")
+        print(" INSTALL DEPENDENCIES")
         print("="*70 + "\n")
         
         # Check if package.json exists
         package_json = Path.cwd() / 'package.json'
         if not package_json.exists():
-            print("❌ No package.json found in current directory")
-            print("💡 Navigate to a Node.js project first")
+            print(" No package.json found in current directory")
+            print(" Navigate to a Node.js project first")
             input("\nPress Enter to continue...")
             return
         
@@ -51,7 +51,7 @@ class InstallDepsCommand(DevModeCommand):
             f"Use detected ({detected_manager})"
         ]
         
-        print("\n📦 Select Package Manager:")
+        print("\n Select Package Manager:")
         choice = get_choice_with_arrows(package_manager_options, "Package Manager")
         
         manager_map = {
@@ -65,8 +65,8 @@ class InstallDepsCommand(DevModeCommand):
         
         # Check if manager is available
         if not self.validate_binary(manager):
-            print(f"\n❌ {manager} not found in PATH")
-            print(f"💡 Install {manager}:")
+            print(f"\n {manager} not found in PATH")
+            print(f" Install {manager}:")
             if manager == 'pnpm':
                 print("   npm install -g pnpm")
             elif manager == 'yarn':
@@ -83,7 +83,7 @@ class InstallDepsCommand(DevModeCommand):
             "Install package as dev dependency"
         ]
         
-        print("\n🔨 Select Install Type:")
+        print("\n Select Install Type:")
         install_type = get_choice_with_arrows(install_type_options, "Install Type")
         
         if install_type == 1:
@@ -93,7 +93,7 @@ class InstallDepsCommand(DevModeCommand):
             # Install specific package
             package_name = input("\nPackage name: ").strip()
             if not package_name:
-                print("❌ Package name cannot be empty")
+                print(" Package name cannot be empty")
                 input("\nPress Enter to continue...")
                 return
             
@@ -120,7 +120,7 @@ class InstallDepsCommand(DevModeCommand):
     
     def _install_all(self, manager: str, interactive: bool = True):
         """Install all dependencies"""
-        print(f"\n🔨 Installing dependencies with {manager}...")
+        print(f"\n Installing dependencies with {manager}...")
         print("="*70 + "\n")
         
         cmd = [manager, 'install']
@@ -141,25 +141,25 @@ class InstallDepsCommand(DevModeCommand):
                     text=True
                 )
             
-            print("✅ Dependencies installed successfully!")
+            print(" Dependencies installed successfully!")
             if interactive and result.stdout and not result.stdout.isspace():
                 print(f"Output: {result.stdout.strip()}")
         
         except subprocess.CalledProcessError as e:
             if interactive:
-                print(f"❌ Installation failed with exit code {e.returncode}")
+                print(f" Installation failed with exit code {e.returncode}")
                 if e.stderr:
                     print(f"Error: {e.stderr.strip()}")
             else:
                 raise
         except FileNotFoundError:
             if interactive:
-                print(f"❌ Error: '{manager}' not found in PATH")
+                print(f" Error: '{manager}' not found in PATH")
             else:
                 raise
         except Exception as e:
             if interactive:
-                print(f"❌ Error: {e}")
+                print(f" Error: {e}")
             else:
                 raise
     
@@ -172,7 +172,7 @@ class InstallDepsCommand(DevModeCommand):
     ):
         """Install specific package"""
         dep_type = "dev dependency" if dev else "dependency"
-        print(f"\n🔨 Installing {package} as {dep_type}...")
+        print(f"\n Installing {package} as {dep_type}...")
         print("="*70 + "\n")
         
         # Build command
@@ -208,25 +208,25 @@ class InstallDepsCommand(DevModeCommand):
                     text=True
                 )
             
-            print(f"✅ Package '{package}' installed successfully!")
+            print(f" Package '{package}' installed successfully!")
             if interactive and result.stdout and not result.stdout.isspace():
                 print(f"Output: {result.stdout.strip()}")
         
         except subprocess.CalledProcessError as e:
             if interactive:
-                print(f"❌ Installation failed with exit code {e.returncode}")
+                print(f" Installation failed with exit code {e.returncode}")
                 if e.stderr:
                     print(f"Error: {e.stderr.strip()}")
             else:
                 raise
         except FileNotFoundError:
             if interactive:
-                print(f"❌ Error: '{manager}' not found in PATH")
+                print(f" Error: '{manager}' not found in PATH")
             else:
                 raise
         except Exception as e:
             if interactive:
-                print(f"❌ Error: {e}")
+                print(f" Error: {e}")
             else:
                 raise
     

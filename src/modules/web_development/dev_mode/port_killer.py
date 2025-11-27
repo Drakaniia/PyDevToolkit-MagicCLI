@@ -80,9 +80,9 @@ class PortKiller:
         ports_to_check = sorted(list(set(ports_to_check)))
         
         if self.verbose:
-            print("\n🔍 SCANNING FOR ACTIVE PORTS")
+            print("\n SCANNING FOR ACTIVE PORTS")
             print("="*70)
-            print(f"📋 Checking {len(ports_to_check)} development ports...")
+            print(f" Checking {len(ports_to_check)} development ports...")
         
         # Find all processes using ports
         active_processes = []
@@ -93,7 +93,7 @@ class PortKiller:
         
         if not active_processes:
             if self.verbose:
-                print("✅ No active processes found on development ports")
+                print(" No active processes found on development ports")
             return {
                 'killed_processes': [],
                 'failed_kills': [],
@@ -102,7 +102,7 @@ class PortKiller:
             }
         
         if self.verbose:
-            print(f"\n⚠️  Found {len(active_processes)} active process(es):")
+            print(f"\n  Found {len(active_processes)} active process(es):")
             print("-" * 50)
             for proc in active_processes:
                 print(f"  Port {proc['port']:>5} | PID {proc['pid']:>6} | {proc['name']}")
@@ -112,18 +112,18 @@ class PortKiller:
         failed_kills = []
         
         if self.verbose:
-            print(f"\n💀 TERMINATING PROCESSES")
+            print(f"\n TERMINATING PROCESSES")
             print("="*70)
         
         for proc in active_processes:
             if self._kill_process(proc):
                 killed_processes.append(proc)
                 if self.verbose:
-                    print(f"✅ Killed PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
+                    print(f" Killed PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
             else:
                 failed_kills.append(proc)
                 if self.verbose:
-                    print(f"❌ Failed to kill PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
+                    print(f" Failed to kill PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
         
         # Wait a moment for processes to fully terminate
         if killed_processes:
@@ -132,12 +132,12 @@ class PortKiller:
             time.sleep(2)
         
         if self.verbose:
-            print(f"\n📊 SUMMARY")
+            print(f"\n SUMMARY")
             print("="*70)
-            print(f"✅ Successfully killed: {len(killed_processes)} process(es)")
+            print(f" Successfully killed: {len(killed_processes)} process(es)")
             if failed_kills:
-                print(f"❌ Failed to kill: {len(failed_kills)} process(es)")
-            print(f"🔍 Total ports checked: {len(ports_to_check)}")
+                print(f" Failed to kill: {len(failed_kills)} process(es)")
+            print(f" Total ports checked: {len(ports_to_check)}")
         
         return {
             'killed_processes': killed_processes,
@@ -160,11 +160,11 @@ class PortKiller:
         
         if not processes:
             if self.verbose:
-                print(f"✅ Port {port} is already free")
+                print(f" Port {port} is already free")
             return True
         
         if self.verbose:
-            print(f"\n🔍 Found {len(processes)} process(es) on port {port}:")
+            print(f"\n Found {len(processes)} process(es) on port {port}:")
             for proc in processes:
                 print(f"  PID {proc['pid']} | {proc['name']}")
         
@@ -178,10 +178,10 @@ class PortKiller:
         remaining_processes = self._get_processes_on_port(port)
         if remaining_processes:
             if self.verbose:
-                print(f"⚠️  Some processes still active on port {port}")
+                print(f"  Some processes still active on port {port}")
             success = False
         elif self.verbose:
-            print(f"✅ Port {port} is now free")
+            print(f" Port {port} is now free")
         
         return success
     
@@ -226,7 +226,7 @@ class PortKiller:
                 processes = self._get_processes_unix(port)
         except Exception as e:
             if self.verbose:
-                print(f"⚠️  Error checking port {port}: {e}")
+                print(f"  Error checking port {port}: {e}")
         
         return processes
     
@@ -441,7 +441,7 @@ class PortKiller:
                 server_processes = self._scan_all_servers_unix()
         except Exception as e:
             if self.verbose:
-                print(f"⚠️  Error scanning for server processes: {e}")
+                print(f"  Error scanning for server processes: {e}")
         
         return server_processes
     
@@ -608,7 +608,7 @@ class PortKiller:
             Dict with results
         """
         if self.verbose:
-            print("\n🔍 SCANNING FOR ALL SERVER PROCESSES")
+            print("\n SCANNING FOR ALL SERVER PROCESSES")
             print("="*70)
         
         # Get all server processes
@@ -617,7 +617,7 @@ class PortKiller:
         
         if not all_processes:
             if self.verbose:
-                print("✅ No active server processes found")
+                print(" No active server processes found")
             return {
                 'killed_processes': [],
                 'failed_kills': [],
@@ -625,7 +625,7 @@ class PortKiller:
             }
         
         if self.verbose:
-            print(f"\n⚠️  Found {len(all_processes)} server process(es):")
+            print(f"\n  Found {len(all_processes)} server process(es):")
             print("-" * 50)
             for proc in all_processes:
                 print(f"  Port {proc['port']:>5} | PID {proc['pid']:>6} | {proc['name']}")
@@ -635,7 +635,7 @@ class PortKiller:
         failed_kills = []
         
         if self.verbose:
-            print(f"\n💀 TERMINATING SERVER PROCESSES")
+            print(f"\n TERMINATING SERVER PROCESSES")
             print("="*70)
         
         for proc in all_processes:
@@ -647,14 +647,14 @@ class PortKiller:
                 if self._kill_process(proc):
                     killed_processes.append(proc)
                     if self.verbose:
-                        print(f"✅ Killed PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
+                        print(f" Killed PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
                 else:
                     failed_kills.append(proc)
                     if self.verbose:
-                        print(f"❌ Failed to kill PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
+                        print(f" Failed to kill PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
             else:
                 if self.verbose:
-                    print(f"⚠️  Skipped PID {proc['pid']} ({proc['name']}) - not in safe list")
+                    print(f"  Skipped PID {proc['pid']} ({proc['name']}) - not in safe list")
                 failed_kills.append(proc)
         
         # Wait for processes to terminate
@@ -664,11 +664,11 @@ class PortKiller:
             time.sleep(2)
         
         if self.verbose:
-            print(f"\n📊 SUMMARY")
+            print(f"\n SUMMARY")
             print("="*70)
-            print(f"✅ Successfully killed: {len(killed_processes)} process(es)")
+            print(f" Successfully killed: {len(killed_processes)} process(es)")
             if failed_kills:
-                print(f"⚠️  Skipped/Failed: {len(failed_kills)} process(es)")
+                print(f"  Skipped/Failed: {len(failed_kills)} process(es)")
         
         return {
             'killed_processes': killed_processes,
@@ -726,11 +726,11 @@ def ensure_ports_free(ports: List[int], verbose: bool = True) -> bool:
     
     if all_free:
         if verbose:
-            print("✅ All specified ports are already free")
+            print(" All specified ports are already free")
         return True
     
     if verbose:
-        print(f"🔍 Found processes on {len(occupied_ports)} port(s): {occupied_ports}")
+        print(f" Found processes on {len(occupied_ports)} port(s): {occupied_ports}")
     
     # Kill processes on occupied ports
     success = True
@@ -795,9 +795,9 @@ def force_clear_all_ports(verbose: bool = True) -> Dict[str, any]:
         Dict with results
     """
     if verbose:
-        print("🚨 FORCE CLEARING ALL DEVELOPMENT PORTS")
+        print(" FORCE CLEARING ALL DEVELOPMENT PORTS")
         print("="*70)
-        print("⚠️  This will terminate ALL detected development server processes")
+        print("  This will terminate ALL detected development server processes")
         print("="*70)
     
     killer = PortKiller(verbose=verbose)
@@ -811,11 +811,11 @@ def force_clear_all_ports(verbose: bool = True) -> Dict[str, any]:
     total_killed = common_result['total_killed'] + server_result['total_killed']
     
     if verbose:
-        print(f"\n🎯 FINAL SUMMARY")
+        print(f"\n FINAL SUMMARY")
         print("="*70)
-        print(f"✅ Total processes killed: {total_killed}")
-        print(f"📋 Common dev ports cleared: {common_result['total_killed']}")
-        print(f"🔍 Additional servers cleared: {server_result['total_killed']}")
+        print(f" Total processes killed: {total_killed}")
+        print(f" Common dev ports cleared: {common_result['total_killed']}")
+        print(f" Additional servers cleared: {server_result['total_killed']}")
     
     return {
         'common_ports_result': common_result,

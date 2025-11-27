@@ -15,7 +15,7 @@ class DevModeMenu(Menu):
     
     def __init__(self):
         self.commands: List[DevModeCommand] = []
-        super().__init__("🌐 Dev Mode - Web Development Automation")
+        super().__init__(" Dev Mode - Web Development Automation")
     
     def setup_items(self):
         """Setup menu items by loading command modules"""
@@ -63,11 +63,11 @@ class DevModeMenu(Menu):
         try:
             command.run(interactive=True)
         except KeyboardInterrupt:
-            print("\n\n❌ Operation cancelled by user")
+            print("\n\n Operation cancelled by user")
             input("\nPress Enter to continue...")
         except Exception as e:
             print(f"\n{'='*70}")
-            print(f"❌ ERROR: {str(e)}")
+            print(f" ERROR: {str(e)}")
             print(f"{'='*70}\n")
             import traceback
             traceback.print_exc()

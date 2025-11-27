@@ -101,7 +101,7 @@ class CLICommandHandler:
 
     def run_interactive(self):
         """Run interactive command loop"""
-        print("🚀 Python Automation Command Handler")
+        print("Python Automation Command Handler")
         print("Type 'help' for available commands, 'exit' to quit")
         print("-" * 50)
 

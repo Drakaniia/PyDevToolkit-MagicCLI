@@ -13,11 +13,11 @@ class GitCache:
     def unstage_directory(self):
         """Run git rm --cached -r on working directory to unstage all files"""
         print("\n" + "="*70)
-        print("🗑️  UNSTAGE WORKING DIRECTORY")
+        print("  UNSTAGE WORKING DIRECTORY")
         print("="*70 + "\n")
         
         if not self._is_git_repo():
-            print("❌ Not a git repository. Please initialize git first.")
+            print(" Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
             return
         
@@ -41,20 +41,20 @@ class GitCache:
             )
             
             if result.returncode == 0:
-                print("✅ SUCCESS! Working directory has been unstaged.")
-                print("📁 All files remain in your local directory")
-                print("🔓 Files are no longer tracked by git")
+                print(" SUCCESS! Working directory has been unstaged.")
+                print(" All files remain in your local directory")
+                print(" Files are no longer tracked by git")
                 if result.stdout:
                     print(f"\nGit output:\n{result.stdout}")
             else:
-                print("❌ FAILED to unstage directory.")
+                print(" FAILED to unstage directory.")
                 if result.stderr:
                     print(f"Error: {result.stderr}")
                     
         except FileNotFoundError:
-            print("❌ Git is not installed or not in PATH")
+            print(" Git is not installed or not in PATH")
         except Exception as e:
-            print(f"❌ Unexpected error: {e}")
+            print(f" Unexpected error: {e}")
         
         input("\nPress Enter to continue...")
     

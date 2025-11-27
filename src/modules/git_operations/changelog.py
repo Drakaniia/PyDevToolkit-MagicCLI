@@ -34,91 +34,91 @@ class ChangelogGenerator:
     COMMIT_TYPES = {
         'breaking': {
             'keywords': ['breaking', 'major', 'breaking change', 'incompatible', 'BREAKING CHANGE'],
-            'emoji': '💥',
+            'emoji': '',
             'label': 'Breaking Changes',
             'priority': 1
         },
         'security': {
             'keywords': ['security', 'vulnerability', 'exploit', 'cve', 'auth', 'authentication'],
-            'emoji': '🔒',
+            'emoji': '',
             'label': 'Security Fixes',
             'priority': 2
         },
         'feat': {
             'keywords': ['feat:', 'feat(', 'feature', 'add', 'new', 'implement', 'create', 'introduce'],
-            'emoji': '✨',
+            'emoji': '',
             'label': 'New Features',
             'priority': 3
         },
         'fix': {
             'keywords': ['fix:', 'fix(', 'bug', 'patch', 'resolve', 'correct', 'repair', 'hotfix'],
-            'emoji': '🐛',
+            'emoji': '',
             'label': 'Bug Fixes',
             'priority': 4
         },
         'perf': {
             'keywords': ['perf:', 'perf(', 'performance', 'optimize', 'speed', 'faster', 'cache', 'memory'],
-            'emoji': '⚡',
+            'emoji': '',
             'label': 'Performance Improvements',
             'priority': 5
         },
         'refactor': {
             'keywords': ['refactor:', 'refactor(', 'restructure', 'reorganize', 'clean', 'improve', 'simplify'],
-            'emoji': '♻️',
+            'emoji': '',
             'label': 'Code Refactoring',
             'priority': 6
         },
         'ui': {
             'keywords': ['ui', 'ux', 'interface', 'design', 'layout', 'styling'],
-            'emoji': '🎨',
+            'emoji': '',
             'label': 'UI/UX Changes',
             'priority': 7
         },
         'api': {
             'keywords': ['api', 'endpoint', 'route', 'controller', 'service'],
-            'emoji': '🔌',
+            'emoji': '',
             'label': 'API Changes',
             'priority': 8
         },
         'config': {
             'keywords': ['config', 'configuration', 'settings', 'env', 'environment'],
-            'emoji': '⚙️',
+            'emoji': '',
             'label': 'Configuration',
             'priority': 9
         },
         'docs': {
             'keywords': ['docs:', 'docs(', 'doc', 'readme', 'comment', 'documentation', 'changelog'],
-            'emoji': '📚',
+            'emoji': '',
             'label': 'Documentation',
             'priority': 10
         },
         'test': {
             'keywords': ['test:', 'test(', 'spec', 'testing', 'coverage'],
-            'emoji': '✅',
+            'emoji': '',
             'label': 'Tests',
             'priority': 11
         },
         'style': {
             'keywords': ['style:', 'style(', 'format', 'lint', 'prettier', 'eslint', 'beautify'],
-            'emoji': '💄',
+            'emoji': '',
             'label': 'Style Changes',
             'priority': 12
         },
         'build': {
             'keywords': ['build:', 'build(', 'webpack', 'rollup', 'vite', 'compile', 'ci', 'cd'],
-            'emoji': '📦',
+            'emoji': '',
             'label': 'Build System',
             'priority': 13
         },
         'deps': {
             'keywords': ['dependency', 'dependencies', 'package', 'npm', 'pip', 'requirements', 'upgrade', 'downgrade'],
-            'emoji': '📌',
+            'emoji': '',
             'label': 'Dependencies',
             'priority': 14
         },
         'chore': {
             'keywords': ['chore:', 'chore(', 'update', 'upgrade', 'cleanup', 'maintenance', 'wip'],
-            'emoji': '🔧',
+            'emoji': '',
             'label': 'Maintenance',
             'priority': 15
         }
@@ -126,15 +126,15 @@ class ChangelogGenerator:
 
     # Conventional commit types for direct matching
     CONVENTIONAL_COMMIT_TYPES = {
-        'feat': '✨ New Features',
-        'fix': '🐛 Bug Fixes',
-        'perf': '⚡ Performance Improvements',
-        'refactor': '♻️ Code Refactoring',
-        'docs': '📚 Documentation',
-        'test': '✅ Tests',
-        'style': '💄 Style Changes',
-        'build': '📦 Build System',
-        'chore': '🔧 Maintenance'
+        'feat': ' New Features',
+        'fix': ' Bug Fixes',
+        'perf': ' Performance Improvements',
+        'refactor': ' Code Refactoring',
+        'docs': ' Documentation',
+        'test': ' Tests',
+        'style': ' Style Changes',
+        'build': ' Build System',
+        'chore': ' Maintenance'
     }
     
     # Comprehensive file type patterns for smarter detection
@@ -171,16 +171,16 @@ class ChangelogGenerator:
             True if successful, False otherwise
         """
         if not self._is_git_repo():
-            print("❌ Not a git repository")
+            print(" Not a git repository")
             return False
         
-        print(f"\n📝 Generating changelog for last {num_commits} commit(s)...")
+        print(f"\n Generating changelog for last {num_commits} commit(s)...")
         
         # Get unprocessed commits
         commits = self._get_unprocessed_commits(num_commits)
         
         if not commits:
-            print("✅ Changelog already up to date")
+            print(" Changelog already up to date")
             return True
         
         # Group commits by date if configured
@@ -198,23 +198,23 @@ class ChangelogGenerator:
             for commit in commit_list:
                 self._mark_commit_processed(commit['hash'])
         
-        print(f"✅ Changelog updated with {len(commits)} commit(s)!")
+        print(f" Changelog updated with {len(commits)} commit(s)!")
         return True
     
     def show_unprocessed_commits(self, limit: int = 10) -> None:
         """Show commits that haven't been added to changelog yet"""
         print("\n" + "="*70)
-        print("📋 UNPROCESSED COMMITS")
+        print(" UNPROCESSED COMMITS")
         print("="*70 + "\n")
         
         if not self._is_git_repo():
-            print("❌ Not a git repository")
+            print(" Not a git repository")
             return
         
         commits = self._get_unprocessed_commits(limit)
         
         if not commits:
-            print("✅ No unprocessed commits found")
+            print(" No unprocessed commits found")
             print("All commits have been added to the changelog.\n")
             return
         
@@ -235,9 +235,9 @@ class ChangelogGenerator:
         
         if cache_path.exists():
             cache_path.unlink()
-            print("✅ Cleared processed commits cache")
+            print(" Cleared processed commits cache")
         else:
-            print("ℹ️  No cache file found")
+            print("ℹ  No cache file found")
     
     # ========== Commit Classification ==========
     
@@ -434,7 +434,7 @@ class ChangelogGenerator:
             return ""
         
         if len(files) == 1:
-            return f"📄 `{files[0]}`"
+            return f" `{files[0]}`"
         
         # Categorize files
         categories = self._analyze_file_context(files)
@@ -483,9 +483,9 @@ class ChangelogGenerator:
             summary_parts.append(f"{other_count} other file{'s' if other_count > 1 else ''}")
 
         if summary_parts:
-            return f"📁 {', '.join(summary_parts)}"
+            return f" {', '.join(summary_parts)}"
         else:
-            return f"📁 {total_files} file{'s' if total_files > 1 else ''}"
+            return f" {total_files} file{'s' if total_files > 1 else ''}"
     
     def _analyze_change_impact(self, files: List[str], message: str) -> str:
         """Analyze the potential impact of changes with improved metrics"""
@@ -497,20 +497,20 @@ class ChangelogGenerator:
 
         # Check for breaking changes (highest priority)
         if any(keyword in message_lower for keyword in ['breaking', 'major', 'incompatible', 'BREAKING CHANGE']):
-            impact_indicators.append("💥 **BREAKING CHANGE**")
+            impact_indicators.append(" **BREAKING CHANGE**")
 
         # Check for security-related changes
         if any(keyword in message_lower for keyword in ['security', 'vulnerability', 'cve', 'auth', 'authentication', 'permission', 'privilege']):
-            impact_indicators.append("🔒 **Security Impact**")
+            impact_indicators.append(" **Security Impact**")
 
         # Analyze change scale based on number of files and lines changed
         file_count = len(files)
         if file_count > 15:
-            impact_indicators.append(f"📈 **LARGE SCALE** ({file_count} files)")
+            impact_indicators.append(f" **LARGE SCALE** ({file_count} files)")
         elif file_count > 8:
-            impact_indicators.append(f"📈 **MEDIUM SCALE** ({file_count} files)")
+            impact_indicators.append(f" **MEDIUM SCALE** ({file_count} files)")
         elif file_count > 3:
-            impact_indicators.append(f"📈 **SMALL SCALE** ({file_count} files)")
+            impact_indicators.append(f" **SMALL SCALE** ({file_count} files)")
 
         # Check for critical file types with severity levels
         critical_files = []
@@ -527,11 +527,11 @@ class ChangelogGenerator:
                 medium_risk_files.append(f)
 
         if critical_files:
-            impact_indicators.append(f"⚠️ **CRITICAL DEPENDENCIES** ({len(critical_files)} file{'s' if len(critical_files) > 1 else ''})")
+            impact_indicators.append(f" **CRITICAL DEPENDENCIES** ({len(critical_files)} file{'s' if len(critical_files) > 1 else ''})")
         if high_risk_files:
-            impact_indicators.append(f"⚠️ **HIGH RISK** ({len(high_risk_files)} file{'s' if len(high_risk_files) > 1 else ''})")
+            impact_indicators.append(f" **HIGH RISK** ({len(high_risk_files)} file{'s' if len(high_risk_files) > 1 else ''})")
         if medium_risk_files:
-            impact_indicators.append(f"⚠️ **MEDIUM RISK** ({len(medium_risk_files)} file{'s' if len(medium_risk_files) > 1 else ''})")
+            impact_indicators.append(f" **MEDIUM RISK** ({len(medium_risk_files)} file{'s' if len(medium_risk_files) > 1 else ''})")
 
         # Check for potential breaking changes based on file types
         breaking_file_patterns = [
@@ -540,16 +540,16 @@ class ChangelogGenerator:
         ]
         breaking_files = [f for f in files if any(pattern in f.lower() for pattern in breaking_file_patterns)]
         if breaking_files and not any('breaking' in msg for msg in impact_indicators):
-            impact_indicators.append(f"⚠️ **POTENTIAL BREAKING** ({len(breaking_files)} file{'s' if len(breaking_files) > 1 else ''})")
+            impact_indicators.append(f" **POTENTIAL BREAKING** ({len(breaking_files)} file{'s' if len(breaking_files) > 1 else ''})")
 
         # Check for test coverage changes
         test_files = [f for f in files if any(test_pattern in f.lower() for test_pattern in ['test', 'spec', 'testing'])]
         if len(test_files) > 0 and len(test_files) >= file_count * 0.5:  # If more than 50% are test files
-            impact_indicators.append(f"✅ **TEST IMPROVEMENT**")
+            impact_indicators.append(f" **TEST IMPROVEMENT**")
         elif len(test_files) == 0 and 'test' not in message_lower:
             # Only flag if no tests were added and commit doesn't mention testing
             if any(kw in message_lower for kw in ['fix', 'bug', 'resolve']):
-                impact_indicators.append(f"⚠️ **NO TESTS ADDED** for bug fix")
+                impact_indicators.append(f" **NO TESTS ADDED** for bug fix")
 
         return ', '.join(impact_indicators) if impact_indicators else ""
     
@@ -626,7 +626,7 @@ class ChangelogGenerator:
                 # Add impact analysis for important changes
                 impact = self._analyze_change_impact(changed_files, commit['message'])
                 if impact:
-                    lines.append(f"  - 📊 *{impact}*")
+                    lines.append(f"  -  *{impact}*")
             
             lines.append("")
         
@@ -665,7 +665,7 @@ class ChangelogGenerator:
                 f.write(new_content)
             
         except Exception as e:
-            print(f"❌ Failed to update changelog: {e}")
+            print(f" Failed to update changelog: {e}")
     
     def _create_changelog_header(self) -> str:
         """Create initial changelog header"""
@@ -711,7 +711,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
                 json.dump(data, f, indent=2)
         
         except Exception as e:
-            print(f"⚠️  Could not save commit cache: {e}")
+            print(f"  Could not save commit cache: {e}")
     
     def _get_unprocessed_commits(self, limit: int) -> List[Dict]:
         """Get commits that haven't been processed yet"""

@@ -53,6 +53,6 @@ class DevModeCommand(ABC):
         print(f"\n{'='*70}")
         print(f"ERROR: \"{binary_name}\" not found in PATH")
         print(f"{'='*70}")
-        print(f"\n💡 Install {binary_name}:")
+        print(f"\n Install {binary_name}:")
         print(f"   {install_url}")
         print(f"\n{'='*70}\n")

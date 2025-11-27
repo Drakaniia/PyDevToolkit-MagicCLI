@@ -78,7 +78,7 @@ class CreateFrontendCommand(DevModeCommand):
     def _interactive_create(self):
         """Interactive project creation flow"""
         print("\n" + "="*70)
-        print("🚀 CREATE FRONTEND PROJECT")
+        print("CREATE FRONTEND PROJECT")
         print("="*70 + "\n")
         
         # Check if Node.js/npm is installed
@@ -130,7 +130,7 @@ class CreateFrontendCommand(DevModeCommand):
         
         # Show summary
         print("\n" + "="*70)
-        print("📋 PROJECT SUMMARY")
+        print("PROJECT SUMMARY")
         print("="*70)
         print(f"Framework:        {framework_info['name']}")
         print(f"Project Name:     {project_name}")
@@ -143,7 +143,7 @@ class CreateFrontendCommand(DevModeCommand):
         
         confirm = self._prompt_yes_no("Proceed with creation?", default='y')
         if confirm is None or not confirm:
-            print("\n❌ Project creation cancelled")
+            print("\nProject creation cancelled")
             input("\nPress Enter to continue...")
             return
         
@@ -243,14 +243,14 @@ class CreateFrontendCommand(DevModeCommand):
         init_git: bool
     ):
         """Execute project creation"""
-        print("\n🔨 Creating project...\n")
+        print("\nCreating project...\n")
         
         target_path = Path(target_dir).resolve()
         project_path = target_path / project_name
         
         # Check if directory already exists
         if project_path.exists():
-            print(f"❌ ERROR: Directory '{project_name}' already exists")
+            print(f"ERROR: Directory '{project_name}' already exists")
             return
         
         try:
@@ -318,7 +318,7 @@ class CreateFrontendCommand(DevModeCommand):
                 shell=use_shell
             )
             
-            print(f"\n✅ Project '{project_name}' created successfully!")
+            print(f"\nProject '{project_name}' created successfully!")
             
             # Initialize Git if requested
             if init_git:
@@ -328,9 +328,10 @@ class CreateFrontendCommand(DevModeCommand):
             self._show_next_steps(project_name, pkg_manager, framework_name)
         
         except subprocess.CalledProcessError as e:
-            print(f"\n❌ Failed to create project: {e}")
+            print(f"
+Failed to create project: {e}")
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\nError: {e}")
     
     def _build_react_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
         """Build create-react-app command"""
@@ -501,7 +502,7 @@ class CreateFrontendCommand(DevModeCommand):
     
     def _initialize_git(self, project_path: Path):
         """Initialize Git repository"""
-        print("\n📦 Initializing Git repository...")
+        print("\nInitializing Git repository...")
         try:
             use_shell = sys.platform == 'win32'
             
@@ -526,14 +527,14 @@ class CreateFrontendCommand(DevModeCommand):
                 capture_output=True,
                 shell=use_shell
             )
-            print("✅ Git repository initialized")
+            print("Git repository initialized")
         except subprocess.CalledProcessError:
-            print("⚠️  Failed to initialize Git repository")
+            print("  Failed to initialize Git repository")
     
     def _show_next_steps(self, project_name: str, pkg_manager: str, framework_name: str = ""):
         """Display framework-specific next steps"""
         print("\n" + "="*70)
-        print("🎉 NEXT STEPS")
+        print("NEXT STEPS")
         print("="*70)
         print(f"\n1. Navigate to your project:")
         print(f"   cd {project_name}")
@@ -607,45 +608,45 @@ class CreateFrontendCommand(DevModeCommand):
         """Show framework-specific tips and resources"""
         tips = {
             "React": [
-                "📚 Learn more: https://react.dev/",
-                "🔧 Useful extensions: React Developer Tools"
+                "Learn more: https://react.dev/",
+                "Useful extensions: React Developer Tools"
             ],
             "Next.js": [
-                "📚 Learn more: https://nextjs.org/docs",
-                "🚀 Deploy easily with Vercel: https://vercel.com/"
+                "Learn more: https://nextjs.org/docs",
+                "Deploy easily with Vercel: https://vercel.com/"
             ],
             "Vue.js": [
-                "📚 Learn more: https://vuejs.org/guide/",
-                "🔧 Useful extensions: Vue.js devtools"
+                "Learn more: https://vuejs.org/guide/",
+                "Useful extensions: Vue.js devtools"
             ],
             "Angular": [
-                "📚 Learn more: https://angular.io/docs",
-                "🔧 Use Angular CLI for generators: ng generate component"
+                "Learn more: https://angular.io/docs",
+                "Use Angular CLI for generators: ng generate component"
             ],
             "React Native": [
-                "📚 Learn more: https://reactnative.dev/docs/getting-started",
-                "📱 Test on device with Expo Go for quick testing"
+                "Learn more: https://reactnative.dev/docs/getting-started",
+                "Test on device with Expo Go for quick testing"
             ],
             "Expo (React Native)": [
-                "📚 Learn more: https://docs.expo.dev/",
-                "📱 Install Expo Go app for easy testing"
+                "Learn more: https://docs.expo.dev/",
+                "Install Expo Go app for easy testing"
             ],
             "Flutter (Web)": [
-                "📚 Learn more: https://flutter.dev/docs",
-                "🌐 Flutter web is great for PWAs"
+                "Learn more: https://flutter.dev/docs",
+                "Flutter web is great for PWAs"
             ],
             "Svelte": [
-                "📚 Learn more: https://svelte.dev/tutorial",
-                "⚡ Svelte compiles to vanilla JS - no runtime overhead"
+                "Learn more: https://svelte.dev/tutorial",
+                "Svelte compiles to vanilla JS - no runtime overhead"
             ],
             "Astro": [
-                "📚 Learn more: https://docs.astro.build/",
-                "🚀 Perfect for content-heavy sites with partial hydration"
+                "Learn more: https://docs.astro.build/",
+                "Perfect for content-heavy sites with partial hydration"
             ]
         }
         
         if framework_name in tips:
-            print(f"\n💡 Tips for {framework_name}:")
+            print(f"\nTips for {framework_name}:")
             for tip in tips[framework_name]:
                 print(f"   {tip}")
     
@@ -662,10 +663,10 @@ class CreateFrontendCommand(DevModeCommand):
     def _prompt_framework_category(self) -> Optional[str]:
         """Prompt user to select framework category"""
         categories = [
-            "🌐 Web Frameworks",
-            "📱 Mobile Frameworks", 
-            "🔧 Full-Stack Frameworks",
-            "❌ Exit"
+            "Web Frameworks",
+            "Mobile Frameworks", 
+            "Full-Stack Frameworks",
+            "Exit"
         ]
         
         try:
@@ -673,7 +674,7 @@ class CreateFrontendCommand(DevModeCommand):
             
             # Handle exit option (last option)
             if choice_idx == len(categories):
-                print("\n❌ Operation cancelled")
+                print("\nOperation cancelled")
                 return None
             
             # Map choice to category type
@@ -686,7 +687,7 @@ class CreateFrontendCommand(DevModeCommand):
             return category_map.get(choice_idx)
             
         except KeyboardInterrupt:
-            print("\n❌ Operation cancelled")
+            print("\nOperation cancelled")
             return None
     
     def _prompt_framework_from_category(self, category: str) -> Optional[str]:
@@ -701,11 +702,11 @@ class CreateFrontendCommand(DevModeCommand):
                 framework_keys.append(key)
         
         if not category_frameworks:
-            print(f"❌ No frameworks found for category: {category}")
+            print(f"No frameworks found for category: {category}")
             return None
         
         # Add exit option
-        category_frameworks.append("❌ Exit")
+        category_frameworks.append("Exit")
         
         try:
             # Get category name for display
@@ -726,7 +727,7 @@ class CreateFrontendCommand(DevModeCommand):
             return framework_keys[choice_idx - 1]
             
         except KeyboardInterrupt:
-            print("\n❌ Operation cancelled")
+            print("\nOperation cancelled")
             return None
     
     def _prompt_project_name(self) -> Optional[str]:
@@ -737,26 +738,26 @@ class CreateFrontendCommand(DevModeCommand):
                 
                 # Handle exit
                 if name.lower() in ['exit', 'quit', 'cancel']:
-                    print("\n❌ Operation cancelled")
+                    print("\nOperation cancelled")
                     return None
                 
                 if not name:
-                    print("❌ Project name cannot be empty")
+                    print("Project name cannot be empty")
                     continue
                 
                 if not self._is_valid_project_name(name):
-                    print("❌ Invalid project name. Use letters, numbers, hyphens, underscores")
+                    print("Invalid project name. Use letters, numbers, hyphens, underscores")
                     continue
                 
                 return name
                 
             except KeyboardInterrupt:
-                print("\n❌ Operation cancelled")
+                print("\nOperation cancelled")
                 return None
     
     def _prompt_package_manager(self) -> Optional[str]:
         """Prompt for package manager"""
-        pm_options = list(self.PACKAGE_MANAGERS.values()) + ["❌ Exit"]
+        pm_options = list(self.PACKAGE_MANAGERS.values()) + ["Exit"]
         
         try:
             choice_idx = get_choice_with_arrows(pm_options, "Package Manager", show_numbers=True)
@@ -769,12 +770,12 @@ class CreateFrontendCommand(DevModeCommand):
             return pm_options[choice_idx - 1]
             
         except KeyboardInterrupt:
-            print("\n❌ Operation cancelled")
+            print("\nOperation cancelled")
             return None
     
     def _prompt_css_framework(self) -> Optional[str]:
         """Prompt for CSS framework"""
-        css_options = [value['name'] for value in self.CSS_FRAMEWORKS.values()] + ["❌ Exit"]
+        css_options = [value['name'] for value in self.CSS_FRAMEWORKS.values()] + ["Exit"]
         
         try:
             choice_idx = get_choice_with_arrows(css_options, "CSS Framework", show_numbers=True)
@@ -792,7 +793,7 @@ class CreateFrontendCommand(DevModeCommand):
             return '1'  # Default to first option if not found
             
         except KeyboardInterrupt:
-            print("\n❌ Operation cancelled")
+            print("\nOperation cancelled")
             return None
     
     def _prompt_directory(self) -> Optional[str]:
@@ -802,12 +803,12 @@ class CreateFrontendCommand(DevModeCommand):
             
             # Handle exit
             if directory.lower() in ['exit', 'quit', 'cancel']:
-                print("\n❌ Operation cancelled")
+                print("\nOperation cancelled")
                 return None
                 
             return directory if directory else '.'
         except KeyboardInterrupt:
-            print("\n❌ Operation cancelled")
+            print("\nOperation cancelled")
             return None
     
     def _prompt_yes_no(self, question: str, default: str = 'y') -> Optional[bool]:
@@ -818,7 +819,7 @@ class CreateFrontendCommand(DevModeCommand):
             
             # Handle exit
             if response in ['exit', 'quit', 'cancel']:
-                print("\n❌ Operation cancelled")
+                print("\nOperation cancelled")
                 return None
             
             if not response:
@@ -826,7 +827,7 @@ class CreateFrontendCommand(DevModeCommand):
             
             return response in ['y', 'yes']
         except KeyboardInterrupt:
-            print("\n❌ Operation cancelled")
+            print("\nOperation cancelled")
             return None
     
     def _is_valid_project_name(self, name: str) -> bool:

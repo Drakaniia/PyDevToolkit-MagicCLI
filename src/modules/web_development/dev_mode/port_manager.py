@@ -22,85 +22,85 @@ from .port_killer import (
 
 def cmd_scan(args):
     """Scan for active server processes"""
-    print("🔍 SCANNING FOR ACTIVE SERVER PROCESSES")
+    print(" SCANNING FOR ACTIVE SERVER PROCESSES")
     print("="*70)
     
     if args.all:
         # Scan all server processes
         servers = scan_active_servers(verbose=True)
         if servers:
-            print(f"\n📊 Found {len(servers)} active server process(es)")
+            print(f"\n Found {len(servers)} active server process(es)")
         else:
-            print("✅ No active server processes found")
+            print(" No active server processes found")
     else:
         # Scan common dev ports only
         conflicts = get_port_conflicts()
         if conflicts:
-            print(f"⚠️  Found processes on {len(conflicts)} port(s):")
+            print(f"  Found processes on {len(conflicts)} port(s):")
             for port, processes in conflicts.items():
-                print(f"\n🔹 Port {port}:")
+                print(f"\n Port {port}:")
                 for proc in processes:
                     print(f"  PID {proc['pid']} | {proc['name']} | {proc['protocol']}")
         else:
-            print("✅ No conflicts detected on common development ports")
+            print(" No conflicts detected on common development ports")
 
 
 def cmd_kill(args):
     """Kill processes on specified ports or all dev ports"""
     if args.port:
         # Kill specific port
-        print(f"💀 KILLING PROCESSES ON PORT {args.port}")
+        print(f" KILLING PROCESSES ON PORT {args.port}")
         print("="*70)
         success = kill_port(args.port, verbose=True)
         if success:
-            print(f"✅ Port {args.port} is now free")
+            print(f" Port {args.port} is now free")
         else:
-            print(f"❌ Failed to clear port {args.port}")
+            print(f" Failed to clear port {args.port}")
     elif args.all:
         # Kill all server processes
-        print("💀 FORCE CLEARING ALL SERVER PROCESSES")
+        print(" FORCE CLEARING ALL SERVER PROCESSES")
         print("="*70)
         result = force_clear_all_ports(verbose=True)
-        print(f"\n✅ Killed {result['total_killed']} processes")
+        print(f"\n Killed {result['total_killed']} processes")
     else:
         # Kill common dev ports
-        print("💀 CLEARING COMMON DEVELOPMENT PORTS")
+        print(" CLEARING COMMON DEVELOPMENT PORTS")
         print("="*70)
         result = kill_all_dev_ports(verbose=True)
-        print(f"\n✅ Killed {result['total_killed']} processes")
+        print(f"\n Killed {result['total_killed']} processes")
 
 
 def cmd_ensure(args):
     """Ensure specific ports are free"""
     ports = args.ports
-    print(f"🎯 ENSURING PORTS ARE FREE: {ports}")
+    print(f" ENSURING PORTS ARE FREE: {ports}")
     print("="*70)
     
     success = ensure_ports_free(ports, verbose=True)
     if success:
-        print(f"✅ All specified ports are now free")
+        print(f" All specified ports are now free")
     else:
-        print(f"❌ Some ports could not be cleared")
+        print(f" Some ports could not be cleared")
 
 
 def cmd_check(args):
     """Check if specific ports are free"""
     ports = args.ports
-    print(f"🔍 CHECKING PORT STATUS: {ports}")
+    print(f" CHECKING PORT STATUS: {ports}")
     print("="*70)
     
     killer = PortKiller(verbose=False)
     all_free, occupied = killer.validate_ports_free(ports)
     
     if all_free:
-        print("✅ All specified ports are free")
+        print(" All specified ports are free")
     else:
-        print(f"⚠️  Occupied ports: {occupied}")
+        print(f"  Occupied ports: {occupied}")
         
         # Show details for occupied ports
         for port in occupied:
             processes = killer._get_processes_on_port(port)
-            print(f"\n🔹 Port {port}:")
+            print(f"\n Port {port}:")
             for proc in processes:
                 print(f"  PID {proc['pid']} | {proc['name']} | {proc['protocol']}")
 
@@ -160,9 +160,9 @@ Examples:
     try:
         args.func(args)
     except KeyboardInterrupt:
-        print("\n\n❌ Operation cancelled by user")
+        print("\n\n Operation cancelled by user")
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\n Error: {e}")
         if '--debug' in sys.argv:
             import traceback
             traceback.print_exc()

@@ -252,7 +252,7 @@ def delete_{resource.lower()}(item_id):
 
     def _create_django_api(self, resource, endpoints):
         """Create Django REST Framework endpoints"""
-        print(f"\n🐍 Creating Django REST Framework API for {resource}...")
+        print(f"\n Creating Django REST Framework API for {resource}...")
         
         # Create views.py
         views_content = f'''"""
@@ -554,7 +554,7 @@ schema = Schema(query=Query, mutation=Mutation)
 
     def _generate_postman_collection(self):
         """Generate Postman collection"""
-        print("\n📮 Generating Postman collection...")
+        print("\n Generating Postman collection...")
         
         collection = {
             "info": {
@@ -579,7 +579,7 @@ schema = Schema(query=Query, mutation=Mutation)
 
     def _generate_markdown_docs(self):
         """Generate Markdown documentation"""
-        print("\n📝 Generating Markdown documentation...")
+        print("\n Generating Markdown documentation...")
         
         docs_content = '''# API Documentation
 
@@ -655,7 +655,7 @@ Create a new item
 
     def _create_pytest_tests(self):
         """Create pytest tests"""
-        print("\n🐍 Creating pytest test suite...")
+        print("\n Creating pytest test suite...")
         
         test_content = '''"""
 API Tests using pytest
@@ -731,7 +731,7 @@ def test_delete_item():
 
     def _create_jest_tests(self):
         """Create Jest tests"""
-        print("\n🃏 Creating Jest test suite...")
+        print("\n Creating Jest test suite...")
         
         test_content = '''/**
  * API Tests using Jest
@@ -830,7 +830,7 @@ describe('API Endpoints', () => {
 
     def _create_mocha_tests(self):
         """Create Mocha tests"""
-        print("\n☕ Creating Mocha test suite...")
+        print("\n Creating Mocha test suite...")
         
         test_content = '''/**
  * API Tests using Mocha
@@ -1038,8 +1038,8 @@ describe('API Endpoints', () => {
         print("\nValidating API endpoints...")
         print("All endpoints are valid!")
         print("Response formats are correct")
-        print("🔒 Authentication is properly configured")
-        print("📝 Documentation is up to date")
+        print(" Authentication is properly configured")
+        print(" Documentation is up to date")
         
         input("\nPress Enter to continue...")
         return None

@@ -43,23 +43,23 @@ NC='\033[0m' # No Color
 
 print_header() {
     clear
-    echo -e "\n${BLUE}${BOLD}╔════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}${BOLD}║  Python Automation System - Complete Setup Wizard            ║${NC}"
-    echo -e "${BLUE}${BOLD}╚════════════════════════════════════════════════════════════════╝${NC}\n"
+    echo -e "\n${BLUE}${BOLD}${NC}"
+    echo -e "${BLUE}${BOLD}  Python Automation System - Complete Setup Wizard            ${NC}"
+    echo -e "${BLUE}${BOLD}${NC}\n"
 }
 
 print_section() {
-    echo -e "\n${CYAN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "\n${CYAN}${BOLD}${NC}"
     echo -e "${CYAN}${BOLD}$1${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+    echo -e "${CYAN}${NC}\n"
 }
 
 print_success() {
-    echo -e "${GREEN}✓${NC} $1"
+    echo -e "${GREEN}${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}✗${NC} $1"
+    echo -e "${RED}${NC} $1"
 }
 
 print_warning() {
@@ -71,7 +71,7 @@ print_info() {
 }
 
 print_step() {
-    echo -e "\n${MAGENTA}▶${NC} ${BOLD}$1${NC}"
+    echo -e "\n${MAGENTA}${NC} ${BOLD}$1${NC}"
 }
 
 ask_yes_no() {
@@ -196,7 +196,7 @@ find_python_command() {
 }
 
 validate_python() {
-    print_section "🐍 Python Detection & Validation"
+    print_section "Python Detection & Validation"
     
     # Try to find Python
     if PYTHON_CMD=$(find_python_command); then
@@ -309,7 +309,7 @@ offer_python_installation() {
 # ============================================================
 
 validate_git() {
-    print_section "🔧 Git Validation & Configuration"
+    print_section "Git Validation & Configuration"
     
     if ! command -v git &> /dev/null; then
         print_error "Git is not installed"
@@ -394,7 +394,7 @@ offer_git_installation() {
 configure_git_user() {
     echo ""
     echo -e "${CYAN}Git User Configuration${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}${NC}"
     echo ""
     
     read -p "Enter your name: " git_name
@@ -416,7 +416,7 @@ configure_git_user() {
 # ============================================================
 
 install_dependencies() {
-    print_section "📦 Installing Python Dependencies"
+    print_section "Installing Python Dependencies"
 
     # Change to project root for installation
     cd "$PROJECT_ROOT"
@@ -470,7 +470,7 @@ install_dependencies() {
 # ============================================================
 
 validate_files() {
-    print_section "📁 File Structure Validation"
+    print_section "File Structure Validation"
 
     local all_valid=true
 
@@ -533,7 +533,7 @@ validate_files() {
 # ============================================================
 
 validate_permissions() {
-    print_section "🔐 Permission Configuration"
+    print_section "Permission Configuration"
     
     # Make main.py executable
     if chmod +x "$MAIN_PY" 2>/dev/null; then
@@ -607,7 +607,7 @@ backup_shell_config() {
 }
 
 configure_shell_alias() {
-    print_section "⚙️  Shell Alias Configuration"
+    print_section "Shell Alias Configuration"
     
     local shell_config=$(get_shell_config)
     local shell_type=$(detect_shell)
@@ -700,23 +700,23 @@ clear_terminal_cache() {
 }
 
 print_completion_message() {
-    print_section "🎉 Setup Complete!"
+    print_section "Setup Complete!"
     
-    echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}${BOLD}║  PyDevToolkit MagicCLI is ready to use!                      ║${NC}"
-    echo -e "${GREEN}${BOLD}╚════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${GREEN}${BOLD}${NC}"
+    echo -e "${GREEN}${BOLD}  PyDevToolkit MagicCLI is ready to use!                      ${NC}"
+    echo -e "${GREEN}${BOLD}${NC}"
     
-    echo -e "\n${CYAN}${BOLD}📋 Installation Summary:${NC}"
-    echo -e "  ${GREEN}✓${NC} Python: $PYTHON_CMD ($PYTHON_VERSION)"
-    echo -e "  ${GREEN}✓${NC} Install location: $PROJECT_ROOT"
-    echo -e "  ${GREEN}✓${NC} Shell config: $(get_shell_config)"
-    echo -e "  ${GREEN}✓${NC} Command alias: ${YELLOW}${BOLD}$COMMAND_ALIAS${NC}"
+    echo -e "\n${CYAN}${BOLD}Installation Summary:${NC}"
+    echo -e "  ${GREEN}[OK]${NC} Python: $PYTHON_CMD ($PYTHON_VERSION)"
+    echo -e "  ${GREEN}[OK]${NC} Install location: $PROJECT_ROOT"
+    echo -e "  ${GREEN}[OK]${NC} Shell config: $(get_shell_config)"
+    echo -e "  ${GREEN}[OK]${NC} Command alias: ${YELLOW}${BOLD}$COMMAND_ALIAS${NC}"
     
-    echo -e "\n${YELLOW}${BOLD}⚠️  IMPORTANT: Terminal Restart Required${NC}"
+    echo -e "\n${YELLOW}${BOLD}IMPORTANT: Terminal Restart Required${NC}"
     echo -e "${YELLOW}The '$COMMAND_ALIAS' command will NOT work until you:${NC}"
     echo ""
     
-    echo -e "${CYAN}${BOLD}🔄 REQUIRED - Choose ONE option:${NC}"
+    echo -e "${CYAN}${BOLD}REQUIRED - Choose ONE option:${NC}"
     echo -e "  ${RED}1.${NC} ${BOLD}RESTART TERMINAL (Recommended)${NC}"
     echo -e "     • Close this terminal completely"
     echo -e "     • Open a new terminal window"
@@ -738,22 +738,22 @@ print_completion_message() {
         echo ""
     fi
     
-    echo -e "${CYAN}${BOLD}💡 Quick Start Guide:${NC}"
+    echo -e "${CYAN}${BOLD}Quick Start Guide:${NC}"
     echo -e "  • ${BLUE}GitHub Operations:${NC} Push, pull, commit management"
     echo -e "  • ${BLUE}Project Management:${NC} View structure, navigate folders"
     echo -e "  • ${BLUE}Web Development:${NC} Modern frontend project automation"
     echo -e "  • ${BLUE}Backend Development:${NC} API scaffolding, database tools"
     
-    echo -e "\n${CYAN}${BOLD}📚 Resources:${NC}"
+    echo -e "\n${CYAN}${BOLD}Resources:${NC}"
     echo -e "  • README: $PROJECT_ROOT/README.md"
     echo -e "  • Repository: https://github.com/Drakaniia/PyDevToolkit-MagicCLI"
     echo -e "  • Issues: https://github.com/Drakaniia/PyDevToolkit-MagicCLI/issues"
     
-    echo -e "\n${CYAN}${BOLD}❓ Need Help?${NC}"
+    echo -e "\n${CYAN}${BOLD}Need Help?${NC}"
     echo -e "  • Email: alistairybaez574@gmail.com"
     echo -e "  • Documentation: Check README.md for detailed usage"
     
-    echo -e "\n${GREEN}════════════════════════════════════════════════════════════════${NC}\n"
+    echo -e "\n${GREEN}${NC}\n"
 }
 
 reload_shell_config() {
@@ -787,7 +787,7 @@ reload_shell_config() {
             
             # Test if the alias is now available
             if command -v "$COMMAND_ALIAS" &> /dev/null || alias "$COMMAND_ALIAS" &> /dev/null; then
-                print_success "✓ '$COMMAND_ALIAS' command is now available!"
+                print_success "'$COMMAND_ALIAS' command is now available!"
                 echo ""
                 echo -e "${CYAN}${BOLD}Try it now:${NC}"
                 echo -e "  ${YELLOW}$COMMAND_ALIAS${NC}"
@@ -858,18 +858,18 @@ offer_restart_options() {
     if ask_yes_no "Would you like to test the '$COMMAND_ALIAS' command now?"; then
         echo ""
         print_info "Testing: $COMMAND_ALIAS"
-        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${CYAN}${NC}"
         
         # Try to run the command with error handling
         if eval "$COMMAND_ALIAS --help" 2>&1 || eval "$COMMAND_ALIAS -h" 2>&1 || eval "$COMMAND_ALIAS" 2>&1; then
             echo ""
-            print_success "✓ '$COMMAND_ALIAS' command is working!"
+            print_success "'$COMMAND_ALIAS' command is working!"
         else
             echo ""
             print_warning "Command test failed - you may need to restart your terminal"
             print_info "After restarting, try: $COMMAND_ALIAS"
         fi
-        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${CYAN}${NC}"
     fi
 }
 
@@ -916,7 +916,8 @@ main() {
     reload_shell_config
     
     # Final message
-    echo -e "${GREEN}${BOLD}🎉 Setup completed successfully!${NC}\n"
+    echo -e "${GREEN}${BOLD}Setup completed successfully!${NC}\n"
+
 }
 
 # ============================================================

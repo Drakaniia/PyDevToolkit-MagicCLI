@@ -31,7 +31,7 @@ class MainMenu(Menu):
         if sys.platform == "win32":
             title = "Python Automation System - Main Menu"
         else:
-            title = "🚀 Python Automation System - Main Menu"
+            title = "Python Automation System - Main Menu"
         super().__init__(title)
 
     def setup_items(self) -> None:
@@ -97,7 +97,7 @@ class MainMenu(Menu):
         """Exit the program"""
         self.clear_screen()
         print("\n" + "="*70)
-        print("  👋 Thanks for using Python Automation System!")
-        print("  Made with ❤️  for developers")
+        print("  Thanks for using Python Automation System!")
+        print("  Made for developers")
         print("="*70 + "\n")
         return "exit"

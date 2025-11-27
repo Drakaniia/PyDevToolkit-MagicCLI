@@ -124,7 +124,7 @@ class GitMenu(Menu):
 
     def __init__(self):
         self.git_ops = GitOperations()
-        super().__init__("🔧 GitHub Operations")
+        super().__init__("GitHub Operations")
 
     def setup_items(self) -> None:
         """Setup menu items with all Git operations"""
@@ -148,7 +148,7 @@ class GitMenu(Menu):
         try:
             from .changelog import ChangelogGenerator
             print("\n" + "="*70)
-            print("📝 CHANGLOG GENERATOR")
+            print("CHANGLOG GENERATOR")
             print("="*70 + "\n")
 
             # Ask user for number of commits to process
@@ -160,28 +160,30 @@ class GitMenu(Menu):
                 print("Using default value of 1 commit\n")
 
             if num_commits <= 0:
-                print("❌ Invalid number of commits. Must be positive.")
+                print("Invalid number of commits. Must be positive.")
                 input("\nPress Enter to continue...")
                 return
 
-            print(f"🔄 Processing last {num_commits} commit(s)...\n")
+            print(f"Processing last {num_commits} commit(s)...\n")
+
 
             generator = ChangelogGenerator()
             success = generator.generate_changelog(num_commits=num_commits)
 
             if success:
-                print(f"✅ Changelog updated successfully!")
-                print(f"📄 File: {generator.CONFIG['changelog_file']}\n")
+                print(f"Changelog updated successfully!")
+                print(f"File: {generator.CONFIG['changelog_file']}\n")
+
             else:
-                print("ℹ️  No new commits to process or changelog already up to date\n")
+                print("ℹ  No new commits to process or changelog already up to date\n")
 
             input("Press Enter to continue...")
 
         except ImportError as e:
-            print(f"❌ Error importing ChangelogGenerator: {e}")
+            print(f"Error importing ChangelogGenerator: {e}")
             input("Press Enter to continue...")
         except Exception as e:
-            print(f"❌ Error generating changelog: {e}")
+            print(f"Error generating changelog: {e}")
             import traceback
             traceback.print_exc()
             input("Press Enter to continue...")

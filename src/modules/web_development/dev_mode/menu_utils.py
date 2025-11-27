@@ -146,7 +146,7 @@ def _display_options(options, selected_idx, prompt, show_numbers):
         
         if i == selected_idx:
             # Highlighted selection
-            print(f"\033[1;46m  ► {line_text[4:]}\033[0m")
+            print(f"\033[1;46m   {line_text[4:]}\033[0m")
         else:
             print(line_text)
     
@@ -178,7 +178,7 @@ def _redraw_options(options, selected_idx, prompt, show_numbers):
         
         if i == selected_idx:
             # Highlighted selection
-            print(f"\033[1;46m  ► {line_text[4:]}\033[0m")
+            print(f"\033[1;46m   {line_text[4:]}\033[0m")
         else:
             print(line_text)
     

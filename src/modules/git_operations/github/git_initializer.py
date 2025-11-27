@@ -15,18 +15,18 @@ class GitInitializer:
     def initialize_and_push(self):
         """Initialize git repo and push to GitHub"""
         print("\n" + "="*70)
-        print("🚀 Git Repository Initialization & First Push")
+        print(" Git Repository Initialization & First Push")
         print("="*70 + "\n")
         
         # Show current directory
         current_dir = Path.cwd()
-        print(f"📍 Current Directory: {current_dir}")
-        print(f"📍 Absolute Path: {current_dir.absolute()}\n")
+        print(f" Current Directory: {current_dir}")
+        print(f" Absolute Path: {current_dir.absolute()}\n")
         
         # Confirm this is the right directory
         confirm = input("Is this the correct project directory? (y/n): ").strip().lower()
         if confirm != 'y':
-            print("\n❌ Operation cancelled. Please navigate to the correct directory first.")
+            print("\n Operation cancelled. Please navigate to the correct directory first.")
             input("\nPress Enter to continue...")
             return
         
@@ -34,31 +34,31 @@ class GitInitializer:
         git_exists = (current_dir / ".git").exists()
         
         if git_exists:
-            print("\n⚠️  Git repository already exists in this directory.")
+            print("\n  Git repository already exists in this directory.")
             print("This will configure remote and push existing commits.\n")
             
             # Show current status
-            print("📊 Current Git Status:")
+            print(" Current Git Status:")
             self._run_command(["git", "status", "--short"])
             print()
             
             choice = input("Continue? (y/n): ").strip().lower()
             if choice != 'y':
-                print("\n❌ Operation cancelled.")
+                print("\n Operation cancelled.")
                 input("\nPress Enter to continue...")
                 return
         
         # Get repository URL
-        print("\n📝 Enter your GitHub repository URL:")
+        print("\n Enter your GitHub repository URL:")
         print("Example: https://github.com/username/repo-name.git")
         repo_url = input("Repository URL: ").strip()
         
         if not repo_url:
-            print("\n❌ Repository URL cannot be empty")
+            print("\n Repository URL cannot be empty")
             input("\nPress Enter to continue...")
             return
         
-        print("\n🔧 Starting Git setup...\n")
+        print("\n Starting Git setup...\n")
         
         # If git doesn't exist, initialize it
         if not git_exists:
@@ -71,16 +71,16 @@ class GitInitializer:
                 return
         
         # Configure remote
-        print(f"🔗 Configuring remote origin: {repo_url}")
+        print(f" Configuring remote origin: {repo_url}")
         if not self._configure_remote(repo_url):
             input("\nPress Enter to continue...")
             return
-        print("✅ Remote origin configured\n")
+        print(" Remote origin configured\n")
         
         # Push to GitHub
-        print("⬆️  Pushing to GitHub...")
+        print("  Pushing to GitHub...")
         if not self._run_command(["git", "push", "-u", "origin", "main"]):
-            print("\n⚠️  Push failed. This might be because:")
+            print("\n  Push failed. This might be because:")
             print("  • The remote repository doesn't exist")
             print("  • You don't have permission to push")
             print("  • The remote has commits you don't have locally")
@@ -89,8 +89,8 @@ class GitInitializer:
             return
         
         print("\n" + "="*70)
-        print("✅ SUCCESS! Repository pushed to GitHub!")
-        print(f"🌐 Your repository: {repo_url.replace('.git', '')}")
+        print(" SUCCESS! Repository pushed to GitHub!")
+        print(f" Your repository: {repo_url.replace('.git', '')}")
         print("="*70 + "\n")
         
         input("Press Enter to continue...")
@@ -100,46 +100,46 @@ class GitInitializer:
         # Step 1: Create README if it doesn't exist
         readme_path = Path("README.md")
         if not readme_path.exists():
-            print("📄 Creating README.md...")
+            print(" Creating README.md...")
             try:
                 with open(readme_path, "w") as f:
                     f.write(f"# {current_dir.name}\n\n")
                     f.write("This project was initialized using Python Automation System.\n")
-                print("✅ README.md created\n")
+                print(" README.md created\n")
             except Exception as e:
-                print(f"❌ Error creating README.md: {e}\n")
+                print(f" Error creating README.md: {e}\n")
                 return False
         
         # Step 2: Initialize git
-        print("📦 Initializing git repository...")
+        print(" Initializing git repository...")
         if not self._run_command(["git", "init"]):
             return False
-        print("✅ Git repository initialized\n")
+        print(" Git repository initialized\n")
         
         # Step 3: Add files
-        print("➕ Adding files to staging...")
+        print(" Adding files to staging...")
         if not self._run_command(["git", "add", "."]):
             return False
-        print("✅ Files added\n")
+        print(" Files added\n")
         
         # Step 4: First commit
-        print("💾 Creating first commit...")
+        print(" Creating first commit...")
         if not self._run_command(["git", "commit", "-m", "Initial commit"]):
             return False
-        print("✅ First commit created\n")
+        print(" First commit created\n")
         
         # Step 5: Set branch to main
-        print("🌿 Setting branch to 'main'...")
+        print(" Setting branch to 'main'...")
         if not self._run_command(["git", "branch", "-M", "main"]):
             return False
-        print("✅ Branch set to 'main'\n")
+        print(" Branch set to 'main'\n")
         
         return True
     
     def _setup_existing_repo(self):
         """Setup existing repository for push"""
         # Check for uncommitted changes
-        print("🔍 Checking for uncommitted changes...")
+        print(" Checking for uncommitted changes...")
         result = subprocess.run(
             ["git", "status", "--porcelain"],
             capture_output=True,
@@ -147,7 +147,7 @@ class GitInitializer:
         )
         
         if result.stdout.strip():
-            print("\n⚠️  You have uncommitted changes:")
+            print("\n  You have uncommitted changes:")
             print(result.stdout)
             
             commit_choice = input("\nDo you want to commit these changes first? (y/n): ").strip().lower()
@@ -156,24 +156,24 @@ class GitInitializer:
                 if not commit_msg:
                     commit_msg = "Update files before push"
                 # Auto-add heart emoji at the beginning if not already present
-                if not commit_msg.startswith('❤️'):
-                    commit_msg = f"❤️ {commit_msg}"
+                if not commit_msg.startswith(''):
+                    commit_msg = f" {commit_msg}"
                 if not commit_msg:
                     commit_msg = "Update files before push"
                 
-                print("\n➕ Adding files...")
+                print("\n Adding files...")
                 if not self._run_command(["git", "add", "."]):
                     return False
                 
-                print("💾 Committing changes...")
+                print(" Committing changes...")
                 if not self._run_command(["git", "commit", "-m", commit_msg]):
                     return False
-                print("✅ Changes committed\n")
+                print(" Changes committed\n")
         else:
-            print("✅ No uncommitted changes\n")
+            print(" No uncommitted changes\n")
         
         # Ensure we're on main branch
-        print("🌿 Checking current branch...")
+        print(" Checking current branch...")
         result = subprocess.run(
             ["git", "branch", "--show-current"],
             capture_output=True,
@@ -182,7 +182,7 @@ class GitInitializer:
         current_branch = result.stdout.strip()
         
         if current_branch != "main":
-            print(f"📌 Current branch: {current_branch}")
+            print(f" Current branch: {current_branch}")
             switch = input("Switch to 'main' branch? (y/n): ").strip().lower()
             if switch == 'y':
                 # Check if main exists
@@ -200,7 +200,7 @@ class GitInitializer:
                     # main doesn't exist, rename current branch
                     if not self._run_command(["git", "branch", "-M", "main"]):
                         return False
-                print("✅ Switched to 'main'\n")
+                print(" Switched to 'main'\n")
         
         return True
     
@@ -215,7 +215,7 @@ class GitInitializer:
         
         if result.returncode == 0:
             # Remote exists, update it
-            print("⚠️  Remote 'origin' exists, updating URL...")
+            print("  Remote 'origin' exists, updating URL...")
             return self._run_command(["git", "remote", "set-url", "origin", repo_url])
         else:
             # Add new remote
@@ -236,12 +236,12 @@ class GitInitializer:
                 print(result.stderr)
             return True
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error: {e}")
+            print(f" Error: {e}")
             if e.stdout:
                 print(e.stdout)
             if e.stderr:
                 print(e.stderr)
             return False
         except FileNotFoundError:
-            print("❌ Git is not installed or not in PATH")
+            print(" Git is not installed or not in PATH")
             return False

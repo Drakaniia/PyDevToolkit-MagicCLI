@@ -53,7 +53,7 @@ $ magic
   Current Directory: /home/user/my-project
 ======================================================================
 
-  ► 1. GitHub Operations
+   1. GitHub Operations
     2. Show Project Structure
     3. Navigate Folders
     4. Dev Mode (Web Dev Automation)
@@ -106,22 +106,22 @@ Commit message:
 
 ```
 PyDevToolkit-MagicCLI/
-├── src/                    # Source code
-│   ├── core/              # Core functionality
-│   │   ├── menu/          # Menu system
-│   │   ├── security/      # Security validation
-│   │   └── utils/         # Utilities
-│   ├── modules/           # Feature modules
-│   │   ├── git_operations/
-│   │   ├── web_development/
-│   │   ├── backend_development/
-│   │   └── project_management/
-│   ├── ui/                # UI components
-│   └── cli/               # CLI entry points
-├── config/                # Configuration files
-├── scripts/               # Setup and utility scripts
-├── tests/                 # Test files
-└── bin/                   # Executable scripts
+ src/                    # Source code
+    core/              # Core functionality
+       menu/          # Menu system
+       security/      # Security validation
+       utils/         # Utilities
+    modules/           # Feature modules
+       git_operations/
+       web_development/
+       backend_development/
+       project_management/
+    ui/                # UI components
+    cli/               # CLI entry points
+ config/                # Configuration files
+ scripts/               # Setup and utility scripts
+ tests/                 # Test files
+ bin/                   # Executable scripts
 ```
 
 ---
@@ -172,4 +172,4 @@ MIT License - feel free to use this in your own projects!
 
 ---
 
-**Made with ❤️ for developers who love automation**
+**Made for developers who love automation**

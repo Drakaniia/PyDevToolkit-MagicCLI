@@ -95,8 +95,8 @@ class FrameworkTools(Menu):
         self._create_project_structure(project_structure)
         
         print("FastAPI project setup completed!")
-        print(f"📁 Project created: {project_name}/")
-        print("🚀 Run: cd {} && uvicorn app.main:app --reload".format(project_name))
+        print(f" Project created: {project_name}/")
+        print(" Run: cd {} && uvicorn app.main:app --reload".format(project_name))
         
         input("\nPress Enter to continue...")
         return None
@@ -946,7 +946,7 @@ class {app_name.title()}Serializer(serializers.ModelSerializer):
 
     def _manage_flask(self):
         """Flask management tools"""
-        print("\n🌶️ Flask Management Tools")
+        print("\n Flask Management Tools")
         print("1. Create Flask app")
         print("2. Add Flask extensions")
         print("3. Create Flask blueprints")
@@ -962,7 +962,7 @@ class {app_name.title()}Serializer(serializers.ModelSerializer):
     def _create_flask_app(self):
         """Create Flask application"""
         app_name = input("Enter app name: ")
-        print(f"\n🌶️ Creating Flask app: {app_name}")
+        print(f"\n Creating Flask app: {app_name}")
         
         flask_app_content = f'''"""
 Flask Application: {app_name}
@@ -1532,8 +1532,8 @@ app.use('*', (req, res) => {{
 
 // Start server
 app.listen(PORT, () => {{
-    console.log(`🚀 Server running on port ${{PORT}}`);
-    console.log(`📖 API documentation: http://localhost:${{PORT}}/api-docs`);
+    console.log(` Server running on port ${{PORT}}`);
+    console.log(` API documentation: http://localhost:${{PORT}}/api-docs`);
 }});
 
 module.exports = app;

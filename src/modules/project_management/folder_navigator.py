@@ -52,8 +52,8 @@ class FolderNavigator:
             action = self._get_user_input(subdirs)
 
             if action == "confirm":
-                print(f"\n✅ Directory confirmed: {self.current_path}")
-                print("⚠️  All operations will now work in this directory.\n")
+                print(f"\nDirectory confirmed: {self.current_path}")
+                print("All operations will now work in this directory.\n")
                 input("Press Enter to return to main menu...")
                 break
             elif action == "back":
@@ -84,17 +84,17 @@ class FolderNavigator:
             self._clear_screen()
         
         print("="*70)
-        print("📂 FOLDER NAVIGATOR")
+        print("FOLDER NAVIGATOR")
         print("="*70)
-        print(f"📍 Current Location: {self.current_path}")
-        print(f"📍 Absolute Path: {self.current_path.absolute()}")
+        print(f"Current Location: {self.current_path}")
+        print(f"Absolute Path: {self.current_path.absolute()}")
         print("="*70)
 
         if not subdirs:
-            print("\n📭 No subdirectories found in current location.")
+            print("\nNo subdirectories found in current location.")
             print("    Press ← to go back or Enter to confirm this directory.\n")
         else:
-            print("\n📁 Available Directories:")
+            print("\nAvailable Directories:")
             print("-" * 70)
             for idx, subdir in enumerate(subdirs):
                 self._print_directory_item(idx, subdir, idx == self.selected_idx)
@@ -142,7 +142,7 @@ class FolderNavigator:
 
         if is_selected:
             # Pad line to ensure full coverage
-            line = f"  ► {line}".ljust(68)
+            line = f"   {line}".ljust(68)
             print(f"\033[1;46m{line}\033[0m")
         else:
             line = f"    {line}".ljust(68)
@@ -153,7 +153,7 @@ class FolderNavigator:
         line = f"{idx + 1}. {subdir.name}/"
 
         if is_selected:
-            line = f"  ► {line}".ljust(68)
+            line = f"   {line}".ljust(68)
             sys.stdout.write(f"\033[1;46m{line}\033[0m")
         else:
             line = f"    {line}".ljust(68)
@@ -270,7 +270,7 @@ class FolderNavigator:
         elif choice.isdigit():
             return int(choice)
         else:
-            print("\n❌ Invalid input. Please try again.")
+            print("\nInvalid input. Please try again.")
             input("\nPress Enter to continue...")
             return None
 
@@ -314,14 +314,14 @@ class FolderNavigator:
             # Show error and wait for user acknowledgment
             self._clear_screen()
             print("\n" + "="*70)
-            print(f"❌ Permission denied: {target_dir.name}")
+            print(f"Permission denied: {target_dir.name}")
             print("="*70 + "\n")
             input("Press Enter to continue...")
         except Exception as e:
             # Show error and wait for user acknowledgment
             self._clear_screen()
             print("\n" + "="*70)
-            print(f"❌ Error: {e}")
+            print(f"Error: {e}")
             print("="*70 + "\n")
             input("Press Enter to continue...")
 

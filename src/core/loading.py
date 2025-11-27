@@ -14,14 +14,14 @@ class LoadingSpinner:
     
     # Different spinner styles
     SPINNER_STYLES = {
-        'dots': ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
+        'dots': ['', '', '', '', '', '', '', '', '', ''],
         'classic': ['|', '/', '-', '\\'],
         'arrows': ['←', '↖', '↑', '↗', '→', '↘', '↓', '↙'],
-        'bouncing': ['⠁', '⠂', '⠄', '⠂'],
-        'pulse': ['●', '◐', '◑', '◒', '◓', '◔', '◕', '◖', '◗'],
-        'blocks': ['▁', '▃', '▄', '▅', '▆', '▇', '█', '▇', '▆', '▅', '▄', '▃'],
-        'clock': ['🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚', '🕛'],
-        'moon': ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'],
+        'bouncing': ['', '', '', ''],
+        'pulse': ['', '', '', '', '', '', '', '', ''],
+        'blocks': ['', '', '', '', '', '', '', '', '', '', '', ''],
+        'clock': ['[', ']', '[', ']', '[', ']', '[', ']', '[', ']', '[', ']'],
+        'moon': ['(', ')', '(', ')', '(', ')', '(', ')'],
     }
     
     def __init__(self, message: str = "Loading", style: str = 'dots', speed: float = 0.1):
@@ -140,7 +140,7 @@ class ProgressBar:
         filled_width = int(self.width * percentage)
         
         # Create progress bar
-        bar = '█' * filled_width + '░' * (self.width - filled_width)
+        bar = '' * filled_width + '' * (self.width - filled_width)
         percent_text = f"{percentage:.1%}"
         
         # Display progress

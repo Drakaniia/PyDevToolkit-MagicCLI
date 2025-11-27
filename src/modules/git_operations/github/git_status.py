@@ -23,11 +23,11 @@ class GitStatus:
     def show_status(self):
         """Display current git status in verbose format with colors"""
         print("\n" + "="*70)
-        print("📊 GIT STATUS (VERBOSE FORMAT WITH COLORS)")
+        print(" GIT STATUS (VERBOSE FORMAT WITH COLORS)")
         print("="*70 + "\n")
 
         if not self._is_git_repo():
-            print("❌ Not a git repository. Please initialize git first.")
+            print(" Not a git repository. Please initialize git first.")
             input("\nPress Enter to continue...")
             return
 
@@ -46,14 +46,14 @@ class GitStatus:
                 # Parse the verbose output and organize it by section
                 self._parse_and_display_verbose_status(result.stdout)
             else:
-                print("✅ Working directory clean (no changes)")
+                print(" Working directory clean (no changes)")
 
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error getting git status: {e}")
+            print(f" Error getting git status: {e}")
             if e.stderr:
                 print(e.stderr)
         except FileNotFoundError:
-            print("❌ Git is not installed or not in PATH")
+            print(" Git is not installed or not in PATH")
 
         input("\nPress Enter to continue...")
     
@@ -275,12 +275,12 @@ class GitStatus:
                 print(result.stderr)
             return True
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error: {e}")
+            print(f" Error: {e}")
             if e.stdout:
                 print(e.stdout)
             if e.stderr:
                 print(e.stderr)
             return False
         except FileNotFoundError:
-            print("❌ Git is not installed or not in PATH")
+            print(" Git is not installed or not in PATH")
             return False

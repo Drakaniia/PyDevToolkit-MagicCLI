@@ -46,7 +46,7 @@ class AutomationError(Exception):
                 lines.append(f"  {key}: {value}")
         
         if self.suggestion:
-            lines.append(f"\n💡 Suggestion: {self.suggestion}")
+            lines.append(f"\nSuggestion: {self.suggestion}")
         
         lines.append(f"{'='*70}\n")
         
