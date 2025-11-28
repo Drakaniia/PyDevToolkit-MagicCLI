@@ -71,6 +71,8 @@ class MenuRenderer:
             initial: Whether this is the initial display
             force_full_redraw: Force complete screen refresh
         """
+        # Invalidate cache to ensure we get current terminal size
+        TerminalInfo.invalidate_cache()
         cols, lines = TerminalInfo.get_size()
         available_lines = TerminalInfo.get_available_lines()
         is_small = TerminalInfo.is_small_viewport()
@@ -162,7 +164,7 @@ class MenuRenderer:
 
         # Calculate cursor position for updates
         # Header is 5 lines, scroll indicator adds 1 if present
-        base_line = 5
+        base_line = 6  # Start from line 6 (1-indexed for ANSI escape codes)
         if self._scroll_offset > 0:
             base_line += 1
 
@@ -170,8 +172,8 @@ class MenuRenderer:
         for i in range(visible_start, visible_end):
             line_number = base_line + (i - visible_start)
 
-            # Move cursor to the line
-            sys.stdout.write(f'\033[{line_number + 1};1H')
+            # Move cursor to the line and clear it completely
+            sys.stdout.write(f'\033[{line_number};0H')  # Move to beginning of line
             sys.stdout.write(self.CLEAR_LINE)
 
             # Redraw the item with proper selection state

@@ -712,12 +712,12 @@ offer_git_installation() {
 
 configure_git_user() {
     echo ""
-    echo -e "${CYAN}Git User Configuration${NC}"
+    echo -e "${CYAN}Git User Configuration (REQUIRED IN GIT OPERATIONS)${NC}"
     echo -e "${CYAN}${NC}"
     echo ""
     
-    read -p "Enter your name: " git_name
-    read -p "Enter your email: " git_email
+    read -p "Enter your github username: " git_name
+    read -p "Enter your github email: " git_email
     
     if [ -n "$git_name" ] && [ -n "$git_email" ]; then
         git config --global user.name "$git_name"

@@ -49,8 +49,11 @@ class MenuNavigation:
         - Minimal redraws for large menus
         - Proper cursor positioning
         - Terminal resize detection
+        - Prevent duplicate key processing
         """
         selected_idx = 0
+        last_processed_key = None
+        key_debounce_time = 0.05  # Small debounce to prevent rapid duplicate processing
         
         # Initial display
         if initial_display:
@@ -59,9 +62,20 @@ class MenuNavigation:
         sys.stdout.flush()
 
         try:
+            import time
+            last_key_time = 0
+            
             while True:
                 try:
                     key = self._getch()
+                    current_time = time.time()
+                    
+                    # Debounce: ignore if same key processed too quickly
+                    if key == last_processed_key and (current_time - last_key_time) < key_debounce_time:
+                        continue
+                    
+                    last_processed_key = key
+                    last_key_time = current_time
 
                     old_idx = selected_idx
                     new_idx = selected_idx
@@ -72,9 +86,9 @@ class MenuNavigation:
                         if key in ('\xe0', '\x00'):
                             arrow = self._getch()
                             if arrow == 'H':  # Up
-                                new_idx = (selected_idx - 1) % len(items)
+                                new_idx = max(0, selected_idx - 1)
                             elif arrow == 'P':  # Down
-                                new_idx = (selected_idx + 1) % len(items)
+                                new_idx = min(len(items) - 1, selected_idx + 1)
                         elif key == '\r':  # Enter
                             should_select = True
                         elif key.isdigit():
@@ -94,9 +108,9 @@ class MenuNavigation:
                             if next_key == '[':
                                 arrow = self._getch()
                                 if arrow == 'A':  # Up
-                                    new_idx = (selected_idx - 1) % len(items)
+                                    new_idx = max(0, selected_idx - 1)
                                 elif arrow == 'B':  # Down
-                                    new_idx = (selected_idx + 1) % len(items)
+                                    new_idx = min(len(items) - 1, selected_idx + 1)
                         elif key in ['\r', '\n']:  # Enter
                             should_select = True
                         elif key.isdigit():
@@ -113,7 +127,8 @@ class MenuNavigation:
                     # Update selection if changed
                     if new_idx != old_idx:
                         selected_idx = new_idx
-                        renderer.display(items, selected_idx, initial=False)
+                        # Force full redraw to prevent duplication issues
+                        renderer.display(items, selected_idx, initial=False, force_full_redraw=True)
 
                     if should_select:
                         sys.stdout.write(renderer.SHOW_CURSOR)
