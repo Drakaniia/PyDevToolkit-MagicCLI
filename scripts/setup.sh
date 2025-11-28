@@ -246,62 +246,203 @@ validate_python() {
     return 0
 }
 
-offer_python_installation() {
-    local os=$(detect_os)
-    local pkg_mgr=$(detect_package_manager "$os")
-    
-    echo -e "${RED}${BOLD}Python 3 is required but not found!${NC}\n"
-    
-    echo -e "${YELLOW}Installation Instructions:${NC}\n"
-    
-    case "$os" in
-        linux)
-            case "$pkg_mgr" in
-                apt)
-                    echo "Ubuntu/Debian:"
-                    echo "  sudo apt update"
-                    echo "  sudo apt install python3 python3-pip"
-                    ;;
-                yum|dnf)
-                    echo "CentOS/Fedora/RHEL:"
-                    echo "  sudo $pkg_mgr install python3 python3-pip"
-                    ;;
-                pacman)
-                    echo "Arch Linux:"
-                    echo "  sudo pacman -S python python-pip"
-                    ;;
-                *)
-                    echo "Please install Python 3.7+ using your distribution's package manager"
-                    ;;
-            esac
+install_python_linux() {
+    local pkg_mgr=$(detect_package_manager "$(detect_os)")
+
+    case "$pkg_mgr" in
+        apt)
+            echo -e "${CYAN}Installing Python 3 on Ubuntu/Debian...${NC}"
+            sudo apt update
+            sudo apt install -y python3 python3-pip python3-venv
             ;;
-        macos)
-            if [ "$pkg_mgr" = "brew" ]; then
-                echo "Using Homebrew:"
-                echo "  brew install python3"
-            else
-                echo "1. Install Homebrew first:"
-                echo "   /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-                echo ""
-                echo "2. Then install Python:"
-                echo "   brew install python3"
-            fi
-            echo ""
-            echo "Or download from: https://www.python.org/downloads/"
+        yum|dnf)
+            echo -e "${CYAN}Installing Python 3 on CentOS/Fedora/RHEL...${NC}"
+            sudo $pkg_mgr install -y python3 python3-pip
             ;;
-        windows)
-            echo "Windows (Git Bash/WSL):"
-            echo "  1. Download Python from: https://www.python.org/downloads/"
-            echo "  2. During installation, check 'Add Python to PATH'"
-            echo "  3. Restart your terminal after installation"
+        pacman)
+            echo -e "${CYAN}Installing Python 3 on Arch Linux...${NC}"
+            sudo pacman -S --noconfirm python python python-pip
+            ;;
+        *)
+            echo -e "${RED}Unsupported package manager. Please install Python 3.7+ manually.${NC}"
+            return 1
             ;;
     esac
-    
-    echo ""
-    echo -e "${CYAN}After installing Python, run this setup script again.${NC}"
-    echo ""
-    
-    exit 1
+
+    if command -v python3 &> /dev/null; then
+        print_success "Python 3 installed successfully"
+        return 0
+    else
+        print_error "Python 3 installation failed"
+        return 1
+    fi
+}
+
+install_python_macos() {
+    local pkg_mgr=$(detect_package_manager "$(detect_os)")
+
+    if [ "$pkg_mgr" = "brew" ]; then
+        echo -e "${CYAN}Installing Python 3 using Homebrew...${NC}"
+        brew install python3
+    else
+        echo -e "${YELLOW}Homebrew not found. Installing Homebrew first...${NC}"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        echo -e "${CYAN}Installing Python 3 using Homebrew...${NC}"
+        brew install python3
+    fi
+
+    if command -v python3 &> /dev/null; then
+        print_success "Python 3 installed successfully"
+        return 0
+    else
+        print_error "Python 3 installation failed"
+        return 1
+    fi
+}
+
+install_python_windows() {
+    echo -e "${YELLOW}Installing Python 3 on Windows...${NC}"
+    echo -e "${CYAN}This requires PowerShell with administrative privileges.${NC}"
+
+    # Check if Chocolatey is installed
+    if command -v choco &> /dev/null; then
+        echo -e "${CYAN}Using Chocolatey to install Python...${NC}"
+        powershell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
+        choco install -y python
+    else
+        # Try to install Python via Windows package manager (winget) if available
+        if command -v winget &> /dev/null; then
+            echo -e "${CYAN}Using Windows Package Manager to install Python...${NC}"
+            winget install -e --id Python.Python.3
+        else
+            # Fallback to PowerShell script to download and install Python
+            echo -e "${YELLOW}Please download and install Python from: https://www.python.org/downloads/${NC}"
+            echo -e "${YELLOW}Make sure to check 'Add Python to PATH' during installation.${NC}"
+            echo -e "${CYAN}After installation, please restart your terminal and run this setup script again.${NC}"
+            return 1
+        fi
+    fi
+
+    # For Git Bash, we need to verify installation
+    # Wait a moment for the installation to complete
+    sleep 3
+
+    # Check if Python is available (might require a new terminal session)
+    if command -v python3 &> /dev/null || command -v python &> /dev/null; then
+        print_success "Python 3 installation completed"
+        return 0
+    else
+        print_warning "Python might require terminal restart to be available"
+        print_info "Please restart your terminal and run this setup script again"
+        return 0  # Return 0 since installation likely succeeded but needs restart
+    fi
+}
+
+offer_python_installation() {
+    local os=$(detect_os)
+
+    echo -e "${RED}${BOLD}Python 3 is required but not found!${NC}\n"
+
+    if ask_yes_no "Would you like to automatically install Python 3?"; then
+        echo ""
+
+        case "$os" in
+            linux)
+                if install_python_linux; then
+                    print_success "Python 3 installation completed successfully!"
+                    echo -e "${CYAN}Verifying installation...${NC}"
+
+                    # Try to find the newly installed Python
+                    if PYTHON_CMD=$(find_python_command); then
+                        print_success "Found Python command: $PYTHON_CMD"
+                        PYTHON_VERSION=$($PYTHON_CMD --version 2>&1 | grep -oP '\d+\.\d+\.\d+' || echo "unknown")
+                        print_success "Python version: $PYTHON_VERSION"
+
+                        # Verify minimum version
+                        PYTHON_MAJOR=$($PYTHON_CMD -c "import sys; print(sys.version_info.major)")
+                        PYTHON_MINOR=$($PYTHON_CMD -c "import sys; print(sys.version_info.minor)")
+
+                        if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 7 ]); then
+                            print_error "Installed Python version is too old: $PYTHON_VERSION"
+                            print_error "Python $MIN_PYTHON_VERSION or higher is required"
+                            exit 1
+                        fi
+
+                        print_success "Python installation verified and meets requirements"
+                        return 0  # Success - continue with setup
+                    else
+                        print_error "Python was installed but cannot be found in PATH"
+                        print_info "Please restart your terminal and run this setup script again"
+                        exit 1
+                    fi
+                else
+                    print_error "Python installation failed"
+                    echo -e "${YELLOW}Please install Python 3.7+ manually.${NC}"
+                    exit 1
+                fi
+                ;;
+            macos)
+                if install_python_macos; then
+                    print_success "Python 3 installation completed successfully!"
+                    echo -e "${CYAN}Verifying installation...${NC}"
+
+                    # Refresh PATH to include new Python installation
+                    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+                    if PYTHON_CMD=$(find_python_command); then
+                        print_success "Found Python command: $PYTHON_CMD"
+                        PYTHON_VERSION=$($PYTHON_CMD --version 2>&1 | grep -oP '\d+\.\d+\.\d+' || echo "unknown")
+                        print_success "Python version: $PYTHON_VERSION"
+
+                        # Verify minimum version
+                        PYTHON_MAJOR=$($PYTHON_CMD -c "import sys; print(sys.version_info.major)")
+                        PYTHON_MINOR=$($PYTHON_CMD -c "import sys; print(sys.version_info.minor)")
+
+                        if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 7 ]); then
+                            print_error "Installed Python version is too old: $PYTHON_VERSION"
+                            print_error "Python $MIN_PYTHON_VERSION or higher is required"
+                            exit 1
+                        fi
+
+                        print_success "Python installation verified and meets requirements"
+                        return 0  # Success - continue with setup
+                    else
+                        print_error "Python was installed but cannot be found in PATH"
+                        print_info "Please restart your terminal and run this setup script again"
+                        exit 1
+                    fi
+                else
+                    print_error "Python installation failed"
+                    echo -e "${YELLOW}Please install Python 3.7+ manually.${NC}"
+                    exit 1
+                fi
+                ;;
+            windows)
+                if install_python_windows; then
+                    print_success "Python installation completed!"
+                    print_info "Please restart your terminal and run this setup script again"
+                    print_info "The new terminal will recognize the installed Python"
+                    exit 0  # Exit this setup run, user needs to restart terminal
+                else
+                    print_error "Python installation failed"
+                    echo -e "${YELLOW}Please install Python 3.7+ manually from https://www.python.org/downloads/${NC}"
+                    exit 1
+                fi
+                ;;
+            *)
+                print_error "Unsupported operating system: $os"
+                echo -e "${YELLOW}Please install Python 3.7+ manually.${NC}"
+                exit 1
+                ;;
+        esac
+    else
+        echo -e "${YELLOW}Python 3.7+ is required for this application.${NC}"
+        echo -e "${YELLOW}Please install it manually and run this setup script again.${NC}"
+        echo ""
+        echo -e "${CYAN}You can download Python from: https://www.python.org/downloads/${NC}"
+        exit 1
+    fi
 }
 
 # ============================================================
