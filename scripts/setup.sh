@@ -308,34 +308,191 @@ install_python_windows() {
     # Check if Chocolatey is installed
     if command -v choco &> /dev/null; then
         echo -e "${CYAN}Using Chocolatey to install Python...${NC}"
-        powershell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
-        choco install -y python
+        if powershell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))" 2>/dev/null; then
+            if choco install -y python 2>/dev/null; then
+                echo -e "${GREEN}Python installation completed successfully via Chocolatey${NC}"
+            else
+                print_error "Chocolatey installation of Python failed"
+                return 1
+            fi
+        else
+            print_error "Failed to install Chocolatey package manager"
+            return 1
+        fi
     else
         # Try to install Python via Windows package manager (winget) if available
         if command -v winget &> /dev/null; then
             echo -e "${CYAN}Using Windows Package Manager to install Python...${NC}"
-            winget install -e --id Python.Python.3
+            # Try multiple possible Python package IDs
+            # First, check if winget is working properly
+            if ! winget --info >/dev/null 2>&1; then
+                print_error "Winget is installed but not functioning properly"
+                echo -e "${YELLOW}Troubleshooting winget:${NC}"
+                echo "  - Run 'winget --info' in an elevated PowerShell to diagnose"
+                echo "  - You may need to reinstall winget or update Windows"
+                echo "  - See: https://learn.microsoft.com/en-us/windows/package-manager/winget/"
+                echo -e "${YELLOW}Attempting to install Python from web...${NC}"
+                # Fallback to PowerShell script to download and install Python
+                if powershell -Command "Invoke-WebRequest -Uri https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe -OutFile python-installer.exe" 2>/dev/null; then
+                    if powershell -Command "Start-Process -FilePath python-installer.exe -ArgumentList '/quiet', 'PrependPath=1' -Wait" 2>/dev/null; then
+                        echo -e "${GREEN}Python installation completed via web download${NC}"
+                    else
+                        print_error "Failed to execute Python installer"
+                        print_warning "Please try installing Python manually from https://www.python.org/downloads/"
+                        if [ -f "python-installer.exe" ]; then
+                            rm python-installer.exe
+                        fi
+                        return 1
+                    fi
+                else
+                    print_error "Failed to download Python installer from web"
+                    print_warning "Please check your internet connection and try installing Python manually from https://www.python.org/downloads/"
+                    return 1
+                fi
+
+                # Clean up installer file
+                if [ -f "python-installer.exe" ]; then
+                    rm python-installer.exe
+                fi
+            elif winget install -e --id Python.Python.3 2>/dev/null || \
+                 winget install -e --id "Python.Python.3" 2>/dev/null || \
+                 winget install Python 2>/dev/null || \
+                 winget install "Python 3" 2>/dev/null; then
+                echo -e "${GREEN}Python installation completed successfully via winget${NC}"
+            else
+                echo -e "${RED}All winget installation attempts failed${NC}"
+                echo -e "${YELLOW}Winget troubleshooting information:${NC}"
+
+                # Display winget version and status
+                echo -e "${CYAN}Winget version and status:${NC}"
+                winget --info 2>/dev/null || echo "  - Winget not responding to --info command"
+
+                # List available Python packages
+                echo -e "${CYAN}Available Python packages in winget:${NC}"
+                winget list python 2>/dev/null | head -10 || echo "  - No Python packages found or winget list command failed"
+
+                # Show more detailed error troubleshooting
+                echo -e "${CYAN}Possible solutions:${NC}"
+                echo "  - Run Windows PowerShell as Administrator and execute: winget install Python.Python.3"
+                echo "  - Update Windows to the latest version"
+                echo "  - Reset winget: winget source reset"
+                echo "  - Check Windows Package Manager version: winget --version"
+                echo -e "  - Manually download from: https://www.python.org/downloads/"
+
+                echo -e "${YELLOW}Attempting to install Python from web...${NC}"
+                # Fallback to PowerShell script to download and install Python
+                if powershell -Command "Invoke-WebRequest -Uri https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe -OutFile python-installer.exe" 2>/dev/null; then
+                    if powershell -Command "Start-Process -FilePath python-installer.exe -ArgumentList '/quiet', 'PrependPath=1' -Wait" 2>/dev/null; then
+                        echo -e "${GREEN}Python installation completed via web download${NC}"
+                    else
+                        print_error "Failed to execute Python installer"
+                        print_info "Detailed error information:"
+                        echo "  - The downloaded installer file may be corrupted"
+                        echo "  - Antivirus software may be blocking the installation"
+                        echo "  - You may not have administrator privileges for installation"
+                        echo "  - Try running this script in an elevated command prompt or PowerShell"
+                        print_warning "Please try installing Python manually from https://www.python.org/downloads/"
+                        if [ -f "python-installer.exe" ]; then
+                            rm python-installer.exe
+                        fi
+                        return 1
+                    fi
+                else
+                    print_error "Failed to download Python installer from web"
+                    print_info "Detailed error information:"
+                    echo "  - Check your internet connection"
+                    echo "  - Firewall or proxy settings may be blocking access to python.org"
+                    echo "  - PowerShell execution policy may be restricting downloads"
+                    echo "  - Try running 'Invoke-WebRequest https://www.python.org' to test connectivity"
+                    echo -e "  - You can manually download from: https://www.python.org/downloads/"
+                    echo -e "  - Or try alternative Python download: https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe"
+                    print_warning "If the issue persists, install Python manually from https://www.python.org/downloads/"
+                    return 1
+                fi
+
+                # Clean up installer file
+                if [ -f "python-installer.exe" ]; then
+                    rm python-installer.exe
+                fi
+            fi
         else
+            print_warning "Winget is not available on this system"
+            echo -e "${YELLOW}Attempting to install Python from web...${NC}"
             # Fallback to PowerShell script to download and install Python
-            echo -e "${YELLOW}Please download and install Python from: https://www.python.org/downloads/${NC}"
-            echo -e "${YELLOW}Make sure to check 'Add Python to PATH' during installation.${NC}"
-            echo -e "${CYAN}After installation, please restart your terminal and run this setup script again.${NC}"
-            return 1
+            if powershell -Command "Invoke-WebRequest -Uri https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe -OutFile python-installer.exe" 2>/dev/null; then
+                if powershell -Command "Start-Process -FilePath python-installer.exe -ArgumentList '/quiet', 'PrependPath=1' -Wait" 2>/dev/null; then
+                    echo -e "${GREEN}Python installation completed via web download${NC}"
+                else
+                    print_error "Failed to execute Python installer"
+                    print_info "Detailed error information:"
+                    echo "  - The downloaded installer file may be corrupted"
+                    echo "  - Antivirus software may be blocking the installation"
+                    echo "  - You may not have administrator privileges for installation"
+                    echo "  - Try running this script in an elevated command prompt or PowerShell"
+                    print_warning "Please try installing Python manually from https://www.python.org/downloads/"
+                    if [ -f "python-installer.exe" ]; then
+                        rm python-installer.exe
+                    fi
+                    return 1
+                fi
+            else
+                print_error "Failed to download Python installer from web"
+                print_info "Detailed error information:"
+                echo "  - Check your internet connection"
+                echo "  - Firewall or proxy settings may be blocking access to python.org"
+                echo "  - PowerShell execution policy may be restricting downloads"
+                echo "  - Try running 'Invoke-WebRequest https://www.python.org' to test connectivity"
+                echo -e "  - You can manually download from: https://www.python.org/downloads/"
+                echo -e "  - Or try alternative Python download: https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe"
+                print_warning "If the issue persists, install Python manually from https://www.python.org/downloads/"
+                return 1
+            fi
+
+            # Clean up installer file
+            if [ -f "python-installer.exe" ]; then
+                rm python-installer.exe
+            fi
         fi
     fi
 
     # For Git Bash, we need to verify installation
     # Wait a moment for the installation to complete
-    sleep 3
+    sleep 5  # Increased sleep time to ensure installation completion
 
     # Check if Python is available (might require a new terminal session)
     if command -v python3 &> /dev/null || command -v python &> /dev/null; then
-        print_success "Python 3 installation completed"
-        return 0
+        # Verify Python version meets requirements
+        if PYTHON_CMD=$(find_python_command); then
+            PYTHON_VERSION=$($PYTHON_CMD --version 2>&1 | grep -oP '\d+\.\d+\.\d+' || echo "unknown")
+            print_success "Python 3 found: $PYTHON_CMD ($PYTHON_VERSION)"
+
+            # Verify minimum version
+            PYTHON_MAJOR=$($PYTHON_CMD -c "import sys; print(sys.version_info.major)" 2>/dev/null || echo "0")
+            PYTHON_MINOR=$($PYTHON_CMD -c "import sys; print(sys.version_info.minor)" 2>/dev/null || echo "0")
+
+            if [ "$PYTHON_MAJOR" -ge 3 ] && [ "$PYTHON_MINOR" -ge 7 ]; then
+                print_success "Python version meets requirements (>= $MIN_PYTHON_VERSION)"
+                return 0
+            else
+                print_error "Installed Python version is too old: $PYTHON_VERSION"
+                print_error "Python $MIN_PYTHON_VERSION or higher is required"
+                return 1
+            fi
+        else
+            print_error "Python was installed but cannot be found in PATH"
+            print_info "Please restart your terminal and run this setup script again"
+            print_info "If the problem persists, verify Python is installed and in your PATH environment variable"
+            return 1
+        fi
     else
-        print_warning "Python might require terminal restart to be available"
+        print_error "Python installation appears to have failed or is not accessible"
         print_info "Please restart your terminal and run this setup script again"
-        return 0  # Return 0 since installation likely succeeded but needs restart
+        print_info "If the issue persists, check that:"
+        echo "  - Python was installed successfully"
+        echo "  - Python was added to your PATH environment variable"
+        echo "  - You have appropriate permissions to access Python"
+        echo -e "  - You may need to install Python manually from https://www.python.org/downloads/"
+        return 1  # Return 1 to indicate that setup should not continue
     fi
 }
 
@@ -420,10 +577,34 @@ offer_python_installation() {
                 ;;
             windows)
                 if install_python_windows; then
-                    print_success "Python installation completed!"
-                    print_info "Please restart your terminal and run this setup script again"
-                    print_info "The new terminal will recognize the installed Python"
-                    exit 0  # Exit this setup run, user needs to restart terminal
+                    print_success "Python installation completed successfully!"
+                    echo -e "${CYAN}Verifying installation...${NC}"
+
+                    # Try to find the newly installed Python
+                    if PYTHON_CMD=$(find_python_command); then
+                        print_success "Found Python command: $PYTHON_CMD"
+                        PYTHON_VERSION=$($PYTHON_CMD --version 2>&1 | grep -oP '\d+\.\d+\.\d+' || echo "unknown")
+                        print_success "Python version: $PYTHON_VERSION"
+
+                        # Verify minimum version
+                        PYTHON_MAJOR=$($PYTHON_CMD -c "import sys; print(sys.version_info.major)" 2>/dev/null || echo "0")
+                        PYTHON_MINOR=$($PYTHON_CMD -c "import sys; print(sys.version_info.minor)" 2>/dev/null || echo "0")
+
+                        if [ "$PYTHON_MAJOR" -ge 3 ] && [ "$PYTHON_MINOR" -ge 7 ]; then
+                            print_success "Python installation verified and meets requirements"
+                            print_info "Please restart your terminal for changes to take effect"
+                            return 0  # Success - continue with setup
+                        else
+                            print_error "Installed Python version is too old: $PYTHON_VERSION"
+                            print_error "Python $MIN_PYTHON_VERSION or higher is required"
+                            print_info "Please install a newer version of Python manually from https://www.python.org/downloads/"
+                            exit 1
+                        fi
+                    else
+                        print_error "Python was installed but cannot be found in PATH"
+                        print_info "Please restart your terminal and run this setup script again"
+                        exit 1
+                    fi
                 else
                     print_error "Python installation failed"
                     echo -e "${YELLOW}Please install Python 3.7+ manually from https://www.python.org/downloads/${NC}"
