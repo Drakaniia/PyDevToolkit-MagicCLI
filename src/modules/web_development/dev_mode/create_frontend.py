@@ -328,8 +328,7 @@ class CreateFrontendCommand(DevModeCommand):
             self._show_next_steps(project_name, pkg_manager, framework_name)
         
         except subprocess.CalledProcessError as e:
-            print(f"
-Failed to create project: {e}")
+            print(f"\nFailed to create project: {e}")
         except Exception as e:
             print(f"\nError: {e}")
     
