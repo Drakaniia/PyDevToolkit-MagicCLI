@@ -63,7 +63,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "magic=main:main",
+            "magic=cli.magic:main",
         ],
     },
     include_package_data=True,

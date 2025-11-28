@@ -76,20 +76,17 @@ print_step() {
 
 ask_yes_no() {
     local prompt="$1"
-    local default="${2:-y}"
-    
-    if [ "$default" = "y" ]; then
-        echo -e "${YELLOW}${prompt} [Y/n]:${NC} "
-    else
-        echo -e "${YELLOW}${prompt} [y/N]:${NC} "
-    fi
-    
+    # Force 'y' to always be the default, ignoring any passed default value
+    local default="y"
+
+    echo -e "${YELLOW}${prompt} [Y/n] (Y default):${NC} "
+
     read -r response
-    
+
     if [ -z "$response" ]; then
         response="$default"
     fi
-    
+
     case "$response" in
         [Yy]|[Yy][Ee][Ss]) return 0 ;;
         *) return 1 ;;
