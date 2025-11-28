@@ -28,7 +28,7 @@ bash scripts/setup.sh
 # 3. Reload your shell
 source ~/.bashrc  # or ~/.zshrc
 
-# 4. Start using it anywhere!
+# 4. Start using it anywhere
 magic
 ```
 
