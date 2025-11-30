@@ -1217,15 +1217,156 @@ class GitPushRetry:
         print("\n" + "="*60)
     
     def _show_push_summary(self):
-        """Show summary after successful push"""
+        """Show visually appealing summary after successful push"""
         try:
+            # Import colorama for colors
+            from colorama import Fore, Style, init
+            init()
+            
+            print("\n" + "="*70)
+            print(f"{Fore.GREEN}{'PUSH SUCCESSFUL!':^70}{Style.RESET_ALL}")
+            print("="*70)
+            
+            # Get latest commit info
             commits = self.git.log(limit=1)
             if commits:
                 commit = commits[0]
-                print(" Latest commit:")
-                print(f"   {commit['short_hash']} - {commit['message']}")
-                print(f"   by {commit['author']}")
-                print()
+                print(f"\n{Fore.CYAN}Latest Commit:{Style.RESET_ALL}")
+                print(f"    {commit['short_hash']} - {commit['message']}")
+                print(f"    Author: {commit['author']}")
+            
+            # Get diff statistics for the pushed commit
+            self._show_commit_statistics()
+            
+            # Get repository status
+            self._show_repository_status()
+            
+            print("\n" + "="*70)
+            print(f"{Fore.GREEN}{'All changes pushed successfully!':^70}{Style.RESET_ALL}")
+            print("="*70 + "\n")
+            
+        except Exception as e:
+            print(f"  Could not generate full summary: {e}")
+    
+    def _show_commit_statistics(self):
+        """Show detailed file change statistics"""
+        try:
+            # Import colorama for colors
+            from colorama import Fore, Style, init
+            init()
+            
+            # Get statistics for the latest commit
+            result = self.git._run_command(
+                ['git', 'show', '--stat', '--format=', 'HEAD'],
+                check=False
+            )
+            
+            if result.returncode == 0 and result.stdout.strip():
+                print(f"\n{Fore.YELLOW}Commit Statistics:{Style.RESET_ALL}")
+                
+                stats_lines = result.stdout.strip().split('\n')
+                for line in stats_lines:
+                    if line.strip():
+                        # Parse the stat line
+                        if ' changed' in line:
+                            # This is the summary line
+                            import re
+                            match = re.search(r'(\d+)\s+files?\s+changed(?:,\s+(\d+)\s+insertions?\(\+\))?(?:,\s+(\d+)\s+deletions?\(-\))?', line)
+                            if match:
+                                files_changed = match.group(1)
+                                insertions = match.group(2) or '0'
+                                deletions = match.group(3) or '0'
+                                
+                                print(f"    {Fore.BLUE}Files changed:{Style.RESET_ALL} {files_changed}")
+                                print(f"    {Fore.GREEN}Insertions:{Style.RESET_ALL}   {insertions}")
+                                print(f"    {Fore.RED}Deletions:{Style.RESET_ALL}    {deletions}")
+                        else:
+                            # This is a file line, show it with proper formatting
+                            print(f"    {line}")
+            else:
+                # Fallback: try to get diff stats for the last commit
+                self._show_fallback_statistics()
+                
+        except Exception:
+            # Fallback method
+            self._show_fallback_statistics()
+    
+    def _show_fallback_statistics(self):
+        """Fallback method to show statistics"""
+        try:
+            # Import colorama for colors
+            from colorama import Fore, Style, init
+            init()
+            
+            # Try to get simple stat output
+            result = self.git._run_command(
+                ['git', 'diff', '--stat', 'HEAD~1', 'HEAD'],
+                check=False
+            )
+            
+            if result.returncode == 0 and result.stdout.strip():
+                print(f"\n{Fore.YELLOW}Commit Statistics:{Style.RESET_ALL}")
+                lines = result.stdout.strip().split('\n')
+                for line in lines:
+                    if line.strip() and not line.startswith(' '):
+                        print(f"    {line}")
+            else:
+                print(f"\n{Fore.YELLOW}Commit Statistics:{Style.RESET_ALL}")
+                print(f"    {Fore.CYAN}Detailed statistics not available{Style.RESET_ALL}")
+        except Exception:
+            print(f"\n{Fore.YELLOW}Commit Statistics:{Style.RESET_ALL}")
+            print(f"    {Fore.CYAN}Statistics not available{Style.RESET_ALL}")
+    
+    def _show_repository_status(self):
+        """Show current repository status"""
+        try:
+            # Import colorama for colors
+            from colorama import Fore, Style, init
+            init()
+            
+            # Get current branch
+            current_branch = self.git.current_branch()
+            print(f"\n{Fore.MAGENTA}Current Branch:{Style.RESET_ALL} {current_branch}")
+            
+            # Check if there are any uncommitted changes
+            status = self.git.status(porcelain=True)
+            if status and status.strip():
+                print(f"{Fore.YELLOW}You have uncommitted changes:{Style.RESET_ALL}")
+                lines = status.strip().split('\n')[:5]  # Show first 5 files
+                for line in lines:
+                    if line.strip():
+                        status_code = line[:2]
+                        file_path = line[3:]
+                        
+                        if status_code.startswith('??'):
+                            print(f"    {Fore.GREEN}Untracked:{Style.RESET_ALL} {file_path}")
+                        elif status_code[0] in ['M', 'A']:
+                            print(f"    {Fore.BLUE}Modified:{Style.RESET_ALL} {file_path}")
+                        elif status_code[0] == 'D':
+                            print(f"    {Fore.RED}Deleted:{Style.RESET_ALL} {file_path}")
+                
+                status_lines = status.strip().split('\n')
+                if len(status_lines) > 5:
+                    print(f"    ... and {len(status_lines) - 5} more files")
+            else:
+                print(f"{Fore.GREEN}Working directory clean{Style.RESET_ALL}")
+                
+            # Get remote info
+            try:
+                remote_result = self.git._run_command(
+                    ['git', 'remote', '-v'],
+                    check=False
+                )
+                if remote_result.returncode == 0 and remote_result.stdout.strip():
+                    print(f"\n{Fore.CYAN}Remote:{Style.RESET_ALL}")
+                    for line in remote_result.stdout.strip().split('\n')[:2]:  # Show first 2 remotes
+                        if 'origin' in line:
+                            parts = line.split()
+                            if len(parts) >= 2:
+                                print(f"    {parts[1]}")
+            except Exception:
+                pass
+                
         except Exception:
             pass
     
