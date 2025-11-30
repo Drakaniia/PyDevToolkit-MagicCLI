@@ -12,20 +12,27 @@ class TerminalInfo:
     """Handle terminal size and viewport information"""
 
     _cached_size: Optional[Tuple[int, int]] = None
+    _last_check_time: float = 0
+    _check_interval: float = 0.5  # Only check size every 0.5 seconds to reduce overhead
 
     @classmethod
     def get_size(cls) -> Tuple[int, int]:
-        """Get current terminal size (columns, lines) with caching"""
-        if cls._cached_size is not None:
-            return cls._cached_size
+        """Get current terminal size (columns, lines) with caching and rate limiting"""
+        import time
+        current_time = time.time()
 
-        try:
-            size = shutil.get_terminal_size(fallback=(80, 24))
-            cls._cached_size = (size.columns, size.lines)
-            return cls._cached_size
-        except Exception:
-            cls._cached_size = (80, 24)
-            return cls._cached_size
+        # Only update cache if enough time has passed or cache is empty
+        if cls._cached_size is None or (current_time - cls._last_check_time) > cls._check_interval:
+            try:
+                size = shutil.get_terminal_size(fallback=(80, 24))
+                cls._cached_size = (size.columns, size.lines)
+                cls._last_check_time = current_time
+            except Exception:
+                if cls._cached_size is None:  # Only use fallback if no previous value
+                    cls._cached_size = (80, 24)
+                cls._last_check_time = current_time
+
+        return cls._cached_size
 
     @classmethod
     def is_small_viewport(cls) -> bool:
@@ -44,6 +51,7 @@ class TerminalInfo:
     def invalidate_cache(cls) -> None:
         """Invalidate the cached terminal size"""
         cls._cached_size = None
+        cls._last_check_time = 0
 
 
 class MenuRenderer:
@@ -71,12 +79,14 @@ class MenuRenderer:
             initial: Whether this is the initial display
             force_full_redraw: Force complete screen refresh
         """
-        # Invalidate cache to ensure we get current terminal size
-        TerminalInfo.invalidate_cache()
+        # Only invalidate cache if it's initial display or forced redraw to reduce overhead
+        if initial or force_full_redraw:
+            TerminalInfo.invalidate_cache()
+
         cols, lines = TerminalInfo.get_size()
         available_lines = TerminalInfo.get_available_lines()
         is_small = TerminalInfo.is_small_viewport()
-        
+
         # Adjust scroll offset to keep selected item visible
         if len(items) > available_lines:
             # Calculate scroll position
@@ -86,7 +96,7 @@ class MenuRenderer:
                 self._scroll_offset = selected_idx - available_lines + 1
         else:
             self._scroll_offset = 0
-        
+
         if initial or force_full_redraw:
             self._display_full(items, selected_idx, cols, lines, available_lines, is_small)
         else:
@@ -168,19 +178,24 @@ class MenuRenderer:
         if self._scroll_offset > 0:
             base_line += 1
 
+        # Create a buffer to store all output before sending to terminal
+        output_buffer = []
+
         # Update each visible item individually
         for i in range(visible_start, visible_end):
             line_number = base_line + (i - visible_start)
 
             # Move cursor to the line and clear it completely
-            sys.stdout.write(f'\033[{line_number};0H')  # Move to beginning of line
-            sys.stdout.write(self.CLEAR_LINE)
+            output_buffer.append(f'\033[{line_number};0H')  # Move to beginning of line
+            output_buffer.append(self.CLEAR_LINE)
 
             # Redraw the item with proper selection state
             # Reset formatting first, then add content
-            sys.stdout.write('\033[0m')  # Reset all formatting
-            self._print_item_inline(i, items[i], i == selected_idx, cols)
+            output_buffer.append('\033[0m')  # Reset all formatting
+            self._print_item_to_buffer(i, items[i], i == selected_idx, cols, output_buffer)
 
+        # Send all output at once to prevent flickering
+        sys.stdout.write(''.join(output_buffer))
         sys.stdout.flush()
     
     def _print_item(self, index: int, item: Any, is_selected: bool, cols: int) -> None:
@@ -218,6 +233,50 @@ class MenuRenderer:
             full_line = f"    {line_text}"
             # Ensure we reset formatting first, then write content
             sys.stdout.write(f"\033[0m{full_line}")
+
+    def _print_item_to_buffer(self, index: int, item: Any, is_selected: bool, cols: int, buffer: List[str]) -> None:
+        """Add item output to buffer instead of writing directly to stdout"""
+        line_text = f"{index + 1}. {item.label}"
+
+        max_text_width = cols - 6
+        if len(line_text) > max_text_width:
+            line_text = line_text[:max_text_width-3] + "..."
+
+        if is_selected:
+            full_line = f"  > {line_text}"
+            full_line = full_line.ljust(min(70, cols - 2))
+            # Apply highlight and then reset formatting
+            buffer.append(f"\033[1;46m{full_line}\033[0m")
+        else:
+            full_line = f"    {line_text}"
+            # Ensure we reset formatting first, then write content
+            buffer.append(f"\033[0m{full_line}")
+
+    def _calculate_header_info(self, cols: int, lines: int, available_lines: int, is_small: bool) -> List[str]:
+        """Calculate header lines to avoid recalculation during updates"""
+        # Calculate separator width for terminal size
+        sep_width = min(70, cols - 2)
+        header_lines = []
+
+        header_lines.append("=" * sep_width + "\n")
+
+        # Truncate title if needed
+        title_display = self.title[:cols-4] if len(self.title) > cols-4 else self.title
+        header_lines.append(f"  {title_display}\n")
+
+        header_lines.append("=" * sep_width + "\n")
+
+        # Current directory info (truncate for small viewports)
+        from pathlib import Path
+        current_dir = str(Path.cwd())
+        if len(current_dir) > cols - 25:
+            # Show last part of path
+            current_dir = "..." + current_dir[-(cols-28):]
+
+        header_lines.append(f"  [DIR] Current Directory: {current_dir}\n")
+        header_lines.append("=" * sep_width + "\n")
+
+        return header_lines
     
     def _has_arrow_support(self) -> bool:
         """Check if terminal supports arrow keys"""
@@ -235,6 +294,8 @@ class MenuRenderer:
     @staticmethod
     def clear_screen() -> None:
         """Clear the terminal screen and invalidate terminal size cache"""
-        os.system('cls' if os.name == 'nt' else 'clear')
+        # Use ANSI escape codes for faster clearing without system call
+        sys.stdout.write('\033[2J\033[H')  # Clear screen and move cursor to home
+        sys.stdout.flush()
         # Invalidate terminal size cache since window dimensions might change after clear
         TerminalInfo.invalidate_cache()

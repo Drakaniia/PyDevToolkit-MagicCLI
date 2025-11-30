@@ -205,7 +205,12 @@ class StructureViewer:
         print("\n```")
         print(f"{self.current_dir.name}/")
         for line in tree_lines:
-            print(line)
+            try:
+                print(line)
+            except UnicodeEncodeError:
+                # Fallback to ASCII representation if Unicode chars fail
+                line = line.replace('├──', '|--').replace('└──', '`--').replace('│', '|')
+                print(line)
         print("```\n")
         
         input("Press Enter to continue...")
@@ -600,15 +605,15 @@ class StructureViewer:
             # Generate lines for each item
             for i, item in enumerate(shown_items):
                 is_last = (i == len(shown_items) - 1) and (hidden_count == 0)
-                
-                # Tree characters
+
+                # Use proper Unicode tree symbols that match traditional tree format from your example
                 if is_last:
-                    current_prefix = " "
-                    next_prefix = "    "
+                    current_prefix = "└── "  # For last item in directory (proper Unicode character)
+                    next_prefix = "    "     # No vertical line continuation for the last item
                 else:
-                    current_prefix = " "
-                    next_prefix = "   "
-                
+                    current_prefix = "├── "  # For items with siblings below (proper Unicode character)
+                    next_prefix = "│   "     # Vertical line continuation for items with siblings below (proper Unicode character)
+
                 # Display name with size for files (optimized for AI readability)
                 if item.is_dir():
                     display_name = f"{item.name}/"
@@ -622,9 +627,9 @@ class StructureViewer:
                             display_name = item.name
                     except (OSError, PermissionError):
                         display_name = item.name
-                
+
                 lines.append(f"{prefix}{current_prefix}{display_name}")
-                
+
                 # Recurse into subdirectories
                 if item.is_dir():
                     sublines = self._generate_tree(

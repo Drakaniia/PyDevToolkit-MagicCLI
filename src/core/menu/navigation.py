@@ -43,7 +43,7 @@ class MenuNavigation:
     def _arrow_navigation(self, items: List[Any], renderer: Any, initial_display: bool = True) -> int:
         """
         Navigate with arrow keys - optimized for responsiveness
-        
+
         Improvements:
         - Smooth scrolling in small viewports
         - Minimal redraws for large menus
@@ -53,8 +53,8 @@ class MenuNavigation:
         """
         selected_idx = 0
         last_processed_key = None
-        key_debounce_time = 0.05  # Small debounce to prevent rapid duplicate processing
-        
+        key_debounce_time = 0.02  # Reduced debounce for more responsive feel
+
         # Initial display
         if initial_display:
             renderer.display(items, selected_idx, initial=True)
@@ -64,16 +64,16 @@ class MenuNavigation:
         try:
             import time
             last_key_time = 0
-            
+
             while True:
                 try:
                     key = self._getch()
                     current_time = time.time()
-                    
+
                     # Debounce: ignore if same key processed too quickly
                     if key == last_processed_key and (current_time - last_key_time) < key_debounce_time:
                         continue
-                    
+
                     last_processed_key = key
                     last_key_time = current_time
 
@@ -127,8 +127,8 @@ class MenuNavigation:
                     # Update selection if changed
                     if new_idx != old_idx:
                         selected_idx = new_idx
-                        # Force full redraw to prevent duplication issues
-                        renderer.display(items, selected_idx, initial=False, force_full_redraw=True)
+                        # Use partial update instead of full redraw for better performance
+                        renderer.display(items, selected_idx, initial=False, force_full_redraw=False)
 
                     if should_select:
                         sys.stdout.write(renderer.SHOW_CURSOR)

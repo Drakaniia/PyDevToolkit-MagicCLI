@@ -78,7 +78,8 @@ class Menu(ABC):
         """
         while True:
             choice = self.get_choice_with_arrows()
-            self._renderer.clear_screen()
+
+            # Clear screen only after a selection is made, not during navigation
             result = self.items[choice - 1].action()
             if result == "exit":
                 break
