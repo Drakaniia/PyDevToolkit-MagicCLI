@@ -1274,7 +1274,7 @@ class GitPushRetry:
             if result.returncode == 0 and result.stdout.strip():
                 # Create a beautiful header with gradient effect
                 print(f"\n{Fore.CYAN}╔{'═'*78}╗{Style.RESET_ALL}")
-                print(f"{Fore.CYAN}║{Fore.YELLOW}{'📊COMMIT STATISTICS':^78}{Fore.CYAN}║{Style.RESET_ALL}")
+                print(f"{Fore.CYAN}║{Fore.YELLOW}{'📊COMMIT STATISTICS':^77}{Fore.CYAN}║{Style.RESET_ALL}")
                 print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
                 
                 stats_lines = result.stdout.strip().split('\n')
