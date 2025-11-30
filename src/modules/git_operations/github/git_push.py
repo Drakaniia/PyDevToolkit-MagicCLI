@@ -1272,10 +1272,9 @@ class GitPushRetry:
             )
             
             if result.returncode == 0 and result.stdout.strip():
-                # Create a beautiful header with gradient effect
-                print(f"\n{Fore.CYAN}╔{'═'*78}╗{Style.RESET_ALL}")
-                print(f"{Fore.CYAN}║{Fore.YELLOW}{'📊COMMIT STATISTICS':^77}{Fore.CYAN}║{Style.RESET_ALL}")
-                print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
+                # Create a beautiful header
+                print(f"\n{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Style.RESET_ALL}")
+                print("="*78)
                 
                 stats_lines = result.stdout.strip().split('\n')
                 file_changes = []
@@ -1300,8 +1299,8 @@ class GitPushRetry:
                         total_changes = insertions + deletions
                         
                         # Summary section with visual indicators
-                        print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.BLUE}📁 Files Changed:{Style.RESET_ALL} {files_changed:<3} {Fore.CYAN}│{Style.RESET_ALL} {Fore.GREEN}➕ Insertions:{Style.RESET_ALL} {insertions:<4} {Fore.CYAN}│{Style.RESET_ALL} {Fore.RED}➖ Deletions:{Style.RESET_ALL} {deletions:<18} {Fore.CYAN}║{Style.RESET_ALL}")
-                        print(f"{Fore.CYAN}╟{'─'*78}╢{Style.RESET_ALL}")
+                        print(f"{Fore.BLUE}📁 Files Changed:{Style.RESET_ALL} {files_changed:<3} │ {Fore.GREEN}➕ Insertions:{Style.RESET_ALL} {insertions:<4} │ {Fore.RED}➖ Deletions:{Style.RESET_ALL} {deletions:<18}")
+                        print("-"*78)
                         
                         # Visual representation of changes
                         if total_changes > 0:
@@ -1314,12 +1313,12 @@ class GitPushRetry:
                             del_width = int((del_percentage / 100) * bar_width)
                             
                             # Insertions bar
-                            print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.GREEN}Insertions:{Style.RESET_ALL}")
-                            print(f"{Fore.CYAN}║{Style.RESET_ALL}   [{Fore.GREEN}{'█' * ins_width}{Style.DIM}{'░' * (bar_width - ins_width)}{Style.RESET_ALL}] {ins_percentage:.1f}% ({insertions} lines) {Fore.CYAN}║{Style.RESET_ALL}")
+                            print(f"{Fore.GREEN}Insertions:{Style.RESET_ALL}")
+                            print(f"   [{Fore.GREEN}{'█' * ins_width}{Style.DIM}{'░' * (bar_width - ins_width)}{Style.RESET_ALL}] {ins_percentage:.1f}% ({insertions} lines)")
                             
                             # Deletions bar
-                            print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.RED}Deletions:{Style.RESET_ALL}")
-                            print(f"{Fore.CYAN}║{Style.RESET_ALL}   [{Fore.RED}{'█' * del_width}{Style.DIM}{'░' * (bar_width - del_width)}{Style.RESET_ALL}] {del_percentage:.1f}% ({deletions} lines) {Fore.CYAN}║{Style.RESET_ALL}")
+                            print(f"{Fore.RED}Deletions:{Style.RESET_ALL}")
+                            print(f"   [{Fore.RED}{'█' * del_width}{Style.DIM}{'░' * (bar_width - del_width)}{Style.RESET_ALL}] {del_percentage:.1f}% ({deletions} lines)")
                             
                             # Net change indicator
                             net_change = insertions - deletions
@@ -1333,13 +1332,13 @@ class GitPushRetry:
                                 net_color = Fore.YELLOW
                                 net_symbol = "→"
                             
-                            print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.YELLOW}Net Change:{Style.RESET_ALL} {net_color}{net_symbol} {abs(net_change)} lines{Style.RESET_ALL} {'':<38} {Fore.CYAN}║{Style.RESET_ALL}")
+                            print(f"{Fore.YELLOW}Net Change:{Style.RESET_ALL} {net_color}{net_symbol} {abs(net_change)} lines{Style.RESET_ALL}")
                 
                 # Display detailed file changes if any
                 if file_changes:
-                    print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
-                    print(f"{Fore.CYAN}║{Fore.MAGENTA}{'📋 DETAILED FILE CHANGES':^78}{Fore.CYAN}║{Style.RESET_ALL}")
-                    print(f"{Fore.CYAN}╟{'─'*78}╢{Style.RESET_ALL}")
+                    print("\n" + "="*78)
+                    print(f"{Fore.MAGENTA}{'📋 DETAILED FILE CHANGES':^78}{Style.RESET_ALL}")
+                    print("-"*78)
                     
                     # Sort files by change count (most changes first)
                     file_data = []
@@ -1380,16 +1379,15 @@ class GitPushRetry:
                             change_color = Fore.WHITE
                             change_type = "Changed"
                         
-                        print(f"{Fore.CYAN}║{Style.RESET_ALL} {change_color}{change_type:>8}:{Style.RESET_ALL} {display_path:<45} {changes:>4} changes {Fore.CYAN}║{Style.RESET_ALL}")
+                        print(f"  {change_color}{change_type:>8}:{Style.RESET_ALL} {display_path:<45} {changes:>4} changes")
                     
                     if len(file_changes) > 15:
-                        print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.CYAN}{'... and ' + str(len(file_changes) - 15) + ' more files':^78} {Fore.CYAN}║{Style.RESET_ALL}")
+                        print(f"  {'... and ' + str(len(file_changes) - 15) + ' more files':^78}")
                 
                 # Footer with summary
-                print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
+                print("\n" + "="*78)
                 if summary_line and match:
-                    print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.CYAN}{'Total: ' + str(total_changes) + ' lines changed across ' + str(files_changed) + ' file(s)':^78} {Fore.CYAN}║{Style.RESET_ALL}")
-                print(f"{Fore.CYAN}╚{'═'*78}╝{Style.RESET_ALL}")
+                    print(f"{'Total: ' + str(total_changes) + ' lines changed across ' + str(files_changed) + ' file(s)':^78}")
             else:
                 # Fallback: try to get diff stats for the last commit
                 self._show_fallback_statistics()
@@ -1411,26 +1409,24 @@ class GitPushRetry:
                 check=False
             )
             
-            # Create a beautiful header for statistics
-            print(f"\n{Fore.CYAN}╔{'═'*78}╗{Style.RESET_ALL}")
-            print(f"{Fore.CYAN}║{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Fore.CYAN}║{Style.RESET_ALL}")
-            print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
+            # Create a simple header for statistics
+            print(f"\n{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Style.RESET_ALL}")
+            print("="*78)
             
             if result.returncode == 0 and result.stdout.strip():
                 lines = result.stdout.strip().split('\n')
                 for line in lines:
                     if line.strip() and not line.startswith(' '):
-                        print(f"{Fore.CYAN}║{Style.RESET_ALL} {line:<76} {Fore.CYAN}║{Style.RESET_ALL}")
-                print(f"{Fore.CYAN}╚{'═'*78}╝{Style.RESET_ALL}")
+                        print(f"  {line}")
+                print("="*78)
             else:
-                print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.CYAN}{'Detailed statistics not available':^76} {Fore.CYAN}║{Style.RESET_ALL}")
-                print(f"{Fore.CYAN}╚{'═'*78}╝{Style.RESET_ALL}")
+                print(f"  {'Detailed statistics not available':^78}")
+                print("="*78)
         except Exception:
-            print(f"\n{Fore.CYAN}╔{'═'*78}╗{Style.RESET_ALL}")
-            print(f"{Fore.CYAN}║{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Fore.CYAN}║{Style.RESET_ALL}")
-            print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
-            print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.CYAN}{'Statistics not available':^76} {Fore.CYAN}║{Style.RESET_ALL}")
-            print(f"{Fore.CYAN}╚{'═'*78}╝{Style.RESET_ALL}")
+            print(f"\n{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Style.RESET_ALL}")
+            print("="*78)
+            print(f"  {'Statistics not available':^78}")
+            print("="*78)
     
     def _show_repository_status(self):
         """Show current repository status"""
