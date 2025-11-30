@@ -1259,7 +1259,7 @@ class GitPushRetry:
             print(f"    Could not retrieve commit details: {e}")
     
     def _show_commit_statistics(self):
-        """Show detailed file change statistics"""
+        """Show comprehensive file change statistics with beautiful design"""
         try:
             # Import colorama for colors
             from colorama import Fore, Style, init
@@ -1272,27 +1272,124 @@ class GitPushRetry:
             )
             
             if result.returncode == 0 and result.stdout.strip():
-                print(f"\n{Fore.YELLOW}Commit Statistics:{Style.RESET_ALL}")
+                # Create a beautiful header with gradient effect
+                print(f"\n{Fore.CYAN}╔{'═'*78}╗{Style.RESET_ALL}")
+                print(f"{Fore.CYAN}║{Fore.YELLOW}{'📊COMMIT STATISTICS':^78}{Fore.CYAN}║{Style.RESET_ALL}")
+                print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
                 
                 stats_lines = result.stdout.strip().split('\n')
+                file_changes = []
+                summary_line = None
+                
+                # Separate file changes from summary
                 for line in stats_lines:
                     if line.strip():
-                        # Parse the stat line
                         if ' changed' in line:
-                            # This is the summary line
-                            import re
-                            match = re.search(r'(\d+)\s+files?\s+changed(?:,\s+(\d+)\s+insertions?\(\+\))?(?:,\s+(\d+)\s+deletions?\(-\))?', line)
-                            if match:
-                                files_changed = match.group(1)
-                                insertions = match.group(2) or '0'
-                                deletions = match.group(3) or '0'
-                                
-                                print(f"    {Fore.BLUE}Files changed:{Style.RESET_ALL} {files_changed}")
-                                print(f"    {Fore.GREEN}Insertions:{Style.RESET_ALL}   {insertions}")
-                                print(f"    {Fore.RED}Deletions:{Style.RESET_ALL}    {deletions}")
+                            summary_line = line
                         else:
-                            # This is a file line, show it with proper formatting
-                            print(f"    {line}")
+                            file_changes.append(line)
+                
+                # Parse and display summary with enhanced visuals
+                if summary_line:
+                    import re
+                    match = re.search(r'(\d+)\s+files?\s+changed(?:,\s+(\d+)\s+insertions?\(\+\))?(?:,\s+(\d+)\s+deletions?\(-\))?', summary_line)
+                    if match:
+                        files_changed = int(match.group(1))
+                        insertions = int(match.group(2) or '0')
+                        deletions = int(match.group(3) or '0')
+                        total_changes = insertions + deletions
+                        
+                        # Summary section with visual indicators
+                        print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.BLUE}📁 Files Changed:{Style.RESET_ALL} {files_changed:<3} {Fore.CYAN}│{Style.RESET_ALL} {Fore.GREEN}➕ Insertions:{Style.RESET_ALL} {insertions:<4} {Fore.CYAN}│{Style.RESET_ALL} {Fore.RED}➖ Deletions:{Style.RESET_ALL} {deletions:<4} {Fore.CYAN}║{Style.RESET_ALL}")
+                        print(f"{Fore.CYAN}╟{'─'*78}╢{Style.RESET_ALL}")
+                        
+                        # Visual representation of changes
+                        if total_changes > 0:
+                            ins_percentage = (insertions / total_changes) * 100
+                            del_percentage = (deletions / total_changes) * 100
+                            
+                            # Create progress bars
+                            bar_width = 50
+                            ins_width = int((ins_percentage / 100) * bar_width)
+                            del_width = int((del_percentage / 100) * bar_width)
+                            
+                            # Insertions bar
+                            print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.GREEN}Insertions:{Style.RESET_ALL}")
+                            print(f"{Fore.CYAN}║{Style.RESET_ALL}   [{Fore.GREEN}{'█' * ins_width}{Style.DIM}{'░' * (bar_width - ins_width)}{Style.RESET_ALL}] {ins_percentage:.1f}% ({insertions} lines) {Fore.CYAN}║{Style.RESET_ALL}")
+                            
+                            # Deletions bar
+                            print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.RED}Deletions:{Style.RESET_ALL}")
+                            print(f"{Fore.CYAN}║{Style.RESET_ALL}   [{Fore.RED}{'█' * del_width}{Style.DIM}{'░' * (bar_width - del_width)}{Style.RESET_ALL}] {del_percentage:.1f}% ({deletions} lines) {Fore.CYAN}║{Style.RESET_ALL}")
+                            
+                            # Net change indicator
+                            net_change = insertions - deletions
+                            if net_change > 0:
+                                net_color = Fore.GREEN
+                                net_symbol = "↑"
+                            elif net_change < 0:
+                                net_color = Fore.RED
+                                net_symbol = "↓"
+                            else:
+                                net_color = Fore.YELLOW
+                                net_symbol = "→"
+                            
+                            print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.YELLOW}Net Change:{Style.RESET_ALL} {net_color}{net_symbol} {abs(net_change)} lines{Style.RESET_ALL} {'':<38} {Fore.CYAN}║{Style.RESET_ALL}")
+                
+                # Display detailed file changes if any
+                if file_changes:
+                    print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
+                    print(f"{Fore.CYAN}║{Fore.MAGENTA}{'📋 DETAILED FILE CHANGES':^78}{Fore.CYAN}║{Style.RESET_ALL}")
+                    print(f"{Fore.CYAN}╟{'─'*78}╢{Style.RESET_ALL}")
+                    
+                    # Sort files by change count (most changes first)
+                    file_data = []
+                    for line in file_changes[:15]:  # Show max 15 files
+                        if line.strip() and '|' in line:
+                            file_part, stats_part = line.rsplit('|', 1)
+                            file_path = file_part.strip()
+                            
+                            # Extract numbers from stats
+                            import re
+                            stats_match = re.search(r'(\d+)(?:\s*([+-]+))?', stats_part.strip())
+                            if stats_match:
+                                changes = int(stats_match.group(1))
+                                symbols = stats_match.group(2) or ''
+                                
+                                file_data.append((file_path, changes, symbols))
+                    
+                    # Sort by number of changes
+                    file_data.sort(key=lambda x: x[1], reverse=True)
+                    
+                    for file_path, changes, symbols in file_data:
+                        # Truncate long file paths
+                        display_path = file_path
+                        if len(file_path) > 60:
+                            display_path = '...' + file_path[-57:]
+                        
+                        # Color code based on change type
+                        if '+' in symbols and '-' in symbols:
+                            change_color = Fore.YELLOW
+                            change_type = "Modified"
+                        elif '+' in symbols:
+                            change_color = Fore.GREEN
+                            change_type = "Added"
+                        elif '-' in symbols:
+                            change_color = Fore.RED
+                            change_type = "Deleted"
+                        else:
+                            change_color = Fore.WHITE
+                            change_type = "Changed"
+                        
+                        print(f"{Fore.CYAN}║{Style.RESET_ALL} {change_color}{change_type:>8}:{Style.RESET_ALL} {display_path:<45} {changes:>4} changes {Fore.CYAN}║{Style.RESET_ALL}")
+                    
+                    if len(file_changes) > 15:
+                        print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.CYAN}{'... and ' + str(len(file_changes) - 15) + ' more files':^78} {Fore.CYAN}║{Style.RESET_ALL}")
+                
+                # Footer with summary
+                print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
+                if summary_line and match:
+                    print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.CYAN}{'Total: ' + str(total_changes) + ' lines changed across ' + str(files_changed) + ' file(s)':^78} {Fore.CYAN}║{Style.RESET_ALL}")
+                print(f"{Fore.CYAN}╚{'═'*78}╝{Style.RESET_ALL}")
             else:
                 # Fallback: try to get diff stats for the last commit
                 self._show_fallback_statistics()
@@ -1302,7 +1399,7 @@ class GitPushRetry:
             self._show_fallback_statistics()
     
     def _show_fallback_statistics(self):
-        """Fallback method to show statistics"""
+        """Fallback method to show comprehensive statistics"""
         try:
             # Import colorama for colors
             from colorama import Fore, Style, init
@@ -1314,18 +1411,26 @@ class GitPushRetry:
                 check=False
             )
             
+            # Create a beautiful header for statistics
+            print(f"\n{Fore.CYAN}╔{'═'*78}╗{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}║{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Fore.CYAN}║{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
+            
             if result.returncode == 0 and result.stdout.strip():
-                print(f"\n{Fore.YELLOW}Commit Statistics:{Style.RESET_ALL}")
                 lines = result.stdout.strip().split('\n')
                 for line in lines:
                     if line.strip() and not line.startswith(' '):
-                        print(f"    {line}")
+                        print(f"{Fore.CYAN}║{Style.RESET_ALL} {line:<76} {Fore.CYAN}║{Style.RESET_ALL}")
+                print(f"{Fore.CYAN}╚{'═'*78}╝{Style.RESET_ALL}")
             else:
-                print(f"\n{Fore.YELLOW}Commit Statistics:{Style.RESET_ALL}")
-                print(f"    {Fore.CYAN}Detailed statistics not available{Style.RESET_ALL}")
+                print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.CYAN}{'Detailed statistics not available':^76} {Fore.CYAN}║{Style.RESET_ALL}")
+                print(f"{Fore.CYAN}╚{'═'*78}╝{Style.RESET_ALL}")
         except Exception:
-            print(f"\n{Fore.YELLOW}Commit Statistics:{Style.RESET_ALL}")
-            print(f"    {Fore.CYAN}Statistics not available{Style.RESET_ALL}")
+            print(f"\n{Fore.CYAN}╔{'═'*78}╗{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}║{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Fore.CYAN}║{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}╠{'═'*78}╣{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.CYAN}{'Statistics not available':^76} {Fore.CYAN}║{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}╚{'═'*78}╝{Style.RESET_ALL}")
     
     def _show_repository_status(self):
         """Show current repository status"""
