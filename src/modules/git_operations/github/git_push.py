@@ -1300,7 +1300,7 @@ class GitPushRetry:
                         total_changes = insertions + deletions
                         
                         # Summary section with visual indicators
-                        print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.BLUE}📁 Files Changed:{Style.RESET_ALL} {files_changed:<3} {Fore.CYAN}│{Style.RESET_ALL} {Fore.GREEN}➕ Insertions:{Style.RESET_ALL} {insertions:<4} {Fore.CYAN}│{Style.RESET_ALL} {Fore.RED}➖ Deletions:{Style.RESET_ALL} {deletions:<4} {Fore.CYAN}║{Style.RESET_ALL}")
+                        print(f"{Fore.CYAN}║{Style.RESET_ALL} {Fore.BLUE}📁 Files Changed:{Style.RESET_ALL} {files_changed:<3} {Fore.CYAN}│{Style.RESET_ALL} {Fore.GREEN}➕ Insertions:{Style.RESET_ALL} {insertions:<4} {Fore.CYAN}│{Style.RESET_ALL} {Fore.RED}➖ Deletions:{Style.RESET_ALL} {deletions:<10} {Fore.CYAN}║{Style.RESET_ALL}")
                         print(f"{Fore.CYAN}╟{'─'*78}╢{Style.RESET_ALL}")
                         
                         # Visual representation of changes
