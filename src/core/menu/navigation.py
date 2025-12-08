@@ -86,9 +86,9 @@ class MenuNavigation:
                         if key in ('\xe0', '\x00'):
                             arrow = self._getch()
                             if arrow == 'H':  # Up
-                                new_idx = max(0, selected_idx - 1)
+                                new_idx = (selected_idx - 1) % len(items) if selected_idx > 0 else len(items) - 1
                             elif arrow == 'P':  # Down
-                                new_idx = min(len(items) - 1, selected_idx + 1)
+                                new_idx = (selected_idx + 1) % len(items)
                         elif key == '\r':  # Enter
                             should_select = True
                         elif key.isdigit():
@@ -108,9 +108,9 @@ class MenuNavigation:
                             if next_key == '[':
                                 arrow = self._getch()
                                 if arrow == 'A':  # Up
-                                    new_idx = max(0, selected_idx - 1)
+                                    new_idx = (selected_idx - 1) % len(items) if selected_idx > 0 else len(items) - 1
                                 elif arrow == 'B':  # Down
-                                    new_idx = min(len(items) - 1, selected_idx + 1)
+                                    new_idx = (selected_idx + 1) % len(items)
                         elif key in ['\r', '\n']:  # Enter
                             should_select = True
                         elif key.isdigit():
