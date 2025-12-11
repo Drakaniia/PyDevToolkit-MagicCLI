@@ -77,11 +77,17 @@ class Menu(ABC):
         It will continue until a menu item returns "exit".
         """
         while True:
-            choice = self.get_choice_with_arrows()
+            try:
+                choice = self.get_choice_with_arrows()
 
-            # Clear screen only after a selection is made, not during navigation
-            result = self.items[choice - 1].action()
-            if result == "exit":
+                # Clear screen only after a selection is made, not during navigation
+                result = self.items[choice - 1].action()
+                if result == "exit":
+                    break
+            except KeyboardInterrupt:
+                # Handle Ctrl+C globally to return to main menu instead of crashing
+                print("\n\nOperation cancelled by user.")
+                self.clear_screen()
                 break
 
     @staticmethod

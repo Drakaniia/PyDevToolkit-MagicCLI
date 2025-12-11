@@ -98,9 +98,8 @@ class MenuNavigation:
                                 selected_idx = num - 1
                                 should_select = True
                         elif key == '\x03':  # Ctrl+C
-                            should_exit = True
-                            selected_idx = len(items) - 1
-                            should_select = True
+                            # Raise KeyboardInterrupt to be caught by outer function
+                            raise KeyboardInterrupt()
 
                     else:  # Unix/Linux/Mac
                         if key == '\x1b':  # ESC sequence
@@ -120,14 +119,19 @@ class MenuNavigation:
                                 selected_idx = num - 1
                                 should_select = True
                         elif key in ['\x03', '\x04']:  # Ctrl+C or Ctrl+D
-                            should_exit = True
-                            selected_idx = len(items) - 1
-                            should_select = True
+                            # For Ctrl+C, raise KeyboardInterrupt to be caught by outer function
+                            if key == '\x03':
+                                raise KeyboardInterrupt()
+                            # For Ctrl+D, exit normally
+                            else:
+                                should_exit = True
+                                selected_idx = len(items) - 1
+                                should_select = True
 
                     # Update selection if changed
                     if new_idx != old_idx:
                         selected_idx = new_idx
-                        # Use partial update instead of full redraw for better performance
+                        # Use partial update for smooth navigation without flickering
                         renderer.display(items, selected_idx, initial=False, force_full_redraw=False)
 
                     if should_select:
@@ -161,8 +165,8 @@ class MenuNavigation:
             except ValueError:
                 print("Please enter a valid number")
             except KeyboardInterrupt:
-                print("\n\nExiting...")
-                return len(items)
+                # Re-raise the exception to be handled by the calling function
+                raise
     
     def _getch(self) -> str:
         """Get a single character from stdin"""

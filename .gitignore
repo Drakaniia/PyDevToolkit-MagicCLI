@@ -84,3 +84,9 @@ htmlcov/
 coverage.xml
 
 .aider*
+
+# Additional directories to ignore
+/codebuddy/
+.openspec/
+.iflow/
+.qwen/

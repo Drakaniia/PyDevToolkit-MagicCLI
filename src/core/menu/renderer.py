@@ -88,6 +88,7 @@ class MenuRenderer:
         is_small = TerminalInfo.is_small_viewport()
 
         # Adjust scroll offset to keep selected item visible
+        old_scroll_offset = self._scroll_offset
         if len(items) > available_lines:
             # Calculate scroll position
             if selected_idx < self._scroll_offset:
@@ -97,11 +98,13 @@ class MenuRenderer:
         else:
             self._scroll_offset = 0
 
-        if initial or force_full_redraw:
+        # Do a full redraw when scrolling offset changes to properly update scroll indicators
+        if initial or force_full_redraw or self._scroll_offset != old_scroll_offset:
             self._display_full(items, selected_idx, cols, lines, available_lines, is_small)
         else:
             # Only update the changed items for smooth navigation
-            self._update_visible_items(items, selected_idx, available_lines)
+            # but also update scroll indicators if they've changed
+            self._update_visible_items_and_indicators(items, selected_idx, available_lines, cols)
     
     def _display_full(self, items: List[Any], selected_idx: int, cols: int, lines: int,
                       available_lines: int, is_small: bool) -> None:
@@ -178,34 +181,148 @@ class MenuRenderer:
         if self._scroll_offset > 0:
             base_line += 1
 
-        # Create a buffer to store all output before sending to terminal
-        output_buffer = []
+        # Calculate the full range of lines that need to be updated
+        # This includes potential blank lines at the end
+        total_visible_lines = min(available_lines, len(items) - visible_start)
 
-        # Update each visible item individually
-        for i in range(visible_start, visible_end):
-            line_number = base_line + (i - visible_start)
+        # Prepare content for all potentially visible lines
+        lines_to_update = []
+        for idx_in_viewport in range(total_visible_lines):
+            actual_idx = visible_start + idx_in_viewport
 
-            # Move cursor to the line and clear it completely
-            output_buffer.append(f'\033[{line_number};0H')  # Move to beginning of line
-            output_buffer.append(self.CLEAR_LINE)
+            if actual_idx < len(items):
+                # There's an actual item to display at this position
+                item = items[actual_idx]
+                line_text = f"{actual_idx + 1}. {item.label}"
 
-            # Redraw the item with proper selection state
-            # Reset formatting first, then add content
-            output_buffer.append('\033[0m')  # Reset all formatting
-            self._print_item_to_buffer(i, items[i], i == selected_idx, cols, output_buffer)
+                # Truncate if too long for terminal
+                max_text_width = cols - 6  # Leave space for prefix and padding
+                if len(line_text) > max_text_width:
+                    line_text = line_text[:max_text_width-3] + "..."
 
-        # Send all output at once to prevent flickering
-        sys.stdout.write(''.join(output_buffer))
+                # Format the line based on selection state
+                if actual_idx == selected_idx:
+                    full_line = f"  > {line_text}"
+                    full_line = full_line.ljust(min(70, cols - 2))
+                    formatted_line = f"\033[1;46m{full_line}\033[0m"
+                else:
+                    full_line = f"    {line_text}"
+                    formatted_line = full_line
+            else:
+                # This line is beyond our items, so it should be blank
+                formatted_line = " " * cols  # Fill with spaces to clear
+
+            lines_to_update.append((base_line + idx_in_viewport, formatted_line))
+
+        # Batch update all lines needed to reduce flickering
+        for line_num, content in lines_to_update:
+            sys.stdout.write(f'\033[{line_num};1H')  # Move cursor to line, column 1
+            sys.stdout.write(self.CLEAR_LINE)  # Clear the entire line
+            sys.stdout.write(content)  # Write the new content
+
         sys.stdout.flush()
-    
+
+    def _update_visible_items_and_indicators(self, items: List[Any], selected_idx: int, available_lines: int, cols: int) -> None:
+        """
+        Update visible menu items and scroll indicators for smooth navigation
+
+        This handles both the menu items and the scroll indicators without flickering
+        """
+        visible_start = self._scroll_offset
+        visible_end = min(visible_start + available_lines, len(items))
+
+        # Calculate cursor positions
+        # Header is 5 lines, scroll indicator adds 1 if present
+        base_line = 6  # Start from line 6 (1-indexed for ANSI escape codes)
+
+        # Track if we have scroll indicators and their positions
+        has_top_indicator = self._scroll_offset > 0
+        has_bottom_indicator = visible_end < len(items)
+
+        # Prepare content for all lines that need to be updated
+        lines_to_update = []
+
+        # First, handle the top scroll indicator if needed
+        if has_top_indicator:
+            remaining = self._scroll_offset
+            scroll_info = f"  ^ {remaining} more above..."
+            scroll_info = scroll_info[:cols-2]  # Truncate if needed
+            lines_to_update.append((6, scroll_info))  # Top indicator is at line 6
+            # Adjust base line for menu items since we have a top indicator
+            actual_base_line = 7
+        else:
+            actual_base_line = 6
+
+        # Prepare content for all menu items in the visible range
+        for idx_in_viewport in range(visible_end - visible_start):
+            actual_idx = visible_start + idx_in_viewport
+            # There's definitely an item to display at this position
+            item = items[actual_idx]
+            line_text = f"{actual_idx + 1}. {item.label}"
+
+            # Truncate if too long for terminal
+            max_text_width = cols - 6  # Leave space for prefix and padding
+            if len(line_text) > max_text_width:
+                line_text = line_text[:max_text_width-3] + "..."
+
+            # Format the line based on selection state
+            if actual_idx == selected_idx:
+                full_line = f"  > {line_text}"
+                full_line = full_line.ljust(min(70, cols - 2))
+                formatted_line = f"\033[1;46m{full_line}\033[0m"
+            else:
+                full_line = f"    {line_text}"
+                formatted_line = full_line
+
+            actual_line_num = actual_base_line + idx_in_viewport
+            lines_to_update.append((actual_line_num, formatted_line))
+
+        # Handle the bottom scroll indicator if needed
+        if has_bottom_indicator:
+            remaining = len(items) - visible_end
+            scroll_info = f"  v {remaining} more below..."
+            scroll_info = scroll_info[:cols-2]  # Truncate if needed
+            # Calculate where the bottom indicator should go
+            bottom_line_num = actual_base_line + (visible_end - visible_start)
+            lines_to_update.append((bottom_line_num, scroll_info))
+
+        # Clear any remaining lines that might still show old content
+        total_lines_used = (visible_end - visible_start)  # Menu items
+        if has_top_indicator:
+            total_lines_used += 1  # Top indicator
+        if has_bottom_indicator:
+            total_lines_used += 1  # Bottom indicator
+
+        # Add blank lines for any remaining space
+        remaining_available_lines = available_lines - (visible_end - visible_start)
+        if has_top_indicator:
+            remaining_available_lines -= 1
+        if has_bottom_indicator:
+            remaining_available_lines -= 1
+
+        for i in range(remaining_available_lines):
+            if has_bottom_indicator:
+                # If there's a bottom indicator, blank lines come after it
+                blank_line_num = actual_base_line + (visible_end - visible_start) + 1 + i
+            else:
+                # If no bottom indicator, blank lines come after the menu items
+                blank_line_num = actual_base_line + (visible_end - visible_start) + i
+            lines_to_update.append((blank_line_num, " " * cols))
+
+        # Batch update all lines needed to reduce flickering
+        for line_num, content in lines_to_update:
+            sys.stdout.write(f'\033[{line_num};1H')  # Move cursor to line, column 1
+            sys.stdout.write(self.CLEAR_LINE)  # Clear the entire line
+            sys.stdout.write(content)  # Write the new content
+
+        sys.stdout.flush()
+
     def _print_item(self, index: int, item: Any, is_selected: bool, cols: int) -> None:
         """Print a single menu item with proper formatting"""
         line_text = f"{index + 1}. {item.label}"
-        
+
         # Truncate if too long for terminal
         max_text_width = cols - 6  # Leave space for prefix and padding
-        if len(line_text) > max_text_width:
-            line_text = line_text[:max_text_width-3] + "..."
         
         if is_selected:
             full_line = f"  > {line_text}"
