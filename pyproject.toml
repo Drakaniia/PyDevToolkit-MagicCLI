@@ -83,7 +83,7 @@ monitoring = [
 ]
 
 [project.scripts]
-magic = "src.main:main"
+magic = "cli.magic:main"
 
 [project.urls]
 Homepage = "https://github.com/Drakaniia/PyDevToolkit-MagicCLI"
