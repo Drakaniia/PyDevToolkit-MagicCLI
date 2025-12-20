@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "PyDevToolkit-MagicCLI"
+name = "magic-cli"
 version = "1.0.0"
-description = "A powerful CLI automation toolkit with AI-powered Git operations"
+description = "A powerful, secure developer toolkit with AI-powered Git operations"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
@@ -21,16 +21,16 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
-    "pyyaml>=6.0 ; python_version>='3.7'",
+    "pyyaml>=6.0",
     "colorama>=0.4.4",
     "pyfiglet>=0.7",
     "termcolor>=1.1.0",
@@ -83,7 +83,7 @@ monitoring = [
 ]
 
 [project.scripts]
-magic = "cli.magic:main"
+magic = "magic_cli.cli.main:main"
 
 [project.urls]
 Homepage = "https://github.com/Drakaniia/PyDevToolkit-MagicCLI"
@@ -91,15 +91,16 @@ Repository = "https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git"
 Issues = "https://github.com/Drakaniia/PyDevToolkit-MagicCLI/issues"
 
 [tool.setuptools.packages.find]
-where = ["src"]
-exclude = ["tests*", "docs*", "scripts*"]
+where = ["."]
+include = ["magic_cli*"]
+exclude = ["tests*", "docs*", "scripts*", "src*"]
 
 [tool.setuptools.package-data]
-"*" = ["*.yaml", "*.yml", "*.json", "*.md"]
+"magic_cli" = ["assets/**/*", "config/**/*"]
 
 [tool.black]
 line-length = 88
-target-version = ['py37', 'py38', 'py39', 'py310', 'py311']
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -112,6 +113,10 @@ extend-exclude = '''
   | \.venv
   | build
   | dist
+  | src
+  | assets
+  | scripts
+  | docs
 )/
 '''
 
@@ -119,10 +124,11 @@ extend-exclude = '''
 profile = "black"
 multi_line_output = 3
 line_length = 88
-known_first_party = ["src"]
+known_first_party = ["magic_cli"]
+skip = ["src"]
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -145,7 +151,7 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "--verbose",
-    "--cov=src",
+    "--cov=magic_cli",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
@@ -157,13 +163,14 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src"]
+source = ["magic_cli"]
 omit = [
     "*/tests/*",
     "*/test_*",
     "*/__pycache__/*",
     "*/venv/*",
     "*/env/*",
+    "*/src/*",
 ]
 
 [tool.coverage.report]

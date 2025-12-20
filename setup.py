@@ -1,44 +1,43 @@
 """
-setup.py
-Legacy setup.py for PyDevToolkit MagicCLI - Use pyproject.toml for modern builds
+setup.py - Legacy setup.py for backward compatibility
+Use pyproject.toml for modern builds
 """
 from setuptools import setup, find_packages
-from pathlib import Path
 
 # Read README for long description
-readme_file = Path(__file__).parent / "README.md"
-long_description = readme_file.read_text(encoding='utf-8') if readme_file.exists() else ""
+with open("README.md", "r", encoding="utf-8") as f:
+    long_description = f.read()
 
 setup(
-    name="PyDevToolkit-MagicCLI",
+    name="magic-cli",
     version="1.0.0",
     author="Eyabnyez",
     author_email="alistairybaez574@gmail.com",
-    description="A powerful CLI automation toolkit with AI-powered Git operations",
+    description="A powerful, secure developer toolkit with AI-powered Git operations",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Drakaniia/PyDevToolkit-MagicCLI",
-    packages=find_packages(where="src", exclude=["tests", "tests.*"]),
-    package_dir={"": "src"},
+    packages=find_packages(exclude=["tests*", "docs*", "scripts*", "src*"]),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
-        "pyyaml>=6.0 ; python_version>='3.7'",
+        "pyyaml>=6.0",
         "colorama>=0.4.4",
         "pyfiglet>=0.7",
         "termcolor>=1.1.0",
+        "psutil>=5.8.0",
     ],
     extras_require={
         "test": [
@@ -63,12 +62,12 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "magic=cli.magic:main",
+            "magic=magic_cli.cli.main:main",
         ],
     },
     include_package_data=True,
     package_data={
-        "": ["*.yaml", "*.yml", "*.json", "*.md"],
+        "magic_cli": ["assets/**/*", "config/**/*"],
     },
     zip_safe=False,
 )
