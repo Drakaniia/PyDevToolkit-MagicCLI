@@ -105,36 +105,67 @@ Commit message:
 ## Project Structure
 
 ```
-PyDevToolkit-MagicCLI/
- src/                    # Source code
-    core/              # Core functionality
-       menu/          # Menu system
-       security/      # Security validation
-       utils/         # Utilities
-    modules/           # Feature modules
-       git_operations/
-       web_development/
-       backend_development/
-       project_management/
-    ui/                # UI components
-    cli/               # CLI entry points
- config/                # Configuration files
- scripts/               # Setup and utility scripts
- tests/                 # Test files
- bin/                   # Executable scripts
+magic_cli/
+├── pyproject.toml          # Modern Python packaging
+├── requirements.txt        # Production dependencies
+├── README.md              # This file
+├── magic_cli/             # Main package
+│   ├── __init__.py
+│   ├── __main__.py         # Module entry point
+│   ├── cli/               # CLI presentation layer
+│   │   ├── __init__.py
+│   │   ├── main.py        # CLI entry point
+│   │   ├── menu.py        # Main menu
+│   │   ├── menu_base.py   # Base menu classes
+│   │   ├── renderer.py    # Menu rendering
+│   │   └── navigation.py  # Input handling
+│   ├── core/              # Cross-cutting concerns
+│   │   ├── __init__.py
+│   │   ├── config.py      # Configuration management
+│   │   ├── exceptions.py  # Error handling
+│   │   └── security.py    # Security utilities
+│   ├── domain/            # Business logic
+│   │   ├── __init__.py
+│   │   ├── git/          # Git domain models & services
+│   │   ├── project/      # Project management domain
+│   │   └── backend/      # Backend development domain
+│   ├── infrastructure/    # External dependencies
+│   │   ├── __init__.py
+│   │   ├── git_client.py # Git operations
+│   │   └── file_system.py # File operations
+│   ├── application/       # Application services & use cases
+│   │   ├── __init__.py
+│   │   ├── services/     # Application services
+│   │   └── use_cases/    # Use case orchestrators
+│   ├── presentation/      # Presentation layer
+│   │   ├── __init__.py
+│   │   └── ui/           # UI components & banners
+│   └── plugins/          # Plugin system
+│       ├── __init__.py
+│       └── registry.py   # Plugin management
+├── assets/               # Static assets (fonts, etc.)
+├── scripts/              # Setup and utility scripts
+└── tests/                # Test suite
+    ├── __init__.py
+    ├── unit/
+    ├── integration/
+    └── e2e/
 ```
 
 ---
 
 ## Development notes
 
-- The main entrypoint for the menu is `src/main.py` (executed via the `magic` alias or `bin/magic` script).
-- **Project Structure**: The codebase has been reorganized with a modular architecture:
-  - `src/core/` - Core functionality (menu system, security, utilities)
-  - `src/modules/` - Feature modules (git_operations, web_development, backend_development, project_management)
-  - `src/ui/` - User interface components (banners, etc.)
-  - `src/cli/` - CLI entry points
-  - `config/` - Configuration files (default, development, security)
+- **Architecture**: The codebase follows Domain-Driven Design (DDD) principles with clean architecture:
+  - `magic_cli/core/` - Cross-cutting concerns (config, exceptions, security)
+  - `magic_cli/domain/` - Business logic and domain models
+  - `magic_cli/application/` - Application services and use cases
+  - `magic_cli/infrastructure/` - External dependencies and adapters
+  - `magic_cli/presentation/` - UI and CLI presentation layer
+- **Entry Points**: Multiple ways to run:
+  - `python -m magic_cli` (module execution)
+  - `magic` (installed script)
+  - `python magic_cli/cli/main.py` (direct execution)
 - **Web Development (Dev Mode)**: from the main menu, opens tools for:
   - Creating modern frontend/mobile projects (React, Next.js, Vue, Svelte, React Native, etc.).
   - Running Node-based dev servers (`npm run dev`, `npm run start`, etc.).
