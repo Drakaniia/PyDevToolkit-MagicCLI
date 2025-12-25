@@ -2,7 +2,7 @@
 setup.py - Legacy setup.py for backward compatibility
 Use pyproject.toml for modern builds
 """
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 # Read README for long description
 with open("README.md", "r", encoding="utf-8") as f:
