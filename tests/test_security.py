@@ -12,7 +12,7 @@ import tempfile
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from core.security import SecurityValidator
-from core.exceptions import AutomationError
+from core.utils.exceptions import AutomationError
 
 
 class TestSecurityValidation(unittest.TestCase):

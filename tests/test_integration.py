@@ -12,9 +12,9 @@ import os
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from core.security import SecurityValidator
-from core.config import ConfigManager, get_security_config
-from core.exceptions import AutomationError
-from core.logging import SecurityAuditLogger, get_security_logger
+from core.utils.config import ConfigManager, get_security_config
+from core.utils.exceptions import AutomationError
+from core.utils.logging import SecurityAuditLogger, get_security_logger
 
 
 class TestSecurityIntegration(unittest.TestCase):

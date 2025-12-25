@@ -9,12 +9,12 @@ from pathlib import Path
 # Add the src directory to Python path to import modules
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from core.exceptions import (
+from core.utils.exceptions import (
     AutomationError, GitError, GitCommandError, NotGitRepositoryError,
-    NoRemoteError, GitNotInstalledError, UncommittedChangesError, ErrorSeverity
+    NoRemoteError, GitNotInstalledError, UncommittedChangesError, ErrorSeverity,
+    ExceptionHandler
 )
 from core.security import SecurityValidator
-from core.exceptions import ExceptionHandler
 
 
 class TestErrorHandling(unittest.TestCase):
