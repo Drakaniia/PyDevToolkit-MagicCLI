@@ -108,9 +108,10 @@ def main():
         print("Remember to:")
         print("1. Update CHANGELOG.md")
         print(
-            "2. Commit changes: git add . && git commit -m 'Bump version to {new_version}'"
+            "2. Commit changes: git add . && git commit -m "
+            f"'Bump version to {new_version}'"
         )
-        print("3. Create tag: git tag v{new_version}")
+        print(f"3. Create tag: git tag v{new_version}")
         print("4. Push: git push && git push --tags")
 
     except Exception as e:
