@@ -3,16 +3,17 @@ automation/menu.py
 Responsive Menu System with Adaptive Viewport Handling
 Refactored: Split into modular components for better maintainability
 """
-from modules.others_menu import OthersMenu
-from typing import Any, Optional
-from core.menu import Menu, MenuItem
 import sys
 from pathlib import Path
 
-# Ensure the src directory is in the Python path
+# Add src directory to path to enable imports
 src_path = Path(__file__).parent
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
+
+from modules.others_menu import OthersMenu
+from typing import Any, Optional
+from core.menu import Menu, MenuItem
 
 
 class MainMenu(Menu):

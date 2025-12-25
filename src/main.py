@@ -13,6 +13,13 @@ if sys.platform == "win32":
     # Ensure stdout uses UTF-8 encoding
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
+import sys
+from pathlib import Path
+
+# Add src directory to path to enable imports
+src_dir = Path(__file__).parent
+sys.path.insert(0, str(src_dir))
+
 from menu import MainMenu
 
 

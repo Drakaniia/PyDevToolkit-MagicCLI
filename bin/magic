@@ -2,11 +2,12 @@
 """
 Main entry point for PyDevToolkit MagicCLI
 """
-from main import main
 import io
 import os
 import sys
 from pathlib import Path
+
+from main import main
 
 # Set UTF-8 encoding for Windows console
 if sys.platform == "win32":
