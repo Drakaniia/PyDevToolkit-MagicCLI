@@ -220,6 +220,24 @@ class SecurityTools:
             input("\nPress Enter to continue...")
 
 
+class SecurityMenu(Menu):
+    """Menu for security and compliance tools"""
+
+    def __init__(self):
+        self.security_tools = SecurityTools()
+        super().__init__("Security & Compliance Tools")
+
+    def setup_items(self) -> None:
+        """Setup menu items for security tools"""
+        self.items = [
+            MenuItem("🔍 Scan for Secrets", self.security_tools.scan_for_secrets),
+            MenuItem("🔒 Security Audit", self.security_tools.security_audit),
+            MenuItem("📦 Check Dependencies", self.security_tools.check_dependencies),
+            MenuItem("📊 Generate Security Report", self.security_tools.generate_security_report),
+            MenuItem("🔙 Back to Main Menu", lambda: "exit")
+        ]
+
+
 def get_security_tools_menu() -> Menu:
     """Create and return the security tools menu"""
     security_tools = SecurityTools()
