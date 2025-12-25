@@ -51,8 +51,8 @@ class VersionControlTools:
             print("  - Linux: sudo apt-get install git-flow")
             print("  - macOS: brew install git-flow")
             print("  - Windows: Download from GitHub or use Git Bash")
-            print("\nAlternatively,
-                  you can use a GitFlow - like workflow manually.")
+            print("""Alternatively,
+                  you can use a GitFlow - like workflow manually.""")
 
             setup_manual = input(
                 "\nSet up GitFlow-like branches manually? (y/n): ").lower()
@@ -197,9 +197,9 @@ class VersionControlTools:
         print("=" * 70)
 
         print("\nThis tool provides guidance for integrating with code review systems")
-        print("like GitHub Pull Requests,
+        print("""like GitHub Pull Requests,
               GitLab Merge Requests,
-              or similar platforms.")
+              or similar platforms.""")
 
         print("\nSupported platforms:")
         print("  1. GitHub (via GitHub CLI)")
