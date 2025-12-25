@@ -18,36 +18,95 @@
 
 ### Installation
 
-#### Option 1: Global Installation (Recommended)
-Install globally like any other Python package:
+#### Option 1: Automated Global Installation (Recommended - No Python Required!)
+Install globally with our automated installer - **Python not required!**
 
 ```bash
-# Install from PyPI (when available)
-pip install pydevtoolkit-magiccli
+# One-liner installation (works on Linux, macOS, Windows)
+curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/install.sh | bash
 
-# Or install directly from GitHub
-pip install git+https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
+# Or download and run manually:
+wget https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/install.sh
+bash install.sh
 
 # Use anywhere
 magic
 ```
 
-#### Option 2: Development Installation
-For contributors or local development:
+**What this installer does:**
+- ✅ Detects your operating system
+- ✅ Installs Python 3.8+ automatically (if needed)
+- ✅ Installs the package and sets up the `magic` command
+- ✅ Configures your shell environment
+- ✅ Works on any system with bash (Linux/macOS) or Git Bash (Windows)
+
+#### Option 2: Manual Installation (For Advanced Users)
+If you already have Python installed:
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
-cd PyDevToolkit-MagicCLI
+# Install via pip
+pip install git+https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
 
-# 2. Install in development mode
-pip install -e .
-
-# 3. Start using it anywhere
-magic
+# Or from PyPI (when published)
+pip install pydevtoolkit-magiccli
 ```
 
-> **Note**: Global installation eliminates the need to clone the repository or run setup scripts. Just `pip install` and you're ready to go!
+#### Option 3: Development Installation
+For contributors:
+
+```bash
+# Clone and develop
+git clone https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
+cd PyDevToolkit-MagicCLI
+pip install -e .
+```
+
+> **Note**: The automated installer eliminates all complexity. Just run one command and you're ready to go!
+
+### Uninstallation
+
+#### Global Installation Removal (Recommended)
+To completely remove the automated installation:
+
+```bash
+# Use the uninstall script (handles everything automatically)
+curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/uninstall.sh | bash
+
+# Or download and run manually:
+wget https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/uninstall.sh
+bash uninstall.sh
+```
+
+The uninstall script automatically:
+- Removes the package from all Python installations
+- Cleans up configuration files and cache
+- Removes the global `magic` command
+- Restores your shell configuration
+
+#### Manual Removal (Advanced)
+If you installed manually via pip:
+
+```bash
+# Remove the package
+pip uninstall pydevtoolkit-magiccli
+
+# Remove installation directory
+rm -rf ~/.pydevtoolkit-magiccli
+
+# Clean shell config (remove PATH entries manually)
+```
+
+#### Development Installation Removal
+For development installations:
+
+```bash
+# Remove the package
+pip uninstall -e .
+
+# Optional: Remove repository
+cd ..
+rm -rf PyDevToolkit-MagicCLI
+```
 
 ### Quick Start
 
