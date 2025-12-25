@@ -8,8 +8,6 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
-
-
 class DatabaseTools:
     """Handles database management tasks"""
 
@@ -21,9 +19,9 @@ class DatabaseTools:
         print("\n" + "="*70)
         print("DATABASE CONFIGURATION SETUP")
         print("="*70)
-        
+
         print("\nThis tool helps set up database configuration for your project.")
-        
+
         # Detect if SQLAlchemy is used
         has_sqlalchemy = False
         try:
@@ -31,22 +29,22 @@ class DatabaseTools:
             has_sqlalchemy = True
         except ImportError:
             pass
-        
+
         if has_sqlalchemy:
             print("✓ SQLAlchemy detected in environment")
         else:
             print("⚠ SQLAlchemy not found. Install with: pip install sqlalchemy")
-        
+
         # Ask for database type
         print("\nSelect database type:")
         print("  1. PostgreSQL")
         print("  2. MySQL")
         print("  3. SQLite")
         print("  4. MongoDB")
-        
+
         try:
             choice = input("\nEnter choice (1-4) or press Enter to cancel: ").strip()
-            
+
             if choice == "1":
                 self._setup_postgres_config()
             elif choice == "2":
@@ -59,16 +57,16 @@ class DatabaseTools:
                 print("Operation cancelled.")
             else:
                 print("Invalid choice. Operation cancelled.")
-        
+
         except KeyboardInterrupt:
             print("\nOperation cancelled.")
-        
+
         input("\nPress Enter to continue...")
 
     def _setup_postgres_config(self) -> None:
         """Set up PostgreSQL configuration"""
         print("\nSetting up PostgreSQL Configuration...")
-        
+
         # Create example config file
         config_content = '''# PostgreSQL Configuration
 # Update these values according to your setup
@@ -82,19 +80,19 @@ POSTGRES_PASSWORD=your_password
 # Example connection string:
 # postgresql://user:password@host:port/database
 '''
-        
+
         config_path = Path("config") / "database_postgresql.env"
         config_path.parent.mkdir(exist_ok=True)
-        
+
         with open(config_path, 'w') as f:
             f.write(config_content)
-        
+
         print(f"✓ PostgreSQL configuration template created: {config_path}")
 
     def _setup_mysql_config(self) -> None:
         """Set up MySQL configuration"""
         print("\nSetting up MySQL Configuration...")
-        
+
         # Create example config file
         config_content = '''# MySQL Configuration
 # Update these values according to your setup
@@ -108,19 +106,19 @@ MYSQL_PASSWORD=your_password
 # Example connection string:
 # mysql+pymysql://user:password@host:port/database
 '''
-        
+
         config_path = Path("config") / "database_mysql.env"
         config_path.parent.mkdir(exist_ok=True)
-        
+
         with open(config_path, 'w') as f:
             f.write(config_content)
-        
+
         print(f"✓ MySQL configuration template created: {config_path}")
 
     def _setup_sqlite_config(self) -> None:
         """Set up SQLite configuration"""
         print("\nSetting up SQLite Configuration...")
-        
+
         # Create example config file
         config_content = '''# SQLite Configuration
 
@@ -133,19 +131,19 @@ SQLITE_PATH=./data/database.db
 # For in-memory database (not persistent):
 # sqlite:///:memory:
 '''
-        
+
         config_path = Path("config") / "database_sqlite.env"
         config_path.parent.mkdir(exist_ok=True)
-        
+
         with open(config_path, 'w') as f:
             f.write(config_content)
-        
+
         print(f"✓ SQLite configuration template created: {config_path}")
 
     def _setup_mongodb_config(self) -> None:
         """Set up MongoDB configuration"""
         print("\nSetting up MongoDB Configuration...")
-        
+
         # Create example config file
         config_content = '''# MongoDB Configuration
 
@@ -160,13 +158,13 @@ MONGO_DB=your_database_name
 # Example connection string:
 # mongodb://host:port/database
 '''
-        
+
         config_path = Path("config") / "database_mongodb.env"
         config_path.parent.mkdir(exist_ok=True)
-        
+
         with open(config_path, 'w') as f:
             f.write(config_content)
-        
+
         print(f"✓ MongoDB configuration template created: {config_path}")
 
     def run_database_migrations(self) -> None:
@@ -174,15 +172,15 @@ MONGO_DB=your_database_name
         print("\n" + "="*70)
         print("DATABASE MIGRATIONS")
         print("="*70)
-        
+
         print("\nThis feature helps manage database schema changes.")
         print("It typically uses Alembic for SQLAlchemy-based projects.")
-        
+
         # Check if Alembic is available
         try:
             import alembic
             print("✓ Alembic is available")
-            
+
             print("\nCommon Alembic commands:")
             print("  alembic init alembic")  # Initialize
             print("  alembic revision --autogenerate -m \"message\"")  # Generate migration
@@ -198,7 +196,7 @@ MONGO_DB=your_database_name
                     print("\nRun 'alembic init alembic' to initialize in your project")
                 except subprocess.CalledProcessError:
                     print("⚠ Failed to install Alembic")
-        
+
         print("\nFor more complex migration management, use the respective tools.")
         input("\nPress Enter to continue...")
 
@@ -207,22 +205,22 @@ MONGO_DB=your_database_name
         print("\n" + "="*70)
         print("DATABASE SEEDING")
         print("="*70)
-        
+
         print("\nThis feature would populate your database with test/fake data.")
         print("Implementation depends on your specific models and requirements.")
-        
+
         # Look for potential data seed files
         seed_pattern = list(Path('.').glob('**/seed*'))
         if seed_pattern:
             print("\nPotential seed files found:")
             for seed_file in seed_pattern[:5]:  # Show first 5
                 print(f"  - {seed_file}")
-        
+
         print("\nTypical implementation involves:")
         print("  1. Creating a seeding script")
         print("  2. Defining sample data for each model")
         print("  3. Running the seeding script")
-        
+
         # Provide example code
         print("\nExample seeding code:")
         print("```python")
@@ -243,7 +241,7 @@ MONGO_DB=your_database_name
         print("    finally:")
         print("        db.close()")
         print("```")
-        
+
         input("\nPress Enter to continue...")
 
     def compare_database_schemas(self) -> None:
@@ -251,21 +249,21 @@ MONGO_DB=your_database_name
         print("\n" + "="*70)
         print("DATABASE SCHEMA COMPARISON")
         print("="*70)
-        
+
         print("\nThis feature compares database schemas across different environments.")
         print("For this to work, you need to specify connection details for both databases.")
-        
+
         print("\nWithout specific database access details, here's how you would typically approach this:")
         print("  1. Connect to source database")
         print("  2. Connect to target database")
         print("  3. Extract schema information from both")
         print("  4. Compare and report differences")
-        
+
         print("\nCommon tools for schema comparison:")
         print("  - For PostgreSQL: pg_dump and diff tools")
         print("  - For MySQL: mysqldump and diff tools")
         print("  - Using SQLAlchemy reflection to compare models")
-        
+
         # Provide example code
         print("\nExample schema comparison code:")
         print("```python")
@@ -290,7 +288,7 @@ MONGO_DB=your_database_name
         print("    except SQLAlchemyError as e:")
         print("        print(f'Error comparing schemas: {e}')")
         print("```")
-        
+
         input("\nPress Enter to continue...")
 
     def run_database_backup(self) -> None:
@@ -298,26 +296,26 @@ MONGO_DB=your_database_name
         print("\n" + "="*70)
         print("DATABASE BACKUP")
         print("="*70)
-        
+
         print("\nDatabase backup functionality depends on the specific database system.")
         print("Here are common approaches for different databases:")
-        
+
         print("\nPostgreSQL:")
         print("  - pg_dump -U username -h host database_name > backup.sql")
-        
+
         print("\nMySQL:")
         print("  - mysqldump -u username -p database_name > backup.sql")
-        
+
         print("\nSQLite:")
         print("  - cp database.db database_backup.db")
-        
+
         print("\nMongoDB:")
         print("  - mongodump --db database_name --out backup_directory")
-        
+
         print("\nFor application-level backup (using SQLAlchemy):")
         print("  - Use your ORM's capabilities to extract data")
         print("  - Serialize data to JSON or other formats")
-        
+
         input("\nPress Enter to continue...")
 
     def run_database_restore(self) -> None:
@@ -325,28 +323,26 @@ MONGO_DB=your_database_name
         print("\n" + "="*70)
         print("DATABASE RESTORE")
         print("="*70)
-        
+
         print("\nDatabase restore functionality depends on the specific database system.")
         print("Here are common approaches for different databases:")
-        
+
         print("\nPostgreSQL:")
         print("  - psql -U username -h host database_name < backup.sql")
-        
+
         print("\nMySQL:")
         print("  - mysql -u username -p database_name < backup.sql")
-        
+
         print("\nSQLite:")
         print("  - cp backup_database.db database.db")
-        
+
         print("\nMongoDB:")
         print("  - mongorestore backup_directory/")
-        
+
         print("\n⚠️  Warning: Restoring will overwrite current data!")
         print("Always ensure you have the correct backup file before proceeding.")
-        
+
         input("\nPress Enter to continue...")
-
-
 class DatabaseMenu(Menu):
     """Menu for database tools"""
 

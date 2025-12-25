@@ -7,8 +7,6 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 from dataclasses import dataclass, asdict
-
-
 @dataclass
 class SecurityConfig:
     """Security-related configuration settings"""
@@ -20,7 +18,7 @@ class SecurityConfig:
     enable_input_sanitization: bool = True
     blocked_commands: list = None
     allowed_file_extensions: list = None
-    
+
     def __post_init__(self):
         if self.blocked_commands is None:
             self.blocked_commands = [
@@ -28,13 +26,11 @@ class SecurityConfig:
             ]
         if self.allowed_file_extensions is None:
             self.allowed_file_extensions = [
-                '.py', '.js', '.ts', '.tsx', '.json', '.yaml', '.yml', 
+                '.py', '.js', '.ts', '.tsx', '.json', '.yaml', '.yml',
                 '.txt', '.md', '.html', '.css', '.jsx', '.tsx', '.sql',
                 '.xml', '.ini', '.cfg', '.conf', '.dockerfile', 'dockerfile',
                 '.gitignore', '.env', '.sh', '.bash', '.zsh', '.bat', '.cmd'
             ]
-
-
 @dataclass
 class OperationalConfig:
     """Operational configuration settings"""
@@ -45,17 +41,15 @@ class OperationalConfig:
     backup_count: int = 5
     enable_color_output: bool = True
     enable_loading_animations: bool = True
-
-
 class ConfigManager:
     """Centralized configuration manager"""
-    
+
     def __init__(self, config_file: Optional[str] = None):
         self.security_config = SecurityConfig()
         self.operational_config = OperationalConfig()
         self.config_file = config_file or self._get_default_config_path()
         self._load_config()
-    
+
     def _get_default_config_path(self) -> str:
         """Get the default path for configuration file"""
         # Look for config in current directory or in user's home directory
@@ -65,16 +59,16 @@ class ConfigManager:
             Path.home() / ".magiccli" / "config.yaml",
             Path.home() / ".magiccli" / "config.json",
         ]
-        
+
         for path in config_paths:
             if path.exists():
                 return str(path)
-        
+
         # If no config exists, create default in project root
         default_path = Path.cwd() / "config.yaml"
         self._create_default_config(default_path)
         return str(default_path)
-    
+
     def _create_default_config(self, path: Path) -> None:
         """Create a default configuration file"""
         config_data = {
@@ -138,42 +132,34 @@ class ConfigManager:
                     json.dump(config_data, f, indent=2)
             else:
                 json.dump(config_data, f, indent=2)
-    
+
     def get_security_setting(self, key: str) -> Any:
         """Get a security configuration setting"""
         return getattr(self.security_config, key, None)
-    
+
     def get_operational_setting(self, key: str) -> Any:
         """Get an operational configuration setting"""
         return getattr(self.operational_config, key, None)
-    
+
     def set_security_setting(self, key: str, value: Any) -> None:
         """Set a security configuration setting"""
         setattr(self.security_config, key, value)
-    
+
     def set_operational_setting(self, key: str, value: Any) -> None:
         """Set an operational configuration setting"""
         setattr(self.operational_config, key, value)
-
-
 # Global configuration instance
 _config_manager: Optional[ConfigManager] = None
-
-
 def get_config_manager() -> ConfigManager:
     """Get the global configuration manager instance"""
     global _config_manager
     if _config_manager is None:
         _config_manager = ConfigManager()
     return _config_manager
-
-
 def get_security_config() -> SecurityConfig:
     """Get the security configuration"""
     config_manager = get_config_manager()
     return config_manager.security_config
-
-
 def get_operational_config() -> OperationalConfig:
     """Get the operational configuration"""
     config_manager = get_config_manager()

@@ -9,8 +9,6 @@ from pathlib import Path
 from typing import List, Optional
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
-
-
 class TestingCICDTools:
     """Handles testing and CI/CD integration tasks"""
 
@@ -22,13 +20,13 @@ class TestingCICDTools:
         print("\n" + "="*70)
         print("RUNNING UNIT TESTS")
         print("="*70)
-        
+
         try:
             # Run unit tests only with pytest
             result = subprocess.run([
                 sys.executable, "-m", "pytest", "tests/unit/", "-v"
             ], capture_output=True, text=True)
-            
+
             if result.returncode == 0:
                 print("\n✓ All unit tests passed!")
             else:
@@ -36,12 +34,12 @@ class TestingCICDTools:
                 print(result.stdout)
                 if result.stderr:
                     print(f"\nErrors: {result.stderr}")
-        
+
         except FileNotFoundError:
             print("\n⚠ Pytest is not installed or no unit tests found")
         except Exception as e:
             print(f"\n⚠ Error running unit tests: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def run_integration_tests(self) -> None:
@@ -49,13 +47,13 @@ class TestingCICDTools:
         print("\n" + "="*70)
         print("RUNNING INTEGRATION TESTS")
         print("="*70)
-        
+
         try:
             # Run integration tests only with pytest
             result = subprocess.run([
                 sys.executable, "-m", "pytest", "tests/integration/", "-v"
             ], capture_output=True, text=True)
-            
+
             if result.returncode == 0:
                 print("\n✓ All integration tests passed!")
             else:
@@ -63,12 +61,12 @@ class TestingCICDTools:
                 print(result.stdout)
                 if result.stderr:
                     print(f"\nErrors: {result.stderr}")
-        
+
         except FileNotFoundError:
             print("\n⚠ Pytest is not installed or no integration tests found")
         except Exception as e:
             print(f"\n⚠ Error running integration tests: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def run_all_tests(self) -> None:
@@ -76,22 +74,22 @@ class TestingCICDTools:
         print("\n" + "="*70)
         print("RUNNING ALL TESTS WITH COVERAGE")
         print("="*70)
-        
+
         try:
             # Run all tests with coverage
             result = subprocess.run([
-                sys.executable, "-m", "pytest", "tests/", 
+                sys.executable, "-m", "pytest", "tests/",
                 "-v", "--cov=src", "--cov-report=term-missing"
             ], capture_output=True, text=True)
-            
+
             print(f"\nTest Results:\n")
             print(result.stdout)
             if result.stderr:
                 print(f"\nErrors: {result.stderr}")
-        
+
         except Exception as e:
             print(f"\n⚠ Error running tests: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def run_test_coverage(self) -> None:
@@ -99,26 +97,26 @@ class TestingCICDTools:
         print("\n" + "="*70)
         print("RUNNING TEST COVERAGE ANALYSIS")
         print("="*70)
-        
+
         try:
             # Run coverage analysis only
             result = subprocess.run([
-                sys.executable, "-m", "pytest", 
-                "--cov=src", "--cov-report=term-missing", 
+                sys.executable, "-m", "pytest",
+                "--cov=src", "--cov-report=term-missing",
                 "--cov-report=html:htmlcov", "--cov-report=xml"
             ], capture_output=True, text=True)
-            
+
             print(f"\nCoverage Analysis Results:\n")
             print(result.stdout)
             if result.stderr:
                 print(f"\nErrors: {result.stderr}")
-            
+
             print(f"\nHTML coverage report saved to 'htmlcov/' directory")
             print(f"XML coverage report saved as 'coverage.xml'")
-        
+
         except Exception as e:
             print(f"\n⚠ Error running coverage analysis: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def generate_test_report(self) -> None:
@@ -126,36 +124,36 @@ class TestingCICDTools:
         print("\n" + "="*70)
         print("GENERATING COMPREHENSIVE TEST REPORT")
         print("="*70)
-        
+
         try:
             # Run tests with multiple output formats
             print("Running tests and generating reports...")
             result = subprocess.run([
-                sys.executable, "-m", "pytest", 
-                "tests/", 
-                "-v", 
+                sys.executable, "-m", "pytest",
+                "tests/",
+                "-v",
                 "--tb=short",
                 f"--junit-xml=test-results.xml",
-                "--cov=src", 
+                "--cov=src",
                 "--cov-report=term-missing",
                 "--cov-report=html:htmlcov",
                 "--cov-report=xml:coverage.xml"
             ], capture_output=True, text=True)
-            
+
             print(f"\nTest Results:\n")
             print(result.stdout)
-            
+
             if result.returncode == 0:
                 print("\n✓ Tests completed successfully!")
             else:
                 print("\n⚠ Some tests failed")
-                
+
             if result.stderr:
                 print(f"\nErrors: {result.stderr}")
-        
+
         except Exception as e:
             print(f"\n⚠ Error generating test report: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def run_ci_checks(self) -> None:
@@ -163,12 +161,12 @@ class TestingCICDTools:
         print("\n" + "="*70)
         print("RUNNING CI CHECKS (Format, Lint, Type, Test)")
         print("="*70)
-        
+
         print("This would typically run in a CI environment.")
         print("For local execution, this runs a comprehensive check.")
-        
+
         # We'll call the appropriate functions from other modules
-        # This is a simplified version - in a real scenario, 
+        # This is a simplified version - in a real scenario,
         # we would have access to the functions from other modules
         try:
             # Check formatting
@@ -176,55 +174,55 @@ class TestingCICDTools:
             format_result = subprocess.run([
                 sys.executable, "-m", "black", "--check", "src/", "tests/"
             ], capture_output=True, text=True)
-            
+
             if format_result.returncode == 0:
                 print("   ✓ Code formatting is correct")
             else:
                 print("   ⚠ Code formatting issues found")
                 print(format_result.stdout[:500] + "..." if len(format_result.stdout) > 500 else format_result.stdout)
-            
+
             # Run linting
             print("\n2. Running linting...")
             lint_result = subprocess.run([
-                sys.executable, "-m", "flake8", "src/", 
+                sys.executable, "-m", "flake8", "src/",
                 "--max-line-length=88", "--extend-ignore=E203,W503"
             ], capture_output=True, text=True)
-            
+
             if lint_result.returncode == 0:
                 print("   ✓ No linting issues found")
             else:
                 print("   ⚠ Linting issues found")
                 print(lint_result.stdout[:500] + "..." if len(lint_result.stdout) > 500 else lint_result.stdout)
-            
+
             # Run type checking
             print("\n3. Running type checking...")
             type_result = subprocess.run([
                 sys.executable, "-m", "mypy", "src/"
             ], capture_output=True, text=True)
-            
+
             if type_result.returncode == 0:
                 print("   ✓ Type checking passed")
             else:
                 print("   ⚠ Type checking issues found")
                 print(type_result.stdout[:500] + "..." if len(type_result.stdout) > 500 else type_result.stdout)
-            
+
             # Run tests
             print("\n4. Running tests...")
             test_result = subprocess.run([
                 sys.executable, "-m", "pytest", "tests/", "--tb=short"
             ], capture_output=True, text=True)
-            
+
             if test_result.returncode == 0:
                 print("   ✓ All tests passed")
             else:
                 print("   ⚠ Some tests failed")
                 print(test_result.stdout[:500] + "..." if len(test_result.stdout) > 500 else test_result.stdout)
-            
+
             print("\nCI Checks completed!")
-            
+
         except Exception as e:
             print(f"\n⚠ Error running CI checks: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def setup_ci_pipeline(self) -> None:
@@ -232,7 +230,7 @@ class TestingCICDTools:
         print("\n" + "="*70)
         print("SETTING UP CI PIPELINE")
         print("="*70)
-        
+
         print("This tool helps you create CI pipeline configuration files.")
         print("\nAvailable CI platforms:")
         print("  1. GitHub Actions")
@@ -240,10 +238,10 @@ class TestingCICDTools:
         print("  3. Jenkins")
         print("  4. CircleCI")
         print("  5. Travis CI")
-        
+
         try:
             choice = input("\nSelect a CI platform (1-5) or press Enter to cancel: ").strip()
-            
+
             if choice == "1":
                 self._create_github_actions_config()
             elif choice == "2":
@@ -258,17 +256,17 @@ class TestingCICDTools:
                 print("Operation cancelled.")
             else:
                 print("Invalid choice. Operation cancelled.")
-        
+
         except KeyboardInterrupt:
             print("\nOperation cancelled.")
-        
+
         input("\nPress Enter to continue...")
 
     def _create_github_actions_config(self) -> None:
         """Create GitHub Actions workflow configuration"""
         github_dir = Path(".github/workflows")
         github_dir.mkdir(parents=True, exist_ok=True)
-        
+
         workflow_content = """name: Python CI
 
 on:
@@ -312,11 +310,11 @@ jobs:
         file: ./coverage.xml
         fail_ci_if_error: true
 """
-        
+
         workflow_path = github_dir / "python-app.yml"
         with open(workflow_path, 'w') as f:
             f.write(workflow_content)
-        
+
         print(f"\n✓ GitHub Actions workflow created: {workflow_path}")
         print("Remember to enable GitHub Actions in your repository settings.")
 
@@ -364,11 +362,11 @@ deploy:
   only:
     - main
 """
-        
+
         config_path = Path(".gitlab-ci.yml")
         with open(config_path, 'w') as f:
             f.write(config_content)
-        
+
         print(f"\n✓ GitLab CI configuration created: {config_path}")
 
     def _create_jenkins_config(self) -> None:
@@ -438,18 +436,18 @@ deploy:
     }
 }
 """
-        
+
         config_path = Path("Jenkinsfile")
         with open(config_path, 'w') as f:
             f.write(config_content)
-        
+
         print(f"\n✓ Jenkins pipeline configuration created: {config_path}")
 
     def _create_circleci_config(self) -> None:
         """Create CircleCI configuration"""
         circle_dir = Path(".circleci")
         circle_dir.mkdir(exist_ok=True)
-        
+
         config_content = """version: 2.1
 
 orbs:
@@ -498,11 +496,11 @@ workflows:
     jobs:
       - test
 """
-        
+
         config_path = circle_dir / "config.yml"
         with open(config_path, 'w') as f:
             f.write(config_content)
-        
+
         print(f"\n✓ CircleCI configuration created: {config_path}")
 
     def _create_travis_config(self) -> None:
@@ -533,14 +531,12 @@ after_success:
 notifications:
   email: false
 """
-        
+
         config_path = Path(".travis.yml")
         with open(config_path, 'w') as f:
             f.write(config_content)
-        
+
         print(f"\n✓ Travis CI configuration created: {config_path}")
-
-
 class TestingCICDMenu(Menu):
     """Menu for testing and CI/CD tools"""
 

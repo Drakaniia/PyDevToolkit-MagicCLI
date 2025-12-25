@@ -9,8 +9,6 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from core.menu import Menu, MenuItem
-
-
 class DatabaseManager(Menu):
     """Database Management Menu with PostgreSQL and Prisma tools"""
 

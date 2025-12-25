@@ -6,19 +6,15 @@ from enum import Enum
 from typing import Optional, Dict, Any, Tuple, Callable
 import functools
 import traceback
-
-
 class ErrorSeverity(Enum):
     """Error severity levels"""
     INFO = "INFO"
     WARNING = "WARNING"
     ERROR = "ERROR"
     CRITICAL = "CRITICAL"
-
-
 class AutomationError(Exception):
     """Base exception for all automation errors"""
-    
+
     def __init__(
         self,
         message: str,
@@ -31,7 +27,7 @@ class AutomationError(Exception):
         self.severity = severity
         self.details = details or {}
         self.suggestion = suggestion
-    
+
     def display(self) -> str:
         """Format error for display"""
         lines = [
@@ -39,49 +35,45 @@ class AutomationError(Exception):
             f"{self.severity.value}: {self.message}",
             f"{'='*70}"
         ]
-        
+
         if self.details:
             lines.append("\nDetails:")
             for key, value in self.details.items():
                 lines.append(f"  {key}: {value}")
-        
+
         if self.suggestion:
             lines.append(f"\nSuggestion: {self.suggestion}")
-        
+
         lines.append(f"{'='*70}\n")
-        
+
         return '\n'.join(lines)
-
-
 class GitError(AutomationError):
     """Base class for Git-related errors"""
     pass
-
-
 class GitCommandError(GitError):
     """Error executing Git command"""
-    
+
     def __init__(self, command: str, return_code: int, stderr: str = ""):
         self.command = command
         self.return_code = return_code
         self.stderr = stderr
-        
+
         message = f"Git command failed: {command}"
         details = {
             "command": command,
             "return_code": return_code,
             "stderr": stderr
         }
-        
+
         # Generate helpful suggestions
         suggestion = self._generate_suggestion(stderr)
-        
+
         super().__init__(message, details=details, suggestion=suggestion)
-    
+
     def _generate_suggestion(self, stderr: str) -> str:
         """Generate helpful suggestion based on error"""
         stderr_lower = stderr.lower()
-        
+
         if "not a git repository" in stderr_lower:
             return "Initialize Git with: git init"
         elif "remote" in stderr_lower and "not found" in stderr_lower:
@@ -96,68 +88,54 @@ class GitCommandError(GitError):
             return "Set upstream with: git push --set-upstream origin <branch>"
         else:
             return "Check git status and try again"
-
-
 class NotGitRepositoryError(GitError):
     """Not in a Git repository"""
-    
+
     def __init__(self, path: str = "."):
         super().__init__(
             f"Not a Git repository: {path}",
             suggestion="Initialize repository with: git init"
         )
-
-
 class NoRemoteError(GitError):
     """No remote configured"""
-    
+
     def __init__(self, remote_name: str = "origin"):
         super().__init__(
             f"No remote '{remote_name}' configured",
             suggestion=f"Add remote with: git remote add {remote_name} <url>"
         )
-
-
 class GitNotInstalledError(GitError):
     """Git is not installed or not in PATH"""
-    
+
     def __init__(self):
         super().__init__(
             "Git is not installed or not found in PATH",
             severity=ErrorSeverity.CRITICAL,
             suggestion="Install Git from: https://git-scm.com/downloads"
         )
-
-
 class UncommittedChangesError(GitError):
     """Uncommitted changes prevent operation"""
-    
+
     def __init__(self, operation: str):
         super().__init__(
             f"Cannot {operation}: uncommitted changes exist",
             suggestion="Commit or stash changes before continuing"
         )
-
-
 class SSHConfigError(GitError):
     """SSH configuration specific errors"""
     pass
-
-
 class GitHubAPIError(AutomationError):
     """GitHub API related errors"""
     pass
-
-
 class ExceptionHandler:
     """Centralized exception handling"""
-    
+
     @staticmethod
     def handle(error: Exception, exit_on_critical: bool = False) -> None:
         """Handle and display exception"""
         if isinstance(error, AutomationError):
             print(error.display())
-            
+
             if exit_on_critical and error.severity == ErrorSeverity.CRITICAL:
                 import sys
                 sys.exit(1)
@@ -170,11 +148,11 @@ class ExceptionHandler:
                 suggestion="Check logs for details"
             )
             print(wrapped.display())
-            
+
             # Print traceback for unexpected errors
             if isinstance(error, Exception):
                 traceback.print_exc()
-    
+
     @staticmethod
     def safe_execute(func: Callable, *args, **kwargs) -> Tuple[Any, Optional[AutomationError]]:
         """Execute function safely and return (result, error)"""
@@ -189,8 +167,6 @@ class ExceptionHandler:
                 details={"type": type(e).__name__}
             )
             return None, wrapped
-
-
 def handle_errors(exit_on_critical: bool = False):
     """Decorator for automatic error handling"""
     def decorator(func):

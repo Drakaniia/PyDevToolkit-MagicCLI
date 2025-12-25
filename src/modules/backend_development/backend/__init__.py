@@ -10,7 +10,7 @@ from .framework.framework_tools import FrameworkTools
 
 __all__ = [
     'DatabaseManager',
-    'APIGenerator', 
+    'APIGenerator',
     'AuthManager',
     'FrameworkTools'
 ]

@@ -2,32 +2,48 @@
 automation/core/loading.py
 Comprehensive loading animation utilities for automation tools
 """
+
 import sys
 import time
 import threading
-from typing import Optional, List, Callable, Any
+from typing import Callable, Any
 from contextlib import contextmanager
 
 
 class LoadingSpinner:
     """Enhanced loading spinner with multiple animation types"""
-    
+
     # Different spinner styles
     SPINNER_STYLES = {
-        'dots': ['', '', '', '', '', '', '', '', '', ''],
-        'classic': ['|', '/', '-', '\\'],
-        'arrows': ['←', '↖', '↑', '↗', '→', '↘', '↓', '↙'],
-        'bouncing': ['', '', '', ''],
-        'pulse': ['', '', '', '', '', '', '', '', ''],
-        'blocks': ['', '', '', '', '', '', '', '', '', '', '', ''],
-        'clock': ['[', ']', '[', ']', '[', ']', '[', ']', '[', ']', '[', ']'],
-        'moon': ['(', ')', '(', ')', '(', ')', '(', ')'],
+        "dots": ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"],
+        "classic": ["|", "/", "-", "\\"],
+        "arrows": ["←", "↖", "↑", "↗", "→", "↘", "↓", "↙"],
+        "bouncing": ["⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈"],
+        "pulse": ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"],
+        "blocks": ["⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿", "⡿", "⢿", "⣻", "⣽", "⣾"],
+        "clock": [
+            "🕐",
+            "🕑",
+            "🕒",
+            "🕓",
+            "🕔",
+            "🕕",
+            "🕖",
+            "🕗",
+            "🕘",
+            "🕙",
+            "🕚",
+            "🕛",
+        ],
+        "moon": ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"],
     }
-    
-    def __init__(self, message: str = "Loading", style: str = 'dots', speed: float = 0.1):
+
+    def __init__(
+        self, message: str = "Loading", style: str = "dots", speed: float = 0.1
+    ):
         """
         Initialize loading spinner
-        
+
         Args:
             message: Message to display
             style: Spinner style ('dots', 'classic', 'arrows', etc.)
@@ -36,12 +52,12 @@ class LoadingSpinner:
         self.message = message
         self.style = style
         self.speed = speed
-        self.frames = self.SPINNER_STYLES.get(style, self.SPINNER_STYLES['dots'])
+        self.frames = self.SPINNER_STYLES.get(style, self.SPINNER_STYLES["dots"])
         self.index = 0
         self.active = False
         self.thread = None
         self._lock = threading.Lock()
-    
+
     def start(self):
         """Start the spinner animation"""
         with self._lock:
@@ -50,266 +66,241 @@ class LoadingSpinner:
             self.active = True
             self.thread = threading.Thread(target=self._animate, daemon=True)
             self.thread.start()
-    
-    def stop(self, success: bool = True, final_message: Optional[str] = None):
-        """
-        Stop the spinner and show final status
-        
-        Args:
-            success: Whether operation was successful
-            final_message: Custom final message to display
-        """
+
+    def stop(self):
+        """Stop the spinner animation"""
         with self._lock:
             if not self.active:
                 return
             self.active = False
-        
-        if self.thread and self.thread.is_alive():
-            self.thread.join(timeout=1.0)
-        
-        # Clear current line and show final status
-        sys.stdout.write('\r' + ' ' * (len(self.message) + 10) + '\r')
-        sys.stdout.flush()
-        
-        icon = "[OK]" if success else "[ERROR]"
-        message = final_message or self.message
-        print(f"{icon} {message}")
-    
-    def update_message(self, new_message: str):
-        """Update the spinner message while running"""
-        with self._lock:
-            self.message = new_message
-    
+            if self.thread:
+                self.thread.join(timeout=0.1)
+
     def _animate(self):
-        """Internal animation loop"""
+        """Animation loop"""
         while self.active:
             with self._lock:
                 if not self.active:
                     break
-                frame = self.frames[self.index % len(self.frames)]
-                sys.stdout.write(f'\r{frame} {self.message}...')
-                sys.stdout.flush()
-                self.index += 1
-            
+                frame = self.frames[self.index]
+                self.index = (self.index + 1) % len(self.frames)
+
+            # Write the frame
+            sys.stdout.write(f"\r{frame} {self.message}")
+            sys.stdout.flush()
             time.sleep(self.speed)
-    
+
+        # Clear the line when stopped
+        sys.stdout.write("\r" + " " * (len(self.message) + 10) + "\r")
+        sys.stdout.flush()
+
     def __enter__(self):
         """Context manager entry"""
         self.start()
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit"""
-        success = exc_type is None
-        self.stop(success=success)
-        return False
+        self.stop()
 
 
 class ProgressBar:
-    """Simple progress bar for operations with known total"""
-    
+    """Progress bar with customizable appearance"""
+
     def __init__(self, total: int, width: int = 50, message: str = "Progress"):
         """
         Initialize progress bar
-        
+
         Args:
             total: Total number of items
-            width: Width of progress bar in characters
+            width: Width of the progress bar
             message: Message to display
         """
         self.total = total
         self.width = width
         self.message = message
         self.current = 0
-    
-    def update(self, increment: int = 1, message: Optional[str] = None):
-        """
-        Update progress bar
-        
-        Args:
-            increment: Number to add to current progress
-            message: Optional message update
-        """
-        self.current = min(self.current + increment, self.total)
-        
-        if message:
-            self.message = message
-        
-        # Calculate progress
-        percentage = self.current / self.total if self.total > 0 else 0
+        self.start_time = time.time()
+
+    def update(self, increment: int = 1):
+        """Update progress by increment"""
+        self.current += increment
+        self._render()
+
+    def set_progress(self, value: int):
+        """Set progress to specific value"""
+        self.current = min(value, self.total)
+        self._render()
+
+    def _render(self):
+        """Render the progress bar"""
+        if self.total == 0:
+            return
+
+        percentage = self.current / self.total
         filled_width = int(self.width * percentage)
-        
-        # Create progress bar
-        bar = '' * filled_width + '' * (self.width - filled_width)
-        percent_text = f"{percentage:.1%}"
-        
-        # Display progress
-        sys.stdout.write(f'\r{self.message}: |{bar}| {percent_text} ({self.current}/{self.total})')
+        bar = "█" * filled_width + "░" * (self.width - filled_width)
+
+        elapsed = time.time() - self.start_time
+        if self.current > 0:
+            eta = elapsed * (self.total - self.current) / self.current
+            eta_str = f"ETA: {eta:.1f}s"
+        else:
+            eta_str = "ETA: --"
+
+        sys.stdout.write(
+            f"\r{self.message}: |{bar}| {percentage:.1%} "
+            f"({self.current}/{self.total}) {eta_str}"
+        )
         sys.stdout.flush()
-        
-        if self.current >= self.total:
-            print()  # New line when complete
-    
-    def complete(self, message: Optional[str] = None):
-        """Mark progress as complete"""
+
+    def finish(self):
+        """Finish the progress bar"""
         self.current = self.total
-        self.update(0, message or f"{self.message} Complete")
-
-
-class LoadingDots:
-    """Simple loading dots animation"""
-    
-    def __init__(self, message: str = "Loading", max_dots: int = 3, speed: float = 0.5):
-        """
-        Initialize loading dots
-        
-        Args:
-            message: Base message
-            max_dots: Maximum number of dots
-            speed: Speed of animation
-        """
-        self.message = message
-        self.max_dots = max_dots
-        self.speed = speed
-        self.dots = 0
-        self.active = False
-        self.thread = None
-        self._lock = threading.Lock()
-    
-    def start(self):
-        """Start dots animation"""
-        with self._lock:
-            if self.active:
-                return
-            self.active = True
-            self.thread = threading.Thread(target=self._animate, daemon=True)
-            self.thread.start()
-    
-    def stop(self, success: bool = True, final_message: Optional[str] = None):
-        """Stop animation and show final status"""
-        with self._lock:
-            if not self.active:
-                return
-            self.active = False
-        
-        if self.thread and self.thread.is_alive():
-            self.thread.join(timeout=1.0)
-        
-        # Clear line and show final status
-        sys.stdout.write('\r' + ' ' * (len(self.message) + self.max_dots + 5) + '\r')
+        self._render()
+        sys.stdout.write("\n")
         sys.stdout.flush()
-        
-        icon = "[OK]" if success else "[ERROR]"
-        message = final_message or self.message
-        print(f"{icon} {message}")
-    
-    def _animate(self):
-        """Internal animation loop"""
-        while self.active:
-            with self._lock:
-                if not self.active:
-                    break
-                dots_str = '.' * self.dots
-                sys.stdout.write(f'\r{self.message}{dots_str}')
-                sys.stdout.flush()
-                self.dots = (self.dots + 1) % (self.max_dots + 1)
-            
-            time.sleep(self.speed)
-    
-    def __enter__(self):
-        self.start()
-        return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        success = exc_type is None
-        self.stop(success=success)
-        return False
 
 
 @contextmanager
-def loading_animation(message: str = "Loading", style: str = 'dots', speed: float = 0.1):
-    """
-    Context manager for easy loading animation
-    
-    Args:
-        message: Message to display
-        style: Animation style
-        speed: Animation speed
-    
-    Usage:
-        with loading_animation("Installing packages"):
-            # Long running operation
-            time.sleep(5)
-    """
-    spinner = LoadingSpinner(message, style, speed)
+def loading_context(message: str = "Loading", style: str = "dots"):
+    """Context manager for loading animations"""
+    spinner = LoadingSpinner(message, style)
     try:
         spinner.start()
         yield spinner
-    except Exception as e:
-        spinner.stop(success=False, final_message=f"{message} failed: {str(e)}")
-        raise
-    else:
-        spinner.stop(success=True, final_message=f"{message} completed")
+    finally:
+        spinner.stop()
 
 
-def run_with_loading(
-    func: Callable,
-    args: tuple = (),
-    kwargs: dict = None,
-    message: str = "Processing",
-    style: str = 'dots',
-    success_message: Optional[str] = None,
-    error_message: Optional[str] = None
-) -> Any:
+def timed_operation(func: Callable, *args, **kwargs) -> Any:
     """
-    Run a function with loading animation
-    
+    Execute a function with timing and optional progress display
+
     Args:
-        func: Function to run
-        args: Function arguments
-        kwargs: Function keyword arguments
-        message: Loading message
-        style: Animation style
-        success_message: Message on success
-        error_message: Message on error
-    
+        func: Function to execute
+        *args: Function arguments
+        **kwargs: Function keyword arguments
+
     Returns:
-        Function result
+        Result of the function execution
     """
-    kwargs = kwargs or {}
-    
-    with LoadingSpinner(message, style) as spinner:
+    start_time = time.time()
+    try:
+        result = func(*args, **kwargs)
+        elapsed = time.time() - start_time
+        print(f"✓ Operation completed in {elapsed:.2f}s")
+        return result
+    except Exception as e:
+        elapsed = time.time() - start_time
+        print(f"✗ Operation failed after {elapsed:.2f}s: {e}")
+        raise
+
+
+class LoadingManager:
+    """Manager for multiple loading operations"""
+
+    def __init__(self):
+        self.active_spinners = {}
+        self.progress_bars = {}
+
+    def start_spinner(self, name: str, message: str, style: str = "dots"):
+        """Start a named spinner"""
+        spinner = LoadingSpinner(message, style)
+        spinner.start()
+        self.active_spinners[name] = spinner
+        return spinner
+
+    def stop_spinner(self, name: str):
+        """Stop a named spinner"""
+        if name in self.active_spinners:
+            self.active_spinners[name].stop()
+            del self.active_spinners[name]
+
+    def create_progress_bar(self, name: str, total: int, message: str = "Progress"):
+        """Create a named progress bar"""
+        progress_bar = ProgressBar(total, message=message)
+        self.progress_bars[name] = progress_bar
+        return progress_bar
+
+    def finish_progress_bar(self, name: str):
+        """Finish a named progress bar"""
+        if name in self.progress_bars:
+            self.progress_bars[name].finish()
+            del self.progress_bars[name]
+
+    def stop_all(self):
+        """Stop all active operations"""
+        for spinner in self.active_spinners.values():
+            spinner.stop()
+        for progress_bar in self.progress_bars.values():
+            progress_bar.finish()
+        self.active_spinners.clear()
+        self.progress_bars.clear()
+
+
+# Global loading manager instance
+loading_manager = LoadingManager()
+
+
+# Convenience functions
+def start_loading(message: str, style: str = "dots") -> LoadingSpinner:
+    """Start a loading spinner with the given message"""
+    spinner = LoadingSpinner(message, style)
+    spinner.start()
+    return spinner
+
+
+def show_progress(total: int, message: str = "Progress") -> ProgressBar:
+    """Show a progress bar for the given total"""
+    return ProgressBar(total, message=message)
+
+
+def load_with_progress(
+    items: list, processor: Callable, message: str = "Processing"
+) -> list:
+    """
+    Process a list of items with progress display
+
+    Args:
+        items: List of items to process
+        processor: Function to process each item
+        message: Progress message
+
+    Returns:
+        List of processed items
+    """
+    progress = show_progress(len(items), message)
+    results = []
+
+    for item in items:
         try:
-            result = func(*args, **kwargs)
-            spinner.stop(success=True, final_message=success_message or f"{message} completed")
-            return result
+            result = processor(item)
+            results.append(result)
         except Exception as e:
-            error_msg = error_message or f"{message} failed: {str(e)}"
-            spinner.stop(success=False, final_message=error_msg)
-            raise
+            print(f"Error processing item: {e}")
+        progress.update()
+
+    progress.finish()
+    return results
 
 
-# Convenience functions for common operations
-def with_spinner(message: str = "Loading", style: str = 'dots'):
-    """Decorator for adding spinner to functions"""
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            return run_with_loading(
-                func, args, kwargs, 
-                message=message, 
-                style=style,
-                success_message=f"{func.__name__} completed"
-            )
-        return wrapper
-    return decorator
+if __name__ == "__main__":
+    # Example usage
+    print("Testing LoadingSpinner...")
+    with LoadingSpinner("Testing spinner", "dots"):
+        time.sleep(2)
 
+    print("\nTesting ProgressBar...")
+    progress = ProgressBar(100, message="Test progress")
+    for i in range(101):
+        progress.set_progress(i)
+        time.sleep(0.02)
 
-# Export main classes and functions
-__all__ = [
-    'LoadingSpinner',
-    'ProgressBar', 
-    'LoadingDots',
-    'loading_animation',
-    'run_with_loading',
-    'with_spinner'
-]
+    print("\nTesting LoadingManager...")
+    manager = LoadingManager()
+    spinner = manager.start_spinner("test", "Manager test")
+    time.sleep(1)
+    manager.stop_spinner("test")
+
+    print("\nAll tests completed!")

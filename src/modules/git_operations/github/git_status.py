@@ -12,8 +12,6 @@ except ImportError:
     import sys
     if __name__ == "__main__":
         print("Warning: termcolor library not found. Install it using: pip install termcolor")
-
-
 class GitStatus:
     """Handles git status operations"""
 
@@ -56,7 +54,7 @@ class GitStatus:
             print(" Git is not installed or not in PATH")
 
         input("\nPress Enter to continue...")
-    
+
     def _colorize_status_line(self, line):
         """Colorize a single status line based on file status"""
         if not line:
@@ -241,12 +239,12 @@ class GitStatus:
             return result.stdout.strip()
         except subprocess.CalledProcessError:
             return None
-    
+
     def has_uncommitted_changes(self):
         """Check if there are uncommitted changes"""
         status = self.get_status_porcelain()
         return bool(status)
-    
+
     def _is_git_repo(self):
         """Check if current directory is a git repository"""
         result = subprocess.run(
@@ -257,7 +255,7 @@ class GitStatus:
             errors='replace'
         )
         return result.returncode == 0
-    
+
     def _run_command(self, command):
         """Run a shell command and display output"""
         try:

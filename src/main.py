@@ -14,13 +14,9 @@ if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 from menu import MainMenu
-
-
 def main():
     """Entry point for the automation system"""
     menu = MainMenu()
     menu.run()
-
-
 if __name__ == "__main__":
     main()

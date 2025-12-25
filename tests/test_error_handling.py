@@ -2,19 +2,25 @@
 Error handling tests for PyDevToolkit-MagicCLI
 Tests comprehensive error handling and exception management
 """
-import unittest
 import sys
+import unittest
 from pathlib import Path
 
 # Add the src directory to Python path to import modules
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from core.utils.exceptions import (
-    AutomationError, GitError, GitCommandError, NotGitRepositoryError,
-    NoRemoteError, GitNotInstalledError, UncommittedChangesError, ErrorSeverity,
-    ExceptionHandler
-)
 from core.security import SecurityValidator
+from core.utils.exceptions import (
+    AutomationError,
+    ErrorSeverity,
+    ExceptionHandler,
+    GitCommandError,
+    GitError,
+    GitNotInstalledError,
+    NoRemoteError,
+    NotGitRepositoryError,
+    UncommittedChangesError,
+)
 
 
 class TestErrorHandling(unittest.TestCase):
@@ -32,14 +38,14 @@ class TestErrorHandling(unittest.TestCase):
         """Test AutomationError with details and suggestions"""
         details = {"type": "test", "code": 404}
         suggestion = "Try again later"
-        
+
         error = AutomationError(
             "Test error message",
             severity=ErrorSeverity.WARNING,
             details=details,
-            suggestion=suggestion
+            suggestion=suggestion,
         )
-        
+
         self.assertEqual(error.message, "Test error message")
         self.assertEqual(error.severity, ErrorSeverity.WARNING)
         self.assertEqual(error.details, details)
@@ -51,9 +57,9 @@ class TestErrorHandling(unittest.TestCase):
             "Test error message",
             severity=ErrorSeverity.CRITICAL,
             details={"test": "value"},
-            suggestion="Try this solution"
+            suggestion="Try this solution",
         )
-        
+
         display_text = error.display()
         self.assertIn("CRITICAL", display_text)
         self.assertIn("Test error message", display_text)
@@ -68,9 +74,9 @@ class TestErrorHandling(unittest.TestCase):
             NotGitRepositoryError("/test/path"),
             NoRemoteError("origin"),
             GitNotInstalledError(),
-            UncommittedChangesError("push")
+            UncommittedChangesError("push"),
         ]
-        
+
         for git_error in git_errors:
             self.assertIsInstance(git_error, GitError)
             self.assertIsInstance(git_error, AutomationError)
@@ -79,13 +85,19 @@ class TestErrorHandling(unittest.TestCase):
         """Test GitCommandError with different stderr messages"""
         test_cases = [
             ("not a git repository", "Initialize Git with: git init"),
-            ("remote origin not found", "Configure remote with: git remote add origin <url>"),
+            (
+                "remote origin not found",
+                "Configure remote with: git remote add origin <url>",
+            ),
             ("permission denied", "Check file permissions or SSH keys"),
             ("conflict", "Resolve merge conflicts before continuing"),
             ("up to date", "Nothing to push - repository is up to date"),
-            ("no upstream", "Set upstream with: git push --set-upstream origin <branch>"),
+            (
+                "no upstream",
+                "Set upstream with: git push --set-upstream origin <branch>",
+            ),
         ]
-        
+
         for stderr_text, expected_suggestion in test_cases:
             with self.subTest(stderr=stderr_text):
                 error = GitCommandError("git test", 1, stderr_text)
@@ -97,7 +109,7 @@ class TestErrorHandling(unittest.TestCase):
         # Test command validation
         with self.assertRaises(AutomationError):
             SecurityValidator.sanitize_command_input("ls; rm -rf /")
-        
+
         # Test path validation
         with self.assertRaises(AutomationError):
             SecurityValidator.sanitize_path("../../../etc/passwd")
@@ -109,46 +121,51 @@ class TestExceptionHandler(unittest.TestCase):
     def test_handle_automation_error(self):
         """Test handling of AutomationError"""
         error = AutomationError("Test error")
-        
+
         # This should handle the error without issues
         ExceptionHandler.handle(error)
-        
+
         # Test with exit_on_critical
-        critical_error = AutomationError("Critical error", severity=ErrorSeverity.CRITICAL)
-        
+        critical_error = AutomationError(
+            "Critical error", severity=ErrorSeverity.CRITICAL
+        )
+
         # For non-critical errors, it should not exit
         ExceptionHandler.handle(error, exit_on_critical=True)
 
     def test_handle_regular_exception(self):
         """Test handling of regular exceptions"""
         regular_error = ValueError("Test value error")
-        
+
         # This should wrap the error and handle it
         ExceptionHandler.handle(regular_error)
 
     def test_safe_execute_success(self):
         """Test safe_execute with successful function"""
+
         def successful_func():
             return "success"
-        
+
         result, error = ExceptionHandler.safe_execute(successful_func)
         self.assertEqual(result, "success")
         self.assertIsNone(error)
 
     def test_safe_execute_with_automation_error(self):
         """Test safe_execute with AutomationError"""
+
         def error_func():
             raise AutomationError("Test error")
-        
+
         result, error = ExceptionHandler.safe_execute(error_func)
         self.assertIsNone(result)
         self.assertIsInstance(error, AutomationError)
 
     def test_safe_execute_with_regular_exception(self):
         """Test safe_execute with regular exception"""
+
         def error_func():
             raise ValueError("Test error")
-        
+
         result, error = ExceptionHandler.safe_execute(error_func)
         self.assertIsNone(result)
         self.assertIsInstance(error, AutomationError)  # Should be wrapped
@@ -182,6 +199,6 @@ class TestExceptionSubclasses(unittest.TestCase):
         self.assertIn("commit or stash", error.suggestion.lower())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("Running error handling tests...")
     unittest.main(verbosity=2)

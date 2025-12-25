@@ -5,8 +5,6 @@ Handles commit history viewing and log operations
 import subprocess
 from datetime import datetime
 from core.loading import LoadingSpinner, loading_animation
-
-
 class GitLog:
     """Handles git log and commit history operations"""
 
@@ -484,7 +482,7 @@ class GitLog:
         except Exception as e:
             print(f"Unexpected error: {e}")
             return []
-    
+
     def get_commit_details(self, commit_id, fetch_remote=False):
         """Get details for a specific commit with option to fetch remote commits first"""
         if fetch_remote:
@@ -523,7 +521,7 @@ class GitLog:
             pass
 
         return None
-    
+
     def verify_commit_exists(self, commit_id, fetch_remote=False):
         """Verify if a commit exists in the repository with option to fetch remote commits first"""
         if fetch_remote:
@@ -537,7 +535,7 @@ class GitLog:
             errors='replace'
         )
         return result.returncode == 0
-    
+
     def _is_git_repo(self):
         """Check if current directory is a git repository"""
         result = subprocess.run(
@@ -548,7 +546,7 @@ class GitLog:
             errors='replace'
         )
         return result.returncode == 0
-    
+
     def _run_command(self, command):
         """Run a shell command and display output with optional color support"""
         try:

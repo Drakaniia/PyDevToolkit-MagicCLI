@@ -11,14 +11,12 @@ from core.menu import Menu, MenuItem
 from core.utils.git_client import get_git_client
 from core.loading import LoadingSpinner
 # Import security and logging modules inside functions to avoid circular imports
-
-
 class GitRecover:
     """Handles git commit recovery and rollback operations"""
 
     def __init__(self):
         pass
-    
+
     def show_recovery_menu(self, commit_history_func, commit_details_func, verify_commit_func):
         """
         Show the commit recovery interface using the menu system
@@ -76,7 +74,7 @@ class GitRecover:
 
         recovery_menu = GitRecoveryMenu(self, commits)
         recovery_menu.run()
-    
+
     def _select_by_number_with_menu(self, commits):
         """Select commit by using the menu system"""
         class CommitSelectionMenu(Menu):
@@ -126,7 +124,7 @@ class GitRecover:
         except ValueError:
             print("\nInvalid input. Please enter a number.")
             input("\nPress Enter to continue...")
-    
+
     def _select_by_id(self, commit_details_func, verify_commit_func):
         """Select commit by entering commit ID"""
         commit_id = input("\nEnter commit ID (hash): ").strip()
@@ -149,7 +147,7 @@ class GitRecover:
         else:
             print(f"\nCould not retrieve details for commit '{commit_id}'.")
             input("\nPress Enter to continue...")
-    
+
     def _confirm_and_revert(self, commit):
         """Confirm and perform the revert operation"""
         print("\n" + "="*70)
@@ -165,9 +163,9 @@ class GitRecover:
         print("  2. Soft Reset (keeps changes as uncommitted)")
         print("  3. Create new branch from this commit")
         print("  4. Cancel\n")
-        
+
         choice = input("Your choice (1/2/3/4): ").strip()
-        
+
         if choice == '1':
             self.hard_reset(commit['hash'])
         elif choice == '2':
@@ -180,7 +178,7 @@ class GitRecover:
         else:
             print("\nInvalid choice.")
             input("\nPress Enter to continue...")
-    
+
     def hard_reset(self, commit_hash):
         """Perform hard reset to commit"""
         print("\nWARNING: This will permanently delete all commits after this point!")
@@ -224,7 +222,7 @@ class GitRecover:
         else:
             print("\nOperation cancelled.")
             input("\nPress Enter to continue...")
-    
+
     def soft_reset(self, commit_hash):
         """Perform soft reset to commit"""
         print("\nPerforming soft reset...")
@@ -245,7 +243,7 @@ class GitRecover:
             print(f"\nError: {result.stderr}")
 
         input("\nPress Enter to continue...")
-    
+
     def create_branch(self, commit_hash):
         """Create a new branch from commit"""
         branch_name = input("\nEnter new branch name: ").strip()
@@ -272,7 +270,7 @@ class GitRecover:
             print(f"\nError: {result.stderr}")
 
         input("\nPress Enter to continue...")
-    
+
     def _is_git_repo(self):
         """Check if current directory is a git repository"""
         result = subprocess.run(

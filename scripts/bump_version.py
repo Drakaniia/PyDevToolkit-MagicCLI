@@ -7,7 +7,7 @@ Automatically updates version in pyproject.toml and creates git tags
 import re
 import sys
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 
 def get_current_version() -> str:

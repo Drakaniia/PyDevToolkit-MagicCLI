@@ -21,8 +21,6 @@ try:
     HAS_ARROW_NAVIGATION = True
 except ImportError:
     HAS_ARROW_NAVIGATION = False
-
-
 class GitDiff:
     """Handles comprehensive git diff operations"""
 
@@ -324,7 +322,7 @@ class GitDiff:
     def get_all_diffs_formatted(self):
         """Get all types of diffs for external use"""
         diffs = {}
-        
+
         if not self._is_git_repo():
             return diffs
 

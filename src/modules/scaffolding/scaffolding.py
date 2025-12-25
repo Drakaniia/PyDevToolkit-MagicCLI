@@ -9,8 +9,6 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
-
-
 class ScaffoldingTools:
     """Handles project scaffolding and template creation"""
 
@@ -22,29 +20,29 @@ class ScaffoldingTools:
         print("\n" + "="*70)
         print("PYTHON PROJECT SCAFFOLDING")
         print("="*70)
-        
+
         try:
             project_name = input("Enter project name: ").strip()
             if not project_name:
                 print("Project name cannot be empty!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Validate project name
             if not self.validator.validate_file_name(project_name):
                 print("Invalid project name!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Create project directory
             project_dir = Path(project_name)
             if project_dir.exists():
                 print(f"Project directory '{project_name}' already exists!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             project_dir.mkdir()
-            
+
             # Create standard Python project structure
             dirs_to_create = [
                 project_dir / "src",
@@ -54,10 +52,10 @@ class ScaffoldingTools:
                 project_dir / "scripts",
                 project_dir / ".github" / "workflows",
             ]
-            
+
             for directory in dirs_to_create:
                 directory.mkdir(parents=True, exist_ok=True)
-            
+
             # Create pyproject.toml
             pyproject_content = f'''[build-system]
 requires = ["setuptools>=61.0", "wheel"]
@@ -91,10 +89,10 @@ test = [
 [tool.setuptools.packages.find]
 where = ["src"]
 '''
-            
+
             with open(project_dir / "pyproject.toml", "w") as f:
                 f.write(pyproject_content)
-            
+
             # Create README.md
             readme_content = f"""# {project_name}
 
@@ -115,15 +113,15 @@ Instructions for contributing to the project.
 ## License
 MIT License
 """
-            
+
             with open(project_dir / "README.md", "w") as f:
                 f.write(readme_content)
-            
+
             # Create main package init
             main_pkg_dir = project_dir / project_name.replace("-", "_")
             with open(main_pkg_dir / "__init__.py", "w") as f:
                 f.write('"""Main package for {project_name}"""\n')
-            
+
             # Create a main module
             with open(main_pkg_dir / "main.py", "w") as f:
                 f.write(f'''"""
@@ -137,7 +135,7 @@ def main():
 if __name__ == "__main__":
     main()
 ''')
-            
+
             # Create basic test
             with open(project_dir / "tests" / "test_main.py", "w") as f:
                 f.write(f'''"""
@@ -159,7 +157,7 @@ if __name__ == "__main__":
     test_import()
     print("All tests passed!")
 ''')
-            
+
             # Create .gitignore
             gitignore_content = """# Byte-compiled / optimized / DLL files
 __pycache__/
@@ -279,10 +277,10 @@ dmypy.json
 # Pyre checker
 .pyre/
 """
-            
+
             with open(project_dir / ".gitignore", "w") as f:
                 f.write(gitignore_content)
-            
+
             print(f"\n✓ Python project '{project_name}' created successfully!")
             print(f"  Directory structure:")
             print(f"  ├── src/")
@@ -291,12 +289,12 @@ dmypy.json
             print(f"  ├── pyproject.toml")
             print(f"  ├── README.md")
             print(f"  └── .gitignore")
-        
+
         except KeyboardInterrupt:
             print("\nOperation cancelled.")
         except Exception as e:
             print(f"\n⚠ Error creating Python project: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def create_fastapi_project(self) -> None:
@@ -304,35 +302,35 @@ dmypy.json
         print("\n" + "="*70)
         print("FASTAPI PROJECT SCAFFOLDING")
         print("="*70)
-        
+
         try:
             project_name = input("Enter project name: ").strip()
             if not project_name:
                 print("Project name cannot be empty!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Validate project name
             if not self.validator.validate_file_name(project_name):
                 print("Invalid project name!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Create project directory
             project_dir = Path(project_name)
             if project_dir.exists():
                 print(f"Project directory '{project_name}' already exists!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             project_dir.mkdir()
-            
+
             # Create FastAPI project structure
             dirs_to_create = [
                 project_dir / "src",
                 project_dir / project_name.replace("-", "_"),
                 project_dir / "src" / "api",
-                project_dir / "src" / "models", 
+                project_dir / "src" / "models",
                 project_dir / "src" / "schemas",
                 project_dir / "src" / "database",
                 project_dir / "src" / "routers",
@@ -340,10 +338,10 @@ dmypy.json
                 project_dir / "tests",
                 project_dir / "config",
             ]
-            
+
             for directory in dirs_to_create:
                 directory.mkdir(parents=True, exist_ok=True)
-            
+
             # Create main.py for FastAPI app
             main_content = '''from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -376,10 +374,10 @@ def read_root():
 def health_check():
     return {"status": "healthy"}
 '''
-            
+
             with open(project_dir / "src" / "main.py", "w") as f:
                 f.write(main_content)
-            
+
             # Create pyproject.toml
             pyproject_content = f'''[build-system]
 requires = ["setuptools>=61.0", "wheel"]
@@ -425,10 +423,10 @@ start = "src.main:run_server"
 [tool.setuptools.packages.find]
 where = ["src"]
 '''
-            
+
             with open(project_dir / "pyproject.toml", "w") as f:
                 f.write(pyproject_content)
-            
+
             # Create README.md
             readme_content = f"""# {project_name} - FastAPI Project
 
@@ -471,10 +469,10 @@ Instructions for contributing to the project.
 ## License
 MIT License
 """
-            
+
             with open(project_dir / "README.md", "w") as f:
                 f.write(readme_content)
-            
+
             # Create a basic router
             router_content = '''from fastapi import APIRouter, HTTPException, Depends
 from typing import List
@@ -503,24 +501,18 @@ def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
     # return crud.create_item(db=db, item=item)
     return item
 '''
-            
+
             with open(project_dir / "src" / "routers" / "items.py", "w") as f:
                 f.write(router_content)
-            
+
             # Create a basic Pydantic schema
             schema_content = '''from pydantic import BaseModel
 from typing import Optional
-
-
 class ItemBase(BaseModel):
     title: str
     description: Optional[str] = None
-
-
 class ItemCreate(ItemBase):
     pass
-
-
 class Item(ItemBase):
     id: int
     owner_id: int
@@ -528,10 +520,10 @@ class Item(ItemBase):
     class Config:
         from_attributes = True
 '''
-            
+
             with open(project_dir / "src" / "schemas" / "items.py", "w") as f:
                 f.write(schema_content)
-            
+
             # Create a basic database setup
             db_content = '''from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -552,10 +544,10 @@ def get_db():
     finally:
         db.close()
 '''
-            
+
             with open(project_dir / "src" / "database" / "database.py", "w") as f:
                 f.write(db_content)
-            
+
             # Create .gitignore
             gitignore_content = """# Byte-compiled / optimized / DLL files
 __pycache__/
@@ -601,10 +593,10 @@ htmlcov/
 # VSCode
 .vscode/
 """
-            
+
             with open(project_dir / ".gitignore", "w") as f:
                 f.write(gitignore_content)
-            
+
             print(f"\n✓ FastAPI project '{project_name}' created successfully!")
             print(f"  Directory structure:")
             print(f"  ├── src/")
@@ -620,12 +612,12 @@ htmlcov/
             print(f"  ├── pyproject.toml")
             print(f"  ├── README.md")
             print(f"  └── .gitignore")
-        
+
         except KeyboardInterrupt:
             print("\nOperation cancelled.")
         except Exception as e:
             print(f"\n⚠ Error creating FastAPI project: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def create_react_project(self) -> None:
@@ -633,58 +625,58 @@ htmlcov/
         print("\n" + "="*70)
         print("REACT PROJECT SCAFFOLDING")
         print("="*70)
-        
+
         print("\nThis feature would create a React project using Create React App.")
         print("It requires Node.js and npm to be installed on your system.")
-        
+
         try:
             # Check if Node.js is available
-            node_result = subprocess.run(['node', '--version'], 
+            node_result = subprocess.run(['node', '--version'],
                                         capture_output=True, text=True)
-            
+
             if node_result.returncode != 0:
                 print("\n⚠ Node.js is not installed or not in PATH")
                 print("Please install Node.js to use this feature")
                 input("\nPress Enter to continue...")
                 return
-            
+
             project_name = input("Enter project name: ").strip()
             if not project_name:
                 print("Project name cannot be empty!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Validate project name
             if not self.validator.validate_file_name(project_name):
                 print("Invalid project name!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Create project directory
             project_dir = Path(project_name)
             if project_dir.exists():
                 print(f"Project directory '{project_name}' already exists!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Create React app
             print(f"\nCreating React app '{project_name}'...")
             result = subprocess.run([
-                'npx', 'create-react-app', project_name, 
+                'npx', 'create-react-app', project_name,
                 '--template', 'typescript'  # Using TypeScript template
             ], capture_output=True, text=True)
-            
+
             if result.returncode != 0:
                 print(f"\n⚠ Error creating React app: {result.stderr}")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Add Magic CLI specific configurations
             # Add a custom README with Magic CLI notes
             readme_path = project_dir / "README.md"
             with open(readme_path, "r") as f:
                 original_readme = f.read()
-            
+
             magic_cli_readme = f"""# {project_name} - Created with Magic CLI
 
 This project was created using Magic CLI's React project generator.
@@ -693,23 +685,23 @@ This project was created using Magic CLI's React project generator.
 
 {original_readme}
 """
-            
+
             with open(readme_path, "w") as f:
                 f.write(magic_cli_readme)
-            
+
             print(f"\n✓ React project '{project_name}' created successfully!")
             print("Project includes TypeScript template")
             print("\nTo start the development server:")
             print(f"  cd {project_name}")
             print("  npm start")
-        
+
         except KeyboardInterrupt:
             print("\nOperation cancelled.")
         except FileNotFoundError:
             print("\n⚠ 'npx' command not found. Make sure Node.js is installed.")
         except Exception as e:
             print(f"\n⚠ Error creating React project: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def create_flutter_project(self) -> None:
@@ -717,63 +709,63 @@ This project was created using Magic CLI's React project generator.
         print("\n" + "="*70)
         print("FLUTTER PROJECT SCAFFOLDING")
         print("="*70)
-        
+
         print("\nThis feature would create a Flutter project.")
         print("It requires Flutter SDK to be installed on your system.")
-        
+
         try:
             # Check if Flutter is available
-            flutter_result = subprocess.run(['flutter', '--version'], 
+            flutter_result = subprocess.run(['flutter', '--version'],
                                           capture_output=True, text=True)
-            
+
             if flutter_result.returncode != 0:
                 print("\n⚠ Flutter is not installed or not in PATH")
                 print("Please install Flutter SDK to use this feature")
                 input("\nPress Enter to continue...")
                 return
-            
+
             project_name = input("Enter project name: ").strip()
             if not project_name:
                 print("Project name cannot be empty!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Validate project name
             if not self.validator.validate_file_name(project_name):
                 print("Invalid project name!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Create project directory
             project_dir = Path(project_name)
             if project_dir.exists():
                 print(f"Project directory '{project_name}' already exists!")
                 input("\nPress Enter to continue...")
                 return
-            
+
             # Create Flutter app
             print(f"\nCreating Flutter app '{project_name}'...")
             result = subprocess.run([
                 'flutter', 'create', project_name
             ], capture_output=True, text=True)
-            
+
             if result.returncode != 0:
                 print(f"\n⚠ Error creating Flutter app: {result.stderr}")
                 input("\nPress Enter to continue...")
                 return
-            
+
             print(f"\n✓ Flutter project '{project_name}' created successfully!")
             print("\nTo run the app:")
             print(f"  cd {project_name}")
             print("  flutter run")
-        
+
         except KeyboardInterrupt:
             print("\nOperation cancelled.")
         except FileNotFoundError:
             print("\n⚠ 'flutter' command not found. Make sure Flutter SDK is installed.")
         except Exception as e:
             print(f"\n⚠ Error creating Flutter project: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def create_docker_project(self) -> None:
@@ -781,9 +773,9 @@ This project was created using Magic CLI's React project generator.
         print("\n" + "="*70)
         print("DOCKER CONFIGURATION SCAFFOLDING")
         print("="*70)
-        
+
         print("\nCreating Docker configuration files...")
-        
+
         # Create Dockerfile
         dockerfile_content = '''# Use an official Python runtime as a parent image
 FROM python:3.11-slim
@@ -814,10 +806,10 @@ EXPOSE 8000
 # Run the application
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "src.main:app"]
 '''
-        
+
         with open("Dockerfile", "w") as f:
             f.write(dockerfile_content)
-        
+
         # Create docker-compose.yml
         compose_content = '''version: '3.8'
 
@@ -831,7 +823,7 @@ services:
     volumes:
       - .:/app
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
-    
+
   db:
     image: postgres:15
     volumes:
@@ -846,10 +838,10 @@ services:
 volumes:
   postgres_data:
 '''
-        
+
         with open("docker-compose.yml", "w") as f:
             f.write(compose_content)
-        
+
         # Create .dockerignore
         dockerignore_content = """# Python
 __pycache__
@@ -880,20 +872,18 @@ Thumbs.db
 # Environment variables
 .env
 """
-        
+
         with open(".dockerignore", "w") as f:
             f.write(dockerignore_content)
-        
+
         print("\n✓ Docker configuration files created successfully!")
         print("  - Dockerfile: Basic Python application container")
         print("  - docker-compose.yml: Multi-container setup with database")
         print("  - .dockerignore: Ignore unnecessary files in Docker build")
         print("\nTo build and run:")
         print("  docker-compose up --build")
-        
+
         input("\nPress Enter to continue...")
-
-
 class ScaffoldingMenu(Menu):
     """Menu for scaffolding tools"""
 

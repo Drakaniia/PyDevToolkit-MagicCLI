@@ -20,8 +20,6 @@ try:
     HAS_MSVCRT = True
 except ImportError:
     HAS_MSVCRT = False
-
-
 class FolderNavigator:
     """Handles interactive folder navigation with smooth arrow key support"""
 
@@ -82,7 +80,7 @@ class FolderNavigator:
         """Display the navigation interface"""
         if initial:
             self._clear_screen()
-        
+
         print("="*70)
         print("FOLDER NAVIGATOR")
         print("="*70)
@@ -121,19 +119,19 @@ class FolderNavigator:
         # Calculate line positions
         # Header is 9 lines, then directory list starts
         base_line = 10
-        
+
         # Update old selection (unhighlight)
         line_number = base_line + old_idx
         sys.stdout.write(f'\033[{line_number + 1};1H')
         sys.stdout.write(self.CLEAR_LINE)
         self._print_directory_item_inline(old_idx, subdirs[old_idx], False)
-        
+
         # Update new selection (highlight)
         line_number = base_line + new_idx
         sys.stdout.write(f'\033[{line_number + 1};1H')
         sys.stdout.write(self.CLEAR_LINE)
         self._print_directory_item_inline(new_idx, subdirs[new_idx], True)
-        
+
         sys.stdout.flush()
 
     def _print_directory_item(self, idx, subdir, is_selected):
@@ -344,8 +342,6 @@ class FolderNavigator:
         sys.stdout.write(self.CLEAR_SCREEN)
         sys.stdout.flush()
         os.system('cls' if os.name == 'nt' else 'clear')
-
-
 # Test the navigator
 if __name__ == "__main__":
     print("Testing Folder Navigator...")

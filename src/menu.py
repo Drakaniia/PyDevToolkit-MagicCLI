@@ -14,8 +14,6 @@ if str(src_path) not in sys.path:
 from core.menu import Menu, MenuItem
 from typing import Any, Optional
 from modules.others_menu import OthersMenu
-
-
 class MainMenu(Menu):
     """Main menu for the automation system - Updated with Dev Mode"""
 
@@ -92,8 +90,6 @@ class MainMenu(Menu):
         """Run Others menu"""
         self._others_menu.run()
         return None
-
-
 
     def _exit_program(self) -> str:
         """Exit the program"""

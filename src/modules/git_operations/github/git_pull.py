@@ -6,8 +6,6 @@ import subprocess
 import sys
 import threading
 import time
-
-
 class GitPull:
     """Handles git pull operations"""
 

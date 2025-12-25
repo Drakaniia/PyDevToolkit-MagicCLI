@@ -10,8 +10,6 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
-
-
 class APITools:
     """Handles API development and testing tasks"""
 
@@ -23,21 +21,21 @@ class APITools:
         print("\n" + "="*70)
         print("API CLIENT GENERATOR")
         print("="*70)
-        
+
         print("\nThis tool helps create an API client for testing your APIs.")
-        
+
         api_base_url = input("Enter API base URL (e.g., http://localhost:8000/api/v1): ").strip()
         if not api_base_url:
             print("API base URL is required!")
             input("\nPress Enter to continue...")
             return
-        
+
         # Validate URL
         if not api_base_url.startswith(('http://', 'https://')):
             print("Please enter a valid URL starting with http:// or https://")
             input("\nPress Enter to continue...")
             return
-        
+
         print(f"\nExample API client code for {api_base_url}:")
         print("```python")
         print("# api_client.py")
@@ -76,7 +74,7 @@ class APITools:
         print("        response.raise_for_status()")
         print("        return response.json()")
         print("```")
-        
+
         # Optionally create the file
         create_file = input("\nCreate api_client.py file? (y/n): ").lower()
         if create_file == 'y':
@@ -122,12 +120,12 @@ if __name__ == "__main__":
     # data = client.get("/items")
     # print(data)
 '''
-            
+
             with open("api_client.py", "w") as f:
                 f.write(client_content)
-            
+
             print("✓ API client created as api_client.py")
-        
+
         input("\nPress Enter to continue...")
 
     def test_api_endpoint(self) -> None:
@@ -135,24 +133,24 @@ if __name__ == "__main__":
         print("\n" + "="*70)
         print("API ENDPOINT TESTING")
         print("="*70)
-        
+
         api_url = input("Enter API endpoint URL: ").strip()
         if not api_url:
             print("API URL is required!")
             input("\nPress Enter to continue...")
             return
-        
+
         # Validate URL
         if not api_url.startswith(('http://', 'https://')):
             print("Please enter a valid URL starting with http:// or https://")
             input("\nPress Enter to continue...")
             return
-        
+
         method = input("HTTP method (GET, POST, PUT, DELETE) [default: GET]: ").strip().upper() or "GET"
         if method not in ["GET", "POST", "PUT", "DELETE"]:
             print("Invalid HTTP method. Using GET.")
             method = "GET"
-        
+
         # Get headers
         headers = {}
         headers_input = input("Add headers? (format: key=value,key2=value2) [optional]: ").strip()
@@ -163,7 +161,7 @@ if __name__ == "__main__":
                     headers[key.strip()] = value.strip()
             except ValueError:
                 print("Invalid header format. Continuing without headers.")
-        
+
         # Get data for POST/PUT
         data = None
         if method in ["POST", "PUT"]:
@@ -173,10 +171,10 @@ if __name__ == "__main__":
                     data = json.loads(data_input)
                 except json.JSONDecodeError:
                     print("Invalid JSON. Continuing without data.")
-        
+
         try:
             print(f"\nMaking {method} request to: {api_url}")
-            
+
             # Make the API call
             if method == "GET":
                 response = requests.get(api_url, headers=headers)
@@ -186,7 +184,7 @@ if __name__ == "__main__":
                 response = requests.put(api_url, json=data, headers=headers)
             elif method == "DELETE":
                 response = requests.delete(api_url, headers=headers)
-            
+
             print(f"\nResponse Status: {response.status_code}")
             print(f"Response Headers: {dict(response.headers)}")
             try:
@@ -196,12 +194,12 @@ if __name__ == "__main__":
                 print(f"Response Text: {response.text[:500]}")  # Limit output
                 if len(response.text) > 500:
                     print("... (response truncated)")
-        
+
         except requests.exceptions.RequestException as e:
             print(f"\nError making request: {e}")
         except Exception as e:
             print(f"\nUnexpected error: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def mock_api_server(self) -> None:
@@ -209,10 +207,10 @@ if __name__ == "__main__":
         print("\n" + "="*70)
         print("MOCK API SERVER")
         print("="*70)
-        
+
         print("\nThis creates a simple mock API server for frontend development.")
         print("It requires the 'flask' package.")
-        
+
         # Check if Flask is available
         try:
             import flask
@@ -232,13 +230,13 @@ if __name__ == "__main__":
                 print("Cannot create mock server without Flask.")
                 input("\nPress Enter to continue...")
                 return
-        
+
         # Get mock configuration
         port = input("Enter port for mock server [default: 5000]: ").strip()
         port = int(port) if port.isdigit() else 5000
-        
+
         print("\nCreating mock endpoints...")
-        
+
         mock_content = f'''from flask import Flask, jsonify, request
 import json
 import os
@@ -292,35 +290,35 @@ if __name__ == '__main__':
     print(f"Mock API Server running on http://localhost:{port}")
     app.run(debug=True, host='0.0.0.0', port={port})
 '''
-        
+
         # Create mock server file
         with open("mock_server.py", "w") as f:
             f.write(mock_content)
-        
+
         print(f"\n✓ Mock API server created as mock_server.py")
         print(f"Run with: python mock_server.py")
         print(f"Access at: http://localhost:{port}")
-        
+
         run_now = input(f"\nRun the mock server now? (y/n): ").lower()
         if run_now == 'y':
             try:
                 # Run the server in background
                 import threading
                 import time
-                
+
                 def run_server():
                     exec(mock_content)
-                
+
                 server_thread = threading.Thread(target=run_server, daemon=True)
                 server_thread.start()
-                
+
                 print(f"Mock server started in background on port {port}")
                 print("Press Ctrl+C to stop the server")
                 time.sleep(2)  # Give server a moment to start
             except Exception as e:
                 print(f"Error running server: {e}")
                 print(f"Try running manually: python mock_server.py")
-        
+
         input("\nPress Enter to continue...")
 
     def run_api_load_test(self) -> None:
@@ -328,10 +326,10 @@ if __name__ == '__main__':
         print("\n" + "="*70)
         print("API LOAD TESTING")
         print("="*70)
-        
+
         print("\nThis feature would run load testing on your API.")
         print("For proper load testing, tools like 'locust' or 'wrk' are recommended.")
-        
+
         # Check if Locust is available
         try:
             import locust
@@ -344,19 +342,19 @@ if __name__ == '__main__':
                     print("✓ Locust installed successfully")
                 except subprocess.CalledProcessError:
                     print("⚠ Failed to install Locust")
-        
+
         api_url = input("Enter API endpoint URL to test: ").strip()
         if not api_url:
             print("API URL is required!")
             input("\nPress Enter to continue...")
             return
-        
+
         # Validate URL
         if not api_url.startswith(('http://', 'https://')):
             print("Please enter a valid URL starting with http:// or https://")
             input("\nPress Enter to continue...")
             return
-        
+
         print(f"\nExample Locust test file for: {api_url}")
         print("```python")
         print("# locustfile.py")
@@ -371,14 +369,14 @@ if __name__ == '__main__':
         print(f"        response = self.client.get(\"/{api_url.split('/')[-1]}\")")
         print(f"        print(f'Response: {{response.status_code}}')")
         print("```")
-        
+
         print("\nTo run the load test:")
         print("1. Install Locust: pip install locust")
         print("2. Create the locustfile.py with the code above")
         print("3. Run: locust")
         print("4. Open http://localhost:8089 in your browser")
         print("5. Configure test parameters and start the test")
-        
+
         create_locustfile = input("\nCreate example locustfile.py? (y/n): ").lower()
         if create_locustfile == 'y':
             # Determine base URL and endpoint
@@ -388,7 +386,7 @@ if __name__ == '__main__':
             else:
                 base_url = api_url
                 endpoint = ""
-            
+
             locust_content = f'''from locust import HttpUser, task, between
 
 class APIUser(HttpUser):
@@ -399,19 +397,19 @@ class APIUser(HttpUser):
     def api_request(self):
         response = self.client.get("/{endpoint}")
         print(f"Response: {{response.status_code}}")
-    
+
     @task
     def api_status_check(self):
         # Example of another common endpoint
         response = self.client.get("/health")
         print(f"Health check: {{response.status_code}}")
 '''
-            
+
             with open("locustfile.py", "w") as f:
                 f.write(locust_content)
-            
+
             print("✓ Example locustfile.py created")
-        
+
         input("\nPress Enter to continue...")
 
     def generate_api_documentation(self) -> None:
@@ -419,34 +417,34 @@ class APIUser(HttpUser):
         print("\n" + "="*70)
         print("API DOCUMENTATION GENERATOR")
         print("="*70)
-        
+
         print("\nAPI documentation generation depends on the framework used.")
-        
+
         # Check for common API frameworks
         frameworks = []
-        
+
         # Check for FastAPI
         try:
             import fastapi
             frameworks.append("FastAPI")
         except ImportError:
             pass
-        
+
         # Check for Flask
         try:
             import flask
             frameworks.append("Flask")
         except ImportError:
             pass
-        
+
         if frameworks:
             print(f"Detected frameworks: {', '.join(frameworks)}")
-            
+
             if "FastAPI" in frameworks:
                 print("\nFor FastAPI, automatic documentation is available at:")
                 print("  - /docs (Swagger UI)")
                 print("  - /redoc (ReDoc)")
-                
+
             if "Flask" in frameworks:
                 print("\nFor Flask, consider using:")
                 print("  - Flask-Smorest (Flask + Marshmallow + OpenAPI)")
@@ -454,7 +452,7 @@ class APIUser(HttpUser):
         else:
             print("\nNo common API frameworks detected.")
             print("Documentation generation requires framework-specific tools.")
-        
+
         # Create sample OpenAPI spec
         create_openapi = input("\nCreate sample OpenAPI specification file? (y/n): ").lower()
         if create_openapi == 'y':
@@ -535,15 +533,13 @@ class APIUser(HttpUser):
                     }
                 }
             }
-            
+
             with open("openapi_spec.json", "w") as f:
                 json.dump(openapi_spec, f, indent=2)
-            
+
             print("✓ Sample OpenAPI specification created as openapi_spec.json")
-        
+
         input("\nPress Enter to continue...")
-
-
 class APIMenu(Menu):
     """Menu for API tools"""
 

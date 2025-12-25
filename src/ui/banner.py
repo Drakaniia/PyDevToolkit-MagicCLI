@@ -6,10 +6,10 @@ from pyfiglet import Figlet
 def create_qwenzyy_banner(font_style="doom"):
     """
     Create QWENZYY banner using pyfiglet
-    
+
     Args:
         font_style: Font style to use (doom, block, lean, etc.)
-    
+
     Returns:
         str: The rendered banner text
     """
@@ -26,15 +26,7 @@ def get_manual_qwenzyy_banner():
     Light source from north-east, shadow on south-west
     """
     return """
-    
-                        
-                 
-                      
-                     
-                      
-                  
-                     
-                                                  
+
 """
 
 def get_available_fonts():

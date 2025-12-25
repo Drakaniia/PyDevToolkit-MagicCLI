@@ -16,8 +16,6 @@ try:
     import psutil
 except ImportError:
     psutil = None
-
-
 class MonitoringTools:
     """Handles monitoring and performance analysis tasks"""
 
@@ -113,42 +111,42 @@ class MonitoringTools:
         print("\n" + "="*70)
         print("PERFORMANCE PROFILING")
         print("="*70)
-        
+
         print("\nThis feature will profile your application's performance.")
         print("It measures execution time and resource usage of code.")
-        
+
         try:
             # Check if cProfile is available
             import cProfile
-            
+
             # We'll create a simple profile of the current module
             print("\nProfiling Python interpreter (as a demonstration)...")
-            
-            # This is a demonstration - in a real scenario, 
+
+            # This is a demonstration - in a real scenario,
             # we would profile actual application code
             profiler = cProfile.Profile()
             profiler.enable()
-            
+
             # Simulate some work (replace with actual profiling in real usage)
             for i in range(10000):
                 _ = i * i
-            
+
             profiler.disable()
-            
+
             print("\nProfiling completed! (Demo only)")
             print("Note: In production, this would profile actual application functions.")
-            
+
             # Save profile to file
             profile_file = "profile_output.prof"
             profiler.dump_stats(profile_file)
             print(f"Profile data saved to: {profile_file}")
             print(f"Use 'python -m pstats {profile_file}' to analyze the results")
-        
+
         except ImportError:
             print("\n⚠ cProfile module not available")
         except Exception as e:
             print(f"\n⚠ Error during profiling: {e}")
-        
+
         input("\nPress Enter to continue...")
 
     def analyze_memory_usage(self) -> None:
@@ -232,16 +230,16 @@ class MonitoringTools:
         print("\n" + "="*70)
         print("APPLICATION LOG MONITOR")
         print("="*70)
-        
+
         print("\nThis feature would monitor application logs in real-time.")
         print("Currently, Magic CLI uses basic print statements for output.")
         print("\nSuggested log files to monitor:")
-        
+
         # Look for common log files in the project
         log_extensions = ['.log', '.txt', '.out']
         project_files = Path('.').glob('**/*')
         log_files = [f for f in project_files if f.suffix.lower() in log_extensions]
-        
+
         if log_files:
             print("\nFound potential log files:")
             for log_file in log_files[:10]:  # Show first 10
@@ -250,15 +248,13 @@ class MonitoringTools:
                 print(f"  ... and {len(log_files) - 10} more")
         else:
             print("\n  No log files found in current project")
-        
+
         print("\nTo implement full log monitoring, you would need to:")
         print("  1. Set up a proper logging system")
         print("  2. Write logs to specific files")
         print("  3. Monitor those files in real-time")
-        
+
         input("\nPress Enter to continue...")
-
-
 class MonitoringMenu(Menu):
     """Menu for monitoring tools"""
 

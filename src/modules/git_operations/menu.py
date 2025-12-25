@@ -24,8 +24,6 @@ from github.git_diff import GitDiff
 from github.git_stash import GitStash
 from core.menu import Menu, MenuItem
 from core.utils.git_client import get_git_client
-
-
 class GitOperations:
     """Unified Git operations orchestrator with dynamic directory detection"""
 
@@ -117,8 +115,6 @@ class GitOperations:
         """Show comprehensive git stash operations menu"""
         stash_handler = GitStash()
         stash_handler.execute_stash_operations()
-
-
 class GitMenu(Menu):
     """Unified menu for all Git operations"""
 
@@ -165,8 +161,6 @@ class GitMenu(Menu):
                 return
 
             print(f"Processing last {num_commits} commit(s)...\n")
-
-
             generator = ChangelogGenerator()
             success = generator.generate_changelog(num_commits=num_commits)
 

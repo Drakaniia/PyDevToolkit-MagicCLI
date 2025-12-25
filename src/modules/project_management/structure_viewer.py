@@ -13,97 +13,95 @@ import os
 import re
 from pathlib import Path
 from typing import Set, List, Optional, Tuple
-
-
 class StructureViewer:
     """Enhanced project structure viewer with hidden folder exclusion"""
-    
+
     # ONLY exclude true build artifacts and dependencies
     EXCLUDE_DIRS = {
         # Python
         "__pycache__", ".pytest_cache", ".mypy_cache", ".tox",
         ".eggs", ".coverage", "htmlcov",
         ".venv", "venv", "env", "ENV", "virtualenv",
-        
+
         # JavaScript/Node
-        "node_modules", ".next", ".nuxt", ".cache", ".parcel-cache", 
+        "node_modules", ".next", ".nuxt", ".cache", ".parcel-cache",
         ".turbo", "bower_components", "out",
-        
+
         # Build outputs (ONLY generated files)
         "dist", "build", ".build", "target/debug", "target/release",
-        
+
         # Version control (hidden)
         ".git", ".svn", ".hg",
-        
+
         # OS files
         ".DS_Store", "Thumbs.db"
     }
-    
+
     # Exclude directories that match these patterns
     EXCLUDE_DIR_PATTERNS = {
         "*.egg-info",  # Python egg info directories
         "*-info",      # General info directories
         ".coverage*",  # Coverage report directories
     }
-    
+
     # Exclude ONLY generated files
     EXCLUDE_FILES = {
         # Compiled
         "*.pyc", "*.pyo", "*.pyd", "*.so", "*.dll", "*.dylib",
         "*.class", "*.o", "*.obj",
-        
+
         # Lock files
         "package-lock.json", "yarn.lock", "pnpm-lock.yaml",
         "poetry.lock", "Pipfile.lock",
-        
+
         # Minified/compiled assets
         "*.min.js", "*.min.css", "*.map",
-        
+
         # OS
         ".DS_Store", "Thumbs.db", "desktop.ini",
         "*.swp", "*.swo", "*~"
     }
-    
+
     # ALWAYS show these important files (even if hidden)
     ALWAYS_SHOW_FILES = {
         # Environment files
         ".env", ".env.example", ".env.template", ".env.development",
         ".env.local", ".env.production", ".env.test",
-        
+
         # Git files
         ".gitignore", ".dockerignore", ".gitattributes",
-        
+
         # Documentation
         "README.md", "README.txt", "LICENSE", "CHANGELOG.md",
-        
+
         # Docker
         "Dockerfile", "docker-compose.yml", ".dockerignore",
-        
+
         # Code formatting
-        ".prettierrc", ".prettierrc.json", ".prettierrc.js", 
+        ".prettierrc", ".prettierrc.json", ".prettierrc.js",
         ".prettierrc.yaml", ".prettierignore",
-        
+
         # Linting
         ".eslintrc", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yaml",
         ".eslintignore",
-        
+
         # TypeScript/JavaScript config
         "tsconfig.json", "jsconfig.json",
-        
+
         # Package/Project files
         "package.json", "setup.py", "pyproject.toml",
         "requirements.txt", "Cargo.toml", "go.mod",
-        
+
         # Build tools
         "Makefile", ".editorconfig",
-        
+
         # IDE (sometimes important)
         ".vscode/settings.json", ".vscode/launch.json",
-        
+
         # Babel
         ".babelrc", ".babelrc.js", ".babelrc.json"
     }
-    
+
     # Source code extensions (if a directory has these, it's important)
     SOURCE_EXTENSIONS = {
         # Python
@@ -125,11 +123,11 @@ class StructureViewer:
         '.sql', '.graphql', '.prisma', '.proto',
         '.md', '.rst', '.txt'
     }
-    
+
     def __init__(self, max_depth: int = 8, max_files_per_dir: int = 50):
         """
         Initialize structure viewer
-        
+
         Args:
             max_depth: Maximum directory depth to explore (increased for better deep exploration)
             max_files_per_dir: Maximum files to show per directory (reduced to focus on important files)
@@ -138,7 +136,7 @@ class StructureViewer:
         self.max_depth = max_depth
         self.max_files_per_dir = max_files_per_dir
         self.gitignore_patterns: Set[str] = set()
-        
+
         # Track what's actually being hidden for smart display
         self.hidden_categories = {
             'dependencies': set(),
@@ -146,29 +144,29 @@ class StructureViewer:
             'build_artifacts': set(),
             'hidden_folders': set()
         }
-        
+
         # Directories that should show ALL their contents (deep exploration)
         self.IMPORTANT_SOURCE_DIRS = {
-            "src", "app", "components", "lib", "utils", "hooks", "pages", 
+            "src", "app", "components", "lib", "utils", "hooks", "pages",
             "api", "services", "models", "views", "controllers", "routes",
             "config", "constants", "types", "interfaces", "schemas",
             "automation", "tests", "test", "__tests__", "spec",
             "docs", "documentation", "examples", "demo"
         }
-    
+
     def show_structure(self):
         """Display enhanced project structure"""
         self.current_dir = Path.cwd()
-        
+
         print("\n" + "="*70)
         print("PROJECT STRUCTURE")
         print("="*70)
         print(f"\nCurrent Directory: {self.current_dir.name}")
         print(f"Absolute Path: {self.current_dir.absolute()}")
-        
+
         # Load .gitignore patterns
         self._load_gitignore()
-        
+
         # Reset hidden categories tracking
         self.hidden_categories = {
             'dependencies': set(),
@@ -176,12 +174,12 @@ class StructureViewer:
             'build_artifacts': set(),
             'hidden_folders': set()
         }
-        
+
         # Generate the tree structure (this will populate hidden_categories)
         tree_lines = self._generate_tree(self.current_dir)
-        
+
         print("\nShowing: All source code and important files")
-        
+
         # Smart hiding display - only show what's actually being hidden
         hidden_items = []
         if self.hidden_categories['build_artifacts']:
@@ -192,16 +190,16 @@ class StructureViewer:
             hidden_items.append("cache")
         if self.hidden_categories['hidden_folders']:
             hidden_items.append("hidden folders")
-        
+
         if hidden_items:
             print(f"   Hiding: {', '.join(hidden_items)}")
-        
+
         print(f"   Max depth: {self.max_depth} levels")
-        
+
         # Show summary first for AI context
         file_count, dir_count = self._count_items(self.current_dir)
         print(f"\nSummary: {dir_count} directories, {file_count} files")
-        
+
         print("\n```")
         print(f"{self.current_dir.name}/")
         for line in tree_lines:
@@ -212,9 +210,9 @@ class StructureViewer:
                 line = line.replace('├──', '|--').replace('└──', '`--').replace('│', '|')
                 print(line)
         print("```\n")
-        
+
         input("Press Enter to continue...")
-    
+
     def get_clean_structure(self) -> str:
         """
         Get clean structure output optimized for AI consumption
@@ -222,7 +220,7 @@ class StructureViewer:
         """
         self.current_dir = Path.cwd()
         self._load_gitignore()
-        
+
         # Reset hidden categories tracking
         self.hidden_categories = {
             'dependencies': set(),
@@ -230,38 +228,38 @@ class StructureViewer:
             'build_artifacts': set(),
             'hidden_folders': set()
         }
-        
+
         # Generate the tree structure
         tree_lines = self._generate_tree(self.current_dir)
-        
+
         # Build clean output
         output_lines = [f"{self.current_dir.name}/"]
         output_lines.extend(tree_lines)
-        
+
         return "\n".join(output_lines)
-    
+
     def _load_gitignore(self):
         """Load and parse .gitignore patterns"""
         gitignore_path = self.current_dir / ".gitignore"
-        
+
         if not gitignore_path.exists():
             return
-        
+
         try:
             with open(gitignore_path, 'r', encoding='utf-8', errors='ignore') as f:
                 for line in f:
                     line = line.strip()
-                    
+
                     # Skip empty lines and comments
                     if not line or line.startswith('#'):
                         continue
-                    
+
                     # Store pattern
                     self.gitignore_patterns.add(line)
-        
+
         except Exception:
             pass
-    
+
     def _should_exclude(self, path: Path, is_dir: bool = False) -> bool:
         """
         Determine if path should be excluded
@@ -290,11 +288,11 @@ class StructureViewer:
             return True
 
         name = path.name
-        
+
         # Rule 1: Never exclude always-show files
         if not is_dir and name in self.ALWAYS_SHOW_FILES:
             return False
-        
+
         # Also check relative path for nested important files (like .vscode/settings.json)
         try:
             relative_path = str(path.relative_to(self.current_dir))
@@ -302,7 +300,7 @@ class StructureViewer:
                 return False
         except ValueError:
             pass
-        
+
         # Rule 2: ALWAYS exclude hidden folders (starting with .)
         # Exception: Only if it's an important config file
         if name.startswith('.'):
@@ -315,7 +313,7 @@ class StructureViewer:
                     if should_exclude:
                         self.hidden_categories['hidden_folders'].add(name)
                     return should_exclude
-                
+
                 # All other hidden directories are excluded
                 self.hidden_categories['hidden_folders'].add(name)
                 return True
@@ -325,7 +323,7 @@ class StructureViewer:
                 if should_exclude:
                     self.hidden_categories['hidden_folders'].add(name)
                 return should_exclude
-        
+
         # Rule 3: Check explicit exclude lists BEFORE source code check
         # This ensures build artifacts are always excluded
         if is_dir:
@@ -352,14 +350,14 @@ class StructureViewer:
                     else:
                         self.hidden_categories['build_artifacts'].add(name)
                     return True
-        
+
         # Rule 3.5: For directories, check if they contain source code
         # This ensures we show important directories that aren't explicitly excluded
         if is_dir and not name.startswith('.'):
             # Check if this directory or its subdirectories contain source code
             if self._has_source_code_deep(path):
                 return False
-        
+
         # Rule 4: Check file exclusion patterns
         if not is_dir:
             for pattern in self.EXCLUDE_FILES:
@@ -373,7 +371,7 @@ class StructureViewer:
                     else:
                         self.hidden_categories['cache'].add(name)
                     return True
-        
+
         # Rule 5: Check .gitignore
         try:
             relative_path = str(path.relative_to(self.current_dir))
@@ -387,37 +385,37 @@ class StructureViewer:
                     return True
         except ValueError:
             pass
-        
+
         return False
-    
+
     def _has_important_vscode_files(self, vscode_dir: Path) -> bool:
         """
         Check if .vscode directory contains important config files
-        
+
         Args:
             vscode_dir: .vscode directory path
-        
+
         Returns:
             True if contains important files
         """
         important_vscode_files = {'settings.json', 'launch.json', 'tasks.json'}
-        
+
         try:
             for item in vscode_dir.iterdir():
                 if item.is_file() and item.name in important_vscode_files:
                     return True
         except (PermissionError, OSError):
             pass
-        
+
         return False
-    
+
     def _has_source_code(self, directory: Path) -> bool:
         """
         Check if directory contains actual source code files
-        
+
         Args:
             directory: Directory to check
-        
+
         Returns:
             True if contains source files
         """
@@ -437,14 +435,14 @@ class StructureViewer:
                         return True
         except (PermissionError, OSError):
             pass
-        
+
         return False
-    
+
     def _has_source_code_shallow(self, directory: Path, depth: int = 0) -> bool:
         """Shallow recursive check for source code (max 2 levels deep)"""
         if depth > 1:
             return False
-        
+
         try:
             for item in directory.iterdir():
                 if item.is_file() and item.suffix in self.SOURCE_EXTENSIONS:
@@ -454,9 +452,9 @@ class StructureViewer:
                         return True
         except (PermissionError, OSError):
             pass
-        
+
         return False
-    
+
     def _has_source_code_deep(self, directory: Path, depth: int = 0) -> bool:
         """
         Deep recursive check for source code with more thorough scanning
@@ -497,12 +495,12 @@ class StructureViewer:
             pass
 
         return False
-    
+
     def _matches_pattern(self, name: str, pattern: str) -> bool:
         """Check if name matches wildcard pattern"""
         pattern_regex = pattern.replace('.', r'\.').replace('*', '.*')
         return bool(re.match(f'^{pattern_regex}$', name))
-    
+
     def _matches_gitignore(self, path: str, pattern: str, is_dir: bool) -> bool:
         """Check if path matches .gitignore pattern"""
         # Handle trailing slash (directory-only patterns)
@@ -510,21 +508,21 @@ class StructureViewer:
             if not is_dir:
                 return False
             pattern = pattern[:-1]
-        
+
         # Handle leading slash (root-relative patterns)
         if pattern.startswith('/'):
             pattern = pattern[1:]
             return path == pattern or path.startswith(pattern + '/')
-        
+
         # Handle wildcards
         if '*' in pattern:
             pattern_regex = pattern.replace('.', r'\.').replace('*', '.*')
             return bool(re.search(pattern_regex, path))
-        
+
         # Simple substring match
         path_parts = path.split('/')
         return pattern in path_parts or path.endswith('/' + pattern)
-    
+
     def _generate_tree(
         self,
         directory: Path,
@@ -533,38 +531,38 @@ class StructureViewer:
     ) -> List[str]:
         """
         Generate tree structure with enhanced sorting and prioritization
-        
+
         Args:
             directory: Directory to scan
             prefix: Prefix for tree lines
             depth: Current depth level
-        
+
         Returns:
             List of tree lines
         """
         if depth >= self.max_depth:
             return []
-        
+
         lines = []
-        
+
         try:
             # Get all items
             items = list(directory.iterdir())
-            
+
             # Filter out excluded items
             filtered_items = []
             for item in items:
                 if not self._should_exclude(item, item.is_dir()):
                     filtered_items.append(item)
-            
+
             # Enhanced sorting for better AI understanding
             def sort_key(item: Path):
                 name = item.name.lower()
                 is_dir = item.is_dir()
-                
+
                 # Priority order for better structure presentation
                 priority = 0
-                
+
                 # Highest priority: important config files
                 if name in {'readme.md', 'package.json', 'setup.py', 'requirements.txt', 'dockerfile'}:
                     priority = 1
@@ -580,28 +578,28 @@ class StructureViewer:
                 # Lowest priority: other files
                 else:
                     priority = 5
-                
+
                 return (priority, name)
-            
+
             filtered_items.sort(key=sort_key)
-            
+
             # Smart limiting based on directory importance
             current_dir_name = directory.name.lower()
             is_important_dir = current_dir_name in self.IMPORTANT_SOURCE_DIRS
-            
+
             if is_important_dir:
                 # Show more items in important directories
                 max_items = min(self.max_files_per_dir * 2, 100)
             else:
                 max_items = self.max_files_per_dir
-            
+
             if len(filtered_items) > max_items:
                 shown_items = filtered_items[:max_items]
                 hidden_count = len(filtered_items) - max_items
             else:
                 shown_items = filtered_items
                 hidden_count = 0
-            
+
             # Generate lines for each item
             for i, item in enumerate(shown_items):
                 is_last = (i == len(shown_items) - 1) and (hidden_count == 0)
@@ -638,18 +636,18 @@ class StructureViewer:
                         depth + 1
                     )
                     lines.extend(sublines)
-            
+
             # Show hidden count if any
             if hidden_count > 0:
                 lines.append(f"{prefix} ... and {hidden_count} more items")
-        
+
         except PermissionError:
             lines.append(f"{prefix}[Permission Denied]")
         except Exception as e:
             lines.append(f"{prefix}[Error: {str(e)[:30]}]")
-        
+
         return lines
-    
+
     def _format_size(self, size: int) -> str:
         """Format file size in human-readable format"""
         for unit in ['B', 'KB', 'MB', 'GB']:
@@ -657,28 +655,28 @@ class StructureViewer:
                 return f"{size:.1f}{unit}"
             size /= 1024.0
         return f"{size:.1f}TB"
-    
+
     def _count_items(self, directory: Path) -> Tuple[int, int]:
         """
         Count files and directories recursively
-        
+
         Returns:
             Tuple of (file_count, dir_count)
         """
         file_count = 0
         dir_count = 0
-        
+
         def count_recursive(path: Path, depth: int):
             nonlocal file_count, dir_count
-            
+
             if depth > self.max_depth:
                 return
-            
+
             try:
                 for item in path.iterdir():
                     if self._should_exclude(item, item.is_dir()):
                         continue
-                    
+
                     if item.is_file():
                         file_count += 1
                     elif item.is_dir():
@@ -686,11 +684,9 @@ class StructureViewer:
                         count_recursive(item, depth + 1)
             except (PermissionError, OSError):
                 pass
-        
+
         count_recursive(directory, 0)
         return file_count, dir_count
-
-
 # Test
 if __name__ == "__main__":
     viewer = StructureViewer(max_depth=5)

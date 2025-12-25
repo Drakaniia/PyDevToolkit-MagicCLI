@@ -2,9 +2,9 @@
 """
 Main entry point for PyDevToolkit MagicCLI
 """
-import sys
-import os
 import io
+import os
+import sys
 from pathlib import Path
 
 # Set UTF-8 encoding for Windows console

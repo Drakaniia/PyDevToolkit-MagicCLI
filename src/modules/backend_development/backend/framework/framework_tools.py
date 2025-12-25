@@ -11,8 +11,6 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from core.menu import Menu, MenuItem
-
-
 class FrameworkTools(Menu):
     """Backend Framework Integration Tools Menu"""
 
@@ -40,11 +38,11 @@ class FrameworkTools(Menu):
         print("=" * 60)
         print("  FastAPI Project Setup")
         print("=" * 60)
-        
+
         project_name = input("Enter project name: ")
-        
+
         print(f"\nSetting up FastAPI project: {project_name}")
-        
+
         # Create project structure
         project_structure = {
             f"{project_name}": {
@@ -91,20 +89,20 @@ class FrameworkTools(Menu):
                 "docker-compose.yml": self._get_fastapi_docker_compose()
             }
         }
-        
+
         self._create_project_structure(project_structure)
-        
+
         print("FastAPI project setup completed!")
         print(f" Project created: {project_name}/")
         print(" Run: cd {} && uvicorn app.main:app --reload".format(project_name))
-        
+
         input("\nPress Enter to continue...")
         return None
 
     def _get_fastapi_main_content(self, project_name):
         return f'''"""
 FastAPI Main Application
-{project_name} - Auto-generated FastAPI project
+{{project_name}} - Auto-generated FastAPI project
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -115,7 +113,7 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description=settings.DESCRIPTION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{{settings.API_V1_STR}}/openapi.json"
 )
 
 # Set all CORS enabled origins
@@ -134,7 +132,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 async def root():
     """Root endpoint"""
     return {{
-        "message": "Welcome to {project_name} API",
+        "message": "Welcome to {{project_name}} API",
         "version": settings.VERSION,
         "docs": "/docs"
     }}
@@ -157,17 +155,17 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     DESCRIPTION: str = "Auto-generated FastAPI application"
     API_V1_STR: str = "/api/v1"
-    
+
     # Database
     DATABASE_URL: str = "sqlite:///./app.db"
-    
+
     # Security
     SECRET_KEY: str = "your-secret-key-here"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
-    
+
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
-    
+
     class Config:
         env_file = ".env"
 
@@ -207,7 +205,7 @@ from app.database import Base
 
 class BaseModel(Base):
     __abstract__ = True
-    
+
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -237,7 +235,7 @@ class UserInDBBase(UserBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         orm_mode = True
 
@@ -270,15 +268,15 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     payload = verify_token(token)
     if payload is None:
         raise credentials_exception
-    
+
     # user = db.query(User).filter(User.id == payload.get("user_id")).first()
     # if user is None:
     #     raise credentials_exception
-    
+
     # return user
     return payload  # Return payload for now
 '''
@@ -329,7 +327,7 @@ async def create_user(
     # db_user = db.query(User).filter(User.email == user.email).first()
     # if db_user:
     #     raise HTTPException(status_code=400, detail="Email already registered")
-    
+
     # Create user logic here
     return user  # Placeholder
 
@@ -352,7 +350,7 @@ class CoreSettings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = "your-secret-key-change-in-production"
-    
+
     class Config:
         case_sensitive = True
 '''
@@ -387,7 +385,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
-    
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -444,9 +442,9 @@ def db_session(db):
     connection = engine.connect()
     transaction = connection.begin()
     session = Session(bind=connection)
-    
+
     yield session
-    
+
     session.close()
     transaction.rollback()
     connection.close()
@@ -554,8 +552,6 @@ version_path_separator = os
 # output_encoding = utf-8
 
 sqlalchemy.url = sqlite:///./app.db
-
-
 [post_write_hooks]
 # post_write_hooks defines scripts or Python functions that are run
 # on newly generated revision scripts.  See the documentation for further
@@ -654,12 +650,12 @@ volumes:
         print("=" * 60)
         print("  Django/Flask Management")
         print("=" * 60)
-        
+
         print("\nSelect framework:")
         print("1. Django")
         print("2. Flask")
         print("3. Django REST Framework")
-        
+
         try:
             choice = int(input("\nEnter choice: "))
             if choice == 1:
@@ -670,7 +666,7 @@ volumes:
                 self._manage_drf()
         except ValueError:
             print("Invalid choice!")
-        
+
         input("\nPress Enter to continue...")
         return None
 
@@ -681,7 +677,7 @@ volumes:
         print("2. Generate Django app")
         print("3. Create Django models")
         print("4. Setup Django admin")
-        
+
         choice = input("\nEnter choice: ")
         if choice == "1":
             self._create_django_project()
@@ -696,7 +692,7 @@ volumes:
         """Create Django project"""
         project_name = input("Enter project name: ")
         print(f"\nCreating Django project: {project_name}")
-        
+
         django_settings_content = f'''"""
 Django Settings for {project_name}
 """
@@ -802,17 +798,17 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
 ]
 '''
-        
+
         with open('django_settings.py', 'w') as f:
             f.write(django_settings_content)
-        
+
         print("Django project template created!")
 
     def _create_django_app(self):
         """Create Django app"""
         app_name = input("Enter app name: ")
         print(f"\nCreating Django app: {app_name}")
-        
+
         # Create app structure
         app_structure = {
             app_name: {
@@ -829,7 +825,7 @@ CORS_ALLOWED_ORIGINS = [
                 }
             }
         }
-        
+
         self._create_project_structure(app_structure)
         print(f"Django app '{app_name}' created!")
 
@@ -871,11 +867,11 @@ class {app_name.title()}(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         verbose_name = "{app_name.title()}"
         verbose_name_plural = "{app_name.title()}s"
-    
+
     def __str__(self):
         return self.name
 '''
@@ -950,7 +946,7 @@ class {app_name.title()}Serializer(serializers.ModelSerializer):
         print("1. Create Flask app")
         print("2. Add Flask extensions")
         print("3. Create Flask blueprints")
-        
+
         choice = input("\nEnter choice: ")
         if choice == "1":
             self._create_flask_app()
@@ -963,7 +959,7 @@ class {app_name.title()}Serializer(serializers.ModelSerializer):
         """Create Flask application"""
         app_name = input("Enter app name: ")
         print(f"\n Creating Flask app: {app_name}")
-        
+
         flask_app_content = f'''"""
 Flask Application: {app_name}
 """
@@ -980,29 +976,29 @@ jwt = JWTManager()
 def create_app(config_name='development'):
     """Application factory"""
     app = Flask(__name__)
-    
+
     # Configuration
     app.config['SECRET_KEY'] = 'your-secret-key-here'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
-    
+
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     CORS(app)
-    
+
     # Register blueprints
     from app.api import api_bp
     app.register_blueprint(api_bp, url_prefix='/api')
-    
+
     return app
 '''
-        
+
         with open('app.py', 'w') as f:
             f.write(flask_app_content)
-        
+
         print("Flask application created!")
 
     def _manage_drf(self):
@@ -1011,7 +1007,7 @@ def create_app(config_name='development'):
         print("1. Create DRF ViewSets")
         print("2. Create DRF Serializers")
         print("3. Setup DRF authentication")
-        
+
         choice = input("\nEnter choice: ")
         if choice == "1":
             self._create_drf_viewsets()
@@ -1026,12 +1022,12 @@ def create_app(config_name='development'):
         print("=" * 60)
         print("  Spring Boot Configuration")
         print("=" * 60)
-        
+
         project_name = input("Enter project name: ")
         package_name = input("Enter package name (e.g., com.example.app): ")
-        
+
         print(f"\nConfiguring Spring Boot project: {project_name}")
-        
+
         # Create Spring Boot structure
         spring_structure = {
             "src": {
@@ -1066,10 +1062,10 @@ def create_app(config_name='development'):
             },
             "pom.xml": self._get_spring_pom_content(project_name, package_name)
         }
-        
+
         self._create_project_structure(spring_structure)
         print("Spring Boot project configured!")
-        
+
         input("\nPress Enter to continue...")
         return None
 
@@ -1101,12 +1097,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {{
-    
+
     @Bean
     public PasswordEncoder passwordEncoder() {{
         return new BCryptPasswordEncoder();
     }}
-    
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {{
         http
@@ -1117,7 +1113,7 @@ public class SecurityConfig {{
                 .anyRequest().authenticated()
             )
             .httpBasic();
-        
+
         return http.build();
     }}
 }}
@@ -1152,30 +1148,30 @@ import java.util.List;
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
 public class UserController {{
-    
+
     @Autowired
     private UserService userService;
-    
+
     @GetMapping
     public List<User> getAllUsers() {{
         return userService.getAllUsers();
     }}
-    
+
     @GetMapping("/{id}")
     public User getUserById(@PathVariable Long id) {{
         return userService.getUserById(id);
     }}
-    
+
     @PostMapping
     public User createUser(@RequestBody User user) {{
         return userService.createUser(user);
     }}
-    
+
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody User user) {{
         return userService.updateUser(id, user);
     }}
-    
+
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {{
         userService.deleteUser(id);
@@ -1192,71 +1188,71 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 public class User {{
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(nullable = false, unique = true)
     private String username;
-    
+
     @Column(nullable = false, unique = true)
     private String email;
-    
+
     @Column(nullable = false)
     private String password;
-    
+
     @Column(name = "first_name")
     private String firstName;
-    
+
     @Column(name = "last_name")
     private String lastName;
-    
+
     @Column(nullable = false)
     private Boolean active = true;
-    
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-    
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
+
     @PrePersist
     protected void onCreate() {{
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }}
-    
+
     @PreUpdate
     protected void onUpdate() {{
         updatedAt = LocalDateTime.now();
     }}
-    
+
     // Getters and Setters
     public Long getId() {{ return id; }}
     public void setId(Long id) {{ this.id = id; }}
-    
+
     public String getUsername() {{ return username; }}
     public void setUsername(String username) {{ this.username = username; }}
-    
+
     public String getEmail() {{ return email; }}
     public void setEmail(String email) {{ this.email = email; }}
-    
+
     public String getPassword() {{ return password; }}
     public void setPassword(String password) {{ this.password = password; }}
-    
+
     public String getFirstName() {{ return firstName; }}
     public void setFirstName(String firstName) {{ this.firstName = firstName; }}
-    
+
     public String getLastName() {{ return lastName; }}
     public void setLastName(String lastName) {{ this.lastName = lastName; }}
-    
+
     public Boolean getActive() {{ return active; }}
     public void setActive(Boolean active) {{ this.active = active; }}
-    
+
     public LocalDateTime getCreatedAt() {{ return createdAt; }}
     public void setCreatedAt(LocalDateTime createdAt) {{ this.createdAt = createdAt; }}
-    
+
     public LocalDateTime getUpdatedAt() {{ return updatedAt; }}
     public void setUpdatedAt(LocalDateTime updatedAt) {{ this.updatedAt = updatedAt; }}
 }}
@@ -1291,22 +1287,22 @@ import java.util.Optional;
 
 @Service
 public class UserService {{
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
     public List<User> getAllUsers() {{
         return userRepository.findAll();
     }}
-    
+
     public User getUserById(Long id) {{
         return userRepository.findById(id).orElse(null);
     }}
-    
+
     public User createUser(User user) {{
         return userRepository.save(user);
     }}
-    
+
     public User updateUser(Long id, User userDetails) {{
         User user = userRepository.findById(id).orElse(null);
         if (user != null) {{
@@ -1318,7 +1314,7 @@ public class UserService {{
         }}
         return null;
     }}
-    
+
     public void deleteUser(Long id) {{
         userRepository.deleteById(id);
     }}
@@ -1367,62 +1363,62 @@ logging.level.org.springframework=WARN
         return f'''<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.0</version>
         <relativePath/>
     </parent>
-    
+
     <groupId>{package_name}</groupId>
     <artifactId>{project_name}</artifactId>
     <version>1.0.0</version>
     <name>{project_name}</name>
     <description>Spring Boot Application</description>
-    
+
     <properties>
         <java.version>17</java.version>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -1440,13 +1436,13 @@ logging.level.org.springframework=WARN
         print("=" * 60)
         print("  Express.js Helpers")
         print("=" * 60)
-        
+
         print("\nExpress.js Tools:")
         print("1. Create Express.js app")
         print("2. Add middleware")
         print("3. Create routes")
         print("4. Setup database integration")
-        
+
         try:
             choice = int(input("\nEnter choice: "))
             if choice == 1:
@@ -1459,7 +1455,7 @@ logging.level.org.springframework=WARN
                 self._setup_express_database()
         except ValueError:
             print("Invalid choice!")
-        
+
         input("\nPress Enter to continue...")
         return None
 
@@ -1467,7 +1463,7 @@ logging.level.org.springframework=WARN
         """Create Express.js application"""
         app_name = input("Enter app name: ")
         print(f"\nCreating Express.js app: {app_name}")
-        
+
         express_app_content = f'''/**
  * Express.js Application: {app_name}
  * Auto-generated Express.js application
@@ -1538,10 +1534,10 @@ app.listen(PORT, () => {{
 
 module.exports = app;
 '''
-        
+
         with open('app.js', 'w') as f:
             f.write(express_app_content)
-        
+
         # Create package.json
         package_json_content = f'''{{
   "name": "{app_name}",
@@ -1575,10 +1571,10 @@ module.exports = app;
   "license": "MIT"
 }}
 '''
-        
+
         with open('package.json', 'w') as f:
             f.write(package_json_content)
-        
+
         print("Express.js application created!")
 
     def _framework_migration(self):
@@ -1587,13 +1583,13 @@ module.exports = app;
         print("=" * 60)
         print("  Framework Migration Tools")
         print("=" * 60)
-        
+
         print("\nMigration Options:")
         print("1. Flask to FastAPI")
         print("2. Express.js to NestJS")
         print("3. Django to Flask")
         print("4. Custom migration script")
-        
+
         try:
             choice = int(input("\nEnter choice: "))
             if choice == 1:
@@ -1606,7 +1602,7 @@ module.exports = app;
                 self._custom_migration()
         except ValueError:
             print("Invalid choice!")
-        
+
         input("\nPress Enter to continue...")
         return None
 
@@ -1616,13 +1612,13 @@ module.exports = app;
         print("=" * 60)
         print("  Code Generators")
         print("=" * 60)
-        
+
         print("\nCode Generation Options:")
         print("1. Generate CRUD operations")
         print("2. Generate API documentation")
         print("3. Generate database models")
         print("4. Generate test cases")
-        
+
         try:
             choice = int(input("\nEnter choice: "))
             if choice == 1:
@@ -1635,7 +1631,7 @@ module.exports = app;
                 self._generate_tests()
         except ValueError:
             print("Invalid choice!")
-        
+
         input("\nPress Enter to continue...")
         return None
 

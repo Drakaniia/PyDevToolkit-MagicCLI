@@ -12,8 +12,6 @@ if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
 from core.menu import Menu, MenuItem
-
-
 class BackendDevMenu(Menu):
     """Backend Development Menu with comprehensive automation options"""
 
@@ -23,7 +21,7 @@ class BackendDevMenu(Menu):
         self._api_generator = None
         self._auth_manager = None
         self._framework_tools = None
-        
+
         super().__init__("Backend Development Automation")
 
     def setup_items(self):
@@ -75,8 +73,6 @@ class BackendDevMenu(Menu):
         """Run backend framework tools"""
         self._framework_tools.run()
         return None
-
-    
 
     def _back_to_main(self):
         """Return to main menu"""

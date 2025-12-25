@@ -7,7 +7,6 @@ with the menu system to execute various automation tasks.
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
-import sys
 import os
 
 
@@ -66,10 +65,10 @@ class BaseCommandHandler:
     def handle_input(self, user_input: str) -> Any:
         """
         Handle user input and execute appropriate command
-        
+
         Args:
             user_input: Raw user input string
-            
+
         Returns:
             Result of command execution
         """
@@ -108,12 +107,12 @@ class CLICommandHandler:
         while True:
             try:
                 user_input = input("\n> ").strip()
-                
+
                 if not user_input:
                     continue
 
-                if user_input.lower() in ['exit', 'quit', 'q']:
-                    result = self.registry.execute_command('exit')
+                if user_input.lower() in ["exit", "quit", "q"]:
+                    result = self.registry.execute_command("exit")
                     if result == "exit":
                         break
                     continue
@@ -142,7 +141,9 @@ class CLICommandHandler:
         if self.registry.has_command(command_name):
             return self.registry.execute_command(command_name, *args)
         else:
-            return f"Unknown command: {command_name}. Type 'help' for available commands."
+            return (
+                f"Unknown command: {command_name}. Type 'help' for available commands."
+            )
 
 
 class HelpCommand(Command):
@@ -154,7 +155,7 @@ class HelpCommand(Command):
 
     def execute(self, *args) -> str:
         """Show help information"""
-        if args and len(args) > 0:
+        if args:
             # Show help for specific command
             command_name = args[0].lower()
             command = self.registry.get(command_name)
@@ -193,7 +194,7 @@ class ClearCommand(Command):
 
     def execute(self, *args) -> str:
         """Execute clear command"""
-        os.system('cls' if os.name == 'nt' else 'clear')
+        os.system("cls" if os.name == "nt" else "clear")
         return ""
 
 

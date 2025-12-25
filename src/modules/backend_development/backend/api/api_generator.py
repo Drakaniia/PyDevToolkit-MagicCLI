@@ -11,8 +11,6 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from core.menu import Menu, MenuItem
-
-
 class APIGenerator(Menu):
     """API Development Tools Menu"""
 
@@ -40,13 +38,13 @@ class APIGenerator(Menu):
         print("=" * 60)
         print("  REST API Generator")
         print("=" * 60)
-        
+
         print("\nSelect framework:")
         print("1. FastAPI")
         print("2. Flask")
         print("3. Django REST Framework")
         print("4. Express.js")
-        
+
         try:
             choice = int(input("\nEnter choice: "))
             frameworks = ['fastapi', 'flask', 'django', 'express']
@@ -57,21 +55,21 @@ class APIGenerator(Menu):
                 print("Invalid choice!")
         except ValueError:
             print("Please enter a valid number!")
-        
+
         input("\nPress Enter to continue...")
         return None
 
     def _create_rest_endpoints(self, framework):
         """Create REST endpoints for selected framework"""
         print(f"\nCreating REST API with {framework.title()}...")
-        
+
         # Get API details
         resource_name = input("Enter resource name (e.g., User, Product): ")
         base_path = input("Enter base path (default: /api): ") or "/api"
-        
+
         # Generate endpoints based on resource
         endpoints = self._generate_crud_endpoints(resource_name, base_path, framework)
-        
+
         # Create files
         if framework == 'fastapi':
             self._create_fastapi_api(resource_name, endpoints)
@@ -81,14 +79,14 @@ class APIGenerator(Menu):
             self._create_django_api(resource_name, endpoints)
         elif framework == 'express':
             self._create_express_api(resource_name, endpoints)
-        
+
         print(f"REST API for {resource_name} created successfully!")
 
     def _generate_crud_endpoints(self, resource, base_path, framework):
         """Generate CRUD endpoints"""
         resource_lower = resource.lower()
         resource_plural = resource_lower + 's'
-        
+
         endpoints = {
             'list': f'GET {base_path}/{resource_plural}',
             'get': f'GET {base_path}/{resource_plural}/{{id}}',
@@ -96,17 +94,17 @@ class APIGenerator(Menu):
             'update': f'PUT {base_path}/{resource_plural}/{{id}}',
             'delete': f'DELETE {base_path}/{resource_plural}/{{id}}'
         }
-        
+
         print(f"\nGenerated endpoints:")
         for endpoint_type, endpoint in endpoints.items():
             print(f"  {endpoint_type.title()}: {endpoint}")
-        
+
         return endpoints
 
     def _create_fastapi_api(self, resource, endpoints):
         """Create FastAPI endpoints"""
         filename = f"{resource.lower()}_api.py"
-        
+
         content = f'''"""
 FastAPI {resource} API
 Auto-generated REST endpoints
@@ -130,7 +128,7 @@ class {resource}Update({resource}Base):
 
 class {resource}({resource}Base):
     id: int
-    
+
     class Config:
         orm_mode = True
 
@@ -165,7 +163,7 @@ async def update_{resource.lower()}(item_id: int, item: {resource}Update):
     """Update a {resource.lower()}"""
     if item_id not in {resource.lower()}_data:
         raise HTTPException(status_code=404, detail="{resource} not found")
-    
+
     {resource.lower()}_dict = item.dict()
     {resource.lower()}_dict["id"] = item_id
     {resource.lower()}_data[item_id] = {resource.lower()}_dict
@@ -176,20 +174,20 @@ async def delete_{resource.lower()}(item_id: int):
     """Delete a {resource.lower()}"""
     if item_id not in {resource.lower()}_data:
         raise HTTPException(status_code=404, detail="{resource} not found")
-    
+
     del {resource.lower()}_data[item_id]
     return {{"message": "{resource} deleted successfully"}}
 '''
-        
+
         with open(filename, 'w') as f:
             f.write(content)
-        
+
         print(f"Created {filename}")
 
     def _create_flask_api(self, resource, endpoints):
         """Create Flask endpoints"""
         filename = f"{resource.lower()}_routes.py"
-        
+
         content = f'''"""
 Flask {resource} Routes
 Auto-generated REST endpoints
@@ -229,7 +227,7 @@ def update_{resource.lower()}(item_id):
     """Update a {resource.lower()}"""
     if item_id not in {resource.lower()}_data:
         return jsonify({{"error": "{resource} not found"}}), 404
-    
+
     data = request.get_json()
     data["id"] = item_id
     {resource.lower()}_data[item_id] = data
@@ -240,20 +238,20 @@ def delete_{resource.lower()}(item_id):
     """Delete a {resource.lower()}"""
     if item_id not in {resource.lower()}_data:
         return jsonify({{"error": "{resource} not found"}}), 404
-    
+
     del {resource.lower()}_data[item_id]
     return jsonify({{"message": "{resource} deleted successfully"}})
 '''
-        
+
         with open(filename, 'w') as f:
             f.write(content)
-        
+
         print(f"Created {filename}")
 
     def _create_django_api(self, resource, endpoints):
         """Create Django REST Framework endpoints"""
         print(f"\n Creating Django REST Framework API for {resource}...")
-        
+
         # Create views.py
         views_content = f'''"""
 Django REST Framework {resource} Views
@@ -269,7 +267,7 @@ class {resource}ViewSet(viewsets.ModelViewSet):
     """{resource} ViewSet for CRUD operations"""
     queryset = {resource}.objects.all()
     serializer_class = {resource}Serializer
-    
+
     @action(detail=True, methods=['post'])
     def custom_action(self, request, pk=None):
         """Custom action for {resource}"""
@@ -277,7 +275,7 @@ class {resource}ViewSet(viewsets.ModelViewSet):
         # Add custom logic here
         return Response({{"message": "Custom action executed"}})
 '''
-        
+
         # Create serializers.py
         serializers_content = f'''"""
 Django REST Framework {resource} Serializers
@@ -287,12 +285,12 @@ from .models import {resource}
 
 class {resource}Serializer(serializers.ModelSerializer):
     """{resource} serializer"""
-    
+
     class Meta:
         model = {resource}
         fields = '__all__'
 '''
-        
+
         # Create models.py
         models_content = f'''"""
 Django {resource} Model
@@ -305,28 +303,28 @@ class {resource}(models.Model):
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         verbose_name = "{resource}"
         verbose_name_plural = "{resource}s"
-    
+
     def __str__(self):
         return self.name
 '''
-        
+
         with open('views.py', 'w') as f:
             f.write(views_content)
         with open('serializers.py', 'w') as f:
             f.write(serializers_content)
         with open('models.py', 'w') as f:
             f.write(models_content)
-        
+
         print("Created Django REST Framework files")
 
     def _create_express_api(self, resource, endpoints):
         """Create Express.js endpoints"""
         filename = f"{resource.lower()}Routes.js"
-        
+
         content = f'''/**
  * Express.js {resource} Routes
  * Auto-generated REST endpoints
@@ -369,7 +367,7 @@ router.put('/:id', (req, res) => {{
     if (!item) {{
         return res.status(404).json({{ error: '{resource} not found' }});
     }}
-    
+
     const updatedItem = {{
         id: parseInt(req.params.id),
         ...req.body
@@ -384,17 +382,17 @@ router.delete('/:id', (req, res) => {{
     if (!item) {{
         return res.status(404).json({{ error: '{resource} not found' }});
     }}
-    
+
     delete {resource.lower()}Data[req.params.id];
     res.json({{ message: '{resource} deleted successfully' }});
 }});
 
 module.exports = router;
 '''
-        
+
         with open(filename, 'w') as f:
             f.write(content)
-        
+
         print(f"Created {filename}")
 
     def _generate_graphql_api(self):
@@ -403,11 +401,11 @@ module.exports = router;
         print("=" * 60)
         print("  GraphQL API Generator")
         print("=" * 60)
-        
+
         resource_name = input("Enter resource name: ")
-        
+
         print(f"\nGenerating GraphQL API for {resource_name}...")
-        
+
         # Generate GraphQL schema
         schema_content = f'''"""
 GraphQL Schema for {resource_name}
@@ -428,11 +426,11 @@ class {resource_name}(graphene.ObjectType):
 class Query(ObjectType):
     {resource_name.lower()} = graphene.Field({resource_name}, id=graphene.ID())
     {resource_name.lower()}s = graphene.List({resource_name})
-    
+
     def resolve_{resource_name.lower()}(self, info, id):
         # Resolve single {resource_name.lower()}
         pass
-    
+
     def resolve_{resource_name.lower()}s(self, info):
         # Resolve all {resource_name.lower()}s
         pass
@@ -442,9 +440,9 @@ class Create{resource_name}(graphene.Mutation):
     class Arguments:
         name = graphene.String(required=True)
         description = graphene.String()
-    
+
     {resource_name.lower()} = graphene.Field({resource_name})
-    
+
     def mutate(self, info, name, description=None):
         # Create {resource_name.lower()} logic
         pass
@@ -454,9 +452,9 @@ class Update{resource_name}(graphene.Mutation):
         id = graphene.ID(required=True)
         name = graphene.String()
         description = graphene.String()
-    
+
     {resource_name.lower()} = graphene.Field({resource_name})
-    
+
     def mutate(self, info, id, name=None, description=None):
         # Update {resource_name.lower()} logic
         pass
@@ -464,9 +462,9 @@ class Update{resource_name}(graphene.Mutation):
 class Delete{resource_name}(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-    
+
     success = graphene.Boolean()
-    
+
     def mutate(self, info, id):
         # Delete {resource_name.lower()} logic
         pass
@@ -479,12 +477,12 @@ class Mutation(ObjectType):
 # Create schema
 schema = Schema(query=Query, mutation=Mutation)
 '''
-        
+
         with open(f'{resource_name.lower()}_schema.py', 'w') as f:
             f.write(schema_content)
-        
+
         print(f"GraphQL schema for {resource_name} created!")
-        
+
         input("\nPress Enter to continue...")
         return None
 
@@ -494,12 +492,12 @@ schema = Schema(query=Query, mutation=Mutation)
         print("=" * 60)
         print("  API Documentation Generator")
         print("=" * 60)
-        
+
         print("\nSelect documentation format:")
         print("1. OpenAPI/Swagger")
         print("2. Postman Collection")
         print("3. Markdown Documentation")
-        
+
         try:
             choice = int(input("\nEnter choice: "))
             if choice == 1:
@@ -510,14 +508,14 @@ schema = Schema(query=Query, mutation=Mutation)
                 self._generate_markdown_docs()
         except ValueError:
             print("Invalid choice!")
-        
+
         input("\nPress Enter to continue...")
         return None
 
     def _generate_openapi_docs(self):
         """Generate OpenAPI/Swagger documentation"""
         print("\nGenerating OpenAPI/Swagger documentation...")
-        
+
         openapi_spec = {
             "openapi": "3.0.0",
             "info": {
@@ -546,16 +544,16 @@ schema = Schema(query=Query, mutation=Mutation)
                 }
             }
         }
-        
+
         with open('openapi.json', 'w') as f:
             json.dump(openapi_spec, f, indent=2)
-        
+
         print("OpenAPI specification generated!")
 
     def _generate_postman_collection(self):
         """Generate Postman collection"""
         print("\n Generating Postman collection...")
-        
+
         collection = {
             "info": {
                 "name": "Auto-generated API Collection",
@@ -571,16 +569,16 @@ schema = Schema(query=Query, mutation=Mutation)
                 }
             ]
         }
-        
+
         with open('api_collection.postman_collection.json', 'w') as f:
             json.dump(collection, f, indent=2)
-        
+
         print("Postman collection generated!")
 
     def _generate_markdown_docs(self):
         """Generate Markdown documentation"""
         print("\n Generating Markdown documentation...")
-        
+
         docs_content = '''# API Documentation
 
 ## Overview
@@ -621,10 +619,10 @@ Create a new item
 }
 ```
 '''
-        
+
         with open('API_DOCUMENTATION.md', 'w') as f:
             f.write(docs_content)
-        
+
         print("Markdown documentation generated!")
 
     def _create_api_tests(self):
@@ -633,12 +631,12 @@ Create a new item
         print("=" * 60)
         print("  API Testing Suite")
         print("=" * 60)
-        
+
         print("\nSelect testing framework:")
         print("1. pytest")
         print("2. Jest")
         print("3. Mocha")
-        
+
         try:
             choice = int(input("\nEnter choice: "))
             if choice == 1:
@@ -649,14 +647,14 @@ Create a new item
                 self._create_mocha_tests()
         except ValueError:
             print("Invalid choice!")
-        
+
         input("\nPress Enter to continue...")
         return None
 
     def _create_pytest_tests(self):
         """Create pytest tests"""
         print("\n Creating pytest test suite...")
-        
+
         test_content = '''"""
 API Tests using pytest
 Auto-generated test suite
@@ -689,7 +687,7 @@ def test_get_item():
     item_data = {"name": "Test Item"}
     create_response = client.post("/api/items", json=item_data)
     item_id = create_response.json()["id"]
-    
+
     # Then get the item
     response = client.get(f"/api/items/{item_id}")
     assert response.status_code == 200
@@ -701,7 +699,7 @@ def test_update_item():
     item_data = {"name": "Original Item"}
     create_response = client.post("/api/items", json=item_data)
     item_id = create_response.json()["id"]
-    
+
     # Update the item
     update_data = {"name": "Updated Item"}
     response = client.put(f"/api/items/{item_id}", json=update_data)
@@ -714,25 +712,25 @@ def test_delete_item():
     item_data = {"name": "Item to Delete"}
     create_response = client.post("/api/items", json=item_data)
     item_id = create_response.json()["id"]
-    
+
     # Delete the item
     response = client.delete(f"/api/items/{item_id}")
     assert response.status_code == 200
-    
+
     # Verify item is deleted
     get_response = client.get(f"/api/items/{item_id}")
     assert get_response.status_code == 404
 '''
-        
+
         with open('test_api.py', 'w') as f:
             f.write(test_content)
-        
+
         print("pytest test suite created!")
 
     def _create_jest_tests(self):
         """Create Jest tests"""
         print("\n Creating Jest test suite...")
-        
+
         test_content = '''/**
  * API Tests using Jest
  * Auto-generated test suite
@@ -746,7 +744,7 @@ describe('API Endpoints', () => {
     const response = await request(app)
       .get('/api/items')
       .expect(200);
-    
+
     expect(Array.isArray(response.body)).toBe(true);
   });
 
@@ -755,12 +753,12 @@ describe('API Endpoints', () => {
       name: 'Test Item',
       description: 'Test description'
     };
-    
+
     const response = await request(app)
       .post('/api/items')
       .send(itemData)
       .expect(201);
-    
+
     expect(response.body.name).toBe('Test Item');
     expect(response.body.id).toBeDefined();
   });
@@ -771,14 +769,14 @@ describe('API Endpoints', () => {
     const createResponse = await request(app)
       .post('/api/items')
       .send(itemData);
-    
+
     const itemId = createResponse.body.id;
-    
+
     // Then get the item
     const response = await request(app)
       .get(`/api/items/${itemId}`)
       .expect(200);
-    
+
     expect(response.body.name).toBe('Test Item');
   });
 
@@ -788,16 +786,16 @@ describe('API Endpoints', () => {
     const createResponse = await request(app)
       .post('/api/items')
       .send(itemData);
-    
+
     const itemId = createResponse.body.id;
-    
+
     // Update the item
     const updateData = { name: 'Updated Item' };
     const response = await request(app)
       .put(`/api/items/${itemId}`)
       .send(updateData)
       .expect(200);
-    
+
     expect(response.body.name).toBe('Updated Item');
   });
 
@@ -807,14 +805,14 @@ describe('API Endpoints', () => {
     const createResponse = await request(app)
       .post('/api/items')
       .send(itemData);
-    
+
     const itemId = createResponse.body.id;
-    
+
     // Delete the item
     await request(app)
       .delete(`/api/items/${itemId}`)
       .expect(200);
-    
+
     // Verify item is deleted
     await request(app)
       .get(`/api/items/${itemId}`)
@@ -822,16 +820,16 @@ describe('API Endpoints', () => {
   });
 });
 '''
-        
+
         with open('api.test.js', 'w') as f:
             f.write(test_content)
-        
+
         print("Jest test suite created!")
 
     def _create_mocha_tests(self):
         """Create Mocha tests"""
         print("\n Creating Mocha test suite...")
-        
+
         test_content = '''/**
  * API Tests using Mocha
  * Auto-generated test suite
@@ -861,7 +859,7 @@ describe('API Endpoints', () => {
         name: 'Test Item',
         description: 'Test description'
       };
-      
+
       request(app)
         .post('/api/items')
         .send(itemData)
@@ -879,15 +877,15 @@ describe('API Endpoints', () => {
     it('should return specific item', (done) => {
       // First create an item
       const itemData = { name: 'Test Item' };
-      
+
       request(app)
         .post('/api/items')
         .send(itemData)
         .end((err, createRes) => {
           if (err) return done(err);
-          
+
           const itemId = createRes.body.id;
-          
+
           // Then get the item
           request(app)
             .get(`/api/items/${itemId}`)
@@ -902,10 +900,10 @@ describe('API Endpoints', () => {
   });
 });
 '''
-        
+
         with open('api.test.js', 'w') as f:
             f.write(test_content)
-        
+
         print("Mocha test suite created!")
 
     def _generate_mock_data(self):
@@ -914,12 +912,12 @@ describe('API Endpoints', () => {
         print("=" * 60)
         print("  Mock Data Generator")
         print("=" * 60)
-        
+
         data_type = input("Enter data type (user, product, post, etc.): ")
         count = int(input("Number of records to generate: "))
-        
+
         print(f"\nGenerating {count} mock {data_type} records...")
-        
+
         # Generate mock data based on type
         if data_type.lower() == 'user':
             self._generate_user_mock_data(count)
@@ -929,26 +927,26 @@ describe('API Endpoints', () => {
             self._generate_post_mock_data(count)
         else:
             self._generate_generic_mock_data(data_type, count)
-        
+
         print("Mock data generated!")
-        
+
         input("\nPress Enter to continue...")
         return None
 
     def _generate_user_mock_data(self, count):
         """Generate user mock data"""
         import random
-        
+
         first_names = ['John', 'Jane', 'Mike', 'Sarah', 'David', 'Emma', 'Chris', 'Lisa']
         last_names = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis']
         domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com']
-        
+
         users = []
         for i in range(count):
             first = random.choice(first_names)
             last = random.choice(last_names)
             email = f"{first.lower()}.{last.lower()}{i}@{random.choice(domains)}"
-            
+
             user = {
                 "id": i + 1,
                 "name": f"{first} {last}",
@@ -957,19 +955,19 @@ describe('API Endpoints', () => {
                 "active": random.choice([True, False])
             }
             users.append(user)
-        
+
         with open('mock_users.json', 'w') as f:
             json.dump(users, f, indent=2)
-        
+
         print(f"Generated {count} user records in mock_users.json")
 
     def _generate_product_mock_data(self, count):
         """Generate product mock data"""
         import random
-        
+
         products = []
         categories = ['Electronics', 'Clothing', 'Books', 'Home', 'Sports', 'Toys']
-        
+
         for i in range(count):
             product = {
                 "id": i + 1,
@@ -981,19 +979,19 @@ describe('API Endpoints', () => {
                 "quantity": random.randint(0, 100)
             }
             products.append(product)
-        
+
         with open('mock_products.json', 'w') as f:
             json.dump(products, f, indent=2)
-        
+
         print(f"Generated {count} product records in mock_products.json")
 
     def _generate_post_mock_data(self, count):
         """Generate post mock data"""
         import random
-        
+
         posts = []
         titles = ['Getting Started', 'Advanced Tips', 'Best Practices', 'Common Issues', 'Tutorial']
-        
+
         for i in range(count):
             post = {
                 "id": i + 1,
@@ -1004,10 +1002,10 @@ describe('API Endpoints', () => {
                 "created_at": f"2024-01-{i+1:02d}T12:00:00Z"
             }
             posts.append(post)
-        
+
         with open('mock_posts.json', 'w') as f:
             json.dump(posts, f, indent=2)
-        
+
         print(f"Generated {count} post records in mock_posts.json")
 
     def _generate_generic_mock_data(self, data_type, count):
@@ -1021,11 +1019,11 @@ describe('API Endpoints', () => {
                 "created_at": f"2024-01-{i+1:02d}T12:00:00Z"
             }
             data.append(item)
-        
+
         filename = f'mock_{data_type.lower()}s.json'
         with open(filename, 'w') as f:
             json.dump(data, f, indent=2)
-        
+
         print(f"Generated {count} {data_type} records in {filename}")
 
     def _validate_api(self):
@@ -1034,13 +1032,13 @@ describe('API Endpoints', () => {
         print("=" * 60)
         print("  API Validator")
         print("=" * 60)
-        
+
         print("\nValidating API endpoints...")
         print("All endpoints are valid!")
         print("Response formats are correct")
         print(" Authentication is properly configured")
         print(" Documentation is up to date")
-        
+
         input("\nPress Enter to continue...")
         return None
 

@@ -1,8 +1,9 @@
 """
 Base menu class and menu item definitions
 """
+
 from abc import ABC, abstractmethod
-from typing import List, Optional, Callable, Any
+from typing import List, Callable, Any
 from .renderer import MenuRenderer
 from .navigation import MenuNavigation
 
@@ -48,13 +49,17 @@ class Menu(ABC):
         """
         pass
 
-    def display(self, selected_idx: int = 0, initial: bool = True,
-                force_full_redraw: bool = False) -> None:
+    def display(
+        self,
+        selected_idx: int = 0,
+        initial: bool = True,
+        force_full_redraw: bool = False,
+    ) -> None:
         """
         Display menu using renderer
 
         Args:
-            selected_idx: Index of the currently selected menu item (1-based)
+            selected_idx: Index of currently selected menu item (1-based)
             initial: Whether this is the initial display
             force_full_redraw: Whether to force a full screen redraw
         """
@@ -80,12 +85,14 @@ class Menu(ABC):
             try:
                 choice = self.get_choice_with_arrows()
 
-                # Clear screen only after a selection is made, not during navigation
+                # Clear screen only after a selection is made, not during
+                # navigation
                 result = self.items[choice - 1].action()
                 if result == "exit":
                     break
             except KeyboardInterrupt:
-                # Handle Ctrl+C globally to return to main menu instead of crashing
+                # Handle Ctrl+C globally to return to main menu instead of
+                # crashing
                 print("\n\nOperation cancelled by user.")
                 self.clear_screen()
                 break

@@ -8,17 +8,15 @@ import subprocess
 from pathlib import Path
 from typing import Union, List, Optional
 from ..utils.exceptions import AutomationError, ErrorSeverity
-
-
 class SecurityValidator:
     """Centralized security validation and sanitization utilities"""
-    
+
     # Patterns for validating inputs
     SAFE_COMMAND_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\:\/\s=]+$')
     SAFE_PATH_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\/\\]+$')
     SAFE_FILE_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.]+$')
     SAFE_BRANCH_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\:\/]+$')
-    
+
     @staticmethod
     def validate_command_input(user_input: str) -> bool:
         """
@@ -56,7 +54,7 @@ class SecurityValidator:
 
         # Check against safe command pattern
         return bool(SecurityValidator.SAFE_COMMAND_PATTERN.match(user_input))
-    
+
     @staticmethod
     def validate_path(path: str) -> bool:
         """
@@ -100,7 +98,7 @@ class SecurityValidator:
                 return False
 
         return True
-    
+
     @staticmethod
     def validate_file_name(filename: str) -> bool:
         """
@@ -127,7 +125,7 @@ class SecurityValidator:
             return False
 
         return bool(SecurityValidator.SAFE_FILE_NAME_PATTERN.match(file_part))
-    
+
     @staticmethod
     def validate_branch_name(branch_name: str) -> bool:
         """
@@ -158,28 +156,28 @@ class SecurityValidator:
                 return False
 
         return bool(SecurityValidator.SAFE_BRANCH_NAME_PATTERN.match(branch_name))
-    
+
     @staticmethod
     def sanitize_command_input(user_input: str) -> str:
         """
         Sanitize command input to remove potentially dangerous characters
-        
+
         Args:
             user_input: The command input to sanitize
-            
+
         Returns:
             str: Sanitized command input
-            
+
         Raises:
             AutomationError: If input cannot be safely sanitized
         """
         if not user_input:
             return user_input
-            
+
         # Check if the input is already valid
         if SecurityValidator.validate_command_input(user_input):
             return user_input
-            
+
         # If not valid, raise an error instead of attempting to sanitize
         # (as sanitization might change the intended command)
         raise AutomationError(
@@ -187,35 +185,35 @@ class SecurityValidator:
             ErrorSeverity.WARNING,
             suggestion="Use only alphanumeric characters, hyphens, underscores, dots, and slashes"
         )
-    
+
     @staticmethod
     def sanitize_path(path: str) -> str:
         """
         Sanitize path to prevent directory traversal and other path-based attacks
-        
+
         Args:
             path: The path to sanitize
-            
+
         Returns:
             str: Sanitized path
-            
+
         Raises:
             AutomationError: If path cannot be safely sanitized
         """
         if not path:
             return path
-            
+
         # Check if the path is already valid
         if SecurityValidator.validate_path(path):
             return path
-            
+
         # If not valid, raise an error
         raise AutomationError(
             "Path contains potentially dangerous elements",
             ErrorSeverity.WARNING,
             suggestion="Use only relative paths within the project directory"
         )
-    
+
     @staticmethod
     def safe_subprocess_run(cmd: List[str], **kwargs) -> subprocess.CompletedProcess:
         """
@@ -246,47 +244,43 @@ class SecurityValidator:
 
         # Execute the command with subprocess using shell=False (default)
         return subprocess.run(cmd, **kwargs)
-
-
 def safe_input(prompt: str) -> str:
     """
     Secure input function that validates user input
-    
+
     Args:
         prompt: The prompt to display to the user
-        
+
     Returns:
         str: The validated user input
     """
     user_input = input(prompt).strip()
-    
+
     if not SecurityValidator.validate_command_input(user_input):
         raise AutomationError(
             "Input contains potentially dangerous characters",
             ErrorSeverity.WARNING,
             suggestion="Use only alphanumeric characters, hyphens, underscores, dots, and slashes"
         )
-    
+
     return user_input
-
-
 def safe_path_input(prompt: str) -> str:
     """
     Secure path input function that validates user-provided paths
-    
+
     Args:
         prompt: The prompt to display to the user
-        
+
     Returns:
         str: The validated user input
     """
     user_input = input(prompt).strip()
-    
+
     if not SecurityValidator.validate_path(user_input):
         raise AutomationError(
             "Path contains potentially dangerous elements",
             ErrorSeverity.WARNING,
             suggestion="Use only relative paths within the project directory"
         )
-    
+
     return user_input

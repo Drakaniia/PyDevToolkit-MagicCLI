@@ -12,8 +12,6 @@ if str(src_path) not in sys.path:
 
 from core.menu import Menu, MenuItem
 from typing import Any, Optional
-
-
 class OthersMenu(Menu):
     """Menu containing additional development tools and utilities"""
 

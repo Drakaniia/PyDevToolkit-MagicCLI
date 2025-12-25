@@ -9,8 +9,6 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
-
-
 class DevOpsTools:
     """Handles DevOps and infrastructure tasks"""
 
@@ -22,25 +20,25 @@ class DevOpsTools:
         print("\n" + "="*70)
         print("TERRAFORM CONFIGURATION SETUP")
         print("="*70)
-        
+
         print("\nThis tool helps set up Terraform for infrastructure as code.")
-        
+
         # Check if Terraform is installed
-        result = subprocess.run(['terraform', 'version'], 
+        result = subprocess.run(['terraform', 'version'],
                               capture_output=True, text=True)
-        
+
         if result.returncode != 0:
             print("⚠ Terraform is not installed or not in PATH")
             print("Download from: https://www.terraform.io/downloads.html")
             input("\nPress Enter to continue...")
             return
-        
+
         print("✓ Terraform is installed")
-        
+
         # Create Terraform configuration files
         tf_dir = Path("infrastructure")
         tf_dir.mkdir(exist_ok=True)
-        
+
         # Create main.tf
         main_tf_content = '''# Terraform configuration for your project
 terraform {
@@ -140,10 +138,10 @@ output "public_subnet_id" {
   value       = aws_subnet.public.id
 }
 '''
-        
+
         with open(tf_dir / "main.tf", "w") as f:
             f.write(main_tf_content)
-        
+
         # Create variables.tf
         vars_tf_content = '''# Variables for Terraform configuration
 
@@ -165,20 +163,20 @@ variable "environment" {
   default     = "dev"
 }
 '''
-        
+
         with open(tf_dir / "variables.tf", "w") as f:
             f.write(vars_tf_content)
-        
+
         # Create terraform.tfvars as an example
         tfvars_content = '''# Terraform variables file
 project_name = "magic-cli-project"
 aws_region   = "us-east-1"
 environment  = "dev"
 '''
-        
+
         with open(tf_dir / "terraform.tfvars", "w") as f:
             f.write(tfvars_content)
-        
+
         print(f"\n✓ Terraform configuration created in '{tf_dir}' directory")
         print("Files created:")
         print(f"  - {tf_dir}/main.tf: Main Terraform configuration")
@@ -189,7 +187,7 @@ environment  = "dev"
         print("  terraform init")
         print("  terraform plan")
         print("  terraform apply")
-        
+
         input("\nPress Enter to continue...")
 
     def setup_docker_registry(self) -> None:
@@ -197,31 +195,31 @@ environment  = "dev"
         print("\n" + "="*70)
         print("DOCKER REGISTRY INTEGRATION")
         print("="*70)
-        
+
         print("\nThis tool helps integrate with Docker registries.")
-        
+
         # Check if Docker is installed
-        result = subprocess.run(['docker', '--version'], 
+        result = subprocess.run(['docker', '--version'],
                               capture_output=True, text=True)
-        
+
         if result.returncode != 0:
             print("⚠ Docker is not installed or not in PATH")
             print("Please install Docker Desktop or Docker Engine")
             input("\nPress Enter to continue...")
             return
-        
+
         print("✓ Docker is installed")
-        
+
         print("\nCommon Docker registry options:")
         print("  1. Docker Hub")
         print("  2. Amazon ECR (Elastic Container Registry)")
         print("  3. Google Container Registry")
         print("  4. Azure Container Registry")
         print("  5. Self-hosted registry")
-        
+
         try:
             choice = input("\nEnter choice (1-5) or press Enter to cancel: ").strip()
-            
+
             if choice == "1":
                 self._setup_docker_hub()
             elif choice == "2":
@@ -236,25 +234,25 @@ environment  = "dev"
                 print("Operation cancelled.")
             else:
                 print("Invalid choice. Operation cancelled.")
-        
+
         except KeyboardInterrupt:
             print("\nOperation cancelled.")
-        
+
         input("\nPress Enter to continue...")
 
     def _setup_docker_hub(self) -> None:
         """Setup Docker Hub integration"""
         print("\nSetting up Docker Hub integration...")
-        
+
         username = input("Enter Docker Hub username: ").strip()
         if not username:
             print("Username is required!")
             return
-        
+
         print(f"\nExample Docker image build and push commands:")
         print(f"  docker build -t {username}/your-app:latest .")
         print(f"  docker push {username}/your-app:latest")
-        
+
         # Create example build script
         script_content = f'''#!/bin/bash
 # Example build and push script for Docker Hub
@@ -272,47 +270,47 @@ docker push $IMAGE_NAME:latest
 
 echo "Done!"
 '''
-        
+
         with open("build_and_push_docker.sh", "w") as f:
             f.write(script_content)
-        
+
         # Make executable on Unix systems
         try:
             os.chmod("build_and_push_docker.sh", 0o755)
         except:
             pass  # Skip on Windows
-        
+
         print("✓ Build script created: build_and_push_docker.sh")
 
     def _setup_aws_ecr(self) -> None:
         """Setup AWS ECR integration"""
         print("\nSetting up AWS ECR integration...")
-        
+
         print("\nAWS ECR requires AWS CLI to be configured.")
         print("Ensure you have AWS credentials configured using 'aws configure'.")
-        
+
         # Check if AWS CLI is installed
-        result = subprocess.run(['aws', 'configure', 'list'], 
+        result = subprocess.run(['aws', 'configure', 'list'],
                               capture_output=True, text=True)
-        
+
         if result.returncode != 0:
             print("⚠ AWS CLI is not installed or not configured")
             print("Install and configure AWS CLI to use ECR")
             return
-        
+
         account_id = input("Enter AWS Account ID: ").strip()
         region = input("Enter AWS Region (e.g., us-east-1): ").strip() or "us-east-1"
-        
+
         if not account_id:
             print("Account ID is required!")
             return
-        
+
         print(f"\nExample ECR commands:")
         print(f"  aws ecr get-login-password --region {region} | docker login --username AWS --password-stdin {account_id}.dkr.ecr.{region}.amazonaws.com")
         print(f"  docker build -t my-app .")
         print(f"  docker tag my-app:latest {account_id}.dkr.ecr.{region}.amazonaws.com/my-app:latest")
         print(f"  docker push {account_id}.dkr.ecr.{region}.amazonaws.com/my-app:latest")
-        
+
         # Create example script
         script_content = f'''#!/bin/bash
 # Example build and push script for AWS ECR
@@ -339,36 +337,36 @@ docker push $ECR_REGISTRY/$IMAGE_NAME:latest
 
 echo "Image pushed to $ECR_REGISTRY/$IMAGE_NAME"
 '''
-        
+
         with open("build_and_push_ecr.sh", "w") as f:
             f.write(script_content)
-        
+
         # Make executable on Unix systems
         try:
             os.chmod("build_and_push_ecr.sh", 0o755)
         except:
             pass  # Skip on Windows
-        
+
         print("✓ Build script created: build_and_push_ecr.sh")
 
     def _setup_gcr(self) -> None:
         """Setup Google Container Registry"""
         print("\nSetting up Google Container Registry...")
-        
+
         print("\nGCR requires gcloud CLI to be installed and authenticated.")
         print("Ensure you're logged in with 'gcloud auth login'.")
-        
+
         project_id = input("Enter Google Cloud Project ID: ").strip()
-        
+
         if not project_id:
             print("Project ID is required!")
             return
-        
+
         print(f"\nExample GCR commands:")
         print(f"  gcloud auth configure-docker")
         print(f"  docker build -t gcr.io/{project_id}/my-app .")
         print(f"  docker push gcr.io/{project_id}/my-app")
-        
+
         # Create example script
         script_content = f'''#!/bin/bash
 # Example build and push script for Google Container Registry
@@ -393,37 +391,37 @@ docker push gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
 
 echo "Image pushed to gcr.io/$PROJECT_ID/$IMAGE_NAME"
 '''
-        
+
         with open("build_and_push_gcr.sh", "w") as f:
             f.write(script_content)
-        
+
         # Make executable on Unix systems
         try:
             os.chmod("build_and_push_gcr.sh", 0o755)
         except:
             pass  # Skip on Windows
-        
+
         print("✓ Build script created: build_and_push_gcr.sh")
 
     def _setup_acr(self) -> None:
         """Setup Azure Container Registry"""
         print("\nSetting up Azure Container Registry...")
-        
+
         print("\nACR requires Azure CLI to be installed and authenticated.")
         print("Ensure you're logged in with 'az login'.")
-        
+
         registry_name = input("Enter Azure Container Registry name: ").strip()
         resource_group = input("Enter Azure Resource Group name: ").strip()
-        
+
         if not registry_name or not resource_group:
             print("Registry name and resource group are required!")
             return
-        
+
         print(f"\nExample ACR commands:")
         print(f"  az acr login --name {registry_name}")
         print(f"  docker build -t {registry_name}.azurecr.io/my-app .")
         print(f"  docker push {registry_name}.azurecr.io/my-app")
-        
+
         # Create example script
         script_content = f'''#!/bin/bash
 # Example build and push script for Azure Container Registry
@@ -449,32 +447,32 @@ docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:latest
 
 echo "Image pushed to $ACR_NAME.azurecr.io/$IMAGE_NAME"
 '''
-        
+
         with open("build_and_push_acr.sh", "w") as f:
             f.write(script_content)
-        
+
         # Make executable on Unix systems
         try:
             os.chmod("build_and_push_acr.sh", 0o755)
         except:
             pass  # Skip on Windows
-        
+
         print("✓ Build script created: build_and_push_acr.sh")
 
     def _setup_self_hosted_registry(self) -> None:
         """Setup self-hosted Docker registry"""
         print("\nSetting up self-hosted Docker registry...")
-        
+
         registry_url = input("Enter registry URL (e.g., myregistrydomain.com:5000): ").strip()
-        
+
         if not registry_url:
             print("Registry URL is required!")
             return
-        
+
         print(f"\nExample commands for self-hosted registry:")
         print(f"  docker build -t {registry_url}/my-app .")
         print(f"  docker push {registry_url}/my-app")
-        
+
         # Create example script
         script_content = f'''#!/bin/bash
 # Example build and push script for self-hosted Docker registry
@@ -496,16 +494,16 @@ docker push $REGISTRY_URL/$IMAGE_NAME:latest
 
 echo "Image pushed to $REGISTRY_URL/$IMAGE_NAME"
 '''
-        
+
         with open("build_and_push_self_hosted.sh", "w") as f:
             f.write(script_content)
-        
+
         # Make executable on Unix systems
         try:
             os.chmod("build_and_push_self_hosted.sh", 0o755)
         except:
             pass  # Skip on Windows
-        
+
         print("✓ Build script created: build_and_push_self_hosted.sh")
 
     def deploy_to_cloud(self) -> None:
@@ -513,17 +511,17 @@ echo "Image pushed to $REGISTRY_URL/$IMAGE_NAME"
         print("\n" + "="*70)
         print("CLOUD DEPLOYMENT TOOLS")
         print("="*70)
-        
+
         print("\nDeployment options:")
         print("  1. AWS Elastic Beanstalk")
         print("  2. Google Cloud Run")
         print("  3. Azure App Service")
         print("  4. Heroku")
         print("  5. Digital Ocean App Platform")
-        
+
         try:
             choice = input("\nEnter choice (1-5) or press Enter to cancel: ").strip()
-            
+
             if choice == "1":
                 self._deploy_to_aws_eb()
             elif choice == "2":
@@ -538,23 +536,23 @@ echo "Image pushed to $REGISTRY_URL/$IMAGE_NAME"
                 print("Operation cancelled.")
             else:
                 print("Invalid choice. Operation cancelled.")
-        
+
         except KeyboardInterrupt:
             print("\nOperation cancelled.")
-        
+
         input("\nPress Enter to continue...")
 
     def _deploy_to_aws_eb(self) -> None:
         """Deploy to AWS Elastic Beanstalk"""
         print("\nDeploying to AWS Elastic Beanstalk...")
-        
+
         print("\nThis requires the EB CLI (Elastic Beanstalk Command Line Interface).")
         print("Install with: pip install awsebcli")
-        
+
         # Check if EB CLI is installed
-        result = subprocess.run(['eb', '--version'], 
+        result = subprocess.run(['eb', '--version'],
                               capture_output=True, text=True)
-        
+
         if result.returncode != 0:
             print("⚠ EB CLI is not installed")
             install = input("Install EB CLI? (y/n): ").lower()
@@ -570,14 +568,14 @@ echo "Image pushed to $REGISTRY_URL/$IMAGE_NAME"
                 print("Cannot proceed without EB CLI.")
                 input("\nPress Enter to continue...")
                 return
-        
+
         print("\nDeployment steps:")
         print("  1. Navigate to your project directory")
         print("  2. Run: eb init")
         print("  3. Configure your application")
         print("  4. Run: eb create my-environment")
         print("  5. Deploy: eb deploy")
-        
+
         # Create example requirements file specific for EB
         requirements_content = '''# Requirements for Elastic Beanstalk deployment
 # This might differ from your development requirements
@@ -587,12 +585,12 @@ uvicorn==0.22.0
 gunicorn==21.2.0
 python-dotenv==1.0.0
 '''
-        
+
         with open("requirements.txt.eb", "w") as f:
             f.write(requirements_content)
-        
+
         print("✓ Created requirements.txt.eb with common EB requirements")
-        
+
         print("\nFor WSGI apps, create a .ebextensions/01_settings.config file:")
         eb_config_content = '''option_settings:
   aws:elasticbeanstalk:container:python:
@@ -600,45 +598,45 @@ python-dotenv==1.0.0
   aws:elasticbeanstalk:application:environment:
     PYTHONPATH: "/var/app/current:$PYTHONPATH"
 '''
-        
+
         eb_ext_dir = Path(".ebextensions")
         eb_ext_dir.mkdir(exist_ok=True)
         with open(eb_ext_dir / "01_settings.config", "w") as f:
             f.write(eb_config_content)
-        
+
         print("✓ Created .ebextensions/01_settings.config for Python app")
 
     def _deploy_to_gcp_cloud_run(self) -> None:
         """Deploy to Google Cloud Run"""
         print("\nDeploying to Google Cloud Run...")
-        
+
         print("\nThis requires gcloud CLI to be installed and authenticated.")
         print("Ensure you're logged in with 'gcloud auth login'.")
-        
+
         # Check if gcloud is available
-        result = subprocess.run(['gcloud', 'version'], 
+        result = subprocess.run(['gcloud', 'version'],
                               capture_output=True, text=True)
-        
+
         if result.returncode != 0:
             print("⚠ gcloud CLI is not installed")
             print("Download from: https://cloud.google.com/sdk/docs/install")
             input("\nPress Enter to continue...")
             return
-        
+
         service_name = input("Enter service name: ").strip()
         project_id = input("Enter Google Cloud Project ID: ").strip()
-        
+
         if not service_name or not project_id:
             print("Service name and project ID are required!")
             input("\nPress Enter to continue...")
             return
-        
+
         print(f"\nDeployment command:")
         print(f"  gcloud run deploy {service_name} --image gcr.io/{project_id}/my-app --platform managed --region us-central1 --project {project_id}")
-        
+
         print(f"\nFor building and deploying in one command:")
         print(f"  gcloud run deploy {service_name} --source . --platform managed --region us-central1 --project {project_id}")
-        
+
         # Create example cloudbuild.yaml
         cloudbuild_content = f'''steps:
 - name: 'gcr.io/cloud-builders/docker'
@@ -661,40 +659,40 @@ python-dotenv==1.0.0
   - '{project_id}'
   - '--allow-unauthenticated'
 '''
-        
+
         with open("cloudbuild.yaml", "w") as f:
             f.write(cloudbuild_content)
-        
+
         print("✓ Created cloudbuild.yaml for automated builds")
 
     def _deploy_to_azure_app_service(self) -> None:
         """Deploy to Azure App Service"""
         print("\nDeploying to Azure App Service...")
-        
+
         print("\nThis requires Azure CLI and the webapp extension.")
         print("Install with: az extension add --name webapp")
-        
+
         # Check if az is available
-        result = subprocess.run(['az', '--version'], 
+        result = subprocess.run(['az', '--version'],
                               capture_output=True, text=True)
-        
+
         if result.returncode != 0:
             print("⚠ Azure CLI is not installed")
             print("Download from: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli")
             input("\nPress Enter to continue...")
             return
-        
+
         app_name = input("Enter app name: ").strip()
         resource_group = input("Enter resource group name: ").strip()
-        
+
         if not app_name or not resource_group:
             print("App name and resource group are required!")
             input("\nPress Enter to continue...")
             return
-        
+
         print(f"\nDeployment commands:")
         print(f"  az webapp create --resource-group {resource_group} --name {app_name} --runtime 'PYTHON:3.11' --deployment-local-git")
-        
+
         print("\nFor deployment, you can use:")
         print(f"  git push azure main")
         print("  or")
@@ -703,42 +701,42 @@ python-dotenv==1.0.0
     def _deploy_to_heroku(self) -> None:
         """Deploy to Heroku"""
         print("\nDeploying to Heroku...")
-        
+
         print("\nThis requires the Heroku CLI.")
         print("Install from: https://devcenter.heroku.com/articles/heroku-cli")
-        
+
         # Check if heroku is available
-        result = subprocess.run(['heroku', '--version'], 
+        result = subprocess.run(['heroku', '--version'],
                               capture_output=True, text=True)
-        
+
         if result.returncode != 0:
             print("⚠ Heroku CLI is not installed")
             print("Install from: https://devcenter.heroku.com/articles/heroku-cli")
             input("\nPress Enter to continue...")
             return
-        
+
         app_name = input("Enter app name (or leave empty to generate): ").strip()
-        
+
         print(f"\nDeployment steps:")
         if app_name:
             print(f"  1. heroku create {app_name}")
         else:
             print(f"  1. heroku create  # This will generate a name")
-        
+
         print(f"  2. git add .")
         print(f"  3. git commit -m 'Deploy to Heroku'")
         print(f"  4. git push heroku main")
-        
+
         # Create example Procfile for Heroku
         procfile_content = '''# Procfile for Heroku deployment
 web: gunicorn src.main:app --bind 0.0.0.0:$PORT
 '''
-        
+
         with open("Procfile", "w") as f:
             f.write(procfile_content)
-        
+
         print("✓ Created Procfile for Heroku deployment")
-        
+
         # Create requirements.txt if it doesn't exist
         if not Path("requirements.txt").exists():
             with open("requirements.txt", "w") as f:
@@ -747,14 +745,14 @@ web: gunicorn src.main:app --bind 0.0.0.0:$PORT
     def _deploy_to_do_app_platform(self) -> None:
         """Deploy to Digital Ocean App Platform"""
         print("\nDeploying to Digital Ocean App Platform...")
-        
+
         print("\nDigital Ocean App Platform deployments are typically done through:")
         print("  1. The Digital Ocean Control Panel")
         print("  2. Using their API")
         print("  3. Linking to a GitHub/GitLab repository")
-        
+
         print(f"\nRequired files for Python app:")
-        
+
         # Create example app spec
         app_spec_content = '''name: my-app
 services:
@@ -768,12 +766,12 @@ services:
   run_command: gunicorn src.main:app -w 4 -b 0.0.0.0:$PORT
   http_port: 8080
 '''
-        
+
         with open("app.yaml", "w") as f:
             f.write(app_spec_content)
-        
+
         print("✓ Created app.yaml specification file")
-        
+
         print("\nFor Git-based deployment:")
         print("  1. Create a Dockerfile (if needed)")
         print("  2. Create this app.yaml specification")
@@ -785,19 +783,19 @@ services:
         print("\n" + "="*70)
         print("ENVIRONMENT MANAGEMENT")
         print("="*70)
-        
+
         print("\nEnvironment management involves:")
         print("  - Configuration files for different environments")
         print("  - Environment-specific variables")
         print("  - Deployment scripts for each environment")
-        
+
         print("\nCommon environments:")
         print("  - Development (dev)")
         print("  - Staging/Testing (stg/test)")
         print("  - Production (prod)")
-        
+
         print("\nCreating environment-specific configuration files...")
-        
+
         # Create environment-specific configs
         env_configs = {
             'development': {
@@ -816,19 +814,19 @@ services:
                 'LOG_LEVEL': 'WARNING'
             }
         }
-        
+
         for env_name, config_vars in env_configs.items():
             config_content = f"# {env_name.title()} environment configuration\n"
             for key, value in config_vars.items():
                 config_content += f"{key}={value}\n"
-            
+
             with open(f".env.{env_name}", "w") as f:
                 f.write(config_content)
-            
+
             print(f"  - Created .env.{env_name}")
-        
+
         print("\nEnvironment-specific Docker Compose files...")
-        
+
         # Create environment-specific docker-compose files
         dev_compose_content = '''version: '3.8'
 
@@ -843,7 +841,7 @@ services:
     volumes:
       - .:/app
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
-    
+
   db:
     image: postgres:15
     environment:
@@ -858,10 +856,10 @@ services:
 volumes:
   dev_postgres_data:
 '''
-        
+
         with open("docker-compose.dev.yml", "w") as f:
             f.write(dev_compose_content)
-        
+
         prod_compose_content = '''version: '3.8'
 
 services:
@@ -876,7 +874,7 @@ services:
     restart: unless-stopped
     depends_on:
       - db
-    
+
   db:
     image: postgres:15
     environment:
@@ -890,20 +888,18 @@ services:
 volumes:
   prod_postgres_data:
 '''
-        
+
         with open("docker-compose.prod.yml", "w") as f:
             f.write(prod_compose_content)
-        
+
         print("  - Created docker-compose.dev.yml")
         print("  - Created docker-compose.prod.yml")
-        
+
         print(f"\nTo use environment configs:")
         print(f"  - For development: docker-compose -f docker-compose.dev.yml up")
         print(f"  - For production: docker-compose -f docker-compose.prod.yml up")
-        
+
         input("\nPress Enter to continue...")
-
-
 class DevOpsMenu(Menu):
     """Menu for DevOps tools"""
 

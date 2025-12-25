@@ -11,8 +11,6 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from core.menu import Menu, MenuItem
-
-
 class PostgresCommands(Menu):
     """PostgreSQL Quick Commands Menu with common PostgreSQL operations"""
 
@@ -104,13 +102,9 @@ class PostgresCommands(Menu):
     def _back_to_db(self):
         """Return to database management menu"""
         return "exit"
-
-
 def main():
     """Test function to run the PostgreSQL quick commands menu"""
     menu = PostgresCommands()
     menu.run()
-
-
 if __name__ == "__main__":
     main()

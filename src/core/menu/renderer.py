@@ -1,13 +1,10 @@
 """
 Menu rendering and display utilities
 """
-import os
 import sys
 import shutil
 from pathlib import Path
 from typing import List, Tuple, Optional, Any
-
-
 class TerminalInfo:
     """Handle terminal size and viewport information"""
 
@@ -52,22 +49,20 @@ class TerminalInfo:
         """Invalidate the cached terminal size"""
         cls._cached_size = None
         cls._last_check_time = 0
-
-
 class MenuRenderer:
     """Handles menu display and rendering logic"""
-    
+
     # ANSI escape codes for cursor control
     HIDE_CURSOR = '\033[?25l'
     SHOW_CURSOR = '\033[?25h'
     CLEAR_SCREEN = '\033[2J\033[H'
     CLEAR_LINE = '\033[2K'
     MOVE_UP = '\033[1A'
-    
+
     def __init__(self, title: str):
         self.title: str = title
         self._scroll_offset: int = 0
-    
+
     def display(self, items: List[Any], selected_idx: int = 0, initial: bool = True,
                 force_full_redraw: bool = False) -> None:
         """
@@ -105,54 +100,54 @@ class MenuRenderer:
             # Only update the changed items for smooth navigation
             # but also update scroll indicators if they've changed
             self._update_visible_items_and_indicators(items, selected_idx, available_lines, cols)
-    
+
     def _display_full(self, items: List[Any], selected_idx: int, cols: int, lines: int,
                       available_lines: int, is_small: bool) -> None:
         """Full screen refresh with responsive layout"""
         self.clear_screen()
-        
+
         # Adjust separator width for terminal size
         sep_width = min(70, cols - 2)
-        
+
         # Header
         print("=" * sep_width)
-        
+
         # Truncate title if needed
         title_display = self.title[:cols-4] if len(self.title) > cols-4 else self.title
         print(f"  {title_display}")
-        
+
         print("=" * sep_width)
-        
+
         # Current directory info (truncate for small viewports)
         current_dir = str(Path.cwd())
         if len(current_dir) > cols - 25:
             # Show last part of path
             current_dir = "..." + current_dir[-(cols-28):]
-        
+
         print(f"  [DIR] Current Directory: {current_dir}")
         print("=" * sep_width)
-        
+
         # Calculate visible range
         visible_start = self._scroll_offset
         visible_end = min(visible_start + available_lines, len(items))
-        
+
         # Show scroll indicator at top if needed
         if self._scroll_offset > 0:
             scroll_info = f"  ^ {self._scroll_offset} more above..."
             print(scroll_info[:cols-2])
-        
+
         # Display visible menu items
         for i in range(visible_start, visible_end):
             self._print_item(i, items[i], i == selected_idx, cols)
-        
+
         # Show scroll indicator at bottom if needed
         if visible_end < len(items):
             remaining = len(items) - visible_end
             scroll_info = f"  v {remaining} more below..."
             print(scroll_info[:cols-2])
-        
+
         print("=" * sep_width)
-        
+
         # Footer - adapt instructions based on viewport and capabilities
         if is_small:
             if self._has_arrow_support():
@@ -164,7 +159,7 @@ class MenuRenderer:
                 print("\n  Use ^/v arrow keys to navigate, Enter to select, or type number")
             else:
                 print("\n  Type number and press Enter to select")
-    
+
     def _update_visible_items(self, items: List[Any], selected_idx: int, available_lines: int) -> None:
         """
         Update only the visible menu items for smooth navigation
@@ -323,7 +318,7 @@ class MenuRenderer:
 
         # Truncate if too long for terminal
         max_text_width = cols - 6  # Leave space for prefix and padding
-        
+
         if is_selected:
             full_line = f"  > {line_text}"
             # Pad to full width for consistent highlight
@@ -332,7 +327,7 @@ class MenuRenderer:
         else:
             full_line = f"    {line_text}"
             print(full_line)
-    
+
     def _print_item_inline(self, index: int, item: Any, is_selected: bool, cols: int) -> None:
         """Print item inline (without newline) for updates"""
         line_text = f"{index + 1}. {item.label}"
@@ -394,20 +389,20 @@ class MenuRenderer:
         header_lines.append("=" * sep_width + "\n")
 
         return header_lines
-    
+
     def _has_arrow_support(self) -> bool:
         """Check if terminal supports arrow keys"""
         try:
-            import tty
-            import termios
+            import tty  # noqa: F401
+            import termios  # noqa: F401
             return True
         except ImportError:
             try:
-                import msvcrt
+                import msvcrt  # noqa: F401
                 return True
             except ImportError:
                 return False
-    
+
     @staticmethod
     def clear_screen() -> None:
         """Clear the terminal screen and invalidate terminal size cache"""
@@ -416,3 +411,4 @@ class MenuRenderer:
         sys.stdout.flush()
         # Invalidate terminal size cache since window dimensions might change after clear
         TerminalInfo.invalidate_cache()
+

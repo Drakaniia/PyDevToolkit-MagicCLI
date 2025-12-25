@@ -19,8 +19,8 @@ from .exceptions import (
 from .git_client import GitClient
 
 __all__ = [
-    'ConfigManager', 'SecurityAuditLogger', 'AutomationError', 
-    'GitError', 'GitCommandError', 'NotGitRepositoryError', 'NoRemoteError', 
-    'GitNotInstalledError', 'UncommittedChangesError', 'SSHConfigError', 
+    'ConfigManager', 'SecurityAuditLogger', 'AutomationError',
+    'GitError', 'GitCommandError', 'NotGitRepositoryError', 'NoRemoteError',
+    'GitNotInstalledError', 'UncommittedChangesError', 'SSHConfigError',
     'GitHubAPIError', 'ErrorSeverity', 'ExceptionHandler', 'GitClient'
 ]
