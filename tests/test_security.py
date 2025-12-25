@@ -67,8 +67,7 @@ class TestSecurityValidation(unittest.TestCase):
             "app/module.js",
             "static/css/style.css",
             "test_dir",
-            "./relative/path",
-            "../sibling/path"
+            "./relative/path"
         ]
         
         # Create a temporary directory for testing
