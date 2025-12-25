@@ -7,7 +7,7 @@ import os
 import subprocess
 import json
 from typing import List, Tuple, Optional
-from core.loading import loading_animation
+from core.loading import LoadingSpinner
 from core.utils.exceptions import GitError
 from core.menu import Menu, MenuItem
 

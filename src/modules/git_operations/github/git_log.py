@@ -4,7 +4,7 @@ Handles commit history viewing and log operations
 """
 import subprocess
 from datetime import datetime
-from core.loading import LoadingSpinner, loading_animation
+from core.loading import LoadingSpinner
 
 
 class GitLog:

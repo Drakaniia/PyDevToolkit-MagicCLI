@@ -17,7 +17,7 @@ from core.utils.exceptions import (
     UncommittedChangesError,
     handle_errors
 )
-from core.loading import LoadingSpinner, loading_animation
+from core.loading import LoadingSpinner
 
 
 class PushStrategy:
