@@ -894,8 +894,7 @@ class CreateFrontendCommand(DevModeCommand):
         category_frameworks = []
         framework_keys = []
 
-        for key, framework in sorted(self.FRAMEWORKS.items(), def key(x):
-                                     return int(x[0])):
+        for key, framework in sorted(self.FRAMEWORKS.items(), key=lambda x: int(x[0])):
             if framework['type'] == category:
                 category_frameworks.append(framework['name'])
                 framework_keys.append(key)
@@ -948,10 +947,10 @@ class CreateFrontendCommand(DevModeCommand):
                     continue
 
                 if not self._is_valid_project_name(name):
-                    print("Invalid project name. Use letters,
+                    print("""Invalid project name. Use letters,
                           numbers,
                           hyphens,
-                          underscores")
+                          underscores""")
                     continue
 
                 return name
@@ -1011,8 +1010,8 @@ class CreateFrontendCommand(DevModeCommand):
     def _prompt_directory(self) -> Optional[str]:
         """Prompt for target directory"""
         try:
-            directory = input("\nTarget directory(default: current,
-                                                  or 'exit' to cancel): ").strip()
+            directory = input("""\nTarget directory(default: current,
+                                                  or 'exit' to cancel): """).strip()
 
             # Handle exit
             if directory.lower() in ['exit', 'quit', 'cancel']:
