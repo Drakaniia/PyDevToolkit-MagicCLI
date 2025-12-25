@@ -1,62 +1,51 @@
-# Global Installation Guide for MagicCLI
+# Global Installation Guide for PyDevToolkit-MagicCLI
 
 ## Overview
-This guide explains how to install the MagicCLI toolkit globally on your system, similar to `npm install -g`, without needing to clone the repository. After installation, you'll be able to run the `magic` command from anywhere in your terminal.
+This guide explains how to install the PyDevToolkit-MagicCLI globally on your system, similar to `npm install -g`, without needing to clone the repository. After installation, you'll be able to run the `magic` command from anywhere in your terminal.
 
-## Entry Point Configuration
-Before installing, ensure your project is properly configured to expose a command-line interface. The current configuration defines an entry point named `magic`:
+## Quick Start
+```bash
+# Install globally from PyPI (when available)
+pip install pydevtoolkit-magiccli
 
-### In setup.py:
-```python
-entry_points={
-    "console_scripts": [
-        "magic=cli.magic:main",  # Note: This should match your actual module structure
-    ],
-},
+# Or install directly from GitHub
+pip install git+https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
+
+# Use the magic command
+magic
 ```
-
-### In pyproject.toml:
-```toml
-[project.scripts]
-magic = "src.main:main"  # This should match your actual module structure
-```
-
-> **Note**: There's a discrepancy between the entry points defined in setup.py and pyproject.toml. The pyproject.toml defines it as `"src.main:main"` while setup.py defines it as `"cli.magic:main"`. Based on the actual code structure, `src.main:main` appears to be correct.
 
 ## Installation Methods
 
-### Method 1: Install Directly from GitHub (Recommended for Global Use)
-Install the latest version directly from GitHub without cloning the repository:
+## Installation Methods
 
+### Method 1: PyPI Installation (Recommended)
+Once published to PyPI, installation is as simple as:
+```bash
+pip install pydevtoolkit-magiccli
+```
+
+### Method 2: Direct GitHub Installation
+Install the latest development version directly from GitHub:
 ```bash
 pip install git+https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
 ```
 
-For global installation (requires elevated privileges):
+### Method 3: Development Installation
+If you have a local copy of the repository:
 ```bash
-sudo pip install git+https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git  # Linux/macOS
-pip install --user git+https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git  # Alternative for user only
+# Clone the repository
+git clone https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
+cd PyDevToolkit-MagicCLI
+
+# Install in development mode
+pip install -e .
 ```
 
-After installation, you can run the tool from anywhere with:
-```bash
-magic
-```
-
-### Method 2: Development Installation from Local Directory
-If you have a local copy of the repository (cloned or downloaded):
-
-```bash
-pip install -e /path/to/your/PyDevToolkit-MagicCLI
-```
-
-This creates a "development install" where changes to your code are reflected without reinstalling.
-
-### Method 3: From PyPI (When Available)
-Once published to PyPI, the installation would be as simple as:
-```bash
-pip install PyDevToolkit-MagicCLI
-```
+## System Requirements
+- Python 3.8 or higher
+- pip package manager
+- Git (for GitHub installation method)
 
 ## Verification
 After installation, verify that the tool is accessible globally:
@@ -69,6 +58,20 @@ where magic  # On Windows
 # Run the magic command to open the main menu
 magic
 ```
+
+## What You Get
+After installation, the `magic` command provides access to a comprehensive developer toolkit including:
+
+- **Git Operations**: Push, pull, status, branching, and GitHub integration
+- **Project Structure Viewer**: Visualize and navigate project directories
+- **Folder Navigation**: Interactive file system browser
+- **Dev Mode**: Web development automation tools
+- **Backend Development**: API, database, and framework tools
+- **Dependency Management**: Package installation and management
+- **Code Quality**: Linting, formatting, and analysis tools
+- **Testing & CI/CD**: Testing frameworks and pipeline tools
+- **Security Tools**: Code security scanning and validation
+- **And much more!**
 
 ## Troubleshooting
 
@@ -119,31 +122,43 @@ When installing on Windows:
 2. **Ensure Python and pip are properly added to PATH**
 3. **Use Git Bash for installation** if using the command-line installation method
 
+## Publishing to PyPI
+The package is configured for PyPI publishing with the following setup:
+
+### Package Configuration
+- **Name**: `pydevtoolkit-magiccli`
+- **Entry Point**: `magic = src.main:main`
+- **Python Versions**: 3.8, 3.9, 3.10, 3.11, 3.12
+- **Dependencies**: Core dependencies only (optional extras available)
+
+### Build and Publish
+```bash
+# Install build tools
+pip install build twine
+
+# Build the package
+python -m build
+
+# Upload to PyPI (requires API token)
+python -m twine upload dist/*
+```
+
 ## Post-Installation Usage
 
-After successful installation, you can access the MagicCLI from any directory:
+After successful installation, you can access the toolkit from any directory:
 
 ```bash
-# Access the main menu
+# Launch the interactive menu
 magic
-
-# The menu provides access to many development tools including:
-# - GitHub Operations (push, pull, status, etc.)
-# - Project Structure Viewer
-# - Folder Navigation
-# - Dev Mode (Web Development Automation)
-# - Backend Development Tools
-# - Dependency Management
-# - Code Quality Tools
-# - Testing & CI/CD Tools
-# - And much more!
 ```
+
+The menu provides organized access to all development tools and features.
 
 ## Uninstallation
 To uninstall the globally installed package:
 
 ```bash
-pip uninstall PyDevToolkit-MagicCLI
+pip uninstall pydevtoolkit-magiccli
 ```
 
 ## Notes

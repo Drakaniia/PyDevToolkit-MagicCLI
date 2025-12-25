@@ -17,7 +17,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Drakaniia/PyDevToolkit-MagicCLI",
-    packages=find_packages(exclude=["tests*", "docs*", "scripts*", "src*"]),
+    packages=find_packages(exclude=["tests*", "docs*", "scripts*", "magic_cli*"]),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -62,12 +62,12 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "magic=magic_cli.cli.main:main",
+            "magic=src.main:main",
         ],
     },
     include_package_data=True,
     package_data={
-        "magic_cli": ["assets/**/*", "config/**/*"],
+        "src": ["assets/**/*", "config/**/*"],
     },
     zip_safe=False,
 )

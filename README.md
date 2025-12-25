@@ -2,7 +2,8 @@
 
 **One command to rule them all** - A powerful, secure developer toolkit that puts Git operations, project management, and web development automation at your fingertips.
 
-![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)
+![PyPI](https://img.shields.io/pypi/v/pydevtoolkit-magiccli)
+![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)
 ![Security](https://img.shields.io/badge/security-audited-brightgreen)
@@ -17,20 +18,36 @@
 
 ### Installation
 
+#### Option 1: Global Installation (Recommended)
+Install globally like any other Python package:
+
+```bash
+# Install from PyPI (when available)
+pip install pydevtoolkit-magiccli
+
+# Or install directly from GitHub
+pip install git+https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
+
+# Use anywhere
+magic
+```
+
+#### Option 2: Development Installation
+For contributors or local development:
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
 cd PyDevToolkit-MagicCLI
 
-# 2. Run the setup script (Linux/macOS or Git Bash on Windows)
-bash scripts/setup.sh
+# 2. Install in development mode
+pip install -e .
 
-# 3. Reload your shell
-source ~/.bashrc  # or ~/.zshrc
-
-# 4. Start using it anywhere
+# 3. Start using it anywhere
 magic
 ```
+
+> **Note**: Global installation eliminates the need to clone the repository or run setup scripts. Just `pip install` and you're ready to go!
 
 ### Quick Start
 

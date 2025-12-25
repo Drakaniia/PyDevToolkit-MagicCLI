@@ -83,7 +83,7 @@ monitoring = [
 ]
 
 [project.scripts]
-magic = "magic_cli.cli.main:main"
+magic = "src.main:main"
 
 [project.urls]
 Homepage = "https://github.com/Drakaniia/PyDevToolkit-MagicCLI"
@@ -92,11 +92,11 @@ Issues = "https://github.com/Drakaniia/PyDevToolkit-MagicCLI/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["magic_cli*"]
-exclude = ["tests*", "docs*", "scripts*", "src*"]
+include = ["src*"]
+exclude = ["tests*", "docs*", "scripts*", "magic_cli*"]
 
 [tool.setuptools.package-data]
-"magic_cli" = ["assets/**/*", "config/**/*"]
+"src" = ["assets/**/*", "config/**/*"]
 
 [tool.black]
 line-length = 88
@@ -124,7 +124,7 @@ extend-exclude = '''
 profile = "black"
 multi_line_output = 3
 line_length = 88
-known_first_party = ["magic_cli"]
+known_first_party = ["src"]
 skip = ["src"]
 
 [tool.mypy]
@@ -163,7 +163,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["magic_cli"]
+source = ["src"]
 omit = [
     "*/tests/*",
     "*/test_*",
