@@ -3,18 +3,11 @@ import json
 import sys
 from pathlib import Path
 from typing import Optional, Dict, Any
+import traceback
 from ._base import DevModeCommand
-from core.loading import LoadingSpinner, loading_animation
+from core.loading import LoadingSpinner
 from .menu_utils import get_choice_with_arrows
 from .port_killer import (
-    import traceback
-
-    """
-automation/dev_mode/run_project.py
-Run project development server or build
-FIXED: Windows compatibility and encoding issues
-ENHANCED: Automatic port conflict resolution
-"""
     kill_all_dev_ports,
     ensure_ports_free,
     force_clear_all_ports,

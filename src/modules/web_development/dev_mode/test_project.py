@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import Optional, Any
 from ._base import DevModeCommand
-from core.loading import LoadingSpinner, loading_animation
+from core.loading import LoadingSpinner
 from .menu_utils import get_choice_with_arrows
 import traceback
 

@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import Optional, Dict, Any
 from ._base import DevModeCommand
-from core.loading import LoadingSpinner, loading_animation
+from core.loading import LoadingSpinner
 
 """
 automation/dev_mode/format_code.py
@@ -160,8 +160,8 @@ class FormatCodeCommand(DevModeCommand):
         else:
             print("\n  NO WORKSPACE FILE FOUND!")
             print("\n   The .code-workspace file could not be found.")
-            print("   Prettier is installed,
-                  but auto - format on save won't work")
+            print("""   Prettier is installed,
+                  but auto - format on save won't work""")
             print("   until you configure your workspace.")
             print("\n    How to fix:")
             print("      1. In VS Code: File → Save Workspace As...")
