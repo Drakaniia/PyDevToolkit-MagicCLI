@@ -2,6 +2,11 @@
 Error handling tests for PyDevToolkit-MagicCLI
 Tests comprehensive error handling and exception management
 """
+import sys
+import unittest
+from pathlib import Path
+
+from core.security import SecurityValidator
 from core.utils.exceptions import (
     AutomationError,
     ErrorSeverity,
@@ -13,10 +18,6 @@ from core.utils.exceptions import (
     NotGitRepositoryError,
     UncommittedChangesError,
 )
-from core.security import SecurityValidator
-import sys
-import unittest
-from pathlib import Path
 
 # Add the src directory to Python path to import modules
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))

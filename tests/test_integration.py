@@ -2,15 +2,16 @@
 Integration tests for PyDevToolkit-MagicCLI
 Tests modules working together and overall system functionality
 """
-from core.utils.logging import SecurityAuditLogger, get_security_logger
-from core.utils.exceptions import AutomationError
-from core.utils.config import ConfigManager, get_security_config
-from core.security import SecurityValidator
 import os
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+from core.security import SecurityValidator
+from core.utils.config import ConfigManager, get_security_config
+from core.utils.exceptions import AutomationError
+from core.utils.logging import SecurityAuditLogger, get_security_logger
 
 # Add the src directory to Python path to import modules
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -33,10 +34,8 @@ class TestSecurityIntegration(unittest.TestCase):
     def test_security_validator_with_config(self):
         """Test security validator respecting configuration"""
         # Test command validation
-        self.assertTrue(
-            SecurityValidator.validate_command_input("safe command"))
-        self.assertFalse(
-            SecurityValidator.validate_command_input("dangerous; command"))
+        self.assertTrue(SecurityValidator.validate_command_input("safe command"))
+        self.assertFalse(SecurityValidator.validate_command_input("dangerous; command"))
 
     def test_security_audit_logging(self):
         """Test security audit logging functionality"""
@@ -59,8 +58,7 @@ class TestModuleIntegration(unittest.TestCase):
         """Test that security module works with exception handling"""
         # Test that security validation properly raises AutomationError
         with self.assertRaises(AutomationError):
-            SecurityValidator.sanitize_command_input(
-                "dangerous command; rm -rf /")
+            SecurityValidator.sanitize_command_input("dangerous command; rm -rf /")
 
     def test_config_with_security(self):
         """Test configuration integration with security"""
@@ -71,15 +69,13 @@ class TestModuleIntegration(unittest.TestCase):
         self.assertIsInstance(max_cmd_len, int)
 
         # Test setting security settings
-        original_value = config_manager.get_security_setting(
-            "max_command_length")
+        original_value = config_manager.get_security_setting("max_command_length")
         config_manager.set_security_setting("max_command_length", 1000)
         new_value = config_manager.get_security_setting("max_command_length")
         self.assertEqual(new_value, 1000)
 
         # Restore original value
-        config_manager.set_security_setting(
-            "max_command_length", original_value)
+        config_manager.set_security_setting("max_command_length", original_value)
 
 
 class TestRealWorldScenarios(unittest.TestCase):
@@ -88,15 +84,12 @@ class TestRealWorldScenarios(unittest.TestCase):
     def test_safe_git_command_construction(self):
         """Test constructing safe Git commands"""
         # Test safe branch name validation
-        self.assertTrue(
-            SecurityValidator.validate_branch_name("feature/new-feature"))
-        self.assertTrue(
-            SecurityValidator.validate_branch_name("bugfix/issue-123"))
+        self.assertTrue(SecurityValidator.validate_branch_name("feature/new-feature"))
+        self.assertTrue(SecurityValidator.validate_branch_name("bugfix/issue-123"))
         self.assertTrue(SecurityValidator.validate_branch_name("main"))
 
         # Test unsafe branch name
-        self.assertFalse(
-            SecurityValidator.validate_branch_name("test;rm -rf /"))
+        self.assertFalse(SecurityValidator.validate_branch_name("test;rm -rf /"))
 
     def test_safe_file_path_operations(self):
         """Test safe file path operations"""
@@ -123,9 +116,7 @@ class TestRealWorldScenarios(unittest.TestCase):
 
         # Validate each element
         for element in safe_command:
-            self.assertTrue(
-                SecurityValidator.validate_command_input(
-                    str(element)))
+            self.assertTrue(SecurityValidator.validate_command_input(str(element)))
 
         # Validate the entire command would be safe to run
         try:
