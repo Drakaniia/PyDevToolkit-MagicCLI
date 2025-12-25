@@ -344,10 +344,7 @@ class PortKiller:
                 lines = result.stdout.split('\n')
                 for line in lines[1:]:  # Skip header
                     if line.strip():
-                        # Extract PID from ss output (
-    format: users: (("process",
-    pid=1234,
-    fd=5)))
+                        # Extract PID from ss output (format: users: (("process", pid=1234, fd=5)))
                         pid_match = re.search(r'pid=(\d+)', line)
                         name_match = re.search(r'users:\(\("([^"]+)"', line)
 
