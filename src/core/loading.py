@@ -52,7 +52,8 @@ class LoadingSpinner:
         self.message = message
         self.style = style
         self.speed = speed
-        self.frames = self.SPINNER_STYLES.get(style, self.SPINNER_STYLES["dots"])
+        self.frames = self.SPINNER_STYLES.get(
+            style, self.SPINNER_STYLES["dots"])
         self.index = 0
         self.active = False
         self.thread = None
@@ -217,7 +218,11 @@ class LoadingManager:
             self.active_spinners[name].stop()
             del self.active_spinners[name]
 
-    def create_progress_bar(self, name: str, total: int, message: str = "Progress"):
+    def create_progress_bar(
+            self,
+            name: str,
+            total: int,
+            message: str = "Progress"):
         """Create a named progress bar"""
         progress_bar = ProgressBar(total, message=message)
         self.progress_bars[name] = progress_bar

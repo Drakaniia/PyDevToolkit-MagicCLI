@@ -16,6 +16,8 @@ try:
     import psutil
 except ImportError:
     psutil = None
+
+
 class MonitoringTools:
     """Handles monitoring and performance analysis tasks"""
 
@@ -24,9 +26,9 @@ class MonitoringTools:
 
     def show_system_resources(self) -> None:
         """Show current system resource usage"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("SYSTEM RESOURCE USAGE")
-        print("="*70)
+        print("=" * 70)
 
         if psutil is None:
             print("\n⚠ psutil is not installed. Install with: pip install psutil")
@@ -56,9 +58,12 @@ class MonitoringTools:
             bytes_recv = net_io.bytes_recv / (1024**2)  # Convert to MB
 
             print(f"\nCPU Usage: {cpu_percent}% (Physical cores: {cpu_count})")
-            print(f"Memory: {memory_percent}% used ({memory_available:.2f}GB free of {memory_total:.2f}GB)")
-            print(f"Disk: {disk_percent:.1f}% used ({disk_free:.2f}GB free of {disk_total:.2f}GB)")
-            print(f"Network: Sent {bytes_sent:.2f}MB, Received {bytes_recv:.2f}MB")
+            print(
+                f"Memory: {memory_percent}% used ({memory_available:.2f}GB free of {memory_total:.2f}GB)")
+            print(
+                f"Disk: {disk_percent:.1f}% used ({disk_free:.2f}GB free of {disk_total:.2f}GB)")
+            print(
+                f"Network: Sent {bytes_sent:.2f}MB, Received {bytes_recv:.2f}MB")
 
         except Exception as e:
             print(f"\n⚠ Error getting system resources: {e}")
@@ -67,9 +72,9 @@ class MonitoringTools:
 
     def monitor_process(self) -> None:
         """Monitor a specific process"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("PROCESS MONITOR")
-        print("="*70)
+        print("=" * 70)
 
         if psutil is None:
             print("\n⚠ psutil is not installed. Install with: pip install psutil")
@@ -86,7 +91,8 @@ class MonitoringTools:
             print(f"  Status: {current_process.status()}")
             print(f"  CPU %: {current_process.cpu_percent()}")
             print(f"  Memory %: {current_process.memory_percent():.2f}")
-            print(f"  Memory RSS: {current_process.memory_info().rss / (1024**2):.2f} MB")
+            print(
+                f"  Memory RSS: {current_process.memory_info().rss / (1024**2):.2f} MB")
             print(f"  Started: {time.ctime(current_process.create_time())}")
 
             # List child processes
@@ -108,9 +114,9 @@ class MonitoringTools:
 
     def profile_performance(self) -> None:
         """Run performance profiling on the application"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("PERFORMANCE PROFILING")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis feature will profile your application's performance.")
         print("It measures execution time and resource usage of code.")
@@ -140,7 +146,8 @@ class MonitoringTools:
             profile_file = "profile_output.prof"
             profiler.dump_stats(profile_file)
             print(f"Profile data saved to: {profile_file}")
-            print(f"Use 'python -m pstats {profile_file}' to analyze the results")
+            print(
+                f"Use 'python -m pstats {profile_file}' to analyze the results")
 
         except ImportError:
             print("\n⚠ cProfile module not available")
@@ -151,9 +158,9 @@ class MonitoringTools:
 
     def analyze_memory_usage(self) -> None:
         """Analyze memory usage - requires memory-profiler package"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("MEMORY USAGE ANALYSIS")
-        print("="*70)
+        print("=" * 70)
 
         print("This feature analyzes memory usage line by line.")
         print("It requires the memory-profiler package.")
@@ -176,21 +183,25 @@ class MonitoringTools:
                 current_process = psutil.Process(current_pid)
 
                 print(f"\nCurrent Magic CLI memory usage:")
-                print(f"  RSS (Resident Set Size): {current_process.memory_info().rss / (1024**2):.2f} MB")
-                print(f"  VMS (Virtual Memory Size): {current_process.memory_info().vms / (1024**2):.2f} MB")
-                print(f"  Percentage of total system memory: {current_process.memory_percent():.2f}%")
+                print(
+                    f"  RSS (Resident Set Size): {current_process.memory_info().rss / (1024**2):.2f} MB")
+                print(
+                    f"  VMS (Virtual Memory Size): {current_process.memory_info().vms / (1024**2):.2f} MB")
+                print(
+                    f"  Percentage of total system memory: {current_process.memory_percent():.2f}%")
             except Exception as e:
                 print(f"\n⚠ Error getting memory info: {e}")
         else:
-            print("\n⚠ psutil not available for memory monitoring. Install with: pip install psutil")
+            print(
+                "\n⚠ psutil not available for memory monitoring. Install with: pip install psutil")
 
         input("\nPress Enter to continue...")
 
     def run_performance_benchmark(self) -> None:
         """Run a simple performance benchmark"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("PERFORMANCE BENCHMARK")
-        print("="*70)
+        print("=" * 70)
 
         try:
             import time
@@ -200,7 +211,7 @@ class MonitoringTools:
 
             # CPU benchmark: Calculate sum of squares
             start_time = time.time()
-            sum_of_squares = sum(i*i for i in range(1000000))
+            sum_of_squares = sum(i * i for i in range(1000000))
             cpu_time = time.time() - start_time
 
             # Memory benchmark: Create and delete large list
@@ -213,10 +224,13 @@ class MonitoringTools:
             memory_cleanup_time = time.time() - start_time
 
             print(f"\nBenchmark Results:")
-            print(f"  CPU: Calculated sum of squares for 1,000,000 numbers in {cpu_time:.4f}s")
-            print(f"  Memory: Created 1M element list in {memory_creation_time:.4f}s")
+            print(
+                f"  CPU: Calculated sum of squares for 1,000,000 numbers in {cpu_time:.4f}s")
+            print(
+                f"  Memory: Created 1M element list in {memory_creation_time:.4f}s")
             print(f"  Memory: Cleaned up in {memory_cleanup_time:.4f}s")
-            print(f"  Total benchmark time: {cpu_time + memory_creation_time + memory_cleanup_time:.4f}s")
+            print(
+                f"  Total benchmark time: {cpu_time + memory_creation_time + memory_cleanup_time:.4f}s")
 
         except KeyboardInterrupt:
             print("\n\nBenchmark cancelled by user.")
@@ -227,9 +241,9 @@ class MonitoringTools:
 
     def monitor_application_logs(self) -> None:
         """Monitor application logs"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("APPLICATION LOG MONITOR")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis feature would monitor application logs in real-time.")
         print("Currently, Magic CLI uses basic print statements for output.")
@@ -238,7 +252,8 @@ class MonitoringTools:
         # Look for common log files in the project
         log_extensions = ['.log', '.txt', '.out']
         project_files = Path('.').glob('**/*')
-        log_files = [f for f in project_files if f.suffix.lower() in log_extensions]
+        log_files = [f for f in project_files if f.suffix.lower()
+                     in log_extensions]
 
         if log_files:
             print("\nFound potential log files:")
@@ -255,6 +270,8 @@ class MonitoringTools:
         print("  3. Monitor those files in real-time")
 
         input("\nPress Enter to continue...")
+
+
 class MonitoringMenu(Menu):
     """Menu for monitoring tools"""
 

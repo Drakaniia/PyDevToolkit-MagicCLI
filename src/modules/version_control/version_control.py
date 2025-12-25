@@ -1,7 +1,3 @@
-"""
-Version Control Module
-Handles advanced Git workflows, merge conflict resolution, code review integration, and release management
-"""
 import sys
 import subprocess
 import os
@@ -10,6 +6,13 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+"""
+Version Control Module
+Handles advanced Git workflows, merge conflict resolution, code review integration, and release management
+"""
+
+
 class VersionControlTools:
     """Handles advanced version control tasks"""
 
@@ -18,9 +21,9 @@ class VersionControlTools:
 
     def setup_gitflow(self) -> None:
         """Help set up GitFlow workflow"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("GITFLOW WORKFLOW SETUP")
-        print("="*70)
+        print("=" * 70)
 
         print("\nGitFlow is a branching model for Git that provides a structured workflow.")
         print("It uses two main branches: main (production) and develop (integration).")
@@ -28,7 +31,7 @@ class VersionControlTools:
         # Check if Git is available
         try:
             result = subprocess.run(['git', '--version'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode != 0:
                 print("⚠ Git is not installed or not in PATH")
                 input("\nPress Enter to continue...")
@@ -40,7 +43,7 @@ class VersionControlTools:
 
         # Check if GitFlow is available
         result = subprocess.run(['git', 'flow', 'version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("\nGitFlow is not installed.")
@@ -48,9 +51,11 @@ class VersionControlTools:
             print("  - Linux: sudo apt-get install git-flow")
             print("  - macOS: brew install git-flow")
             print("  - Windows: Download from GitHub or use Git Bash")
-            print("\nAlternatively, you can use a GitFlow-like workflow manually.")
+            print("\nAlternatively,
+                  you can use a GitFlow - like workflow manually.")
 
-            setup_manual = input("\nSet up GitFlow-like branches manually? (y/n): ").lower()
+            setup_manual = input(
+                "\nSet up GitFlow-like branches manually? (y/n): ").lower()
             if setup_manual != 'y':
                 input("\nPress Enter to continue...")
                 return
@@ -76,12 +81,18 @@ class VersionControlTools:
         print("\nSetting up GitFlow-like branches manually...")
         try:
             # Create develop branch if it doesn't exist
-            result = subprocess.run(['git', 'rev-parse', '--verify', 'develop'],
-                                  capture_output=True, text=True)
+            result = subprocess.run(
+                ['git', 'rev-parse', '--verify', 'develop'],
+                capture_output=True, text=True)
 
             if result.returncode != 0:
                 print("Creating develop branch...")
-                subprocess.run(['git', 'checkout', '-b', 'develop'], check=True)
+                subprocess.run(
+                    ['git',
+                     'checkout',
+                     '-b',
+                     'develop'],
+                    check=True)
                 print("✓ Created develop branch")
             else:
                 print("✓ Develop branch already exists")
@@ -96,7 +107,8 @@ class VersionControlTools:
 
             print("\nExample commands:")
             print("  - Start feature: git checkout -b feature/new-feature develop")
-            print("  - Finish feature: git checkout develop && git merge feature/new-feature")
+            print(
+                "  - Finish feature: git checkout develop && git merge feature/new-feature")
             print("  - Start release: git checkout -b release/1.2.0 develop")
             print("  - Finish release: git checkout main && git merge release/1.2.0")
 
@@ -109,28 +121,34 @@ class VersionControlTools:
 
     def resolve_merge_conflicts(self) -> None:
         """Help resolve merge conflicts"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("MERGE CONFLICT RESOLUTION")
-        print("="*70)
+        print("=" * 70)
 
-        print("\nThis tool helps identify and resolve merge conflicts in your Git repository.")
+        print(
+            "\nThis tool helps identify and resolve merge conflicts in your Git repository.")
 
         try:
             # Check if we're in a Git repository
             result = subprocess.run(['git', 'rev-parse', '--git-dir'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode != 0:
                 print("⚠ Not in a Git repository!")
                 input("\nPress Enter to continue...")
                 return
 
             # Check for merge conflicts
-            result = subprocess.run(['git', 'diff', '--name-only', '--diff-filter=U'],
-                                  capture_output=True, text=True)
+            result = subprocess.run(['git',
+                                     'diff',
+                                     '--name-only',
+                                     '--diff-filter=U'],
+                                    capture_output=True,
+                                    text=True)
 
             if result.returncode == 0 and result.stdout.strip():
                 conflict_files = result.stdout.strip().split('\n')
-                print(f"\nFound {len(conflict_files)} file(s) with merge conflicts:")
+                print(
+                    f"\nFound {len(conflict_files)} file(s) with merge conflicts:")
 
                 for file_path in conflict_files:
                     print(f"  - {file_path}")
@@ -145,19 +163,21 @@ class VersionControlTools:
                 print("\nResolution options:")
                 print("  1. Open conflicted files in your editor")
                 print("  2. Use 'git checkout --ours <file>' to keep your changes")
-                print("  3. Use 'git checkout --theirs <file>' to accept incoming changes")
+                print(
+                    "  3. Use 'git checkout --theirs <file>' to accept incoming changes")
                 print("  4. Manually edit files to merge changes as needed")
 
                 # Suggest using VS Code, if available
                 try:
                     result = subprocess.run(['code', '--version'],
-                                          capture_output=True, text=True)
+                                            capture_output=True, text=True)
                     if result.returncode == 0:
-                        open_in_editor = input("\nOpen conflicted files in VS Code? (y/n): ").lower()
+                        open_in_editor = input(
+                            "\nOpen conflicted files in VS Code? (y/n): ").lower()
                         if open_in_editor == 'y':
                             files_str = ' '.join(conflict_files)
                             subprocess.run(['code', files_str])
-                except:
+                except BaseException:
                     pass  # VS Code not available
 
             else:
@@ -172,12 +192,14 @@ class VersionControlTools:
 
     def integrate_code_reviews(self) -> None:
         """Help integrate with code review systems"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("CODE REVIEW INTEGRATION")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool provides guidance for integrating with code review systems")
-        print("like GitHub Pull Requests, GitLab Merge Requests, or similar platforms.")
+        print("like GitHub Pull Requests,
+              GitLab Merge Requests,
+              or similar platforms.")
 
         print("\nSupported platforms:")
         print("  1. GitHub (via GitHub CLI)")
@@ -185,7 +207,8 @@ class VersionControlTools:
         print("  3. Bitbucket (via Bitbucket CLI)")
 
         try:
-            choice = input("\nEnter choice (1-3) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-3) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._setup_github_reviews()
@@ -209,7 +232,7 @@ class VersionControlTools:
 
         # Check if GitHub CLI is available
         result = subprocess.run(['gh', '--version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ GitHub CLI (gh) is not installed")
@@ -222,14 +245,14 @@ class VersionControlTools:
 
         # Get current branch
         result = subprocess.run(['git', 'branch', '--show-current'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
         current_branch = result.stdout.strip() if result.returncode == 0 else "unknown"
 
         print(f"\nCurrent branch: {current_branch}")
 
         # Check if we're in a GitHub repository
         result = subprocess.run(['git', 'remote', '-v'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode == 0:
             remotes = result.stdout
@@ -237,26 +260,33 @@ class VersionControlTools:
                 print("✓ Repository is connected to GitHub")
 
                 print("\nCommon GitHub CLI commands for code review:")
-                print(f"  - Create PR: gh pr create --title \"Your Title\" --body \"Description\"")
-                print(f"  - List PRs: gh pr list")
-                print(f"  - View PR: gh pr view")
-                print(f"  - Check out PR: gh pr checkout <number>")
-                print(f"  - Review PR: gh pr review <number> --comment --body \"Your review\"")
+                print(
+                    "  - Create PR: gh pr create --title \"Your Title\" --body \"Description\"")
+                print("  - List PRs: gh pr list")
+                print("  - View PR: gh pr view")
+                print("  - Check out PR: gh pr checkout <number>")
+                print(
+                    "  - Review PR: gh pr review <number> --comment --body \"Your review\"")
 
-                create_pr = input(f"\nCreate a pull request for '{current_branch}'? (y/n): ").lower()
+                create_pr = input(
+                    f"\nCreate a pull request for '{current_branch}'? (y/n): ").lower()
                 if create_pr == 'y':
                     title = input("Enter PR title: ").strip()
                     if title:
-                        body = input("Enter PR description (optional): ").strip()
+                        body = input(
+                            "Enter PR description (optional): ").strip()
 
                         cmd = ['gh', 'pr', 'create', '--title', title]
                         if body:
                             cmd.extend(['--body', body])
 
                         try:
-                            result = subprocess.run(cmd, capture_output=True, text=True)
+                            result = subprocess.run(
+                                cmd,
+                                capture_output=True,
+                                text=True)
                             if result.returncode == 0:
-                                print(f"✓ Pull request created successfully!")
+                                print("✓ Pull request created successfully!")
                                 print(result.stdout)
                             else:
                                 print(f"Error creating PR: {result.stderr}")
@@ -273,7 +303,7 @@ class VersionControlTools:
 
         # Check if GitLab CLI is available
         result = subprocess.run(['glab', '--version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ GitLab CLI (glab) is not installed")
@@ -307,16 +337,16 @@ class VersionControlTools:
 
     def manage_releases(self) -> None:
         """Help with release management"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RELEASE MANAGEMENT")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool helps with creating and managing releases.")
 
         try:
             # Check if we're in a Git repository
             result = subprocess.run(['git', 'rev-parse', '--git-dir'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode != 0:
                 print("⚠ Not in a Git repository!")
                 input("\nPress Enter to continue...")
@@ -324,17 +354,20 @@ class VersionControlTools:
 
             # Get current branch
             result = subprocess.run(['git', 'branch', '--show-current'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             current_branch = result.stdout.strip() if result.returncode == 0 else "unknown"
 
             print(f"\nCurrent branch: {current_branch}")
 
             # Get last few tags
             result = subprocess.run(['git', 'tag', '--sort=-v:refname'],
-                                  capture_output=True, text=True)
-            tags = result.stdout.strip().split('\n') if result.returncode == 0 and result.stdout.strip() else []
+                                    capture_output=True, text=True)
+            tags = result.stdout.strip().split(
+                '\n') if result.returncode == 0 and result.stdout.strip() else []
 
-            print(f"\nRecent tags: {', '.join(tags[:5])}" if tags else "\nNo tags found")
+            print(
+                f"\nRecent tags: {',                                   '.join(tags[:5])}"
+                if tags else "\nNo tags found")
 
             # Suggest next version number
             if tags:
@@ -349,7 +382,7 @@ class VersionControlTools:
                     next_minor = f"v{major}.{int(minor) + 1}.0"
                     next_major = f"v{int(major) + 1}.0.0"
 
-                    print(f"\nSuggested next versions:")
+                    print("\nSuggested next versions:")
                     print(f"  - Patch: {next_patch}")
                     print(f"  - Minor: {next_minor}")
                     print(f"  - Major: {next_major}")
@@ -366,18 +399,24 @@ class VersionControlTools:
                         cmd.extend(['-a', '-m', message])
                     cmd.append(tag_name)
 
-                    result = subprocess.run(cmd, capture_output=True, text=True)
+                    result = subprocess.run(
+                        cmd,
+                        capture_output=True,
+                        text=True)
                     if result.returncode == 0:
                         print(f"✓ Tag '{tag_name}' created successfully!")
 
                         # Ask if they want to push the tag
-                        push_tag = input("Push tag to remote repository? (y/n): ").lower()
+                        push_tag = input(
+                            "Push tag to remote repository? (y/n): ").lower()
                         if push_tag == 'y':
-                            result = subprocess.run(['git', 'push', 'origin', tag_name],
-                                                  capture_output=True, text=True)
+                            result = subprocess.run(
+                                ['git', 'push', 'origin', tag_name],
+                                capture_output=True, text=True)
 
                             if result.returncode == 0:
-                                print(f"✓ Tag '{tag_name}' pushed successfully!")
+                                print(
+                                    f"✓ Tag '{tag_name}' pushed successfully!")
                             else:
                                 print(f"Error pushing tag: {result.stderr}")
                     else:
@@ -392,16 +431,16 @@ class VersionControlTools:
 
     def compare_branches(self) -> None:
         """Compare differences between branches"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("BRANCH COMPARISON")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool compares differences between two branches.")
 
         try:
             # Check if we're in a Git repository
             result = subprocess.run(['git', 'rev-parse', '--git-dir'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode != 0:
                 print("⚠ Not in a Git repository!")
                 input("\nPress Enter to continue...")
@@ -409,12 +448,16 @@ class VersionControlTools:
 
             # Get all branches
             result = subprocess.run(['git', 'branch', '--all'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode == 0:
-                branches = [b.strip().replace('remotes/origin/', '').replace('*', '').strip()
-                           for b in result.stdout.split('\n') if b.strip() and not b.startswith('(HEAD detached')]
+                branches = [b.strip(
+                ).replace('remotes/origin/',
+                          '').replace('*',
+                                      '').strip()
+                    for b in result.stdout.split('\n') if b.strip() and not b.startswith('(HEAD detached')]
 
-                local_branches = [b for b in branches if not b.startswith('remotes/')]
+                local_branches = [
+                    b for b in branches if not b.startswith('remotes/')]
 
                 print(f"\nAvailable branches: {', '.join(local_branches)}")
 
@@ -426,24 +469,29 @@ class VersionControlTools:
                     print(f"\nComparing {source_branch} → {target_branch}:")
 
                     # Get commits unique to source branch
-                    result = subprocess.run([
-                        'git', 'log', '--oneline', f'{target_branch}..{source_branch}'
-                    ], capture_output=True, text=True)
+                    result = subprocess.run(
+                        ['git', 'log', '--oneline',
+                         f'{target_branch}..{source_branch}'],
+                        capture_output=True, text=True)
 
                     if result.returncode == 0 and result.stdout:
                         commits = result.stdout.strip().split('\n')
-                        print(f"\nCommits in '{source_branch}' but not in '{target_branch}' ({len(commits)}):")
+                        print(
+                            f"\nCommits in '{source_branch}' but not in '{target_branch}' ({len(commits)}):")
                         for commit in commits[:20]:  # Show first 20
                             print(f"  {commit}")
                         if len(commits) > 20:
-                            print(f"  ... and {len(commits) - 20} more commits")
+                            print(
+                                f"  ... and {len(commits) - 20} more commits")
                     else:
-                        print(f"No commits in '{source_branch}' that are not in '{target_branch}'")
+                        print(
+                            f"No commits in '{source_branch}' that are not in '{target_branch}'")
 
                     # Show file changes
-                    result = subprocess.run([
-                        'git', 'diff', '--name-only', target_branch, source_branch
-                    ], capture_output=True, text=True)
+                    result = subprocess.run(
+                        ['git', 'diff', '--name-only', target_branch,
+                         source_branch],
+                        capture_output=True, text=True)
 
                     if result.returncode == 0 and result.stdout:
                         files = result.stdout.strip().split('\n')
@@ -464,6 +512,8 @@ class VersionControlTools:
             print(f"Unexpected error: {e}")
 
         input("\nPress Enter to continue...")
+
+
 class VersionControlMenu(Menu):
     """Menu for version control tools"""
 

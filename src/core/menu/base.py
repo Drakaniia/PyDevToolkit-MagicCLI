@@ -63,7 +63,11 @@ class Menu(ABC):
             initial: Whether this is the initial display
             force_full_redraw: Whether to force a full screen redraw
         """
-        self._renderer.display(self.items, selected_idx, initial, force_full_redraw)
+        self._renderer.display(
+            self.items,
+            selected_idx,
+            initial,
+            force_full_redraw)
 
     def get_choice_with_arrows(self) -> int:
         """
@@ -72,7 +76,8 @@ class Menu(ABC):
         Returns:
             int: Index of the selected menu item (1-based)
         """
-        return self._navigation.get_choice_with_arrows(self.items, self._renderer)
+        return self._navigation.get_choice_with_arrows(
+            self.items, self._renderer)
 
     def run(self) -> None:
         """

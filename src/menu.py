@@ -3,6 +3,9 @@ automation/menu.py
 Responsive Menu System with Adaptive Viewport Handling
 Refactored: Split into modular components for better maintainability
 """
+from modules.others_menu import OthersMenu
+from typing import Any, Optional
+from core.menu import Menu, MenuItem
 import sys
 from pathlib import Path
 
@@ -11,9 +14,7 @@ src_path = Path(__file__).parent
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from core.menu import Menu, MenuItem
-from typing import Any, Optional
-from modules.others_menu import OthersMenu
+
 class MainMenu(Menu):
     """Main menu for the automation system - Updated with Dev Mode"""
 
@@ -94,8 +95,8 @@ class MainMenu(Menu):
     def _exit_program(self) -> str:
         """Exit the program"""
         self.clear_screen()
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("  Thanks for using Python Automation System!")
         print("  Made for developers")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
         return "exit"

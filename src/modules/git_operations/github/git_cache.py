@@ -5,14 +5,16 @@ The folder will be removed from git tracking but kept in your local directory.
 """
 import subprocess
 import os
+
+
 class GitCache:
     """Simple git cache operations to unstage files"""
 
     def unstage_directory(self):
         """Run git rm --cached -r on working directory to unstage all files"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("  UNSTAGE WORKING DIRECTORY")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         if not self._is_git_repo():
             print(" Not a git repository. Please initialize git first.")

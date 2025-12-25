@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+
 class AIMLTools:
     """Handles AI and Machine Learning tasks"""
 
@@ -17,9 +19,9 @@ class AIMLTools:
 
     def setup_ml_project(self) -> None:
         """Help set up a machine learning project structure"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("MACHINE LEARNING PROJECT SETUP")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool helps create a standard ML project structure.")
 
@@ -241,30 +243,30 @@ if __name__ == "__main__":
 
         print(f"\n✓ ML project '{project_name}' created successfully!")
         print(f"Directory structure:")
-        print(f"├── data/")
-        print(f"│   ├── raw/")
-        print(f"│   ├── processed/")
-        print(f"│   └── external/")
-        print(f"├── notebooks/")
-        print(f"├── src/")
-        print(f"│   ├── data/")
-        print(f"│   ├── features/")
-        print(f"│   ├── models/")
-        print(f"│   └── visualization/")
-        print(f"├── models/")
-        print(f"├── reports/")
-        print(f"├── tests/")
-        print(f"├── requirements.txt")
-        print(f"├── setup.py")
-        print(f"└── .gitignore")
+        print("├── data/")
+        print("│   ├── raw/")
+        print("│   ├── processed/")
+        print("│   └── external/")
+        print("├── notebooks/")
+        print("├── src/")
+        print("│   ├── data/")
+        print("│   ├── features/")
+        print("│   ├── models/")
+        print("│   └── visualization/")
+        print("├── models/")
+        print("├── reports/")
+        print("├── tests/")
+        print("├── requirements.txt")
+        print("├── setup.py")
+        print("└── .gitignore")
 
         input("\nPress Enter to continue...")
 
     def manage_ml_experiments(self) -> None:
         """Help manage machine learning experiments"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("ML EXPERIMENT TRACKING & MANAGEMENT")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool helps track ML experiments using tools like MLflow or Weights & Biases.")
 
@@ -275,7 +277,8 @@ if __name__ == "__main__":
         print("  4. Neptune")
 
         try:
-            choice = input("\nEnter choice (1-4) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-4) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._setup_mlflow()
@@ -303,10 +306,12 @@ if __name__ == "__main__":
             import mlflow
             print("✓ MLflow is installed")
         except ImportError:
-            install = input("MLflow is not installed. Install? (y/n): ").lower()
+            install = input(
+                "MLflow is not installed. Install? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "mlflow"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "mlflow"], check=True)
                     print("✓ MLflow installed successfully")
                     import mlflow
                 except subprocess.CalledProcessError:
@@ -347,7 +352,8 @@ if __name__ == "__main__":
             install = input("wandb is not installed. Install? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "wandb"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "wandb"], check=True)
                     print("✓ wandb installed successfully")
                     import wandb
                 except subprocess.CalledProcessError:
@@ -390,10 +396,12 @@ if __name__ == "__main__":
             from torch.utils.tensorboard import SummaryWriter
             print("✓ TensorBoard is available")
         except ImportError:
-            install = input("TensorBoard is not available. Install? (y/n): ").lower()
+            install = input(
+                "TensorBoard is not available. Install? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "tensorboard"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "tensorboard"], check=True)
                     print("✓ TensorBoard installed successfully")
                     from torch.utils.tensorboard import SummaryWriter
                 except subprocess.CalledProcessError:
@@ -423,10 +431,12 @@ if __name__ == "__main__":
             import neptune
             print("✓ Neptune is installed")
         except ImportError:
-            install = input("Neptune is not installed. Install? (y/n): ").lower()
+            install = input(
+                "Neptune is not installed. Install? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "neptune"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "neptune"], check=True)
                     print("✓ Neptune installed successfully")
                     import neptune
                 except subprocess.CalledProcessError:
@@ -453,9 +463,9 @@ if __name__ == "__main__":
 
     def create_data_pipeline(self) -> None:
         """Help create data preprocessing and pipeline tools"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DATA PIPELINE & PREPROCESSING TOOLS")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool helps create data pipelines and preprocessing scripts.")
 
@@ -467,7 +477,8 @@ if __name__ == "__main__":
         print("  5. Prefect (for workflow management)")
 
         try:
-            choice = input("\nEnter choice (1-5) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-5) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._setup_pandas_pipeline()
@@ -602,7 +613,8 @@ if __name__ == "__main__":
             install = input("Dask is not installed. Install? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "dask[dataframe]"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "dask[dataframe]"], check=True)
                     print("✓ Dask installed successfully")
                     import dask
                 except subprocess.CalledProcessError:
@@ -643,7 +655,7 @@ if __name__ == "__main__":
         # Check if Kedro is available
         try:
             result = subprocess.run(['kedro', '--version'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode == 0:
                 print("✓ Kedro is installed")
             else:
@@ -654,7 +666,8 @@ if __name__ == "__main__":
         install = input("Install Kedro? (y/n): ").lower()
         if install == 'y':
             try:
-                subprocess.run([sys.executable, "-m", "pip", "install", "kedro"], check=True)
+                subprocess.run([sys.executable, "-m", "pip",
+                               "install", "kedro"], check=True)
                 print("✓ Kedro installed successfully")
             except subprocess.CalledProcessError:
                 print("⚠ Failed to install Kedro")
@@ -674,7 +687,7 @@ if __name__ == "__main__":
         # Check if Prefect is available
         try:
             result = subprocess.run(['prefect', '--version'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode == 0:
                 print("✓ Prefect is installed")
             else:
@@ -685,7 +698,8 @@ if __name__ == "__main__":
         install = input("Install Prefect? (y/n): ").lower()
         if install == 'y':
             try:
-                subprocess.run([sys.executable, "-m", "pip", "install", "prefect"], check=True)
+                subprocess.run([sys.executable, "-m", "pip",
+                               "install", "prefect"], check=True)
                 print("✓ Prefect installed successfully")
             except subprocess.CalledProcessError:
                 print("⚠ Failed to install Prefect")
@@ -703,9 +717,9 @@ if __name__ == "__main__":
 
     def deploy_ml_model(self) -> None:
         """Help deploy machine learning models"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("ML MODEL DEPLOYMENT TOOLS")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool helps deploy ML models to various platforms.")
 
@@ -718,7 +732,8 @@ if __name__ == "__main__":
         print("  6. Hugging Face Spaces")
 
         try:
-            choice = input("\nEnter choice (1-6) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-6) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._deploy_simple_api()
@@ -857,8 +872,10 @@ joblib==1.2.0
         print("\nExample deployment code:")
         print("  import sagemaker")
         print("  from sagemaker.sklearn.model import SKLearnModel")
-        print("  sklearn_model = SKLearnModel(model_data='s3://bucket/model.tar.gz',")
-        print("                            role='arn:aws:iam::account:role/MySageMakerRole',")
+        print(
+            "  sklearn_model = SKLearnModel(model_data='s3://bucket/model.tar.gz',")
+        print(
+            "                            role='arn:aws:iam::account:role/MySageMakerRole',")
         print("                            entry_point='inference.py')")
         print("  predictor = sklearn_model.deploy(initial_instance_count=1, instance_type='ml.m5.large')")
 
@@ -892,7 +909,8 @@ joblib==1.2.0
         print("  from azureml.core.model import InferenceConfig")
         print("  # Deploy model to ACI")
         print("  deployment_config = AciWebservice.deploy_configuration(cpu_cores=1, memory_gb=1)")
-        print("  service = Model.deploy(ws, 'my-service', [model], inference_config, deployment_config)")
+        print(
+            "  service = Model.deploy(ws, 'my-service', [model], inference_config, deployment_config)")
 
     def _deploy_huggingface_spaces(self) -> None:
         """Deploy model to Hugging Face Spaces"""
@@ -912,6 +930,8 @@ joblib==1.2.0
         print("      # Process input and return prediction")
         print("      return model.predict([input])[0]")
         print("  gr.Interface(predict, inputs='text', outputs='label').launch()")
+
+
 class AIMLMenu(Menu):
     """Menu for AI/ML tools"""
 

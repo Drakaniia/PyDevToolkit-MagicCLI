@@ -2,6 +2,7 @@
 Backend Framework Integration Tools
 Comprehensive framework-specific automation and helpers
 """
+from core.menu import Menu, MenuItem
 import os
 import sys
 import json
@@ -10,7 +11,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from core.menu import Menu, MenuItem
+
 class FrameworkTools(Menu):
     """Backend Framework Integration Tools Menu"""
 
@@ -821,10 +822,7 @@ CORS_ALLOWED_ORIGINS = [
                 "urls.py": self._get_django_urls_content(app_name),
                 "serializers.py": self._get_django_serializers_content(app_name),
                 "migrations": {
-                    "__init__.py": ""
-                }
-            }
-        }
+                    "__init__.py": ""}}}
 
         self._create_project_structure(app_structure)
         print(f"Django app '{app_name}' created!")

@@ -10,14 +10,21 @@ from pathlib import Path
 from core.menu import Menu, MenuItem
 from core.utils.git_client import get_git_client
 from core.loading import LoadingSpinner
-# Import security and logging modules inside functions to avoid circular imports
+# Import security and logging modules inside functions to avoid circular
+# imports
+
+
 class GitRecover:
     """Handles git commit recovery and rollback operations"""
 
     def __init__(self):
         pass
 
-    def show_recovery_menu(self, commit_history_func, commit_details_func, verify_commit_func):
+    def show_recovery_menu(
+            self,
+            commit_history_func,
+            commit_details_func,
+            verify_commit_func):
         """
         Show the commit recovery interface using the menu system
 
@@ -49,15 +56,16 @@ class GitRecover:
 
             def setup_items(self):
                 self.items = [
-                    MenuItem("Select commit from list", self._select_from_list),
-                    MenuItem("Enter commit ID directly", self._select_by_id),
-                    MenuItem("Reset & Revert Operations", self._show_reset_revert_menu),
-                    MenuItem("Cancel and return to menu", self._exit_menu)
-                ]
+                    MenuItem(
+                        "Select commit from list", self._select_from_list), MenuItem(
+                        "Enter commit ID directly", self._select_by_id), MenuItem(
+                        "Reset & Revert Operations", self._show_reset_revert_menu), MenuItem(
+                        "Cancel and return to menu", self._exit_menu)]
 
             def _select_from_list(self):
                 self.clear_screen()
-                return self.git_recover._select_by_number_with_menu(self.commits)
+                return self.git_recover._select_by_number_with_menu(
+                    self.commits)
 
             def _select_by_id(self):
                 return self.git_recover._select_by_id(
@@ -87,9 +95,13 @@ class GitRecover:
                 for idx, commit in enumerate(self.commits):
                     commit_id = commit['hash'][:10]
                     timestamp = commit['date']
-                    message = commit['message'][:40] + "..." if len(commit['message']) > 40 else commit['message']
+                    message = commit['message'][: 40] + "..." if len(
+                        commit['message']) > 40 else commit['message']
                     display_text = f"{commit_id} - {message} ({timestamp})"
-                    self.items.append(MenuItem(display_text, lambda commit=commit: commit))
+                    self.items.append(
+                        MenuItem(
+                            display_text,
+                            lambda commit=commit: commit))
 
                 # Add a cancel option
                 self.items.append(MenuItem("Cancel", lambda: None))
@@ -119,7 +131,8 @@ class GitRecover:
                 commit = commits[num - 1]
                 self._confirm_and_revert(commit)
             else:
-                print(f"\nInvalid number. Please enter between 1 and {len(commits)}")
+                print(
+                    f"\nInvalid number. Please enter between 1 and {len(commits)}")
                 input("\nPress Enter to continue...")
         except ValueError:
             print("\nInvalid input. Please enter a number.")
@@ -150,9 +163,9 @@ class GitRecover:
 
     def _confirm_and_revert(self, commit):
         """Confirm and perform the revert operation"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("COMMIT RECOVERY CONFIRMATION")
-        print("="*70)
+        print("=" * 70)
         print(f"\nCommit ID:  {commit['hash']}")
         print(f"Date:       {commit['date']}")
         print(f"Author:     {commit['author']}")
@@ -198,8 +211,7 @@ class GitRecover:
                 if not SecurityValidator.validate_command_input(str(element)):
                     raise AutomationError(
                         f"Command contains potentially dangerous element: {element}",
-                        suggestion="Use only safe command elements without shell metacharacters"
-                    )
+                        suggestion="Use only safe command elements without shell metacharacters")
 
             result = SecurityValidator.safe_subprocess_run(
                 ["git", "reset", "--hard", commit_hash],
@@ -209,7 +221,10 @@ class GitRecover:
                 errors='replace'
             )
             # Log command execution for audit purposes
-            log_command_execution('git reset --hard', commit_hash, result.returncode == 0)
+            log_command_execution(
+                'git reset --hard',
+                commit_hash,
+                result.returncode == 0)
 
             if result.returncode == 0:
                 print("\nSuccessfully reset to commit!")
@@ -263,7 +278,8 @@ class GitRecover:
         )
 
         if result.returncode == 0:
-            print(f"\nSuccessfully created and switched to branch '{branch_name}'!")
+            print(
+                f"\nSuccessfully created and switched to branch '{branch_name}'!")
             if result.stdout:
                 print(result.stdout)
         else:
@@ -292,11 +308,18 @@ class GitRecover:
 
             def setup_items(self):
                 self.items = [
-                    MenuItem("git revert - Create new commit reverting changes (safer than reset)", self._show_git_revert),
-                    MenuItem("git reset HEAD - Unstage files", self._show_git_reset_head),
-                    MenuItem("git restore <file> - Discard changes in working directory", self._show_git_checkout_file),
-                    MenuItem("Cancel and return to main menu", self._exit_menu)
-                ]
+                    MenuItem(
+                        "git revert - Create new commit reverting changes (safer than reset)",
+                        self._show_git_revert),
+                    MenuItem(
+                        "git reset HEAD - Unstage files",
+                        self._show_git_reset_head),
+                    MenuItem(
+                        "git restore <file> - Discard changes in working directory",
+                        self._show_git_checkout_file),
+                    MenuItem(
+                        "Cancel and return to main menu",
+                        self._exit_menu)]
 
             def _show_git_revert(self):
                 return self.git_recover._show_git_revert()
@@ -316,9 +339,9 @@ class GitRecover:
 
     def _show_git_revert(self):
         """Show git revert operation using menu system"""
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("GIT REVERT - Create new commit reverting changes")
-        print("="*50)
+        print("=" * 50)
         print("\nThis command creates a new commit that undoes the changes from a previous commit.")
         print("This is safer than reset because it doesn't modify history.\n")
 
@@ -340,9 +363,13 @@ class GitRecover:
                 for idx, commit in enumerate(self.commits):
                     commit_id = commit['hash'][:10]
                     timestamp = commit['date']
-                    message = commit['message'][:40] + "..." if len(commit['message']) > 40 else commit['message']
+                    message = commit['message'][: 40] + "..." if len(
+                        commit['message']) > 40 else commit['message']
                     display_text = f"{commit_id} - {message} ({timestamp})"
-                    self.items.append(MenuItem(display_text, lambda commit=commit: commit))
+                    self.items.append(
+                        MenuItem(
+                            display_text,
+                            lambda commit=commit: commit))
 
                 # Add other options
                 self.items.extend([
@@ -359,7 +386,8 @@ class GitRecover:
         revert_menu = GitRevertMenu(self, commits)
         selected_commit = revert_menu.get_choice_with_arrows()
 
-        # Adjust for 0-based indexing, and account for the last two options (direct entry and cancel)
+        # Adjust for 0-based indexing, and account for the last two options
+        # (direct entry and cancel)
         if selected_commit == len(commits) + 1:  # Enter commit ID directly
             self._select_commit_for_revert_by_id()
         elif selected_commit == len(commits) + 2:  # Cancel
@@ -382,7 +410,8 @@ class GitRecover:
                 commit = commits[num - 1]
                 self._confirm_and_perform_revert(commit)
             else:
-                print(f"\nInvalid number. Please enter between 1 and {len(commits)}")
+                print(
+                    f"\nInvalid number. Please enter between 1 and {len(commits)}")
                 input("\nPress Enter to continue...")
         except ValueError:
             print("\nInvalid input. Please enter a number.")
@@ -413,9 +442,9 @@ class GitRecover:
 
     def _confirm_and_perform_revert(self, commit):
         """Confirm and perform git revert operation"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("GIT REVERT CONFIRMATION")
-        print("="*70)
+        print("=" * 70)
         print(f"\nCommit ID:  {commit['hash']}")
         print(f"Date:       {commit['date']}")
         print(f"Author:     {commit['author']}")
@@ -461,9 +490,12 @@ class GitRecover:
             else:
                 # If there are conflicts, try to abort the revert
                 print(f"\nError during revert: {result.stderr}")
-                print("The revert operation may have failed. You might need to resolve conflicts manually.")
+                print(
+                    "The revert operation may have failed. You might need to resolve conflicts manually.")
                 # Try to abort the revert attempt if it's still in progress
-                abort_result = subprocess.run(["git", "revert", "--abort"], capture_output=True, text=True)
+                abort_result = subprocess.run(
+                    ["git", "revert", "--abort"],
+                    capture_output=True, text=True)
                 if abort_result.returncode != 0:
                     print("Could not abort revert. Manual intervention may be needed.")
 
@@ -474,9 +506,9 @@ class GitRecover:
 
     def _show_git_reset_head(self):
         """Show git reset HEAD operation to unstage files"""
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("GIT RESET HEAD - Unstage files")
-        print("="*50)
+        print("=" * 50)
         print("\nThis command unstages files that have been added to the staging area.")
         print("The changes will remain in your working directory.\n")
 
@@ -538,14 +570,14 @@ class GitRecover:
         # Import security modules locally to avoid circular imports
         from core.security.validator import SecurityValidator, safe_input
         from core.utils.exceptions import AutomationError
-        file_path = safe_input("\nEnter file path to unstage (e.g., src/main.py): ").strip()
+        file_path = safe_input(
+            "\nEnter file path to unstage (e.g., src/main.py): ").strip()
         # Validate the file path for security
         if file_path and file_path.lower() != 'all':
             if not SecurityValidator.validate_path(file_path):
                 raise AutomationError(
                     "File path contains potentially dangerous elements",
-                    suggestion="Use only relative paths within the project directory"
-                )
+                    suggestion="Use only relative paths within the project directory")
             if not SecurityValidator.validate_file_name(file_path):
                 raise AutomationError(
                     "File name contains potentially dangerous characters",
@@ -577,10 +609,11 @@ class GitRecover:
 
     def _show_git_checkout_file(self):
         """Show git restore operation to discard changes in working directory"""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("GIT RESTORE <FILE> - Discard changes in working directory")
-        print("="*60)
-        print("\nThis command discards changes in the working directory for specified files.")
+        print("=" * 60)
+        print(
+            "\nThis command discards changes in the working directory for specified files.")
         print("This is a destructive operation - you will lose your uncommitted changes!\n")
 
         # Show current status
@@ -601,14 +634,14 @@ class GitRecover:
         # Import security modules locally to avoid circular imports
         from core.security.validator import SecurityValidator, safe_input
         from core.utils.exceptions import AutomationError
-        file_path = safe_input("\nEnter file path to discard changes (e.g., src/main.py) or 'all' for all files: ").strip()
+        file_path = safe_input(
+            "\nEnter file path to discard changes (e.g., src/main.py) or 'all' for all files: ").strip()
         # Validate the file path for security
         if file_path and file_path.lower() != 'all':
             if not SecurityValidator.validate_path(file_path):
                 raise AutomationError(
                     "File path contains potentially dangerous elements",
-                    suggestion="Use only relative paths within the project directory"
-                )
+                    suggestion="Use only relative paths within the project directory")
             if not SecurityValidator.validate_file_name(file_path):
                 raise AutomationError(
                     "File name contains potentially dangerous characters",
@@ -628,7 +661,8 @@ class GitRecover:
 
     def _restore_specific_file(self, file_path):
         """Restore a specific file to discard changes using git restore <file>"""
-        print(f"\nWARNING: This will permanently discard all changes in '{file_path}'!")
+        print(
+            f"\nWARNING: This will permanently discard all changes in '{file_path}'!")
         print("Are you absolutely sure?")
         confirm = input("Type 'YES' to confirm: ").strip()
 
@@ -643,7 +677,8 @@ class GitRecover:
             )
 
             if result.returncode == 0:
-                print(f"\nSuccessfully discarded changes in file '{file_path}'!")
+                print(
+                    f"\nSuccessfully discarded changes in file '{file_path}'!")
                 if result.stdout:
                     print(result.stdout)
             else:
@@ -703,12 +738,10 @@ class GitRecover:
                             commit_message = parts[1]
                             # Get full commit details
                             full_result = subprocess.run(
-                                ["git", "show", "--format=%H|%ai|%an|%s", "--no-patch", commit_hash],
-                                capture_output=True,
-                                text=True,
-                                encoding='utf-8',
-                                errors='replace'
-                            )
+                                ["git", "show", "--format=%H|%ai|%an|%s",
+                                 "--no-patch", commit_hash],
+                                capture_output=True, text=True,
+                                encoding='utf-8', errors='replace')
                             if full_result.returncode == 0:
                                 details = full_result.stdout.strip().split('|')
                                 if len(details) >= 4:
@@ -756,4 +789,3 @@ class GitRecover:
                 }
 
         return None
-

@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+
 class DatabaseTools:
     """Handles database management tasks"""
 
@@ -16,9 +18,9 @@ class DatabaseTools:
 
     def setup_database_config(self) -> None:
         """Help set up database configuration"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DATABASE CONFIGURATION SETUP")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool helps set up database configuration for your project.")
 
@@ -43,7 +45,8 @@ class DatabaseTools:
         print("  4. MongoDB")
 
         try:
-            choice = input("\nEnter choice (1-4) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-4) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._setup_postgres_config()
@@ -169,9 +172,9 @@ MONGO_DB=your_database_name
 
     def run_database_migrations(self) -> None:
         """Run database migrations using Alembic or similar"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DATABASE MIGRATIONS")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis feature helps manage database schema changes.")
         print("It typically uses Alembic for SQLAlchemy-based projects.")
@@ -183,7 +186,8 @@ MONGO_DB=your_database_name
 
             print("\nCommon Alembic commands:")
             print("  alembic init alembic")  # Initialize
-            print("  alembic revision --autogenerate -m \"message\"")  # Generate migration
+            # Generate migration
+            print("  alembic revision --autogenerate -m \"message\"")
             print("  alembic upgrade head")  # Apply migrations
             print("  alembic downgrade -1")  # Revert migration
         except ImportError:
@@ -191,7 +195,8 @@ MONGO_DB=your_database_name
             install = input("Install Alembic? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "alembic"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "alembic"], check=True)
                     print("✓ Alembic installed successfully")
                     print("\nRun 'alembic init alembic' to initialize in your project")
                 except subprocess.CalledProcessError:
@@ -202,9 +207,9 @@ MONGO_DB=your_database_name
 
     def seed_database(self) -> None:
         """Seed database with test/fake data"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DATABASE SEEDING")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis feature would populate your database with test/fake data.")
         print("Implementation depends on your specific models and requirements.")
@@ -246,12 +251,13 @@ MONGO_DB=your_database_name
 
     def compare_database_schemas(self) -> None:
         """Compare database schemas across environments"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DATABASE SCHEMA COMPARISON")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis feature compares database schemas across different environments.")
-        print("For this to work, you need to specify connection details for both databases.")
+        print(
+            "For this to work, you need to specify connection details for both databases.")
 
         print("\nWithout specific database access details, here's how you would typically approach this:")
         print("  1. Connect to source database")
@@ -278,10 +284,12 @@ MONGO_DB=your_database_name
         print("    try:")
         print("        # Get list of tables in both databases")
         print("        with source_engine.connect() as conn:")
-        print("            source_tables = [row[0] for row in conn.execute(text(\"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'\"))]")
+        print(
+            "            source_tables = [row[0] for row in conn.execute(text(\"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'\"))]")
         print("        ")
         print("        with target_engine.connect() as conn:")
-        print("            target_tables = [row[0] for row in conn.execute(text(\"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'\"))]")
+        print(
+            "            target_tables = [row[0] for row in conn.execute(text(\"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'\"))]")
         print("        ")
         print("        print('Tables only in source:', set(source_tables) - set(target_tables))")
         print("        print('Tables only in target:', set(target_tables) - set(source_tables))")
@@ -293,9 +301,9 @@ MONGO_DB=your_database_name
 
     def run_database_backup(self) -> None:
         """Create database backup"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DATABASE BACKUP")
-        print("="*70)
+        print("=" * 70)
 
         print("\nDatabase backup functionality depends on the specific database system.")
         print("Here are common approaches for different databases:")
@@ -320,9 +328,9 @@ MONGO_DB=your_database_name
 
     def run_database_restore(self) -> None:
         """Restore database from backup"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DATABASE RESTORE")
-        print("="*70)
+        print("=" * 70)
 
         print("\nDatabase restore functionality depends on the specific database system.")
         print("Here are common approaches for different databases:")
@@ -343,6 +351,8 @@ MONGO_DB=your_database_name
         print("Always ensure you have the correct backup file before proceeding.")
 
         input("\nPress Enter to continue...")
+
+
 class DatabaseMenu(Menu):
     """Menu for database tools"""
 

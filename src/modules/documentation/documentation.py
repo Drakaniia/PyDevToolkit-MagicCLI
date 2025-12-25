@@ -11,6 +11,8 @@ import inspect
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+
 class DocumentationTools:
     """Handles documentation generation tasks"""
 
@@ -19,9 +21,9 @@ class DocumentationTools:
 
     def generate_api_docs(self) -> None:
         """Generate API documentation"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("API DOCUMENTATION GENERATOR")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis feature would generate API documentation from your code.")
         print("It typically works with frameworks like FastAPI, Flask, or Django.")
@@ -73,9 +75,9 @@ class DocumentationTools:
 
     def generate_code_docs(self) -> None:
         """Extract and format docstrings from code"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("CODE DOCUMENTATION FROM DOCSTRINGS")
-        print("="*70)
+        print("=" * 70)
 
         print("\nAnalyzing Python files in 'src/' directory for docstrings...")
 
@@ -116,7 +118,8 @@ class DocumentationTools:
                                 # Extract method docstrings
                                 for item in node.body:
                                     if isinstance(item, ast.FunctionDef):
-                                        method_docstring = ast.get_docstring(item)
+                                        method_docstring = ast.get_docstring(
+                                            item)
                                         if method_docstring:
                                             classes[-1]['methods'].append({
                                                 'name': item.name,
@@ -154,7 +157,8 @@ class DocumentationTools:
 
         # Option to export docs
         if docs_summary:
-            response = input("\nWould you like to export the documentation as Markdown? (y/n): ").lower()
+            response = input(
+                "\nWould you like to export the documentation as Markdown? (y/n): ").lower()
             if response == 'y':
                 self._export_docs_as_markdown(docs_summary)
 
@@ -173,7 +177,8 @@ class DocumentationTools:
 
         for file_path, docs in docs_summary.items():
             # Create a relative path for the documentation file
-            doc_file_path = docs_dir / f"{file_path.replace(os.sep, '_').replace('.py', '.md')}"
+            doc_file_path = docs_dir / \
+                f"{file_path.replace(os.sep, '_').replace('.py', '.md')}"
 
             content = f"# Documentation for {file_path}\n\n"
 
@@ -214,9 +219,9 @@ class DocumentationTools:
 
     def generate_readme_docs(self) -> None:
         """Enhance or create a README with more details"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("README DOCUMENTATION ENHANCER")
-        print("="*70)
+        print("=" * 70)
 
         readme_path = Path('README.md')
         pyproject_path = Path('pyproject.toml')
@@ -232,9 +237,15 @@ class DocumentationTools:
 
                 project_info = pyproject_data.get('project', {})
                 name = project_info.get('name', 'Project Name')
-                description = project_info.get('description', 'Project description')
+                description = project_info.get(
+                    'description', 'Project description')
                 version = project_info.get('version', 'Unknown')
-                authors = [author.get('name', 'Unknown') for author in project_info.get('authors', [])]
+                authors = [
+                    author.get(
+                        'name',
+                        'Unknown') for author in project_info.get(
+                        'authors',
+                        [])]
 
                 print(f"  Name: {name}")
                 print(f"  Description: {description}")
@@ -243,11 +254,14 @@ class DocumentationTools:
 
                 # Option to update README
                 if readme_path.exists():
-                    response = input("\nUpdate README with this information? (y/n): ").lower()
+                    response = input(
+                        "\nUpdate README with this information? (y/n): ").lower()
                     if response == 'y':
-                        self._update_readme_with_project_info(readme_path, project_info)
+                        self._update_readme_with_project_info(
+                            readme_path, project_info)
                 else:
-                    response = input("\nCreate new README with this information? (y/n): ").lower()
+                    response = input(
+                        "\nCreate new README with this information? (y/n): ").lower()
                     if response == 'y':
                         self._create_readme_with_project_info(project_info)
             except ImportError:
@@ -256,11 +270,13 @@ class DocumentationTools:
                 print(f"⚠ Error reading pyproject.toml: {e}")
         else:
             print("No pyproject.toml found. Manual README enhancement required.")
-            print("Consider adding project metadata to pyproject.toml for auto-generation.")
+            print(
+                "Consider adding project metadata to pyproject.toml for auto-generation.")
 
         input("\nPress Enter to continue...")
 
-    def _update_readme_with_project_info(self, readme_path: Path, project_info: Dict[str, Any]) -> None:
+    def _update_readme_with_project_info(
+            self, readme_path: Path, project_info: Dict[str, Any]) -> None:
         """Update existing README with project information"""
         try:
             with open(readme_path, 'r', encoding='utf-8') as f:
@@ -268,7 +284,8 @@ class DocumentationTools:
 
             # Extract the current title (first line)
             lines = content.split('\n')
-            title = lines[0] if lines and lines[0].startswith('# ') else f"# {project_info.get('name', 'Project Name')}"
+            title = lines[0] if lines and lines[0].startswith(
+                '# ') else f"# {project_info.get('name', 'Project Name')}"
 
             # Create new content with project info
             new_content = f"{title}\n\n"
@@ -281,12 +298,14 @@ class DocumentationTools:
             if project_info.get('version'):
                 new_content += f"- **Version**: {project_info['version']}\n"
             if project_info.get('authors'):
-                authors_list = [author['name'] for author in project_info['authors']]
+                authors_list = [author['name']
+                                for author in project_info['authors']]
                 new_content += f"- **Authors**: {', '.join(authors_list)}\n"
             if project_info.get('license'):
                 new_content += f"- **License**: {project_info['license']['text']}\n"
             if project_info.get('dependencies'):
-                deps = list(project_info['dependencies'][:5])  # Limit to first 5
+                # Limit to first 5
+                deps = list(project_info['dependencies'][:5])
                 new_content += f"- **Dependencies**: {', '.join(deps)}\n"
 
             # Add installation instructions
@@ -307,7 +326,8 @@ class DocumentationTools:
         except Exception as e:
             print(f"⚠ Error updating README: {e}")
 
-    def _create_readme_with_project_info(self, project_info: Dict[str, Any]) -> None:
+    def _create_readme_with_project_info(
+            self, project_info: Dict[str, Any]) -> None:
         """Create a new README with project information"""
         try:
             content = f"# {project_info.get('name', 'Project Name')}\n\n"
@@ -319,12 +339,14 @@ class DocumentationTools:
             if project_info.get('version'):
                 content += f"- **Version**: {project_info['version']}\n"
             if project_info.get('authors'):
-                authors_list = [author['name'] for author in project_info['authors']]
+                authors_list = [author['name']
+                                for author in project_info['authors']]
                 content += f"- **Authors**: {', '.join(authors_list)}\n"
             if project_info.get('license'):
                 content += f"- **License**: {project_info['license']['text']}\n"
             if project_info.get('dependencies'):
-                deps = list(project_info['dependencies'][:5])  # Limit to first 5
+                # Limit to first 5
+                deps = list(project_info['dependencies'][:5])
                 content += f"- **Dependencies**: {', '.join(deps)}\n"
 
             content += "\n## Installation\n\n"
@@ -357,9 +379,9 @@ class DocumentationTools:
 
     def generate_sphinx_docs(self) -> None:
         """Setup Sphinx documentation"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("SPHINX DOCUMENTATION SETUP")
-        print("="*70)
+        print("=" * 70)
 
         try:
             import sphinx
@@ -369,7 +391,8 @@ class DocumentationTools:
             install = input("Install Sphinx? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "sphinx"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "sphinx"], check=True)
                     print("✓ Sphinx installed successfully")
                 except subprocess.CalledProcessError:
                     print("⚠ Failed to install Sphinx")
@@ -455,6 +478,8 @@ Indices and tables
         print("\nThen open _build/html/index.html in your browser")
 
         input("\nPress Enter to continue...")
+
+
 class DocumentationMenu(Menu):
     """Menu for documentation tools"""
 

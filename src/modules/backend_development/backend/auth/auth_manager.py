@@ -2,6 +2,7 @@
 Authentication & Security Module
 Comprehensive authentication and security automation
 """
+from core.menu.base import Menu, MenuItem
 import os
 import sys
 import json
@@ -12,7 +13,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from core.menu.base import Menu, MenuItem
+
 class AuthManager(Menu):
     """Authentication & Security Menu"""
 
@@ -68,7 +69,8 @@ class AuthManager(Menu):
         print("\nCreating JWT Authentication System...")
 
         # Generate JWT secret key
-        secret_key = os.environ.get('JWT_SECRET_KEY') or secrets.token_urlsafe(32)
+        secret_key = os.environ.get(
+            'JWT_SECRET_KEY') or secrets.token_urlsafe(32)
 
         # Create JWT authentication module
         jwt_auth_content = f'''"""
@@ -1007,7 +1009,8 @@ def role_required(role_name):
         print("\nConfiguring JWT Settings...")
 
         # Generate new JWT secret
-        secret_key = os.environ.get('JWT_SECRET_KEY') or secrets.token_urlsafe(32)
+        secret_key = os.environ.get(
+            'JWT_SECRET_KEY') or secrets.token_urlsafe(32)
 
         jwt_config = {
             "jwt": {
@@ -1055,23 +1058,17 @@ def role_required(role_name):
                         "client_id": "your-google-client-id",
                         "client_secret": "your-google-client-secret",
                         "redirect_uri": "http://localhost:5000/auth/google/callback",
-                        "scope": "openid email profile"
-                    },
+                        "scope": "openid email profile"},
                     "github": {
                         "client_id": "your-github-client-id",
                         "client_secret": "your-github-client-secret",
                         "redirect_uri": "http://localhost:5000/auth/github/callback",
-                        "scope": "user:email"
-                    },
+                        "scope": "user:email"},
                     "facebook": {
                         "client_id": "your-facebook-app-id",
                         "client_secret": "your-facebook-app-secret",
                         "redirect_uri": "http://localhost:5000/auth/facebook/callback",
-                        "scope": "email public_profile"
-                    }
-                }
-            }
-        }
+                        "scope": "email public_profile"}}}}
 
         with open('oauth_config.json', 'w') as f:
             json.dump(oauth_config, f, indent=2)

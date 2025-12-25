@@ -1,8 +1,3 @@
-"""
-automation/dev_mode/port_killer.py
-Port termination utility for Web Development operations
-Detects and kills all processes using open ports before starting servers
-"""
 import subprocess
 import sys
 import json
@@ -11,6 +6,14 @@ import time
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from core.loading import LoadingSpinner
+
+"""
+automation/dev_mode/port_killer.py
+Port termination utility for Web Development operations
+Detects and kills all processes using open ports before starting servers
+"""
+
+
 class PortKiller:
     """Utility class to detect and terminate processes using ports"""
 
@@ -55,7 +58,8 @@ class PortKiller:
         self.verbose = verbose
         self.is_windows = sys.platform == 'win32'
 
-    def kill_all_dev_ports(self, custom_ports: Optional[List[int]] = None) -> Dict[str, any]:
+    def kill_all_dev_ports(
+        self, custom_ports: Optional[List[int]] = None) -> Dict[str, any]:
         """
         Kill all processes on common development ports
 
@@ -79,7 +83,7 @@ class PortKiller:
 
         if self.verbose:
             print("\n SCANNING FOR ACTIVE PORTS")
-            print("="*70)
+            print("=" * 70)
             print(f" Checking {len(ports_to_check)} development ports...")
 
         # Find all processes using ports
@@ -103,25 +107,28 @@ class PortKiller:
             print(f"\n  Found {len(active_processes)} active process(es):")
             print("-" * 50)
             for proc in active_processes:
-                print(f"  Port {proc['port']:>5} | PID {proc['pid']:>6} | {proc['name']}")
+                print(
+                    f"  Port {proc['port']:>5} | PID {proc['pid']:>6} | {proc['name']}")
 
         # Kill processes
         killed_processes = []
         failed_kills = []
 
         if self.verbose:
-            print(f"\n TERMINATING PROCESSES")
-            print("="*70)
+            print("\n TERMINATING PROCESSES")
+            print("=" * 70)
 
         for proc in active_processes:
             if self._kill_process(proc):
                 killed_processes.append(proc)
                 if self.verbose:
-                    print(f" Killed PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
+                    print(
+                        f" Killed PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
             else:
                 failed_kills.append(proc)
                 if self.verbose:
-                    print(f" Failed to kill PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
+                    print(
+                        f" Failed to kill PID {proc['pid']} ({proc['name']}) on port {proc['port']}")
 
         # Wait a moment for processes to fully terminate
         if killed_processes:
@@ -130,8 +137,8 @@ class PortKiller:
             time.sleep(2)
 
         if self.verbose:
-            print(f"\n SUMMARY")
-            print("="*70)
+            print("\n SUMMARY")
+            print("=" * 70)
             print(f" Successfully killed: {len(killed_processes)} process(es)")
             if failed_kills:
                 print(f" Failed to kill: {len(failed_kills)} process(es)")
@@ -183,7 +190,8 @@ class PortKiller:
 
         return success
 
-    def get_port_usage(self, ports: Optional[List[int]] = None) -> Dict[int, List[Dict]]:
+    def get_port_usage(
+        self, ports: Optional[List[int]] = None) -> Dict[int, List[Dict]]:
         """
         Get information about which processes are using specific ports
 
@@ -244,7 +252,8 @@ class PortKiller:
             # Parse netstat output
             lines = result.stdout.split('\n')
             for line in lines:
-                if f':{port}' in line and ('LISTENING' in line or 'ESTABLISHED' in line):
+                if f':{port}' in line and (
+    'LISTENING' in line or 'ESTABLISHED' in line):
                     parts = line.split()
                     if len(parts) >= 5:
                         try:
@@ -252,7 +261,8 @@ class PortKiller:
 
                             # Get process name using tasklist
                             name_result = subprocess.run(
-                                ['tasklist', '/FI', f'PID eq {pid}', '/FO', 'CSV'],
+                                ['tasklist', '/FI',
+                                    f'PID eq {pid}', '/FO', 'CSV'],
                                 capture_output=True,
                                 text=True,
                                 check=True
@@ -296,7 +306,8 @@ class PortKiller:
                 check=True
             )
 
-            pids = [pid.strip() for pid in result.stdout.split('\n') if pid.strip()]
+            pids = [pid.strip()
+                              for pid in result.stdout.split('\n') if pid.strip()]
 
             for pid in pids:
                 try:
@@ -333,13 +344,17 @@ class PortKiller:
                 lines = result.stdout.split('\n')
                 for line in lines[1:]:  # Skip header
                     if line.strip():
-                        # Extract PID from ss output (format: users:(("process",pid=1234,fd=5)))
+                        # Extract PID from ss output (
+    format: users: (("process",
+    pid=1234,
+    fd=5)))
                         pid_match = re.search(r'pid=(\d+)', line)
                         name_match = re.search(r'users:\(\("([^"]+)"', line)
 
                         if pid_match:
                             pid = int(pid_match.group(1))
-                            process_name = name_match.group(1) if name_match else 'Unknown'
+                            process_name = name_match.group(
+                                1) if name_match else 'Unknown'
 
                             processes.append({
                                 'pid': pid,
@@ -370,8 +385,8 @@ class PortKiller:
                 # Windows: Use taskkill
                 subprocess.run(
                     ['taskkill', '/F', '/PID', str(pid)],
-                    capture_output=True,
-                    check=True
+                    capture_output = True,
+                    check = True
                 )
             else:
                 # Unix: Use kill
@@ -633,7 +648,7 @@ class PortKiller:
         failed_kills = []
 
         if self.verbose:
-            print(f"\n TERMINATING SERVER PROCESSES")
+            print("\n TERMINATING SERVER PROCESSES")
             print("="*70)
 
         for proc in all_processes:
@@ -662,7 +677,7 @@ class PortKiller:
             time.sleep(2)
 
         if self.verbose:
-            print(f"\n SUMMARY")
+            print("\n SUMMARY")
             print("="*70)
             print(f" Successfully killed: {len(killed_processes)} process(es)")
             if failed_kills:
@@ -795,7 +810,7 @@ def force_clear_all_ports(verbose: bool = True) -> Dict[str, any]:
     total_killed = common_result['total_killed'] + server_result['total_killed']
 
     if verbose:
-        print(f"\n FINAL SUMMARY")
+        print("\n FINAL SUMMARY")
         print("="*70)
         print(f" Total processes killed: {total_killed}")
         print(f" Common dev ports cleared: {common_result['total_killed']}")

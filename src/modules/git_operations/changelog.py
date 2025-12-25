@@ -9,6 +9,8 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional
 from collections import defaultdict
+
+
 class ChangelogGenerator:
     """
     Simple changelog generator focused on clarity and maintainability
@@ -137,20 +139,142 @@ class ChangelogGenerator:
 
     # Comprehensive file type patterns for smarter detection
     FILE_PATTERNS = {
-        'frontend': ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte', '.html', '.htm', '.css', '.scss', '.sass', '.less', '.styl', '.vue', '.astro'],
-        'backend': ['.py', '.java', '.php', '.rb', '.go', '.rs', '.cs', '.cpp', '.c', '.h', '.hpp', '.swift', '.kt', '.scala'],
-        'config': ['.json', '.yaml', '.yml', '.toml', '.ini', '.env', '.config', '.conf', '.properties', '.xml', '.rc'],
-        'docs': ['.md', '.rst', '.txt', '.pdf', '.doc', '.docx', '.asciidoc', '.adoc', 'README', 'CHANGELOG', 'CONTRIBUTING'],
-        'test': ['test_', '_test.', '.test.', '.spec.', 'tests/', 'spec/', 'test/', 'Test', 'Spec'],
-        'build': ['package.json', 'package-lock.json', 'yarn.lock', 'requirements.txt', 'Pipfile', 'Pipfile.lock', 'pyproject.toml', 'setup.py',
-                  'Dockerfile', 'docker-compose', 'Makefile', 'CMakeLists.txt', 'build.gradle', 'pom.xml', 'webpack.config', 'vite.config', 'rollup.config'],
-        'api': ['.proto', '.graphql', '.gql', 'openapi', 'swagger', '.api', 'api/'],
-        'database': ['.sql', '.db', '.sqlite', '.sqlite3', 'migration', 'migrations/', 'schema', 'model/'],
-        'mobile': ['.dart', '.m', '.mm', '.xib', '.storyboard', '.plist', 'ios/', 'android/', 'mobile/'],
-        'desktop': ['.app', '.exe', '.msi', '.dmg', '.deb', '.rpm', 'electron/', 'tauri/', 'flutter/'],
-        'security': ['.pem', '.crt', '.key', '.cert', '.pub', 'ssl/', 'certs/', 'keys/'],
-        'monitoring': ['.prometheus', 'grafana', 'alert', 'metric', 'log', '.log']
-    }
+        'frontend': [
+            '.js',
+            '.jsx',
+            '.ts',
+            '.tsx',
+            '.vue',
+            '.svelte',
+            '.html',
+            '.htm',
+            '.css',
+            '.scss',
+            '.sass',
+            '.less',
+            '.styl',
+            '.vue',
+            '.astro'],
+        'backend': [
+            '.py',
+            '.java',
+            '.php',
+            '.rb',
+            '.go',
+            '.rs',
+            '.cs',
+            '.cpp',
+            '.c',
+            '.h',
+            '.hpp',
+            '.swift',
+            '.kt',
+            '.scala'],
+        'config': [
+            '.json',
+            '.yaml',
+            '.yml',
+            '.toml',
+            '.ini',
+            '.env',
+            '.config',
+            '.conf',
+            '.properties',
+            '.xml',
+            '.rc'],
+        'docs': [
+            '.md',
+            '.rst',
+            '.txt',
+            '.pdf',
+            '.doc',
+            '.docx',
+            '.asciidoc',
+            '.adoc',
+            'README',
+            'CHANGELOG',
+            'CONTRIBUTING'],
+        'test': [
+            'test_',
+            '_test.',
+            '.test.',
+            '.spec.',
+            'tests/',
+            'spec/',
+            'test/',
+            'Test',
+            'Spec'],
+        'build': [
+            'package.json',
+            'package-lock.json',
+            'yarn.lock',
+            'requirements.txt',
+            'Pipfile',
+            'Pipfile.lock',
+            'pyproject.toml',
+            'setup.py',
+            'Dockerfile',
+            'docker-compose',
+            'Makefile',
+            'CMakeLists.txt',
+            'build.gradle',
+            'pom.xml',
+            'webpack.config',
+            'vite.config',
+            'rollup.config'],
+        'api': [
+            '.proto',
+            '.graphql',
+            '.gql',
+            'openapi',
+            'swagger',
+            '.api',
+            'api/'],
+        'database': [
+            '.sql',
+            '.db',
+            '.sqlite',
+            '.sqlite3',
+            'migration',
+            'migrations/',
+            'schema',
+            'model/'],
+        'mobile': [
+            '.dart',
+            '.m',
+            '.mm',
+            '.xib',
+            '.storyboard',
+            '.plist',
+            'ios/',
+            'android/',
+            'mobile/'],
+        'desktop': [
+            '.app',
+            '.exe',
+            '.msi',
+            '.dmg',
+            '.deb',
+            '.rpm',
+            'electron/',
+            'tauri/',
+            'flutter/'],
+        'security': [
+            '.pem',
+            '.crt',
+            '.key',
+            '.cert',
+            '.pub',
+            'ssl/',
+            'certs/',
+            'keys/'],
+        'monitoring': [
+            '.prometheus',
+            'grafana',
+            'alert',
+            'metric',
+            'log',
+            '.log']}
 
     def __init__(self):
         self.current_dir = Path.cwd()
@@ -201,9 +325,9 @@ class ChangelogGenerator:
 
     def show_unprocessed_commits(self, limit: int = 10) -> None:
         """Show commits that haven't been added to changelog yet"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print(" UNPROCESSED COMMITS")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         if not self._is_git_repo():
             print(" Not a git repository")
@@ -222,10 +346,11 @@ class ChangelogGenerator:
             commit_type = self._classify_commit(commit)
             emoji = self.COMMIT_TYPES[commit_type]['emoji']
 
-            print(f"{i}. {emoji} {commit['short_hash']} - {commit['message'][:60]}")
+            print(
+                f"{i}. {emoji} {commit['short_hash']} - {commit['message'][:60]}")
             print(f"   by {commit['author']} on {commit['date'][:10]}\n")
 
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
     def reset_processed_commits(self) -> None:
         """Clear the processed commits cache"""
@@ -276,7 +401,8 @@ class ChangelogGenerator:
                     best_priority = config['priority']
 
         # Enhance classification with file context
-        enhanced_type = self._enhance_with_file_context(best_match, file_context, message_lower)
+        enhanced_type = self._enhance_with_file_context(
+            best_match, file_context, message_lower)
 
         return enhanced_type
 
@@ -298,7 +424,8 @@ class ChangelogGenerator:
             commit_type = match.group(1).lower()
 
             # Check if it's a breaking change (! in the message)
-            if match.group(3) or 'BREAKING CHANGE' in message or commit_type == 'breaking':
+            if match.group(
+                    3) or 'BREAKING CHANGE' in message or commit_type == 'breaking':
                 return 'breaking'
 
             # Map conventional commit types to our internal types
@@ -336,7 +463,8 @@ class ChangelogGenerator:
                 cwd=self.current_dir
             )
 
-            files = [f.strip() for f in result.stdout.strip().split('\n') if f.strip()]
+            files = [f.strip()
+                     for f in result.stdout.strip().split('\n') if f.strip()]
             return files
 
         except subprocess.CalledProcessError:
@@ -365,7 +493,8 @@ class ChangelogGenerator:
             # Check each pattern category
             for category, patterns in self.FILE_PATTERNS.items():
                 for pattern in patterns:
-                    # Check if pattern is part of the path or if it's a file extension
+                    # Check if pattern is part of the path or if it's a file
+                    # extension
                     if pattern.startswith('.'):
                         # Check for file extension
                         if file_path.lower().endswith(pattern):
@@ -379,7 +508,9 @@ class ChangelogGenerator:
 
         return context
 
-    def _enhance_with_file_context(self, base_type: str, file_context: Dict[str, int], message: str) -> str:
+    def _enhance_with_file_context(
+            self, base_type: str, file_context: Dict[str, int],
+            message: str) -> str:
         """Enhance classification based on file context"""
         # If we have strong file context indicators, adjust classification
         total_files = sum(file_context.values())
@@ -388,7 +519,8 @@ class ChangelogGenerator:
             return base_type
 
         # Calculate percentages
-        context_percentages = {k: (v / total_files) for k, v in file_context.items()}
+        context_percentages = {k: (v / total_files)
+                               for k, v in file_context.items()}
 
         # Override based on strong file context (>70% of files)
         if context_percentages.get('test', 0) > 0.7:
@@ -406,12 +538,15 @@ class ChangelogGenerator:
         elif context_percentages.get('security', 0) > 0.7:
             return 'security'
 
-        # For mixed changes, use original classification but with context awareness
+        # For mixed changes, use original classification but with context
+        # awareness
         if base_type == 'chore':
             # Try to infer better type from file context
             max_context = max(context_percentages.items(), key=lambda x: x[1])
             if max_context[1] > 0.5:  # >50% of files are of one type
-                if max_context[0] in ['frontend', 'ui', 'css', 'html'] and any(word in message for word in ['ui', 'interface', 'style', 'design']):
+                if max_context[0] in ['frontend', 'ui', 'css', 'html'] and any(
+                        word in message
+                        for word in ['ui', 'interface', 'style', 'design']):
                     return 'ui'
                 elif max_context[0] in ['backend', 'api', 'server'] and any(word in message for word in ['api', 'endpoint', 'service', 'server']):
                     return 'api'
@@ -442,43 +577,55 @@ class ChangelogGenerator:
         summary_parts = []
 
         if categories['frontend'] > 0:
-            summary_parts.append(f"{categories['frontend']} frontend file{'s' if categories['frontend'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['frontend']} frontend file{'s' if categories['frontend'] > 1 else ''}")
 
         if categories['backend'] > 0:
-            summary_parts.append(f"{categories['backend']} backend file{'s' if categories['backend'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['backend']} backend file{'s' if categories['backend'] > 1 else ''}")
 
         if categories['api'] > 0:
-            summary_parts.append(f"{categories['api']} API file{'s' if categories['api'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['api']} API file{'s' if categories['api'] > 1 else ''}")
 
         if categories['database'] > 0:
-            summary_parts.append(f"{categories['database']} database file{'s' if categories['database'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['database']} database file{'s' if categories['database'] > 1 else ''}")
 
         if categories['test'] > 0:
-            summary_parts.append(f"{categories['test']} test file{'s' if categories['test'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['test']} test file{'s' if categories['test'] > 1 else ''}")
 
         if categories['docs'] > 0:
-            summary_parts.append(f"{categories['docs']} doc file{'s' if categories['docs'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['docs']} doc file{'s' if categories['docs'] > 1 else ''}")
 
         if categories['config'] > 0:
-            summary_parts.append(f"{categories['config']} config file{'s' if categories['config'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['config']} config file{'s' if categories['config'] > 1 else ''}")
 
         if categories['build'] > 0:
-            summary_parts.append(f"{categories['build']} build file{'s' if categories['build'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['build']} build file{'s' if categories['build'] > 1 else ''}")
 
         if categories['mobile'] > 0:
-            summary_parts.append(f"{categories['mobile']} mobile file{'s' if categories['mobile'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['mobile']} mobile file{'s' if categories['mobile'] > 1 else ''}")
 
         if categories['security'] > 0:
-            summary_parts.append(f"{categories['security']} security file{'s' if categories['security'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['security']} security file{'s' if categories['security'] > 1 else ''}")
 
         if categories['monitoring'] > 0:
-            summary_parts.append(f"{categories['monitoring']} monitoring file{'s' if categories['monitoring'] > 1 else ''}")
+            summary_parts.append(
+                f"{categories['monitoring']} monitoring file{'s' if categories['monitoring'] > 1 else ''}")
 
         # If we have uncategorized files
         categorized_count = sum(categories.values())
         if categorized_count < total_files:
             other_count = total_files - categorized_count
-            summary_parts.append(f"{other_count} other file{'s' if other_count > 1 else ''}")
+            summary_parts.append(
+                f"{other_count} other file{'s' if other_count > 1 else ''}")
 
         if summary_parts:
             return f" {', '.join(summary_parts)}"
@@ -494,11 +641,24 @@ class ChangelogGenerator:
         message_lower = message.lower()
 
         # Check for breaking changes (highest priority)
-        if any(keyword in message_lower for keyword in ['breaking', 'major', 'incompatible', 'BREAKING CHANGE']):
+        if any(
+            keyword in message_lower for keyword in [
+                'breaking',
+                'major',
+                'incompatible',
+                'BREAKING CHANGE']):
             impact_indicators.append(" **BREAKING CHANGE**")
 
         # Check for security-related changes
-        if any(keyword in message_lower for keyword in ['security', 'vulnerability', 'cve', 'auth', 'authentication', 'permission', 'privilege']):
+        if any(
+            keyword in message_lower for keyword in [
+                'security',
+                'vulnerability',
+                'cve',
+                'auth',
+                'authentication',
+                'permission',
+                'privilege']):
             impact_indicators.append(" **Security Impact**")
 
         # Analyze change scale based on number of files and lines changed
@@ -517,7 +677,14 @@ class ChangelogGenerator:
 
         for f in files:
             f_lower = f.lower()
-            if any(critical in f_lower for critical in ['package.json', 'requirements.txt', 'pyproject.toml', 'Cargo.toml', 'go.mod', 'Gemfile.lock']):
+            if any(
+                critical in f_lower for critical in [
+                    'package.json',
+                    'requirements.txt',
+                    'pyproject.toml',
+                    'Cargo.toml',
+                    'go.mod',
+                    'Gemfile.lock']):
                 critical_files.append(f)
             elif any(high_risk in f_lower for high_risk in ['docker', 'k8s', 'kubernetes', 'docker-compose', 'config', 'env']):
                 high_risk_files.append(f)
@@ -525,33 +692,46 @@ class ChangelogGenerator:
                 medium_risk_files.append(f)
 
         if critical_files:
-            impact_indicators.append(f" **CRITICAL DEPENDENCIES** ({len(critical_files)} file{'s' if len(critical_files) > 1 else ''})")
+            impact_indicators.append(
+                f" **CRITICAL DEPENDENCIES** ({len(critical_files)} file{'s' if len(critical_files) > 1 else ''})")
         if high_risk_files:
-            impact_indicators.append(f" **HIGH RISK** ({len(high_risk_files)} file{'s' if len(high_risk_files) > 1 else ''})")
+            impact_indicators.append(
+                f" **HIGH RISK** ({len(high_risk_files)} file{'s' if len(high_risk_files) > 1 else ''})")
         if medium_risk_files:
-            impact_indicators.append(f" **MEDIUM RISK** ({len(medium_risk_files)} file{'s' if len(medium_risk_files) > 1 else ''})")
+            impact_indicators.append(
+                f" **MEDIUM RISK** ({len(medium_risk_files)} file{'s' if len(medium_risk_files) > 1 else ''})")
 
         # Check for potential breaking changes based on file types
         breaking_file_patterns = [
             'api', 'interface', 'protocol', 'contract', 'schema', 'migration',
             'model', 'database', 'auth', 'permission'
         ]
-        breaking_files = [f for f in files if any(pattern in f.lower() for pattern in breaking_file_patterns)]
-        if breaking_files and not any('breaking' in msg for msg in impact_indicators):
-            impact_indicators.append(f" **POTENTIAL BREAKING** ({len(breaking_files)} file{'s' if len(breaking_files) > 1 else ''})")
+        breaking_files = [
+            f for f in files if any(
+                pattern in f.lower() for pattern in breaking_file_patterns)]
+        if breaking_files and not any(
+                'breaking' in msg for msg in impact_indicators):
+            impact_indicators.append(
+                f" **POTENTIAL BREAKING** ({len(breaking_files)} file{'s' if len(breaking_files) > 1 else ''})")
 
         # Check for test coverage changes
-        test_files = [f for f in files if any(test_pattern in f.lower() for test_pattern in ['test', 'spec', 'testing'])]
-        if len(test_files) > 0 and len(test_files) >= file_count * 0.5:  # If more than 50% are test files
+        test_files = [
+            f for f in files if any(
+                test_pattern in f.lower() for test_pattern in [
+                    'test', 'spec', 'testing'])]
+        if len(test_files) > 0 and len(test_files) >= file_count * \
+                0.5:  # If more than 50% are test files
             impact_indicators.append(f" **TEST IMPROVEMENT**")
         elif len(test_files) == 0 and 'test' not in message_lower:
-            # Only flag if no tests were added and commit doesn't mention testing
+            # Only flag if no tests were added and commit doesn't mention
+            # testing
             if any(kw in message_lower for kw in ['fix', 'bug', 'resolve']):
                 impact_indicators.append(f" **NO TESTS ADDED** for bug fix")
 
         return ', '.join(impact_indicators) if impact_indicators else ""
 
-    def _group_commits_by_date(self, commits: List[Dict]) -> Dict[str, List[Dict]]:
+    def _group_commits_by_date(
+            self, commits: List[Dict]) -> Dict[str, List[Dict]]:
         """Group commits by date"""
         grouped = defaultdict(list)
 
@@ -589,7 +769,7 @@ class ChangelogGenerator:
 
         # Generate sections for each category (sorted by priority)
         sorted_types = sorted([t for t in categorized.keys()],
-                             key=lambda x: self.COMMIT_TYPES[x]['priority'])
+                              key=lambda x: self.COMMIT_TYPES[x]['priority'])
 
         for commit_type in sorted_types:
             type_config = self.COMMIT_TYPES[commit_type]
@@ -603,7 +783,7 @@ class ChangelogGenerator:
 
                 # Truncate if too long
                 if len(message) > self.CONFIG['max_message_length']:
-                    message = message[:self.CONFIG['max_message_length']-3] + "..."
+                    message = message[:self.CONFIG['max_message_length'] - 3] + "..."
 
                 # Get files changed for this commit
                 changed_files = self._get_commit_files(commit['hash'])
@@ -622,7 +802,8 @@ class ChangelogGenerator:
                     lines.append(f"  - {file_summary}")
 
                 # Add impact analysis for important changes
-                impact = self._analyze_change_impact(changed_files, commit['message'])
+                impact = self._analyze_change_impact(
+                    changed_files, commit['message'])
                 if impact:
                     lines.append(f"  -  *{impact}*")
 
@@ -716,7 +897,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
         all_commits = self._get_commit_history(limit)
 
         # Filter out already processed
-        unprocessed = [c for c in all_commits if c['hash'] not in self.processed_commits]
+        unprocessed = [c for c in all_commits if c['hash']
+                       not in self.processed_commits]
 
         return unprocessed
 
@@ -765,6 +947,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
         return result.returncode == 0
 # ========== CLI Interface ==========
 
+
 def main():
     """CLI entry point for testing"""
     import sys
@@ -787,16 +970,20 @@ def main():
 
         else:
             print(f"Unknown command: {command}")
-            print("Usage: python changelog_generator.py [generate|show|reset] [number]")
+            print(
+                "Usage: python changelog_generator.py [generate|show|reset] [number]")
 
     else:
         print("Changelog Generator")
         print("==================")
         print("\nCommands:")
-        print("  generate [N]  - Generate changelog for last N commits (default: 1)")
+        print(
+            "  generate [N]  - Generate changelog for last N commits (default: 1)")
         print("  show [N]      - Show unprocessed commits (default: 10)")
         print("  reset         - Clear processed commits cache")
         print("\nExample:")
         print("  python changelog_generator.py generate 5")
+
+
 if __name__ == '__main__':
     main()

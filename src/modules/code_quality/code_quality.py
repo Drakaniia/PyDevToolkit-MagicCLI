@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import List, Optional
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+
 class CodeQualityTools:
     """Handles code quality and linting tasks"""
 
@@ -17,9 +19,9 @@ class CodeQualityTools:
 
     def run_linting(self) -> None:
         """Run code linting with flake8"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RUNNING LINTING (Flake8)")
-        print("="*70)
+        print("=" * 70)
 
         try:
             # Run flake8 on the src directory
@@ -45,9 +47,9 @@ class CodeQualityTools:
 
     def run_formatting_check(self) -> None:
         """Check code formatting with Black"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("CHECKING CODE FORMATTING (Black)")
-        print("="*70)
+        print("=" * 70)
 
         try:
             # Run black in check mode
@@ -62,7 +64,8 @@ class CodeQualityTools:
                 print(result.stdout)
 
                 # Ask if user wants to fix formatting
-                response = input("\nWould you like to format the code? (y/n): ").lower()
+                response = input(
+                    "\nWould you like to format the code? (y/n): ").lower()
                 if response == 'y':
                     self._format_code()
 
@@ -92,9 +95,9 @@ class CodeQualityTools:
 
     def run_type_checking(self) -> None:
         """Run type checking with MyPy"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RUNNING TYPE CHECKING (MyPy)")
-        print("="*70)
+        print("=" * 70)
 
         try:
             # Run mypy on the src directory
@@ -119,9 +122,9 @@ class CodeQualityTools:
 
     def run_complexity_analysis(self) -> None:
         """Run complexity analysis with Radon"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RUNNING COMPLEXITY ANALYSIS (Radon)")
-        print("="*70)
+        print("=" * 70)
 
         try:
             # Run radon cc for cyclomatic complexity
@@ -143,9 +146,9 @@ class CodeQualityTools:
 
     def run_security_analysis(self) -> None:
         """Run security analysis with Bandit"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RUNNING SECURITY ANALYSIS (Bandit)")
-        print("="*70)
+        print("=" * 70)
 
         try:
             # Run bandit on the src directory
@@ -170,9 +173,9 @@ class CodeQualityTools:
 
     def run_all_checks(self) -> None:
         """Run all code quality checks"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RUNNING ALL CODE QUALITY CHECKS")
-        print("="*70)
+        print("=" * 70)
 
         checks = [
             ("Linting", self.run_linting),
@@ -187,12 +190,15 @@ class CodeQualityTools:
             # Temporarily redirect stdin to avoid multiple input() calls
             try:
                 # For this implementation, I'll call the function without user input
-                # For the actual menu, it would prompt for input after each check
+                # For the actual menu, it would prompt for input after each
+                # check
                 print(f"  {name} completed")
-            except:
+            except BaseException:
                 print(f"  {name} failed")
 
         input("\nAll checks completed. Press Enter to continue...")
+
+
 class CodeQualityMenu(Menu):
     """Menu for code quality tools"""
 

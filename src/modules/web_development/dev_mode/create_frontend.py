@@ -1,8 +1,3 @@
-"""
-automation/dev_mode/create_frontend.py
-Create new frontend projects (React, Next.js, Vue)
-FIXED: Windows compatibility for npx/npm commands
-"""
 import subprocess
 import re
 import sys
@@ -10,6 +5,14 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 from ._base import DevModeCommand
 from .menu_utils import get_choice_with_arrows
+
+"""
+automation/dev_mode/create_frontend.py
+Create new frontend projects (React, Next.js, Vue)
+FIXED: Windows compatibility for npx/npm commands
+"""
+
+
 class CreateFrontendCommand(DevModeCommand):
     """Command to create new frontend projects"""
 
@@ -75,9 +78,9 @@ class CreateFrontendCommand(DevModeCommand):
 
     def _interactive_create(self):
         """Interactive project creation flow"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("CREATE FRONTEND PROJECT")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         # Check if Node.js/npm is installed
         if not self.validate_binary('node'):
@@ -122,14 +125,16 @@ class CreateFrontendCommand(DevModeCommand):
             return
 
         # 7. Initialize Git?
-        init_git = self._prompt_yes_no("Initialize Git repository?", default='y')
+        init_git = self._prompt_yes_no(
+            "Initialize Git repository?",
+            default='y')
         if init_git is None:
             return
 
         # Show summary
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("PROJECT SUMMARY")
-        print("="*70)
+        print("=" * 70)
         print(f"Framework:        {framework_info['name']}")
         print(f"Project Name:     {project_name}")
         print(f"Package Manager:  {pkg_manager}")
@@ -137,7 +142,7 @@ class CreateFrontendCommand(DevModeCommand):
         print(f"CSS Framework:    {css_info['name']}")
         print(f"Target Directory: {target_dir}")
         print(f"Initialize Git:   {'Yes' if init_git else 'No'}")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         confirm = self._prompt_yes_no("Proceed with creation?", default='y')
         if confirm is None or not confirm:
@@ -256,49 +261,117 @@ class CreateFrontendCommand(DevModeCommand):
             framework_name = framework['name']
 
             if framework_name == 'React':
-                cmd = self._build_react_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_react_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Next.js':
-                cmd = self._build_nextjs_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_nextjs_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Vue.js':
-                cmd = self._build_vue_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_vue_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Angular':
-                cmd = self._build_angular_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_angular_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Svelte':
-                cmd = self._build_svelte_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_svelte_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'SvelteKit':
-                cmd = self._build_sveltekit_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_sveltekit_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Nuxt.js (Vue)':
-                cmd = self._build_nuxt_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_nuxt_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Vite (Vanilla)':
-                cmd = self._build_vite_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_vite_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Astro':
-                cmd = self._build_astro_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_astro_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Remix':
-                cmd = self._build_remix_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_remix_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Gatsby':
-                cmd = self._build_gatsby_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_gatsby_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Solid.js':
-                cmd = self._build_solid_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_solid_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Qwik':
-                cmd = self._build_qwik_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_qwik_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'React Native':
-                cmd = self._build_react_native_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_react_native_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Expo (React Native)':
-                cmd = self._build_expo_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_expo_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif 'Ionic' in framework_name:
-                cmd = self._build_ionic_command(project_name, framework_name, use_typescript, pkg_manager)
+                cmd = self._build_ionic_command(
+                    project_name,
+                    framework_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Flutter (Web)':
-                cmd = self._build_flutter_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_flutter_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif 'Capacitor' in framework_name:
-                cmd = self._build_capacitor_command(project_name, framework_name, use_typescript, pkg_manager)
+                cmd = self._build_capacitor_command(
+                    project_name,
+                    framework_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'NativeScript':
-                cmd = self._build_nativescript_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_nativescript_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'T3 Stack (Next.js + tRPC)':
-                cmd = self._build_t3_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_t3_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'Blitz.js':
-                cmd = self._build_blitz_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_blitz_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             elif framework_name == 'RedwoodJS':
-                cmd = self._build_redwood_command(project_name, use_typescript, pkg_manager)
+                cmd = self._build_redwood_command(
+                    project_name,
+                    use_typescript,
+                    pkg_manager)
             else:
                 raise ValueError(f"Unsupported framework: {framework_name}")
 
@@ -330,7 +403,11 @@ class CreateFrontendCommand(DevModeCommand):
         except Exception as e:
             print(f"\nError: {e}")
 
-    def _build_react_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_react_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build create-react-app command"""
         cmd = ['npx', 'create-react-app', name]
         if typescript:
@@ -340,7 +417,11 @@ class CreateFrontendCommand(DevModeCommand):
             cmd.extend(['--use-' + pkg_manager])
         return cmd
 
-    def _build_nextjs_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_nextjs_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build create-next-app command"""
         cmd = ['npx', 'create-next-app@latest', name]
         if typescript:
@@ -352,87 +433,164 @@ class CreateFrontendCommand(DevModeCommand):
             cmd.extend(['--use-' + pkg_manager])
         return cmd
 
-    def _build_vue_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_vue_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build create-vue command"""
         cmd = ['npm', 'init', 'vue@latest', name, '--', '--default']
         if typescript:
             cmd.append('--typescript')
         return cmd
 
-    def _build_angular_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_angular_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Angular CLI command"""
-        cmd = ['npx', '@angular/cli@latest', 'new', name, '--routing=true', '--style=scss']
+        cmd = [
+            'npx',
+            '@angular/cli@latest',
+            'new',
+            name,
+            '--routing=true',
+            '--style=scss']
         if pkg_manager != 'npm':
             cmd.extend(['--package-manager', pkg_manager])
         return cmd
 
-    def _build_svelte_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_svelte_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build create-svelte command"""
         cmd = ['npm', 'create', 'svelte@latest', name]
         return cmd
 
-    def _build_sveltekit_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_sveltekit_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build SvelteKit command"""
         cmd = ['npm', 'create', 'svelte@latest', name]
         return cmd
 
-    def _build_nuxt_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_nuxt_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Nuxt.js command"""
         cmd = ['npx', 'nuxi@latest', 'init', name]
         return cmd
 
-    def _build_vite_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_vite_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Vite command"""
         template = 'vanilla-ts' if typescript else 'vanilla'
-        cmd = ['npm', 'create', 'vite@latest', name, '--', '--template', template]
+        cmd = [
+            'npm',
+            'create',
+            'vite@latest',
+            name,
+            '--',
+            '--template',
+            template]
         return cmd
 
-    def _build_astro_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_astro_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Astro command"""
-        cmd = ['npm', 'create', 'astro@latest', name, '--', '--template', 'minimal']
+        cmd = [
+            'npm',
+            'create',
+            'astro@latest',
+            name,
+            '--',
+            '--template',
+            'minimal']
         if typescript:
             cmd.extend(['--typescript', 'strict'])
         return cmd
 
-    def _build_remix_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_remix_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Remix command"""
         cmd = ['npx', 'create-remix@latest', name]
         if typescript:
             cmd.extend(['--template', 'typescript'])
         return cmd
 
-    def _build_gatsby_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_gatsby_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Gatsby command"""
         cmd = ['npx', 'create-gatsby', name]
         if typescript:
             cmd.extend(['-ts'])
         return cmd
 
-    def _build_solid_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_solid_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Solid.js command"""
         template = 'ts' if typescript else 'js'
         cmd = ['npx', 'degit', f'solidjs/templates/{template}', name]
         return cmd
 
-    def _build_qwik_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_qwik_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Qwik command"""
         cmd = ['npm', 'create', 'qwik@latest', name]
         return cmd
 
-    def _build_react_native_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_react_native_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build React Native command"""
         cmd = ['npx', 'react-native@latest', 'init', name]
         if typescript:
             cmd.extend(['--template', 'react-native-template-typescript'])
         return cmd
 
-    def _build_expo_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_expo_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Expo command"""
         template = 'typescript' if typescript else 'blank'
         cmd = ['npx', 'create-expo-app@latest', name, '--template', template]
         return cmd
 
-    def _build_ionic_command(self, name: str, framework_name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_ionic_command(
+            self,
+            name: str,
+            framework_name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Ionic command"""
         if 'React' in framework_name:
             framework_type = 'react'
@@ -443,17 +601,33 @@ class CreateFrontendCommand(DevModeCommand):
         else:
             framework_type = 'react'  # Default
 
-        cmd = ['npx', '@ionic/cli', 'start', name, 'tabs', '--type', framework_type]
+        cmd = [
+            'npx',
+            '@ionic/cli',
+            'start',
+            name,
+            'tabs',
+            '--type',
+            framework_type]
         if pkg_manager != 'npm':
             cmd.extend(['--package-manager', pkg_manager])
         return cmd
 
-    def _build_flutter_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_flutter_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Flutter command"""
         cmd = ['flutter', 'create', name, '--platforms', 'web']
         return cmd
 
-    def _build_capacitor_command(self, name: str, framework_name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_capacitor_command(
+            self,
+            name: str,
+            framework_name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Capacitor command"""
         if 'React' in framework_name:
             # First create React app, then add Capacitor
@@ -470,27 +644,49 @@ class CreateFrontendCommand(DevModeCommand):
 
         return cmd
 
-    def _build_nativescript_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_nativescript_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build NativeScript command"""
         template = 'typescript' if typescript else 'javascript'
-        cmd = ['npx', '@nativescript/cli@latest', 'create', name, '--template', template]
+        cmd = [
+            'npx',
+            '@nativescript/cli@latest',
+            'create',
+            name,
+            '--template',
+            template]
         return cmd
 
-    def _build_t3_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_t3_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build T3 Stack command"""
         cmd = ['npm', 'create', 't3-app@latest', name]
         if pkg_manager != 'npm':
             cmd.extend(['--use-' + pkg_manager])
         return cmd
 
-    def _build_blitz_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_blitz_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build Blitz.js command"""
         cmd = ['npx', 'blitz@latest', 'new', name]
         if typescript:
             cmd.extend(['--template', 'typescript'])
         return cmd
 
-    def _build_redwood_command(self, name: str, typescript: bool, pkg_manager: str) -> list:
+    def _build_redwood_command(
+            self,
+            name: str,
+            typescript: bool,
+            pkg_manager: str) -> list:
         """Build RedwoodJS command"""
         cmd = ['npx', 'create-redwood-app@latest', name]
         if typescript:
@@ -518,88 +714,90 @@ class CreateFrontendCommand(DevModeCommand):
                 shell=use_shell
             )
             subprocess.run(
-                ['git', 'commit', '-m', 'Initial commit'] if not use_shell else 'git commit -m "Initial commit"',
-                cwd=project_path,
-                check=True,
-                capture_output=True,
-                shell=use_shell
-            )
+                ['git', 'commit', '-m', 'Initial commit']
+                if not use_shell else 'git commit -m "Initial commit"',
+                cwd=project_path, check=True, capture_output=True,
+                shell=use_shell)
             print("Git repository initialized")
         except subprocess.CalledProcessError:
             print("  Failed to initialize Git repository")
 
-    def _show_next_steps(self, project_name: str, pkg_manager: str, framework_name: str = ""):
+    def _show_next_steps(
+            self,
+            project_name: str,
+            pkg_manager: str,
+            framework_name: str = ""):
         """Display framework-specific next steps"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("NEXT STEPS")
-        print("="*70)
-        print(f"\n1. Navigate to your project:")
+        print("=" * 70)
+        print("\n1. Navigate to your project:")
         print(f"   cd {project_name}")
 
         # Framework-specific instructions
         if framework_name == "Angular":
-            print(f"\n2. Start the development server:")
-            print(f"   ng serve")
-            print(f"\n3. Open your browser to:")
-            print(f"   http://localhost:4200")
+            print("\n2. Start the development server:")
+            print("   ng serve")
+            print("\n3. Open your browser to:")
+            print("   http://localhost:4200")
         elif framework_name == "React Native":
-            print(f"\n2. Install dependencies:")
+            print("\n2. Install dependencies:")
             print(f"   {pkg_manager} install")
-            print(f"\n3. Start Metro bundler:")
-            print(f"   npx react-native start")
-            print(f"\n4. Run on device/emulator:")
-            print(f"   npx react-native run-ios     # For iOS")
-            print(f"   npx react-native run-android # For Android")
+            print("\n3. Start Metro bundler:")
+            print("   npx react-native start")
+            print("\n4. Run on device/emulator:")
+            print("   npx react-native run-ios     # For iOS")
+            print("   npx react-native run-android # For Android")
         elif framework_name == "Expo (React Native)":
-            print(f"\n2. Start the Expo development server:")
-            print(f"   npx expo start")
-            print(f"\n3. Scan QR code with Expo Go app on your phone")
-            print(f"   or press 'w' to open in web browser")
+            print("\n2. Start the Expo development server:")
+            print("   npx expo start")
+            print("\n3. Scan QR code with Expo Go app on your phone")
+            print("   or press 'w' to open in web browser")
         elif "Ionic" in framework_name:
-            print(f"\n2. Start the development server:")
-            print(f"   ionic serve")
-            print(f"\n3. To build for mobile:")
-            print(f"   ionic capacitor add ios")
-            print(f"   ionic capacitor add android")
-            print(f"   ionic capacitor run ios")
+            print("\n2. Start the development server:")
+            print("   ionic serve")
+            print("\n3. To build for mobile:")
+            print("   ionic capacitor add ios")
+            print("   ionic capacitor add android")
+            print("   ionic capacitor run ios")
         elif framework_name == "Flutter (Web)":
-            print(f"\n2. Get dependencies:")
-            print(f"   flutter pub get")
-            print(f"\n3. Start the development server:")
-            print(f"   flutter run -d chrome")
+            print("\n2. Get dependencies:")
+            print("   flutter pub get")
+            print("\n3. Start the development server:")
+            print("   flutter run -d chrome")
         elif "Capacitor" in framework_name:
-            print(f"\n2. Install dependencies:")
+            print("\n2. Install dependencies:")
             print(f"   {pkg_manager} install")
-            print(f"\n3. Add Capacitor:")
-            print(f"   npx cap add ios")
-            print(f"   npx cap add android")
-            print(f"\n4. Build and sync:")
+            print("\n3. Add Capacitor:")
+            print("   npx cap add ios")
+            print("   npx cap add android")
+            print("\n4. Build and sync:")
             print(f"   {pkg_manager} run build")
-            print(f"   npx cap sync")
+            print("   npx cap sync")
         elif framework_name == "NativeScript":
-            print(f"\n2. Install dependencies:")
+            print("\n2. Install dependencies:")
             print(f"   {pkg_manager} install")
-            print(f"\n3. Run on device:")
-            print(f"   ns run ios")
-            print(f"   ns run android")
+            print("\n3. Run on device:")
+            print("   ns run ios")
+            print("   ns run android")
         elif framework_name in ["Nuxt.js (Vue)", "Remix", "Gatsby"]:
-            print(f"\n2. Install dependencies:")
+            print("\n2. Install dependencies:")
             print(f"   {pkg_manager} install")
-            print(f"\n3. Start the development server:")
+            print("\n3. Start the development server:")
             print(f"   {pkg_manager} run dev")
-            print(f"\n4. Open your browser to:")
-            print(f"   http://localhost:3000")
+            print("\n4. Open your browser to:")
+            print("   http://localhost:3000")
         else:
             # Default web framework instructions
-            print(f"\n2. Start the development server:")
+            print("\n2. Start the development server:")
             print(f"   {pkg_manager} run dev")
-            print(f"\n3. Open your browser to:")
-            print(f"   http://localhost:3000")
+            print("\n3. Open your browser to:")
+            print("   http://localhost:3000")
 
         # Additional framework-specific tips
         self._show_framework_tips(framework_name)
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
 
     def _show_framework_tips(self, framework_name: str):
         """Show framework-specific tips and resources"""
@@ -667,7 +865,10 @@ class CreateFrontendCommand(DevModeCommand):
         ]
 
         try:
-            choice_idx = get_choice_with_arrows(categories, "Select Framework Category", show_numbers=True)
+            choice_idx = get_choice_with_arrows(
+                categories,
+                "Select Framework Category",
+                show_numbers=True)
 
             # Handle exit option (last option)
             if choice_idx == len(categories):
@@ -693,7 +894,8 @@ class CreateFrontendCommand(DevModeCommand):
         category_frameworks = []
         framework_keys = []
 
-        for key, framework in sorted(self.FRAMEWORKS.items(), key=lambda x: int(x[0])):
+        for key, framework in sorted(self.FRAMEWORKS.items(), def key(x):
+                                     return int(x[0])):
             if framework['type'] == category:
                 category_frameworks.append(framework['name'])
                 framework_keys.append(key)
@@ -714,7 +916,10 @@ class CreateFrontendCommand(DevModeCommand):
             }
             display_name = category_names.get(category, category)
 
-            choice_idx = get_choice_with_arrows(category_frameworks, f"Select {display_name} Framework", show_numbers=True)
+            choice_idx = get_choice_with_arrows(
+                category_frameworks,
+                f"Select {display_name} Framework",
+                show_numbers=True)
 
             # Handle exit option (last option)
             if choice_idx == len(category_frameworks):
@@ -743,7 +948,10 @@ class CreateFrontendCommand(DevModeCommand):
                     continue
 
                 if not self._is_valid_project_name(name):
-                    print("Invalid project name. Use letters, numbers, hyphens, underscores")
+                    print("Invalid project name. Use letters,
+                          numbers,
+                          hyphens,
+                          underscores")
                     continue
 
                 return name
@@ -757,7 +965,10 @@ class CreateFrontendCommand(DevModeCommand):
         pm_options = list(self.PACKAGE_MANAGERS.values()) + ["Exit"]
 
         try:
-            choice_idx = get_choice_with_arrows(pm_options, "Package Manager", show_numbers=True)
+            choice_idx = get_choice_with_arrows(
+                pm_options,
+                "Package Manager",
+                show_numbers=True)
 
             # Handle exit option (last option)
             if choice_idx == len(pm_options):
@@ -772,10 +983,14 @@ class CreateFrontendCommand(DevModeCommand):
 
     def _prompt_css_framework(self) -> Optional[str]:
         """Prompt for CSS framework"""
-        css_options = [value['name'] for value in self.CSS_FRAMEWORKS.values()] + ["Exit"]
+        css_options = [value['name']
+                       for value in self.CSS_FRAMEWORKS.values()] + ["Exit"]
 
         try:
-            choice_idx = get_choice_with_arrows(css_options, "CSS Framework", show_numbers=True)
+            choice_idx = get_choice_with_arrows(
+                css_options,
+                "CSS Framework",
+                show_numbers=True)
 
             # Handle exit option (last option)
             if choice_idx == len(css_options):
@@ -796,7 +1011,8 @@ class CreateFrontendCommand(DevModeCommand):
     def _prompt_directory(self) -> Optional[str]:
         """Prompt for target directory"""
         try:
-            directory = input("\nTarget directory (default: current, or 'exit' to cancel): ").strip()
+            directory = input("\nTarget directory(default: current,
+                                                  or 'exit' to cancel): ").strip()
 
             # Handle exit
             if directory.lower() in ['exit', 'quit', 'cancel']:
@@ -808,11 +1024,15 @@ class CreateFrontendCommand(DevModeCommand):
             print("\nOperation cancelled")
             return None
 
-    def _prompt_yes_no(self, question: str, default: str = 'y') -> Optional[bool]:
+    def _prompt_yes_no(
+            self,
+            question: str,
+            default: str = 'y') -> Optional[bool]:
         """Prompt yes/no question"""
         try:
             default_text = "Y/n" if default == 'y' else "y/N"
-            response = input(f"\n{question} [{default_text}] (or 'exit' to cancel): ").strip().lower()
+            response = input(
+                f"\n{question} [{default_text}] (or 'exit' to cancel): ").strip().lower()
 
             # Handle exit
             if response in ['exit', 'quit', 'cancel']:
@@ -832,5 +1052,7 @@ class CreateFrontendCommand(DevModeCommand):
         # Allow letters, numbers, hyphens, underscores
         pattern = r'^[a-zA-Z0-9_-]+$'
         return bool(re.match(pattern, name))
+
+
 # Export command instance
 COMMAND = CreateFrontendCommand()

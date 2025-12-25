@@ -2,6 +2,7 @@
 API Development Tools Module
 Comprehensive API development automation
 """
+from core.menu import Menu, MenuItem
 import os
 import sys
 import json
@@ -10,7 +11,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from core.menu import Menu, MenuItem
+
 class APIGenerator(Menu):
     """API Development Tools Menu"""
 
@@ -68,7 +69,8 @@ class APIGenerator(Menu):
         base_path = input("Enter base path (default: /api): ") or "/api"
 
         # Generate endpoints based on resource
-        endpoints = self._generate_crud_endpoints(resource_name, base_path, framework)
+        endpoints = self._generate_crud_endpoints(
+            resource_name, base_path, framework)
 
         # Create files
         if framework == 'fastapi':
@@ -937,8 +939,24 @@ describe('API Endpoints', () => {
         """Generate user mock data"""
         import random
 
-        first_names = ['John', 'Jane', 'Mike', 'Sarah', 'David', 'Emma', 'Chris', 'Lisa']
-        last_names = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis']
+        first_names = [
+            'John',
+            'Jane',
+            'Mike',
+            'Sarah',
+            'David',
+            'Emma',
+            'Chris',
+            'Lisa']
+        last_names = [
+            'Smith',
+            'Johnson',
+            'Williams',
+            'Brown',
+            'Jones',
+            'Garcia',
+            'Miller',
+            'Davis']
         domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com']
 
         users = []
@@ -966,7 +984,13 @@ describe('API Endpoints', () => {
         import random
 
         products = []
-        categories = ['Electronics', 'Clothing', 'Books', 'Home', 'Sports', 'Toys']
+        categories = [
+            'Electronics',
+            'Clothing',
+            'Books',
+            'Home',
+            'Sports',
+            'Toys']
 
         for i in range(count):
             product = {
@@ -990,7 +1014,12 @@ describe('API Endpoints', () => {
         import random
 
         posts = []
-        titles = ['Getting Started', 'Advanced Tips', 'Best Practices', 'Common Issues', 'Tutorial']
+        titles = [
+            'Getting Started',
+            'Advanced Tips',
+            'Best Practices',
+            'Common Issues',
+            'Tutorial']
 
         for i in range(count):
             post = {

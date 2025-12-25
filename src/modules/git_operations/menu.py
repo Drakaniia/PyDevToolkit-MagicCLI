@@ -3,6 +3,18 @@ Consolidated Git Operations Module
 Main orchestrator for all Git operations using modular components
 UPDATED: Changelog is now auto-generated after successful push
 """
+from core.utils.git_client import get_git_client
+from core.menu import Menu, MenuItem
+from github.git_stash import GitStash
+from github.git_diff import GitDiff
+from github.git_cache import GitCache
+from github.git_removesubmodule import GitRemoveSubmodule
+from github.git_recover import GitRecover
+from github.git_initializer import GitInitializer
+from github.git_push import GitPush
+from github.git_pull import GitPull
+from github.git_log import GitLog
+from github.git_status import GitStatus
 import sys
 from pathlib import Path
 from typing import Any, Optional
@@ -12,18 +24,7 @@ src_path = Path(__file__).parent
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from github.git_status import GitStatus
-from github.git_log import GitLog
-from github.git_pull import GitPull
-from github.git_push import GitPush
-from github.git_initializer import GitInitializer
-from github.git_recover import GitRecover
-from github.git_removesubmodule import GitRemoveSubmodule
-from github.git_cache import GitCache
-from github.git_diff import GitDiff
-from github.git_stash import GitStash
-from core.menu import Menu, MenuItem
-from core.utils.git_client import get_git_client
+
 class GitOperations:
     """Unified Git operations orchestrator with dynamic directory detection"""
 
@@ -115,6 +116,8 @@ class GitOperations:
         """Show comprehensive git stash operations menu"""
         stash_handler = GitStash()
         stash_handler.execute_stash_operations()
+
+
 class GitMenu(Menu):
     """Unified menu for all Git operations"""
 
@@ -143,14 +146,16 @@ class GitMenu(Menu):
         """Generate changelog manually without pushing"""
         try:
             from .changelog import ChangelogGenerator
-            print("\n" + "="*70)
+            print("\n" + "=" * 70)
             print("CHANGLOG GENERATOR")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
 
             # Ask user for number of commits to process
             try:
-                num_commits_input = input("Enter number of recent commits to include in changelog (default 1): ").strip()
-                num_commits = int(num_commits_input) if num_commits_input else 1
+                num_commits_input = input(
+                    "Enter number of recent commits to include in changelog (default 1): ").strip()
+                num_commits = int(
+                    num_commits_input) if num_commits_input else 1
             except ValueError:
                 num_commits = 1
                 print("Using default value of 1 commit\n")

@@ -399,7 +399,8 @@ def discover_and_test_all_modules():
                 file_path = Path(root) / file
                 module_path = file_path.relative_to(src_path)
 
-                # Convert to module name (e.g., github/git_stash.py -> github.git_stash)
+                # Convert to module name (e.g., github/git_stash.py ->
+                # github.git_stash)
                 module_parts = []
                 for part in module_path.parts:
                     if part.endswith(".py"):
@@ -454,7 +455,8 @@ def discover_and_test_all_modules():
                     # - validate module structure
                     # For now, just test that import works
                 except ImportError as e:
-                    # Some modules might have dependencies we don't have installed
+                    # Some modules might have dependencies we don't have
+                    # installed
                     print(f"Note: Could not import {mod_name}: {e}")
                     pass  # Still pass the test - it might be OK if dependencies are missing
 

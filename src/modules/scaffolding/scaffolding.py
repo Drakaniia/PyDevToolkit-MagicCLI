@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+
 class ScaffoldingTools:
     """Handles project scaffolding and template creation"""
 
@@ -17,9 +19,9 @@ class ScaffoldingTools:
 
     def create_python_project(self) -> None:
         """Create a Python project with standard structure"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("PYTHON PROJECT SCAFFOLDING")
-        print("="*70)
+        print("=" * 70)
 
         try:
             project_name = input("Enter project name: ").strip()
@@ -46,7 +48,8 @@ class ScaffoldingTools:
             # Create standard Python project structure
             dirs_to_create = [
                 project_dir / "src",
-                project_dir / project_name.replace("-", "_"),  # package dir (with hyphens replaced by underscores)
+                # package dir (with hyphens replaced by underscores)
+                project_dir / project_name.replace("-", "_"),
                 project_dir / "tests",
                 project_dir / "docs",
                 project_dir / "scripts",
@@ -283,12 +286,12 @@ dmypy.json
 
             print(f"\n✓ Python project '{project_name}' created successfully!")
             print(f"  Directory structure:")
-            print(f"  ├── src/")
-            print(f"  ├── tests/")
-            print(f"  ├── docs/")
-            print(f"  ├── pyproject.toml")
-            print(f"  ├── README.md")
-            print(f"  └── .gitignore")
+            print("  ├── src/")
+            print("  ├── tests/")
+            print("  ├── docs/")
+            print("  ├── pyproject.toml")
+            print("  ├── README.md")
+            print("  └── .gitignore")
 
         except KeyboardInterrupt:
             print("\nOperation cancelled.")
@@ -299,9 +302,9 @@ dmypy.json
 
     def create_fastapi_project(self) -> None:
         """Create a FastAPI project template"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("FASTAPI PROJECT SCAFFOLDING")
-        print("="*70)
+        print("=" * 70)
 
         try:
             project_name = input("Enter project name: ").strip()
@@ -597,21 +600,22 @@ htmlcov/
             with open(project_dir / ".gitignore", "w") as f:
                 f.write(gitignore_content)
 
-            print(f"\n✓ FastAPI project '{project_name}' created successfully!")
+            print(
+                f"\n✓ FastAPI project '{project_name}' created successfully!")
             print(f"  Directory structure:")
-            print(f"  ├── src/")
-            print(f"  │   ├── main.py")
-            print(f"  │   ├── api/")
-            print(f"  │   ├── models/")
-            print(f"  │   ├── schemas/")
-            print(f"  │   ├── database/")
-            print(f"  │   ├── routers/")
-            print(f"  │   └── utils/")
-            print(f"  ├── tests/")
-            print(f"  ├── config/")
-            print(f"  ├── pyproject.toml")
-            print(f"  ├── README.md")
-            print(f"  └── .gitignore")
+            print("  ├── src/")
+            print("  │   ├── main.py")
+            print("  │   ├── api/")
+            print("  │   ├── models/")
+            print("  │   ├── schemas/")
+            print("  │   ├── database/")
+            print("  │   ├── routers/")
+            print("  │   └── utils/")
+            print("  ├── tests/")
+            print("  ├── config/")
+            print("  ├── pyproject.toml")
+            print("  ├── README.md")
+            print("  └── .gitignore")
 
         except KeyboardInterrupt:
             print("\nOperation cancelled.")
@@ -622,9 +626,9 @@ htmlcov/
 
     def create_react_project(self) -> None:
         """Create a React project template"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("REACT PROJECT SCAFFOLDING")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis feature would create a React project using Create React App.")
         print("It requires Node.js and npm to be installed on your system.")
@@ -632,7 +636,7 @@ htmlcov/
         try:
             # Check if Node.js is available
             node_result = subprocess.run(['node', '--version'],
-                                        capture_output=True, text=True)
+                                         capture_output=True, text=True)
 
             if node_result.returncode != 0:
                 print("\n⚠ Node.js is not installed or not in PATH")
@@ -706,9 +710,9 @@ This project was created using Magic CLI's React project generator.
 
     def create_flutter_project(self) -> None:
         """Create a Flutter project template"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("FLUTTER PROJECT SCAFFOLDING")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis feature would create a Flutter project.")
         print("It requires Flutter SDK to be installed on your system.")
@@ -716,7 +720,7 @@ This project was created using Magic CLI's React project generator.
         try:
             # Check if Flutter is available
             flutter_result = subprocess.run(['flutter', '--version'],
-                                          capture_output=True, text=True)
+                                            capture_output=True, text=True)
 
             if flutter_result.returncode != 0:
                 print("\n⚠ Flutter is not installed or not in PATH")
@@ -754,7 +758,8 @@ This project was created using Magic CLI's React project generator.
                 input("\nPress Enter to continue...")
                 return
 
-            print(f"\n✓ Flutter project '{project_name}' created successfully!")
+            print(
+                f"\n✓ Flutter project '{project_name}' created successfully!")
             print("\nTo run the app:")
             print(f"  cd {project_name}")
             print("  flutter run")
@@ -770,9 +775,9 @@ This project was created using Magic CLI's React project generator.
 
     def create_docker_project(self) -> None:
         """Create Docker configuration files for a project"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DOCKER CONFIGURATION SCAFFOLDING")
-        print("="*70)
+        print("=" * 70)
 
         print("\nCreating Docker configuration files...")
 
@@ -884,6 +889,8 @@ Thumbs.db
         print("  docker-compose up --build")
 
         input("\nPress Enter to continue...")
+
+
 class ScaffoldingMenu(Menu):
     """Menu for scaffolding tools"""
 

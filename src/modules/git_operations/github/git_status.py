@@ -11,7 +11,10 @@ except ImportError:
     # Only print warning if directly running this file
     import sys
     if __name__ == "__main__":
-        print("Warning: termcolor library not found. Install it using: pip install termcolor")
+        print(
+            "Warning: termcolor library not found. Install it using: pip install termcolor")
+
+
 class GitStatus:
     """Handles git status operations"""
 
@@ -20,9 +23,9 @@ class GitStatus:
 
     def show_status(self):
         """Display current git status in verbose format with colors"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print(" GIT STATUS (VERBOSE FORMAT WITH COLORS)")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         if not self._is_git_repo():
             print(" Not a git repository. Please initialize git first.")
@@ -135,7 +138,8 @@ class GitStatus:
                 continue
             elif line.strip() == "":  # Empty line
                 if current_section != "other":
-                    other_info.append(line)  # Maintain spacing between sections
+                    # Maintain spacing between sections
+                    other_info.append(line)
                 continue
             elif line.startswith("\t") or line.startswith("  "):  # File information
                 if current_section == "staged":
@@ -164,24 +168,31 @@ class GitStatus:
 
         # Display staged files section
         if staged_files:
-            print("\n" + "="*50)
+            print("\n" + "=" * 50)
             if HAS_TERMCOLOR:
-                print(colored("STAGED FILES (Changes to be committed):", 'green', attrs=['bold']))
+                print(
+                    colored(
+                        "STAGED FILES (Changes to be committed):",
+                        'green',
+                        attrs=['bold']))
             else:
                 print("STAGED FILES (Changes to be committed):")
-            print("="*50)
+            print("=" * 50)
 
             for file_line in staged_files:
                 if HAS_TERMCOLOR:
                     # Color based on status (added, modified, deleted, etc.)
                     if file_line.startswith('new file:'):
-                        print(colored("    new file:", 'green') + file_line[11:])
+                        print(colored("    new file:",
+                              'green') + file_line[11:])
                     elif file_line.startswith('modified:'):
-                        print(colored("    modified:", 'green') + file_line[9:])
+                        print(colored("    modified:",
+                              'green') + file_line[9:])
                     elif file_line.startswith('deleted:'):
                         print(colored("    deleted:", 'red') + file_line[8:])
                     elif file_line.startswith('renamed:'):
-                        print(colored("    renamed:", 'yellow') + file_line[8:])
+                        print(colored("    renamed:",
+                              'yellow') + file_line[8:])
                     else:
                         print(colored(file_line, 'green'))
                 else:
@@ -189,12 +200,16 @@ class GitStatus:
 
         # Display unstaged files section
         if unstaged_files:
-            print("\n" + "="*50)
+            print("\n" + "=" * 50)
             if HAS_TERMCOLOR:
-                print(colored("UNSTAGED FILES (Changes not staged for commit):", 'yellow', attrs=['bold']))
+                print(
+                    colored(
+                        "UNSTAGED FILES (Changes not staged for commit):",
+                        'yellow',
+                        attrs=['bold']))
             else:
                 print("UNSTAGED FILES (Changes not staged for commit):")
-            print("="*50)
+            print("=" * 50)
 
             for file_line in unstaged_files:
                 if HAS_TERMCOLOR:
@@ -204,7 +219,8 @@ class GitStatus:
                     elif file_line.startswith('deleted:'):
                         print(colored("    deleted:", 'red') + file_line[8:])
                     elif file_line.startswith('renamed:'):
-                        print(colored("    renamed:", 'yellow') + file_line[8:])
+                        print(colored("    renamed:",
+                              'yellow') + file_line[8:])
                     else:
                         print(colored(file_line, 'yellow'))
                 else:
@@ -212,12 +228,12 @@ class GitStatus:
 
         # Display untracked files section
         if untracked_files:
-            print("\n" + "="*50)
+            print("\n" + "=" * 50)
             if HAS_TERMCOLOR:
                 print(colored("UNTRACKED FILES:", 'blue', attrs=['bold']))
             else:
                 print("UNTRACKED FILES:")
-            print("="*50)
+            print("=" * 50)
 
             for file_line in untracked_files:
                 if HAS_TERMCOLOR:

@@ -1,7 +1,3 @@
-"""
-Testing & CI/CD Module
-Handles test execution, coverage analysis, and CI/CD pipeline integration
-"""
 import sys
 import subprocess
 import os
@@ -9,6 +5,13 @@ from pathlib import Path
 from typing import List, Optional
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+"""
+Testing & CI/CD Module
+Handles test execution, coverage analysis, and CI/CD pipeline integration
+"""
+
+
 class TestingCICDTools:
     """Handles testing and CI/CD integration tasks"""
 
@@ -17,9 +20,9 @@ class TestingCICDTools:
 
     def run_unit_tests(self) -> None:
         """Run unit tests with pytest"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RUNNING UNIT TESTS")
-        print("="*70)
+        print("=" * 70)
 
         try:
             # Run unit tests only with pytest
@@ -30,7 +33,7 @@ class TestingCICDTools:
             if result.returncode == 0:
                 print("\n✓ All unit tests passed!")
             else:
-                print(f"\nUnit tests failed:\n")
+                print("\nUnit tests failed:\n")
                 print(result.stdout)
                 if result.stderr:
                     print(f"\nErrors: {result.stderr}")
@@ -44,9 +47,9 @@ class TestingCICDTools:
 
     def run_integration_tests(self) -> None:
         """Run integration tests with pytest"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RUNNING INTEGRATION TESTS")
-        print("="*70)
+        print("=" * 70)
 
         try:
             # Run integration tests only with pytest
@@ -57,7 +60,7 @@ class TestingCICDTools:
             if result.returncode == 0:
                 print("\n✓ All integration tests passed!")
             else:
-                print(f"\nIntegration tests failed:\n")
+                print("\nIntegration tests failed:\n")
                 print(result.stdout)
                 if result.stderr:
                     print(f"\nErrors: {result.stderr}")
@@ -71,9 +74,9 @@ class TestingCICDTools:
 
     def run_all_tests(self) -> None:
         """Run all tests with coverage"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RUNNING ALL TESTS WITH COVERAGE")
-        print("="*70)
+        print("=" * 70)
 
         try:
             # Run all tests with coverage
@@ -82,7 +85,7 @@ class TestingCICDTools:
                 "-v", "--cov=src", "--cov-report=term-missing"
             ], capture_output=True, text=True)
 
-            print(f"\nTest Results:\n")
+            print("\nTest Results:\n")
             print(result.stdout)
             if result.stderr:
                 print(f"\nErrors: {result.stderr}")
@@ -94,9 +97,9 @@ class TestingCICDTools:
 
     def run_test_coverage(self) -> None:
         """Generate and display test coverage"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RUNNING TEST COVERAGE ANALYSIS")
-        print("="*70)
+        print("=" * 70)
 
         try:
             # Run coverage analysis only
@@ -106,13 +109,13 @@ class TestingCICDTools:
                 "--cov-report=html:htmlcov", "--cov-report=xml"
             ], capture_output=True, text=True)
 
-            print(f"\nCoverage Analysis Results:\n")
+            print("\nCoverage Analysis Results:\n")
             print(result.stdout)
             if result.stderr:
                 print(f"\nErrors: {result.stderr}")
 
-            print(f"\nHTML coverage report saved to 'htmlcov/' directory")
-            print(f"XML coverage report saved as 'coverage.xml'")
+            print("\nHTML coverage report saved to 'htmlcov/' directory")
+            print("XML coverage report saved as 'coverage.xml'")
 
         except Exception as e:
             print(f"\n⚠ Error running coverage analysis: {e}")
@@ -121,9 +124,9 @@ class TestingCICDTools:
 
     def generate_test_report(self) -> None:
         """Generate a comprehensive test report"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("GENERATING COMPREHENSIVE TEST REPORT")
-        print("="*70)
+        print("=" * 70)
 
         try:
             # Run tests with multiple output formats
@@ -133,14 +136,14 @@ class TestingCICDTools:
                 "tests/",
                 "-v",
                 "--tb=short",
-                f"--junit-xml=test-results.xml",
+                "--junit-xml=test-results.xml",
                 "--cov=src",
                 "--cov-report=term-missing",
                 "--cov-report=html:htmlcov",
                 "--cov-report=xml:coverage.xml"
             ], capture_output=True, text=True)
 
-            print(f"\nTest Results:\n")
+            print("\nTest Results:\n")
             print(result.stdout)
 
             if result.returncode == 0:
@@ -158,9 +161,9 @@ class TestingCICDTools:
 
     def run_ci_checks(self) -> None:
         """Run all CI checks (formatting, linting, type checking, tests)"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("RUNNING CI CHECKS (Format, Lint, Type, Test)")
-        print("="*70)
+        print("=" * 70)
 
         print("This would typically run in a CI environment.")
         print("For local execution, this runs a comprehensive check.")
@@ -179,7 +182,8 @@ class TestingCICDTools:
                 print("   ✓ Code formatting is correct")
             else:
                 print("   ⚠ Code formatting issues found")
-                print(format_result.stdout[:500] + "..." if len(format_result.stdout) > 500 else format_result.stdout)
+                print(format_result.stdout[:500] + "..." if len(
+                    format_result.stdout) > 500 else format_result.stdout)
 
             # Run linting
             print("\n2. Running linting...")
@@ -192,7 +196,8 @@ class TestingCICDTools:
                 print("   ✓ No linting issues found")
             else:
                 print("   ⚠ Linting issues found")
-                print(lint_result.stdout[:500] + "..." if len(lint_result.stdout) > 500 else lint_result.stdout)
+                print(lint_result.stdout[:500] + "..." if len(
+                    lint_result.stdout) > 500 else lint_result.stdout)
 
             # Run type checking
             print("\n3. Running type checking...")
@@ -204,7 +209,8 @@ class TestingCICDTools:
                 print("   ✓ Type checking passed")
             else:
                 print("   ⚠ Type checking issues found")
-                print(type_result.stdout[:500] + "..." if len(type_result.stdout) > 500 else type_result.stdout)
+                print(type_result.stdout[:500] + "..." if len(
+                    type_result.stdout) > 500 else type_result.stdout)
 
             # Run tests
             print("\n4. Running tests...")
@@ -216,7 +222,8 @@ class TestingCICDTools:
                 print("   ✓ All tests passed")
             else:
                 print("   ⚠ Some tests failed")
-                print(test_result.stdout[:500] + "..." if len(test_result.stdout) > 500 else test_result.stdout)
+                print(test_result.stdout[:500] + "..." if len(
+                    test_result.stdout) > 500 else test_result.stdout)
 
             print("\nCI Checks completed!")
 
@@ -227,9 +234,9 @@ class TestingCICDTools:
 
     def setup_ci_pipeline(self) -> None:
         """Help set up CI pipeline configuration"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("SETTING UP CI PIPELINE")
-        print("="*70)
+        print("=" * 70)
 
         print("This tool helps you create CI pipeline configuration files.")
         print("\nAvailable CI platforms:")
@@ -240,7 +247,8 @@ class TestingCICDTools:
         print("  5. Travis CI")
 
         try:
-            choice = input("\nSelect a CI platform (1-5) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nSelect a CI platform (1-5) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._create_github_actions_config()
@@ -537,6 +545,8 @@ notifications:
             f.write(config_content)
 
         print(f"\n✓ Travis CI configuration created: {config_path}")
+
+
 class TestingCICDMenu(Menu):
     """Menu for testing and CI/CD tools"""
 

@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+
 class APITools:
     """Handles API development and testing tasks"""
 
@@ -18,13 +20,14 @@ class APITools:
 
     def create_api_client(self) -> None:
         """Help create an API client for testing"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("API CLIENT GENERATOR")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool helps create an API client for testing your APIs.")
 
-        api_base_url = input("Enter API base URL (e.g., http://localhost:8000/api/v1): ").strip()
+        api_base_url = input(
+            "Enter API base URL (e.g., http://localhost:8000/api/v1): ").strip()
         if not api_base_url:
             print("API base URL is required!")
             input("\nPress Enter to continue...")
@@ -48,15 +51,18 @@ class APITools:
         print("    def __init__(self, api_key: str = None):")
         print("        self.session = requests.Session()")
         print("        if api_key:")
-        print("            self.session.headers.update({'Authorization': f'Bearer {api_key}'})")
+        print(
+            "            self.session.headers.update({'Authorization': f'Bearer {api_key}'})")
         print()
-        print("    def get(self, endpoint: str, params: Dict[str, Any] = None):")
+        print(
+            "    def get(self, endpoint: str, params: Dict[str, Any] = None):")
         print("        url = f\"{api_base_url}/{endpoint.lstrip('/')}\"")
         print("        response = self.session.get(url, params=params)")
         print("        response.raise_for_status()")
         print("        return response.json()")
         print()
-        print("    def post(self, endpoint: str, data: Dict[str, Any] = None):")
+        print(
+            "    def post(self, endpoint: str, data: Dict[str, Any] = None):")
         print("        url = f\"{api_base_url}/{endpoint.lstrip('/')}\"")
         print("        response = self.session.post(url, json=data)")
         print("        response.raise_for_status()")
@@ -130,9 +136,9 @@ if __name__ == "__main__":
 
     def test_api_endpoint(self) -> None:
         """Test an API endpoint"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("API ENDPOINT TESTING")
-        print("="*70)
+        print("=" * 70)
 
         api_url = input("Enter API endpoint URL: ").strip()
         if not api_url:
@@ -146,14 +152,16 @@ if __name__ == "__main__":
             input("\nPress Enter to continue...")
             return
 
-        method = input("HTTP method (GET, POST, PUT, DELETE) [default: GET]: ").strip().upper() or "GET"
+        method = input(
+            "HTTP method (GET, POST, PUT, DELETE) [default: GET]: ").strip().upper() or "GET"
         if method not in ["GET", "POST", "PUT", "DELETE"]:
             print("Invalid HTTP method. Using GET.")
             method = "GET"
 
         # Get headers
         headers = {}
-        headers_input = input("Add headers? (format: key=value,key2=value2) [optional]: ").strip()
+        headers_input = input(
+            "Add headers? (format: key=value,key2=value2) [optional]: ").strip()
         if headers_input:
             try:
                 for pair in headers_input.split(","):
@@ -165,7 +173,8 @@ if __name__ == "__main__":
         # Get data for POST/PUT
         data = None
         if method in ["POST", "PUT"]:
-            data_input = input("Request body (JSON format) [optional]: ").strip()
+            data_input = input(
+                "Request body (JSON format) [optional]: ").strip()
             if data_input:
                 try:
                     data = json.loads(data_input)
@@ -190,7 +199,7 @@ if __name__ == "__main__":
             try:
                 response_json = response.json()
                 print(f"Response JSON: {json.dumps(response_json, indent=2)}")
-            except:
+            except BaseException:
                 print(f"Response Text: {response.text[:500]}")  # Limit output
                 if len(response.text) > 500:
                     print("... (response truncated)")
@@ -204,9 +213,9 @@ if __name__ == "__main__":
 
     def mock_api_server(self) -> None:
         """Create a simple mock API server"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("MOCK API SERVER")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis creates a simple mock API server for frontend development.")
         print("It requires the 'flask' package.")
@@ -216,10 +225,12 @@ if __name__ == "__main__":
             import flask
             print("✓ Flask is available")
         except ImportError:
-            install = input("Flask is not installed. Install Flask? (y/n): ").lower()
+            install = input(
+                "Flask is not installed. Install Flask? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "flask"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "flask"], check=True)
                     print("✓ Flask installed successfully")
                     import flask
                 except subprocess.CalledProcessError:
@@ -309,7 +320,8 @@ if __name__ == '__main__':
                 def run_server():
                     exec(mock_content)
 
-                server_thread = threading.Thread(target=run_server, daemon=True)
+                server_thread = threading.Thread(
+                    target=run_server, daemon=True)
                 server_thread.start()
 
                 print(f"Mock server started in background on port {port}")
@@ -323,9 +335,9 @@ if __name__ == '__main__':
 
     def run_api_load_test(self) -> None:
         """Run API load testing"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("API LOAD TESTING")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis feature would run load testing on your API.")
         print("For proper load testing, tools like 'locust' or 'wrk' are recommended.")
@@ -335,10 +347,12 @@ if __name__ == '__main__':
             import locust
             print("✓ Locust is available")
         except ImportError:
-            install = input("Locust is not installed. Install Locust? (y/n): ").lower()
+            install = input(
+                "Locust is not installed. Install Locust? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "locust"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "locust"], check=True)
                     print("✓ Locust installed successfully")
                 except subprocess.CalledProcessError:
                     print("⚠ Failed to install Locust")
@@ -366,7 +380,8 @@ if __name__ == '__main__':
         print()
         print(f"    @task")
         print(f"    def api_request(self):")
-        print(f"        response = self.client.get(\"/{api_url.split('/')[-1]}\")")
+        print(
+            f"        response = self.client.get(\"/{api_url.split('/')[-1]}\")")
         print(f"        print(f'Response: {{response.status_code}}')")
         print("```")
 
@@ -377,7 +392,8 @@ if __name__ == '__main__':
         print("4. Open http://localhost:8089 in your browser")
         print("5. Configure test parameters and start the test")
 
-        create_locustfile = input("\nCreate example locustfile.py? (y/n): ").lower()
+        create_locustfile = input(
+            "\nCreate example locustfile.py? (y/n): ").lower()
         if create_locustfile == 'y':
             # Determine base URL and endpoint
             if '/' in api_url:
@@ -414,9 +430,9 @@ class APIUser(HttpUser):
 
     def generate_api_documentation(self) -> None:
         """Generate API documentation from code or OpenAPI spec"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("API DOCUMENTATION GENERATOR")
-        print("="*70)
+        print("=" * 70)
 
         print("\nAPI documentation generation depends on the framework used.")
 
@@ -454,7 +470,8 @@ class APIUser(HttpUser):
             print("Documentation generation requires framework-specific tools.")
 
         # Create sample OpenAPI spec
-        create_openapi = input("\nCreate sample OpenAPI specification file? (y/n): ").lower()
+        create_openapi = input(
+            "\nCreate sample OpenAPI specification file? (y/n): ").lower()
         if create_openapi == 'y':
             openapi_spec = {
                 "openapi": "3.0.0",
@@ -540,6 +557,8 @@ class APIUser(HttpUser):
             print("✓ Sample OpenAPI specification created as openapi_spec.json")
 
         input("\nPress Enter to continue...")
+
+
 class APIMenu(Menu):
     """Menu for API tools"""
 

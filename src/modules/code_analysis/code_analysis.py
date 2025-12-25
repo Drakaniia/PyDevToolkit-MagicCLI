@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+
 class CodeAnalysisTools:
     """Handles code analysis and metrics tasks"""
 
@@ -18,9 +20,9 @@ class CodeAnalysisTools:
 
     def detect_code_duplication(self) -> None:
         """Detect code duplication using tools like Vulture or custom logic"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("CODE DUPLICATION DETECTION")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis feature detects duplicate code across your project.")
         print("It uses the 'vulture' package to find unused code and potential duplicates.")
@@ -30,10 +32,12 @@ class CodeAnalysisTools:
             import vulture
             print("✓ Vulture is available")
         except ImportError:
-            install = input("Vulture is not installed. Install Vulture? (y/n): ").lower()
+            install = input(
+                "Vulture is not installed. Install Vulture? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "vulture"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "vulture"], check=True)
                     print("✓ Vulture installed successfully")
                     import vulture
                 except subprocess.CalledProcessError:
@@ -69,9 +73,9 @@ class CodeAnalysisTools:
 
     def run_static_analysis(self) -> None:
         """Run comprehensive static analysis on code"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("STATIC CODE ANALYSIS")
-        print("="*70)
+        print("=" * 70)
 
         print("\nRunning static analysis using multiple tools...")
 
@@ -82,8 +86,10 @@ class CodeAnalysisTools:
             ], capture_output=True, text=True)
 
             print("\nPYLINT ANALYSIS:")
-            if result.returncode in [0, 1, 2]:  # 0=ok, 1=error in code, 2=error in pylint
-                print(result.stdout[-1000:])  # Show last 1000 characters to avoid too much output
+            if result.returncode in [
+                    0, 1, 2]:  # 0=ok, 1=error in code, 2=error in pylint
+                # Show last 1000 characters to avoid too much output
+                print(result.stdout[-1000:])
             else:
                 print("Pylint error:", result.stderr)
 
@@ -92,7 +98,8 @@ class CodeAnalysisTools:
             install = input("Install Pylint? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "pylint"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "pylint"], check=True)
                     print("✓ Pylint installed successfully")
                 except subprocess.CalledProcessError:
                     print("⚠ Failed to install Pylint")
@@ -114,7 +121,8 @@ class CodeAnalysisTools:
             install = input("Install Bandit? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "bandit"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "bandit"], check=True)
                     print("✓ Bandit installed successfully")
                 except subprocess.CalledProcessError:
                     print("⚠ Failed to install Bandit")
@@ -124,9 +132,9 @@ class CodeAnalysisTools:
 
     def measure_complexity_metrics(self) -> None:
         """Measure code complexity metrics"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("COMPLEXITY METRICS ANALYSIS")
-        print("="*70)
+        print("=" * 70)
 
         print("\nAnalyzing code complexity metrics...")
 
@@ -152,7 +160,8 @@ class CodeAnalysisTools:
             install = input("Install Radon? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "radon"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "radon"], check=True)
                     print("✓ Radon installed successfully")
 
                     # Rerun the analysis
@@ -178,9 +187,9 @@ class CodeAnalysisTools:
 
     def analyze_code_maintainability(self) -> None:
         """Analyze code maintainability using various metrics"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("CODE MAINTAINABILITY ANALYSIS")
-        print("="*70)
+        print("=" * 70)
 
         print("\nAnalyzing code maintainability...")
 
@@ -246,7 +255,8 @@ class CodeAnalysisTools:
 
         print(f"\nFound {len(large_functions)} large functions (>50 lines):")
         for func in large_functions[:10]:  # Show first 10
-            print(f"  - {func['file']}::{func['function']} ({func['lines']} lines)")
+            print(
+                f"  - {func['file']}::{func['function']} ({func['lines']} lines)")
         if len(large_functions) > 10:
             print(f"  ... and {len(large_functions) - 10} more")
 
@@ -260,9 +270,9 @@ class CodeAnalysisTools:
 
     def generate_metrics_report(self) -> None:
         """Generate a comprehensive metrics report"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("COMPREHENSIVE METRICS REPORT")
-        print("="*70)
+        print("=" * 70)
 
         print("\nGenerating a comprehensive metrics report combining:")
         print("  - Code complexity metrics")
@@ -281,13 +291,14 @@ class CodeAnalysisTools:
                     lines = len(f.readlines())
                     total_lines += lines
                     total_files += 1
-            except:
+            except BaseException:
                 continue
 
         print(f"\nPROJECT STATISTICS:")
         print(f"  - Total Python files: {total_files}")
         print(f"  - Total lines of code: {total_lines}")
-        print(f"  - Average lines per file: {total_lines/total_files if total_files > 0 else 0:.1f}")
+        print(
+            f"  - Average lines per file: {total_lines/total_files if total_files > 0 else 0:.1f}")
 
         # Function count
         function_count = 0
@@ -305,7 +316,7 @@ class CodeAnalysisTools:
                         function_count += 1
                     elif isinstance(node, ast.ClassDef):
                         class_count += 1
-            except:
+            except BaseException:
                 continue
 
         print(f"  - Total functions: {function_count}")
@@ -313,9 +324,10 @@ class CodeAnalysisTools:
 
         # Run complexity analysis if Radon is available
         try:
-            result = subprocess.run([
-                sys.executable, "-m", "radon", "cc", "src/", "-s", "--total-average"
-            ], capture_output=True, text=True)
+            result = subprocess.run(
+                [sys.executable, "-m", "radon", "cc", "src/", "-s",
+                 "--total-average"],
+                capture_output=True, text=True)
 
             if result.returncode == 0:
                 print(f"\nCOMPLEXITY ANALYSIS:")
@@ -362,9 +374,9 @@ Generated on: {__import__('datetime').datetime.now()}
 
     def automated_code_review(self) -> None:
         """Perform automated code review"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("AUTOMATED CODE REVIEW")
-        print("="*70)
+        print("=" * 70)
 
         print("\nPerforming automated code review using multiple tools...")
 
@@ -378,14 +390,17 @@ Generated on: {__import__('datetime').datetime.now()}
 
         # Run flake8 for PEP 8 issues
         try:
-            result = subprocess.run([
-                sys.executable, "-m", "flake8", "src/",
-                "--max-line-length=88", "--format='%(path)s:%(line)d:%(col)d: %(code)s %(text)s'"
-            ], capture_output=True, text=True)
+            result = subprocess.run(
+                [sys.executable, "-m", "flake8", "src/",
+                 "--max-line-length=88",
+                 "--format='%(path)s:%(line)d:%(col)d: %(code)s %(text)s'"],
+                capture_output=True, text=True)
 
             if result.returncode != 0:
-                review_results['pep8_issues'] = len(result.stdout.strip().split('\n'))
-                print(f"  - Found {review_results['pep8_issues']} PEP 8 issues")
+                review_results['pep8_issues'] = len(
+                    result.stdout.strip().split('\n'))
+                print(
+                    f"  - Found {review_results['pep8_issues']} PEP 8 issues")
 
         except FileNotFoundError:
             print("  - Flake8 not installed (install with: pip install flake8)")
@@ -397,9 +412,11 @@ Generated on: {__import__('datetime').datetime.now()}
             ], capture_output=True, text=True)
 
             if result.returncode == 0:
-                high_complexity = [line for line in result.stdout.split('\n') if 'C' in line]
+                high_complexity = [
+                    line for line in result.stdout.split('\n') if 'C' in line]
                 review_results['complexity_issues'] = len(high_complexity)
-                print(f"  - Found {review_results['complexity_issues']} high-complexity functions (complexity > 10)")
+                print(
+                    f"  - Found {review_results['complexity_issues']} high-complexity functions (complexity > 10)")
 
         except FileNotFoundError:
             print("  - Radon not installed (install with: pip install radon)")
@@ -411,10 +428,13 @@ Generated on: {__import__('datetime').datetime.now()}
             ], capture_output=True, text=True)
 
             if result.returncode in [0, 1]:  # 0=no issues, 1=issues found
-                security_issues = [line for line in result.stdout.split('\n') if 'Issue:' in line]
+                security_issues = [
+                    line for line in result.stdout.split('\n')
+                    if 'Issue:' in line]
                 review_results['security_issues'] = len(security_issues)
                 if review_results['security_issues'] > 0:
-                    print(f"  - Found {review_results['security_issues']} potential security issues")
+                    print(
+                        f"  - Found {review_results['security_issues']} potential security issues")
 
         except FileNotFoundError:
             print("  - Bandit not installed (install with: pip install bandit)")
@@ -447,22 +467,28 @@ Generated on: {__import__('datetime').datetime.now()}
                             review_results['suggestions'].append(
                                 f"Class '{node.name}' in {file_path} is very long ({line_count} lines), consider refactoring"
                             )
-            except:
+            except BaseException:
                 continue
 
-        print(f"  - Analyzed {total_functions} functions and {total_classes} classes")
+        print(
+            f"  - Analyzed {total_functions} functions and {total_classes} classes")
 
         # Provide specific suggestions
         if review_results['suggestions']:
             print(f"\nAUTOMATED SUGGESTIONS:")
-            for i, suggestion in enumerate(review_results['suggestions'][:5], 1):  # Show first 5
+            for i, suggestion in enumerate(
+                    review_results['suggestions'][:5], 1):  # Show first 5
                 print(f"  {i}. {suggestion}")
             if len(review_results['suggestions']) > 5:
-                print(f"  ... and {len(review_results['suggestions']) - 5} more")
+                print(
+                    f"  ... and {len(review_results['suggestions']) - 5} more")
 
-        print(f"\nReview completed. Total findings: {sum(len(review_results[key]) if isinstance(review_results[key], list) else review_results[key] for key in ['pep8_issues', 'complexity_issues', 'security_issues'])}")
+        print(
+            f"\nReview completed. Total findings: {sum(len(review_results[key]) if isinstance(review_results[key], list) else review_results[key] for key in ['pep8_issues', 'complexity_issues', 'security_issues'])}")
 
         input("\nPress Enter to continue...")
+
+
 class CodeAnalysisMenu(Menu):
     """Menu for code analysis tools"""
 

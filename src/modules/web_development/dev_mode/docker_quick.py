@@ -1,18 +1,58 @@
-"""
-automation/dev_mode/docker_quick.py
-Quick Docker commands for development
-"""
 import subprocess
 import json
 import re
 from pathlib import Path
 from typing import Optional, Dict, List, Tuple
 from . import _base
-
-# Import security and logging modules inside functions to avoid circular imports
 from . import menu_utils
 from ._base import DevModeCommand
 from .menu_utils import get_choice_with_arrows
+            from core.security.validator import SecurityValidator, safe_input
+                from core.utils.exceptions import AutomationError
+            from core.security.validator import SecurityValidator, safe_input
+                from core.utils.exceptions import AutomationError
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator, safe_input
+            from core.utils.exceptions import AutomationError
+            from core.security.validator import SecurityValidator, safe_input
+            from core.utils.exceptions import AutomationError
+        from core.security.validator import SecurityValidator
+        from core.utils.logging import log_command_execution
+        from core.utils.exceptions import AutomationError
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+                from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+            from core.security.validator import SecurityValidator
+
+"""
+automation/dev_mode/docker_quick.py
+Quick Docker commands for development
+"""
+
+# Import security and logging modules inside functions to avoid circular imports
 class DockerQuickCommand(DevModeCommand):
     """Command for quick Docker operations"""
 
@@ -118,31 +158,45 @@ class DockerQuickCommand(DevModeCommand):
         dockerfile_path = Path("Dockerfile")
         if not dockerfile_path.exists():
             print(f"\n Generating Dockerfile for {project_info['type']} project...")
-            self._generate_dockerfile(project_info, build_dir, start_command, port)
+            self._generate_dockerfile(
+    project_info,
+    build_dir,
+    start_command,
+    port)
             print(" Dockerfile created successfully!")
         else:
             print(f"\n  Dockerfile already exists at {dockerfile_path}")
-            overwrite = input("Do you want to overwrite it? (y/n, default: n): ").strip().lower()
+            overwrite = input(
+    "Do you want to overwrite it? (y/n,
+    default: n): ").strip().lower()
             if overwrite in ['y', 'yes']:
-                self._generate_dockerfile(project_info, build_dir, start_command, port)
+                self._generate_dockerfile(
+    project_info,
+    build_dir,
+    start_command,
+    port)
                 print(" Dockerfile updated successfully!")
 
         # Optionally generate .dockerignore
         dockerignore_path = Path(".dockerignore")
         if not dockerignore_path.exists():
-            generate_ignore = input("\n Generate .dockerignore file? (y/n, default: y): ").strip().lower()
+            generate_ignore = input(
+    "\n Generate .dockerignore file? (y/n,
+    default: y): ").strip().lower()
             if generate_ignore != 'n' and generate_ignore != 'no':
                 self._generate_dockerignore(project_info)
                 print(" .dockerignore created successfully!")
 
         # Summary
-        print(f"\n Docker initialization complete!")
+        print("\n Docker initialization complete!")
         print(f" Build directory: {build_dir}")
         print(f" Start command: {start_command}")
         print(f" Port: {port}")
 
         # Offer to build image now
-        build_now = input(f"\n Build Docker image now? (y/n, default: y): ").strip().lower()
+        build_now = input(
+    f"\n Build Docker image now? (y/n,
+    default: y): ").strip().lower()
         if build_now != 'n' and build_now != 'no':
             project_name = Path.cwd().name.lower()
             self._build_image(interactive=False,
@@ -278,7 +332,7 @@ class DockerQuickCommand(DevModeCommand):
 
     def _prompt_start_command(self, project_info: Dict[str, str]) -> str:
         """Prompt for start command with intelligent suggestions"""
-        print(f"\n Start Command")
+        print("\n Start Command")
         print("-" * 15)
 
         suggestions = []
@@ -295,7 +349,9 @@ class DockerQuickCommand(DevModeCommand):
                         # Prioritize common start scripts
                         for script_name in ['start', 'dev', 'serve', 'preview']:
                             if script_name in scripts:
-                                pkg_mgr = project_info.get('package_manager', 'npm')
+                                pkg_mgr = project_info.get(
+    'package_manager',
+    'npm')
                                 suggestions.append(f"{pkg_mgr} run {script_name}")
                 except (FileNotFoundError, PermissionError, json.JSONDecodeError):
                     pass
@@ -306,7 +362,10 @@ class DockerQuickCommand(DevModeCommand):
             elif project_info['framework'] == 'nextjs':
                 suggestions.extend(['npm run start', 'npm run dev'])
             elif project_info['framework'] == 'express':
-                suggestions.extend(['npm start', 'node server.js', 'node index.js'])
+                suggestions.extend(
+    ['npm start',
+    'node server.js',
+    'node index.js'])
 
         elif project_info['type'] == 'python':
             if project_info['framework'] == 'django':
@@ -338,22 +397,18 @@ class DockerQuickCommand(DevModeCommand):
 
             default_cmd = suggestions[0]
             # Import security modules locally to avoid circular imports
-            from core.security.validator import SecurityValidator, safe_input
             user_input = safe_input(f"\nWhat command do you want to use to start the app? (default: {default_cmd}): ").strip()
             # Validate command input for safety
             if user_input and not SecurityValidator.validate_command_input(user_input):
-                from core.utils.exceptions import AutomationError
                 raise AutomationError(
                     "Command input contains potentially dangerous characters",
                     suggestion="Use only alphanumeric characters, hyphens, underscores, dots, and slashes"
                 )
             return user_input or default_cmd
         else:
-            from core.security.validator import SecurityValidator, safe_input
             user_input = safe_input("What command do you want to use to start the app?: ").strip()
             # Validate command input for safety
             if user_input and not SecurityValidator.validate_command_input(user_input):
-                from core.utils.exceptions import AutomationError
                 raise AutomationError(
                     "Command input contains potentially dangerous characters",
                     suggestion="Use only alphanumeric characters, hyphens, underscores, dots, and slashes"
@@ -362,7 +417,7 @@ class DockerQuickCommand(DevModeCommand):
 
     def _prompt_port(self, project_info: Dict[str, str]) -> str:
         """Prompt for port with intelligent detection"""
-        print(f"\n Port Configuration")
+        print("\n Port Configuration")
         print("-" * 20)
 
         detected_port = self._detect_port(project_info)
@@ -385,7 +440,9 @@ class DockerQuickCommand(DevModeCommand):
                 'fastapi': '8000',
             }
 
-            default_port = default_ports.get(project_info.get('framework'), '8080')
+            default_port = default_ports.get(
+    project_info.get('framework'),
+    '8080')
             user_input = input(f"What port does your server listen on? (default: {default_port}): ").strip()
             return user_input or default_port
 
@@ -428,17 +485,35 @@ class DockerQuickCommand(DevModeCommand):
         dockerfile_content = ""
 
         if project_info['type'] == 'nodejs':
-            dockerfile_content = self._generate_nodejs_dockerfile(project_info, build_dir, start_command, port)
+            dockerfile_content = self._generate_nodejs_dockerfile(
+    project_info,
+    build_dir,
+    start_command,
+    port)
         elif project_info['type'] == 'python':
-            dockerfile_content = self._generate_python_dockerfile(project_info, build_dir, start_command, port)
+            dockerfile_content = self._generate_python_dockerfile(
+    project_info,
+    build_dir,
+    start_command,
+    port)
         elif project_info['type'] == 'java':
-            dockerfile_content = self._generate_java_dockerfile(project_info, build_dir, start_command, port)
+            dockerfile_content = self._generate_java_dockerfile(
+    project_info,
+    build_dir,
+    start_command,
+    port)
         elif project_info['type'] == 'go':
-            dockerfile_content = self._generate_go_dockerfile(start_command, port)
+            dockerfile_content = self._generate_go_dockerfile(
+    start_command,
+    port)
         elif project_info['type'] == 'rust':
-            dockerfile_content = self._generate_rust_dockerfile(start_command, port)
+            dockerfile_content = self._generate_rust_dockerfile(
+    start_command,
+    port)
         else:
-            dockerfile_content = self._generate_generic_dockerfile(start_command, port)
+            dockerfile_content = self._generate_generic_dockerfile(
+    start_command,
+    port)
 
         # Write Dockerfile
         with open('Dockerfile', 'w') as f:
@@ -459,7 +534,7 @@ class DockerQuickCommand(DevModeCommand):
             install_cmd = 'npm install'
             copy_lock = 'COPY package-lock.json* .'
 
-        return f"""# Node.js Dockerfile generated by Docker Init
+        return """# Node.js Dockerfile generated by Docker Init
 FROM node:18-alpine AS builder
 
 WORKDIR /app
@@ -514,7 +589,7 @@ CMD {json.dumps(start_command.split())}
         else:
             additional_deps = ""
 
-        return f"""# Python Dockerfile generated by Docker Init
+        return """# Python Dockerfile generated by Docker Init
 FROM {base_image}
 
 WORKDIR /app
@@ -569,7 +644,7 @@ RUN ./gradlew build -x test
 """
             jar_path = "build/libs/*.jar"
 
-        return f"""# Java Dockerfile generated by Docker Init
+        return """# Java Dockerfile generated by Docker Init
 FROM openjdk:17-jdk-slim AS builder
 
 WORKDIR /app
@@ -601,7 +676,7 @@ CMD ["java", "-jar", "app.jar"]
 
     def _generate_go_dockerfile(self, start_command: str, port: str) -> str:
         """Generate Go specific Dockerfile"""
-        return f"""# Go Dockerfile generated by Docker Init
+        return """# Go Dockerfile generated by Docker Init
 FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
@@ -640,7 +715,7 @@ CMD ["./main"]
 
     def _generate_rust_dockerfile(self, start_command: str, port: str) -> str:
         """Generate Rust specific Dockerfile"""
-        return f"""# Rust Dockerfile generated by Docker Init
+        return """# Rust Dockerfile generated by Docker Init
 FROM rust:1.70 AS builder
 
 WORKDIR /app
@@ -678,7 +753,7 @@ CMD ["./app"]
 
     def _generate_generic_dockerfile(self, start_command: str, port: str) -> str:
         """Generate generic Dockerfile"""
-        return f"""# Generic Dockerfile generated by Docker Init
+        return """# Generic Dockerfile generated by Docker Init
 FROM alpine:latest
 
 WORKDIR /app
@@ -790,7 +865,6 @@ CMD {json.dumps(start_command.split())}
     def _is_docker_running(self) -> bool:
         """Check if Docker daemon is running"""
         try:
-            from core.security.validator import SecurityValidator
             result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'info'],
                 capture_output=True,
@@ -803,7 +877,6 @@ CMD {json.dumps(start_command.split())}
     def _get_available_images(self) -> list:
         """Get list of available Docker images"""
         try:
-            from core.security.validator import SecurityValidator
             result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'images', '--format', '{{.Repository}}:{{.Tag}}'],
                 capture_output=True,
@@ -822,7 +895,6 @@ CMD {json.dumps(start_command.split())}
     def _image_exists(self, image_name: str) -> bool:
         """Check if a Docker image exists"""
         try:
-            from core.security.validator import SecurityValidator
             result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'image', 'inspect', image_name],
                 capture_output=True,
@@ -845,8 +917,6 @@ CMD {json.dumps(start_command.split())}
                 return
 
             # Get Dockerfile path
-            from core.security.validator import SecurityValidator, safe_input
-            from core.utils.exceptions import AutomationError
             dockerfile = safe_input("Dockerfile path (default: ./Dockerfile): ").strip() or 'Dockerfile'
             # Validate path for safety
             if dockerfile and not SecurityValidator.validate_path(dockerfile):
@@ -856,8 +926,6 @@ CMD {json.dumps(start_command.split())}
                 )
 
             # Get build context
-            from core.security.validator import SecurityValidator, safe_input
-            from core.utils.exceptions import AutomationError
             context = safe_input("Build context (default: .): ").strip() or '.'
             # Validate path for safety
             if context and not SecurityValidator.validate_path(context):
@@ -880,9 +948,6 @@ CMD {json.dumps(start_command.split())}
             return
 
         # Import security modules locally to avoid circular imports
-        from core.security.validator import SecurityValidator
-        from core.utils.logging import log_command_execution
-        from core.utils.exceptions import AutomationError
 
         # Build command
         cmd = ['docker', 'build', '-t', image_name, '-f', dockerfile, context]
@@ -900,12 +965,19 @@ CMD {json.dumps(start_command.split())}
         try:
             # Use secure subprocess run with logging
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            log_command_execution('docker build', f"image: {image_name}, dockerfile: {dockerfile}, context: {context}", True)
+            log_command_execution(
+    'docker build',
+    f"image: {image_name},
+    dockerfile: {dockerfile},
+    context: {context}",
+    True)
             print(f"\n Image '{image_name}' built successfully!")
 
             # Offer to run the container after successful build
             if interactive:
-                run_now = input(f"\n Run container from '{image_name}' now? (y/n, default: n): ").strip().lower()
+                run_now = input(
+    f"\n Run container from '{image_name}' now? (y/n,
+    default: n): ").strip().lower()
                 if run_now in ['y', 'yes']:
                     print("\n" + "="*70)
                     # Pass the image name to run container function
@@ -955,13 +1027,23 @@ CMD {json.dumps(start_command.split())}
             container_name = input("Container name (optional): ").strip()
 
             # Port mapping
-            port_map = input("Port mapping (e.g., 8080:80, optional): ").strip()
+            port_map = input(
+    "Port mapping (e.g.,
+    8080:80,
+    optional): ").strip()
 
             # Environment variables
-            env_vars = input("Environment variables (e.g., ENV1=value1,ENV2=value2, optional): ").strip()
+            env_vars = input(
+    "Environment variables (e.g.,
+    ENV1=value1,
+    ENV2=value2,
+    optional): ").strip()
 
             # Volume mapping
-            volume_map = input("Volume mapping (e.g., /host/path:/container/path, optional): ").strip()
+            volume_map = input(
+    "Volume mapping (e.g.,
+    /host/path:/container/path,
+    optional): ").strip()
 
             # Run mode with arrow navigation
             mode_options = ["Detached (background)", "Interactive (foreground)"]
@@ -1007,8 +1089,11 @@ CMD {json.dumps(start_command.split())}
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
-            result = SecurityValidator.safe_subprocess_run(cmd, check=True, capture_output=True, text=True)
+            result = SecurityValidator.safe_subprocess_run(
+    cmd,
+    check=True,
+    capture_output=True,
+    text=True)
 
             if detached:
                 container_id = result.stdout.strip()[:12]
@@ -1023,7 +1108,7 @@ CMD {json.dumps(start_command.split())}
                 print(" Container stopped")
 
         except subprocess.CalledProcessError as e:
-            print(f"\n Failed to run container:")
+            print("\n Failed to run container:")
             print(f"   Exit code: {e.returncode}")
             if e.stderr:
                 print(f"   Error: {e.stderr.strip()}")
@@ -1052,10 +1137,17 @@ CMD {json.dumps(start_command.split())}
         port_map = input("Port mapping (e.g., 8080:80, optional): ").strip()
 
         # Environment variables
-        env_vars = input("Environment variables (e.g., ENV1=value1,ENV2=value2, optional): ").strip()
+        env_vars = input(
+    "Environment variables (e.g.,
+    ENV1=value1,
+    ENV2=value2,
+    optional): ").strip()
 
         # Volume mapping
-        volume_map = input("Volume mapping (e.g., /host/path:/container/path, optional): ").strip()
+        volume_map = input(
+    "Volume mapping (e.g.,
+    /host/path:/container/path,
+    optional): ").strip()
 
         # Run mode with arrow navigation
         mode_options = ["Detached (background)", "Interactive (foreground)"]
@@ -1091,8 +1183,11 @@ CMD {json.dumps(start_command.split())}
         print(f"\n$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
-            result = SecurityValidator.safe_subprocess_run(cmd, check=True, capture_output=True, text=True)
+            result = SecurityValidator.safe_subprocess_run(
+    cmd,
+    check=True,
+    capture_output=True,
+    text=True)
 
             if detached:
                 container_id = result.stdout.strip()[:12]
@@ -1107,7 +1202,7 @@ CMD {json.dumps(start_command.split())}
                 print(" Container stopped")
 
         except subprocess.CalledProcessError as e:
-            print(f"\n Failed to run container:")
+            print("\n Failed to run container:")
             print(f"   Exit code: {e.returncode}")
             if e.stderr:
                 print(f"   Error: {e.stderr.strip()}")
@@ -1131,7 +1226,6 @@ CMD {json.dumps(start_command.split())}
 
         # List running containers
         try:
-            from core.security.validator import SecurityValidator
             result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'ps', '--format', '{{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}'],
                 capture_output=True,
@@ -1159,7 +1253,9 @@ CMD {json.dumps(start_command.split())}
 
                 container_options.append("Stop All")
 
-                choice = get_choice_with_arrows(container_options, "Running Containers")
+                choice = get_choice_with_arrows(
+    container_options,
+    "Running Containers")
 
                 if 1 <= choice <= len(containers):
                     container_info = containers[choice - 1].split('\t')
@@ -1180,7 +1276,6 @@ CMD {json.dumps(start_command.split())}
             cmd = ['docker', 'stop', container_id]
             print(f"\n$ {' '.join(cmd)}\n")
 
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(f" Container {container_id} stopped")
 
@@ -1193,7 +1288,6 @@ CMD {json.dumps(start_command.split())}
         """Stop all running containers"""
         try:
             # Get all running container IDs
-            from core.security.validator import SecurityValidator
             result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'ps', '-q'],
                 capture_output=True,
@@ -1214,9 +1308,8 @@ CMD {json.dumps(start_command.split())}
             cmd = ['docker', 'stop'] + container_ids
             print(f"$ {' '.join(cmd[:3])} [...]")
 
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
-            print(f" All containers stopped successfully!")
+            print(" All containers stopped successfully!")
 
         except subprocess.CalledProcessError as e:
             print(f"\n Failed to stop all containers: {e}")
@@ -1233,7 +1326,6 @@ CMD {json.dumps(start_command.split())}
             cmd.append('-a')
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             print(f"\n Failed to list containers: {e}")
@@ -1244,8 +1336,10 @@ CMD {json.dumps(start_command.split())}
         print("="*70 + "\n")
 
         try:
-            from core.security.validator import SecurityValidator
-            SecurityValidator.safe_subprocess_run(['docker', 'images'], check=True)
+            SecurityValidator.safe_subprocess_run(
+    ['docker',
+    'images'],
+    check=True)
         except subprocess.CalledProcessError as e:
             print(f"\n Failed to list images: {e}")
 
@@ -1269,8 +1363,12 @@ CMD {json.dumps(start_command.split())}
         print("\n Pruning resources...\n")
 
         try:
-            from core.security.validator import SecurityValidator
-            SecurityValidator.safe_subprocess_run(['docker', 'system', 'prune', '-f'], check=True)
+            SecurityValidator.safe_subprocess_run(
+    ['docker',
+    'system',
+    'prune',
+    '-f'],
+    check=True)
             print("\n Resources pruned successfully!")
         except subprocess.CalledProcessError as e:
             print(f"\n Prune failed: {e}")
@@ -1305,7 +1403,9 @@ CMD {json.dumps(start_command.split())}
             "Back to Main Menu"
         ]
 
-        choice = get_choice_with_arrows(compose_options, "Docker Compose Operations")
+        choice = get_choice_with_arrows(
+    compose_options,
+    "Docker Compose Operations")
 
         if choice == 1:
             self._docker_compose_init()
@@ -1352,7 +1452,9 @@ CMD {json.dumps(start_command.split())}
         print()
 
         if compose_file_exists:
-            overwrite = input("docker-compose.yml already exists. Overwrite? (y/n, default: n): ").strip().lower()
+            overwrite = input(
+    "docker-compose.yml already exists. Overwrite? (y/n,
+    default: n): ").strip().lower()
             if overwrite not in ['y', 'yes']:
                 print(" Operation cancelled")
                 return
@@ -1368,7 +1470,9 @@ CMD {json.dumps(start_command.split())}
         services = {}
 
         # Database options
-        db_choice = input("Add database service? (postgres/mysql/mongo/redis/no, default: no): ").strip().lower()
+        db_choice = input(
+    "Add database service? (postgres/mysql/mongo/redis/no,
+    default: no): ").strip().lower()
         if db_choice in ['postgres', 'postgresql']:
             services['database'] = {
                 'image': 'postgres:15',
@@ -1398,7 +1502,9 @@ CMD {json.dumps(start_command.split())}
             }
 
         # Nginx reverse proxy
-        nginx_choice = input("Add Nginx reverse proxy? (y/n, default: n): ").strip().lower()
+        nginx_choice = input(
+    "Add Nginx reverse proxy? (y/n,
+    default: n): ").strip().lower()
         if nginx_choice in ['y', 'yes']:
             services['nginx'] = {
                 'image': 'nginx:alpine',
@@ -1408,14 +1514,18 @@ CMD {json.dumps(start_command.split())}
             }
 
         # Generate docker-compose.yml
-        compose_content = self._generate_docker_compose(project_info, app_name, app_port, services)
+        compose_content = self._generate_docker_compose(
+    project_info,
+    app_name,
+    app_port,
+    services)
 
         # Write docker-compose.yml
         compose_file = Path("docker-compose.yml")
         with open(compose_file, 'w') as f:
             f.write(compose_content)
 
-        print(f"\n docker-compose.yml created successfully!")
+        print("\n docker-compose.yml created successfully!")
 
         # Generate .env file if services have environment variables
         if services:
@@ -1425,9 +1535,9 @@ CMD {json.dumps(start_command.split())}
         if 'nginx' in services:
             self._generate_nginx_conf(app_name, app_port)
 
-        print(f"\n Docker Compose initialization complete!")
+        print("\n Docker Compose initialization complete!")
         print(f" Services configured: {len(services) + 1}")
-        print(f" Start with: docker-compose up -d")
+        print(" Start with: docker-compose up -d")
 
     def _generate_docker_compose(self, project_info: Dict[str, str], app_name: str, app_port: str, services: Dict) -> str:
         """Generate docker-compose.yml content"""
@@ -1444,21 +1554,21 @@ CMD {json.dumps(start_command.split())}
         if 'database' in services:
             db_type = services['database']['image'].split(':')[0]
             if db_type == 'postgres':
-                app_service += f"""
+                app_service += """
       - DATABASE_URL=postgresql://appuser:apppass@database:5432/appdb"""
             elif db_type == 'mysql':
-                app_service += f"""
+                app_service += """
       - DATABASE_URL=mysql://appuser:apppass@database:3306/appdb"""
             elif db_type == 'mongo':
-                app_service += f"""
+                app_service += """
       - DATABASE_URL=mongodb://admin:apppass@database:27017/appdb"""
 
         if 'redis' in services:
-            app_service += f"""
+            app_service += """
       - REDIS_URL=redis://redis:6379"""
 
         # Add volumes for development
-        app_service += f"""
+        app_service += """
     volumes:
       - .:/app
       - /app/node_modules
@@ -1466,14 +1576,14 @@ CMD {json.dumps(start_command.split())}
 
         # Add dependencies
         if 'database' in services:
-            app_service += f"""
+            app_service += """
       - database"""
         if 'redis' in services:
-            app_service += f"""
+            app_service += """
       - redis"""
 
         # Start building the compose file
-        compose_content = f"""version: '3.8'
+        compose_content = """version: '3.8'
 
 services:
 {app_service}
@@ -1581,7 +1691,9 @@ http {{
             print(" Run 'Initialize docker-compose.yml' first")
             return
 
-        detached = input("Run in detached mode? (Y/n, default: Y): ").strip().lower()
+        detached = input(
+    "Run in detached mode? (Y/n,
+    default: Y): ").strip().lower()
         detached = detached not in ['n', 'no']
 
         cmd = ['docker-compose', 'up']
@@ -1591,7 +1703,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             if detached:
                 print(" Services started successfully!")
@@ -1610,7 +1721,9 @@ http {{
             print(" docker-compose.yml not found")
             return
 
-        remove_volumes = input("Remove volumes? (y/N, default: N): ").strip().lower()
+        remove_volumes = input(
+    "Remove volumes? (y/N,
+    default: N): ").strip().lower()
         remove_volumes = remove_volumes in ['y', 'yes']
 
         cmd = ['docker-compose', 'down']
@@ -1620,7 +1733,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(" Services stopped successfully!")
         except subprocess.CalledProcessError as e:
@@ -1639,7 +1751,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(" Services restarted successfully!")
         except subprocess.CalledProcessError as e:
@@ -1668,7 +1779,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             print(f" Failed to view logs: {e}")
@@ -1692,7 +1802,6 @@ http {{
             print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             if show_output:
@@ -1721,7 +1830,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(f" Service '{service}' scaled to {replicas} replicas!")
         except subprocess.CalledProcessError as e:
@@ -1736,7 +1844,9 @@ http {{
             print(" docker-compose.yml not found")
             return
 
-        no_cache = input("Build without cache? (y/N, default: N): ").strip().lower()
+        no_cache = input(
+    "Build without cache? (y/N,
+    default: N): ").strip().lower()
         no_cache = no_cache in ['y', 'yes']
 
         service = input("Specific service? (leave empty for all): ").strip()
@@ -1750,7 +1860,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(" Services built successfully!")
         except subprocess.CalledProcessError as e:
@@ -1774,7 +1883,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(" Images pulled successfully!")
         except subprocess.CalledProcessError as e:
@@ -1836,7 +1944,9 @@ http {{
             "Back to Main Menu"
         ]
 
-        choice = get_choice_with_arrows(swarm_options, "Docker Swarm Operations")
+        choice = get_choice_with_arrows(
+    swarm_options,
+    "Docker Swarm Operations")
 
         if choice == 1:
             self._swarm_init()
@@ -1872,7 +1982,6 @@ http {{
     def _get_swarm_status(self) -> Dict[str, str]:
         """Get Docker Swarm status"""
         try:
-            from core.security.validator import SecurityValidator
             result = SecurityValidator.safe_subprocess_run(
                 ['docker', 'info', '--format', '{{.Swarm.LocalNodeState}}'],
                 capture_output=True,
@@ -1918,14 +2027,20 @@ http {{
             print(f"   Node ID: {swarm_status.get('node_id', 'unknown')}")
             print(f"   Address: {swarm_status.get('node_addr', 'unknown')}")
 
-            reset = input("Reset and reinitialize? (y/N, default: N): ").strip().lower()
+            reset = input(
+    "Reset and reinitialize? (y/N,
+    default: N): ").strip().lower()
             if reset not in ['y', 'yes']:
                 return
 
             # Leave current swarm first
             try:
-                from core.security.validator import SecurityValidator
-                SecurityValidator.safe_subprocess_run(['docker', 'swarm', 'leave', '-f'], check=True)
+                SecurityValidator.safe_subprocess_run(
+    ['docker',
+    'swarm',
+    'leave',
+    '-f'],
+    check=True)
                 print(" Left current Swarm")
             except subprocess.CalledProcessError:
                 print("  Could not leave current Swarm")
@@ -1947,8 +2062,11 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
-            result = SecurityValidator.safe_subprocess_run(cmd, check=True, capture_output=True, text=True)
+            result = SecurityValidator.safe_subprocess_run(
+    cmd,
+    check=True,
+    capture_output=True,
+    text=True)
             print(" Swarm initialized successfully!")
 
             # Show join token for workers
@@ -1997,7 +2115,9 @@ http {{
             return
 
         # Ask if joining as worker or manager
-        role = input("Join as worker or manager? (worker/manager, default: worker): ").strip().lower()
+        role = input(
+    "Join as worker or manager? (worker/manager,
+    default: worker): ").strip().lower()
         if role not in ['worker', 'manager']:
             role = 'worker'
 
@@ -2017,7 +2137,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(f" Successfully joined Swarm as {role}!")
         except subprocess.CalledProcessError as e:
@@ -2044,7 +2163,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(" Successfully left Swarm!")
         except subprocess.CalledProcessError as e:
@@ -2074,7 +2192,11 @@ http {{
 
         if not compose_file:
             print(" No Docker Compose file found")
-            print(" Expected files: docker-compose.yml, docker-compose.yaml, docker-stack.yml, docker-stack.yaml")
+            print(
+    " Expected files: docker-compose.yml,
+    docker-compose.yaml,
+    docker-stack.yml,
+    docker-stack.yaml")
             return
 
         stack_name = input("Stack name: ").strip()
@@ -2087,7 +2209,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             print(f" Stack '{stack_name}' deployed successfully!")
 
@@ -2117,7 +2238,6 @@ http {{
             print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             if show_output:
@@ -2138,7 +2258,6 @@ http {{
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            from core.security.validator import SecurityValidator
             SecurityValidator.safe_subprocess_run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             print(f" Failed to list nodes: {e}")
@@ -2266,7 +2385,9 @@ http {{
             if new_image:
                 cmd.extend(['--image', new_image])
         elif update_choice == '2':
-            env_vars = input("Environment variables (KEY=VALUE, comma-separated): ").strip()
+            env_vars = input(
+    "Environment variables (KEY=VALUE,
+    comma-separated): ").strip()
             if env_vars:
                 for env_var in env_vars.split(','):
                     env_var = env_var.strip()
@@ -2469,6 +2590,8 @@ http {{
             except subprocess.CalledProcessError:
                 print("   Could not retrieve stack list")
         else:
-            print(" To initialize a Swarm, run 'Initialize Swarm' from the menu")
+            print(
+    " To initialize a Swarm,
+    run 'Initialize Swarm' from the menu")
 # Export command instance
 COMMAND = DockerQuickCommand()

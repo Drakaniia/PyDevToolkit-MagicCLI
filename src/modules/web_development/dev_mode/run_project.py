@@ -1,9 +1,3 @@
-"""
-automation/dev_mode/run_project.py
-Run project development server or build
-FIXED: Windows compatibility and encoding issues
-ENHANCED: Automatic port conflict resolution
-"""
 import subprocess
 import json
 import sys
@@ -13,11 +7,21 @@ from ._base import DevModeCommand
 from core.loading import LoadingSpinner, loading_animation
 from .menu_utils import get_choice_with_arrows
 from .port_killer import (
+    import traceback
+
+    """
+automation/dev_mode/run_project.py
+Run project development server or build
+FIXED: Windows compatibility and encoding issues
+ENHANCED: Automatic port conflict resolution
+"""
     kill_all_dev_ports,
     ensure_ports_free,
     force_clear_all_ports,
     scan_active_servers
 )
+
+
 class RunProjectCommand(DevModeCommand):
     """Command to run project dev server or build"""
 
@@ -36,11 +40,11 @@ class RunProjectCommand(DevModeCommand):
         # Always use current directory
         current_dir = Path.cwd()
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("  RUN PROJECT")
-        print("="*70)
+        print("=" * 70)
         print(f" Current Directory: {current_dir}")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         # Check for package.json
         package_json = current_dir / 'package.json'
@@ -58,7 +62,9 @@ class RunProjectCommand(DevModeCommand):
             return
 
         # Show available scripts and get user choice with arrow navigation
-        script_options = [f"{name}: {command}" for name, command in scripts.items()]
+        script_options = [
+            f"{name}: {command}" for name,
+            command in scripts.items()]
         script_options.append("Cancel")
 
         choice = get_choice_with_arrows(script_options, "Available Scripts")
@@ -86,7 +92,8 @@ class RunProjectCommand(DevModeCommand):
         package_json = current_dir / 'package.json'
 
         if not package_json.exists():
-            raise FileNotFoundError("No package.json found in current directory")
+            raise FileNotFoundError(
+                "No package.json found in current directory")
 
         scripts = self._detect_scripts(package_json)
         if mode not in scripts:
@@ -105,7 +112,12 @@ class RunProjectCommand(DevModeCommand):
             # Filter for common dev/build scripts
             relevant_scripts = {}
             for script_name, script_cmd in scripts.items():
-                if script_name in ['dev', 'start', 'build', 'serve', 'preview']:
+                if script_name in [
+                    'dev',
+                    'start',
+                    'build',
+                    'serve',
+                        'preview']:
                     relevant_scripts[script_name] = script_cmd
 
             return relevant_scripts
@@ -117,7 +129,7 @@ class RunProjectCommand(DevModeCommand):
     def _run_script(self, script_name: str, cwd: Path, attach: bool = True):
         """Execute npm script with proper encoding handling"""
         print(f"\n Running script: {script_name}")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         # Detect package manager
         pkg_manager = self._detect_package_manager(cwd)
@@ -126,15 +138,16 @@ class RunProjectCommand(DevModeCommand):
         cmd = [pkg_manager, 'run', script_name]
 
         print(f"$ {' '.join(cmd)}")
-        print(f"\n Press Ctrl+C to stop the server")
-        print("="*70 + "\n")
+        print("\n Press Ctrl+C to stop the server")
+        print("=" * 70 + "\n")
 
         try:
             # Use shell=True on Windows for npm/yarn/pnpm commands
             use_shell = sys.platform == 'win32'
 
             if use_shell:
-                # Windows: use shell mode with string command and proper encoding
+                # Windows: use shell mode with string command and proper
+                # encoding
                 cmd_str = ' '.join(cmd)
                 process = subprocess.Popen(
                     cmd_str,
@@ -166,7 +179,8 @@ class RunProjectCommand(DevModeCommand):
             try:
                 for line in process.stdout:
                     try:
-                        # Print each line, handling any remaining encoding issues
+                        # Print each line, handling any remaining encoding
+                        # issues
                         print(line, end='')
                         sys.stdout.flush()
                     except (UnicodeDecodeError, UnicodeEncodeError):
@@ -203,7 +217,6 @@ class RunProjectCommand(DevModeCommand):
 
         except Exception as e:
             print(f"\n Error running script: {e}")
-            import traceback
             traceback.print_exc()
 
         input("\nPress Enter to continue...")
@@ -217,5 +230,7 @@ class RunProjectCommand(DevModeCommand):
             return 'yarn'
         else:
             return 'npm'
+
+
 # Export command instance
 COMMAND = RunProjectCommand()

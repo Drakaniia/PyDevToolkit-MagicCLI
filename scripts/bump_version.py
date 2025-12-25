@@ -56,7 +56,10 @@ def update_pyproject_version(new_version: str) -> None:
         content = f.read()
 
     # Update version in pyproject.toml
-    content = re.sub(r'version = "[^"]*"', f'version = "{new_version}"', content)
+    content = re.sub(
+        r'version = "[^"]*"',
+        f'version = "{new_version}"',
+        content)
 
     with open(pyproject_path, "w") as f:
         f.write(content)

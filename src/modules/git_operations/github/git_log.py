@@ -5,6 +5,8 @@ Handles commit history viewing and log operations
 import subprocess
 from datetime import datetime
 from core.loading import LoadingSpinner, loading_animation
+
+
 class GitLog:
     """Handles git log and commit history operations"""
 
@@ -14,7 +16,8 @@ class GitLog:
     def fetch_remote_commits(self):
         """Fetch commits from all remotes before displaying local log"""
         try:
-            spinner = LoadingSpinner("Fetching remote changes", style='classic')
+            spinner = LoadingSpinner(
+                "Fetching remote changes", style='classic')
             spinner.start()
 
             result = subprocess.run(
@@ -26,19 +29,25 @@ class GitLog:
                 errors='replace'
             )
 
-            spinner.stop(success=True, final_message="Fetching complete: Remote changes fetched successfully!")
+            spinner.stop(
+                success=True,
+                final_message="Fetching complete: Remote changes fetched successfully!")
 
             if result.stdout:
                 print("Remote changes fetched successfully!")
             return True
         except subprocess.CalledProcessError as e:
-            spinner.stop(success=False, final_message="Fetching failed: Error fetching remote changes")
+            spinner.stop(
+                success=False,
+                final_message="Fetching failed: Error fetching remote changes")
             print(f"Error fetching remote changes: {e}")
             if e.stderr:
                 print(f"Error details: {e.stderr}")
             return False
         except FileNotFoundError:
-            spinner.stop(success=False, final_message="Fetching failed: Git is not installed or not in PATH")
+            spinner.stop(
+                success=False,
+                final_message="Fetching failed: Git is not installed or not in PATH")
             print("Git is not installed or not in PATH")
             return False
 
@@ -58,12 +67,23 @@ class GitLog:
 
             def setup_items(self):
                 self.items = [
-                    MenuItem("Log (Last 10 commits)", lambda: self.git_log_instance.show_log(limit=10, fetch_remote=False)),
-                    MenuItem("Visual Branch History (git log --oneline --graph --all)", lambda: self.git_log_instance.show_visual_branch_history()),
-                    MenuItem("Commit Changes Statistics (git log --stat)", lambda: self.git_log_instance.show_stat_log()),
-                    MenuItem("Author Commit Summary (git shortlog)", lambda: self.git_log_instance.show_shortlog()),
-                    MenuItem("Back to Git Operations Menu", lambda: "exit")
-                ]
+                    MenuItem(
+                        "Log (Last 10 commits)",
+                        lambda: self.git_log_instance.show_log(
+                            limit=10,
+                            fetch_remote=False)),
+                    MenuItem(
+                        "Visual Branch History (git log --oneline --graph --all)",
+                        lambda: self.git_log_instance.show_visual_branch_history()),
+                    MenuItem(
+                        "Commit Changes Statistics (git log --stat)",
+                        lambda: self.git_log_instance.show_stat_log()),
+                    MenuItem(
+                        "Author Commit Summary (git shortlog)",
+                        lambda: self.git_log_instance.show_shortlog()),
+                    MenuItem(
+                        "Back to Git Operations Menu",
+                        lambda: "exit")]
 
         submenu = AdvancedLogMenu(self)
         submenu.run()
@@ -76,9 +96,9 @@ class GitLog:
         except ImportError:
             if fetch_remote:
                 self.fetch_remote_commits()
-            print("\n" + "="*70)
+            print("\n" + "=" * 70)
             print(f"GIT LOG (Last {limit} commits)")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
 
             if not self._is_git_repo():
                 print("Not a git repository. Please initialize git first.")
@@ -92,9 +112,9 @@ class GitLog:
         if fetch_remote:
             self.fetch_remote_commits()
 
-        print("\n" + Fore.CYAN + "="*70)
+        print("\n" + Fore.CYAN + "=" * 70)
         print(Fore.YELLOW + Style.BRIGHT + f"GIT LOG (Last {limit} commits)")
-        print(Fore.CYAN + "="*70 + Style.RESET_ALL + "\n")
+        print(Fore.CYAN + "=" * 70 + Style.RESET_ALL + "\n")
 
         if not self._is_git_repo():
             print(Fore.RED + "Not a git repository. Please initialize git first.")
@@ -119,9 +139,13 @@ class GitLog:
                         processed_line = line
                         import re
                         # Colorize commit hashes (7-character hex)
-                        processed_line = re.sub(r'\b([0-9a-f]{7,})\b',
-                                              Fore.GREEN + Style.BRIGHT + r'\1' + Style.RESET_ALL,
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'\b([0-9a-f]{7,})\b',
+                            Fore.GREEN +
+                            Style.BRIGHT +
+                            r'\1' +
+                            Style.RESET_ALL,
+                            processed_line)
 
                         # Print the processed line with colors
                         print(processed_line)
@@ -142,10 +166,11 @@ class GitLog:
             from colorama import Fore, Style, init
             init(autoreset=True)  # Initialize colorama
         except ImportError:
-            print("Colorama library not found. Please install it with: pip install colorama")
-            print("\n" + "="*70)
+            print(
+                "Colorama library not found. Please install it with: pip install colorama")
+            print("\n" + "=" * 70)
             print("GIT LOG --GRAPH (Commit history as a graph)")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
 
             if not self._is_git_repo():
                 print("Not a git repository. Please initialize git first.")
@@ -156,9 +181,12 @@ class GitLog:
             input("\nPress Enter to continue...")
             return
 
-        print("\n" + Fore.CYAN + "="*70)
-        print(Fore.YELLOW + Style.BRIGHT + "GIT LOG --GRAPH (Commit history as a graph)")
-        print(Fore.CYAN + "="*70 + Style.RESET_ALL + "\n")
+        print("\n" + Fore.CYAN + "=" * 70)
+        print(
+            Fore.YELLOW +
+            Style.BRIGHT +
+            "GIT LOG --GRAPH (Commit history as a graph)")
+        print(Fore.CYAN + "=" * 70 + Style.RESET_ALL + "\n")
 
         if not self._is_git_repo():
             print(Fore.RED + "Not a git repository. Please initialize git first.")
@@ -183,19 +211,21 @@ class GitLog:
                         processed_line = line
                         import re
                         # Colorize commit hashes (7-character hex)
-                        processed_line = re.sub(r'\b([0-9a-f]{7,})\b',
-                                              Fore.GREEN + Style.BRIGHT + r'\1' + Style.RESET_ALL,
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'\b([0-9a-f]{7,})\b',
+                            Fore.GREEN +
+                            Style.BRIGHT +
+                            r'\1' +
+                            Style.RESET_ALL,
+                            processed_line)
 
                         # Colorize branch names (words between *)
-                        processed_line = re.sub(r'\*',
-                                              Fore.RED + Style.BRIGHT + '*' + Style.RESET_ALL,
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'\*', Fore.RED + Style.BRIGHT + '*' + Style.RESET_ALL, processed_line)
 
                         # Colorize branch references
-                        processed_line = re.sub(r'(\(.*?\))',
-                                              Fore.BLUE + r'\1' + Style.RESET_ALL,
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'(\(.*?\))', Fore.BLUE + r'\1' + Style.RESET_ALL, processed_line)
 
                         # Print the processed line with colors
                         print(processed_line)
@@ -216,10 +246,11 @@ class GitLog:
             from colorama import Fore, Style, init
             init(autoreset=True)  # Initialize colorama
         except ImportError:
-            print("Colorama library not found. Please install it with: pip install colorama")
-            print("\n" + "="*70)
+            print(
+                "Colorama library not found. Please install it with: pip install colorama")
+            print("\n" + "=" * 70)
             print("GIT LOG --STAT (Commit changes statistics)")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
 
             if not self._is_git_repo():
                 print("Not a git repository. Please initialize git first.")
@@ -230,9 +261,12 @@ class GitLog:
             input("\nPress Enter to continue...")
             return
 
-        print("\n" + Fore.CYAN + "="*70)
-        print(Fore.YELLOW + Style.BRIGHT + "GIT LOG --STAT (Commit changes statistics)")
-        print(Fore.CYAN + "="*70 + Style.RESET_ALL + "\n")
+        print("\n" + Fore.CYAN + "=" * 70)
+        print(
+            Fore.YELLOW +
+            Style.BRIGHT +
+            "GIT LOG --STAT (Commit changes statistics)")
+        print(Fore.CYAN + "=" * 70 + Style.RESET_ALL + "\n")
 
         if not self._is_git_repo():
             print(Fore.RED + "Not a git repository. Please initialize git first.")
@@ -257,24 +291,42 @@ class GitLog:
                         processed_line = line
                         import re
                         # Colorize commit hashes (7-character hex)
-                        processed_line = re.sub(r'\b([0-9a-f]{7,})\b',
-                                              Fore.GREEN + Style.BRIGHT + r'\1' + Style.RESET_ALL,
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'\b([0-9a-f]{7,})\b',
+                            Fore.GREEN +
+                            Style.BRIGHT +
+                            r'\1' +
+                            Style.RESET_ALL,
+                            processed_line)
 
                         # Colorize file names in the stat output
-                        processed_line = re.sub(r'(\S+\.(?:\w+))',
-                                              Fore.CYAN + Style.BRIGHT + r'\1' + Style.RESET_ALL,
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'(\S+\.(?:\w+))',
+                            Fore.CYAN +
+                            Style.BRIGHT +
+                            r'\1' +
+                            Style.RESET_ALL,
+                            processed_line)
 
                         # Colorize number of insertions
-                        processed_line = re.sub(r'(\d+)\s+insertions?',
-                                              Fore.GREEN + Style.BRIGHT + r'\1' + Style.RESET_ALL + " insertions?",
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'(\d+)\s+insertions?',
+                            Fore.GREEN +
+                            Style.BRIGHT +
+                            r'\1' +
+                            Style.RESET_ALL +
+                            " insertions?",
+                            processed_line)
 
                         # Colorize number of deletions
-                        processed_line = re.sub(r'(\d+)\s+deletions?',
-                                              Fore.RED + Style.BRIGHT + r'\1' + Style.RESET_ALL + " deletions?",
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'(\d+)\s+deletions?',
+                            Fore.RED +
+                            Style.BRIGHT +
+                            r'\1' +
+                            Style.RESET_ALL +
+                            " deletions?",
+                            processed_line)
 
                         # Print the processed line with colors
                         print(processed_line)
@@ -295,10 +347,11 @@ class GitLog:
             from colorama import Fore, Back, Style, init
             init(autoreset=True)  # Initialize colorama
         except ImportError:
-            print("Colorama library not found. Please install it with: pip install colorama")
-            print("\n" + "="*70)
+            print(
+                "Colorama library not found. Please install it with: pip install colorama")
+            print("\n" + "=" * 70)
             print("GIT LOG --ONELINE --GRAPH --ALL (Visual branch history)")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
 
             if not self._is_git_repo():
                 print("Not a git repository. Please initialize git first.")
@@ -309,9 +362,12 @@ class GitLog:
             input("\nPress Enter to continue...")
             return
 
-        print("\n" + Fore.CYAN + "="*70)
-        print(Fore.YELLOW + Style.BRIGHT + "GIT LOG --ONELINE --GRAPH --ALL (Visual branch history)")
-        print(Fore.CYAN + "="*70 + Style.RESET_ALL + "\n")
+        print("\n" + Fore.CYAN + "=" * 70)
+        print(
+            Fore.YELLOW +
+            Style.BRIGHT +
+            "GIT LOG --ONELINE --GRAPH --ALL (Visual branch history)")
+        print(Fore.CYAN + "=" * 70 + Style.RESET_ALL + "\n")
 
         if not self._is_git_repo():
             print(Fore.RED + "Not a git repository. Please initialize git first.")
@@ -336,19 +392,21 @@ class GitLog:
                         processed_line = line
                         # Colorize commit hashes (7-character hex)
                         import re
-                        processed_line = re.sub(r'\b([0-9a-f]{7,})\b',
-                                              Fore.GREEN + Style.BRIGHT + r'\1' + Style.RESET_ALL,
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'\b([0-9a-f]{7,})\b',
+                            Fore.GREEN +
+                            Style.BRIGHT +
+                            r'\1' +
+                            Style.RESET_ALL,
+                            processed_line)
 
                         # Colorize branch names (words between *)
-                        processed_line = re.sub(r'\*',
-                                              Fore.RED + Style.BRIGHT + '*' + Style.RESET_ALL,
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'\*', Fore.RED + Style.BRIGHT + '*' + Style.RESET_ALL, processed_line)
 
                         # Colorize branch references
-                        processed_line = re.sub(r'(\(.*?\))',
-                                              Fore.BLUE + r'\1' + Style.RESET_ALL,
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'(\(.*?\))', Fore.BLUE + r'\1' + Style.RESET_ALL, processed_line)
 
                         # Print the processed line with colors
                         print(processed_line)
@@ -370,10 +428,11 @@ class GitLog:
             from colorama import Fore, Style, init
             init(autoreset=True)  # Initialize colorama
         except ImportError:
-            print("Colorama library not found. Please install it with: pip install colorama")
-            print("\n" + "="*70)
+            print(
+                "Colorama library not found. Please install it with: pip install colorama")
+            print("\n" + "=" * 70)
             print("GIT SHORTLOG (Condensed commit log by author)")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
 
             if not self._is_git_repo():
                 print("Not a git repository. Please initialize git first.")
@@ -384,9 +443,12 @@ class GitLog:
             input("\nPress Enter to continue...")
             return
 
-        print("\n" + Fore.CYAN + "="*70)
-        print(Fore.YELLOW + Style.BRIGHT + "GIT SHORTLOG (Condensed commit log by author)")
-        print(Fore.CYAN + "="*70 + Style.RESET_ALL + "\n")
+        print("\n" + Fore.CYAN + "=" * 70)
+        print(
+            Fore.YELLOW +
+            Style.BRIGHT +
+            "GIT SHORTLOG (Condensed commit log by author)")
+        print(Fore.CYAN + "=" * 70 + Style.RESET_ALL + "\n")
 
         if not self._is_git_repo():
             print(Fore.RED + "Not a git repository. Please initialize git first.")
@@ -410,15 +472,25 @@ class GitLog:
                         # Colorize different parts of the shortlog
                         processed_line = line
                         import re
-                        # Colorize commit counts (numbers at the beginning of the line)
-                        processed_line = re.sub(r'^(\s*\d+)',
-                                              Fore.GREEN + Style.BRIGHT + r'\1' + Style.RESET_ALL,
-                                              processed_line)
+                        # Colorize commit counts (numbers at the beginning of
+                        # the line)
+                        processed_line = re.sub(
+                            r'^(\s*\d+)',
+                            Fore.GREEN +
+                            Style.BRIGHT +
+                            r'\1' +
+                            Style.RESET_ALL,
+                            processed_line)
 
                         # Colorize author names
-                        processed_line = re.sub(r'(\d+\s+)(.+)',
-                                              r'\1' + Fore.CYAN + Style.BRIGHT + r'\2' + Style.RESET_ALL,
-                                              processed_line)
+                        processed_line = re.sub(
+                            r'(\d+\s+)(.+)',
+                            r'\1' +
+                            Fore.CYAN +
+                            Style.BRIGHT +
+                            r'\2' +
+                            Style.RESET_ALL,
+                            processed_line)
 
                         # Print the processed line with colors
                         print(processed_line)
@@ -460,7 +532,8 @@ class GitLog:
                         commit_hash, author, date, message = parts
                         # Parse and format date
                         try:
-                            dt = datetime.fromisoformat(date.replace(' +', '+').replace(' -', '-'))
+                            dt = datetime.fromisoformat(
+                                date.replace(' +', '+').replace(' -', '-'))
                             formatted_date = dt.strftime('%Y-%m-%d %H:%M:%S')
                         except (ValueError, AttributeError):
                             formatted_date = date[:19]  # Fallback
@@ -505,7 +578,8 @@ class GitLog:
             if len(parts) == 4:
                 commit_hash, author, date, message = parts
                 try:
-                    dt = datetime.fromisoformat(date.replace(' +', '+').replace(' -', '-'))
+                    dt = datetime.fromisoformat(
+                        date.replace(' +', '+').replace(' -', '-'))
                     formatted_date = dt.strftime('%Y-%m-%d %H:%M:%S')
                 except (ValueError, AttributeError):
                     formatted_date = date[:19]

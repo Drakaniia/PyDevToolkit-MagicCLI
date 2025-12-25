@@ -1,12 +1,13 @@
-"""
-automation/dev_mode/port_killer_command.py
-Port Killer command for the Dev Mode menu
-Provides interactive port management and termination
-"""
 from typing import Any, List, Dict
 from ._base import DevModeCommand
 from .menu_utils import get_choice_with_arrows
 from .port_killer import (
+
+    """
+automation/dev_mode/port_killer_command.py
+Port Killer command for the Dev Mode menu
+Provides interactive port management and termination
+"""
     PortKiller,
     kill_all_dev_ports,
     scan_active_servers,
@@ -14,6 +15,8 @@ from .port_killer import (
     get_port_conflicts,
     ensure_ports_free
 )
+
+
 class PortKillerCommand(DevModeCommand):
     """Command for port management and process termination"""
 
@@ -30,11 +33,11 @@ class PortKillerCommand(DevModeCommand):
     def _interactive_run(self):
         """Interactive port killer menu"""
         while True:
-            print("\n" + "="*70)
+            print("\n" + "=" * 70)
             print(" PORT KILLER - Port Management & Process Termination")
-            print("="*70)
+            print("=" * 70)
             print(" Detect and terminate processes using development ports")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
 
             # Show current port status
             self._show_port_status()
@@ -118,7 +121,7 @@ class PortKillerCommand(DevModeCommand):
     def _scan_conflicts(self):
         """Scan for port conflicts on common dev ports"""
         print("\n SCANNING COMMON DEVELOPMENT PORTS")
-        print("="*70)
+        print("=" * 70)
 
         try:
             conflicts = get_port_conflicts()
@@ -130,7 +133,8 @@ class PortKillerCommand(DevModeCommand):
                 for port, processes in conflicts.items():
                     print(f"\n Port {port}:")
                     for proc in processes:
-                        print(f"  PID {proc['pid']:>6} | {proc['name']:<20} | {proc['protocol']}")
+                        print(
+                            f"  PID {proc['pid']:>6} | {proc['name']:<20} | {proc['protocol']}")
             else:
                 print(" No conflicts detected on common development ports")
 
@@ -142,7 +146,7 @@ class PortKillerCommand(DevModeCommand):
     def _scan_all_servers(self):
         """Scan for all active server processes"""
         print("\n SCANNING ALL ACTIVE SERVER PROCESSES")
-        print("="*70)
+        print("=" * 70)
 
         try:
             servers = scan_active_servers(verbose=True)
@@ -152,7 +156,8 @@ class PortKillerCommand(DevModeCommand):
                 print("-" * 50)
 
                 for server in servers:
-                    print(f"Port {server['port']:>5} | PID {server['pid']:>6} | {server['name']:<20} | {server['protocol']}")
+                    print(
+                        f"Port {server['port']:>5} | PID {server['pid']:>6} | {server['name']:<20} | {server['protocol']}")
             else:
                 print(" No active server processes detected")
 
@@ -164,7 +169,7 @@ class PortKillerCommand(DevModeCommand):
     def _kill_common_ports(self):
         """Kill processes on common development ports"""
         print("\n KILLING PROCESSES ON COMMON DEV PORTS")
-        print("="*70)
+        print("=" * 70)
         print("  This will terminate processes on common development ports")
 
         confirm = input("\nContinue? (y/N): ").lower().strip()
@@ -176,7 +181,7 @@ class PortKillerCommand(DevModeCommand):
         try:
             result = kill_all_dev_ports(verbose=True)
 
-            print(f"\n RESULTS:")
+            print("\n RESULTS:")
             print(f" Processes killed: {result['total_killed']}")
             if result['failed_kills']:
                 print(f" Failed to kill: {len(result['failed_kills'])}")
@@ -189,11 +194,12 @@ class PortKillerCommand(DevModeCommand):
     def _force_clear_all(self):
         """Force clear all server processes"""
         print("\n FORCE CLEARING ALL SERVER PROCESSES")
-        print("="*70)
+        print("=" * 70)
         print("  This will terminate ALL detected development server processes")
         print(" This is the nuclear option - use with caution!")
 
-        confirm = input("\nAre you sure you want to continue? (y/N): ").lower().strip()
+        confirm = input(
+            "\nAre you sure you want to continue? (y/N): ").lower().strip()
         if confirm != 'y':
             print(" Operation cancelled")
             input("\nPress Enter to continue...")
@@ -202,10 +208,12 @@ class PortKillerCommand(DevModeCommand):
         try:
             result = force_clear_all_ports(verbose=True)
 
-            print(f"\n FINAL RESULTS:")
+            print("\n FINAL RESULTS:")
             print(f" Total processes killed: {result['total_killed']}")
-            print(f" Common ports cleared: {result['common_ports_result']['total_killed']}")
-            print(f" Additional servers cleared: {result['server_scan_result']['total_killed']}")
+            print(
+                f" Common ports cleared: {result['common_ports_result']['total_killed']}")
+            print(
+                f" Additional servers cleared: {result['server_scan_result']['total_killed']}")
 
         except Exception as e:
             print(f" Error during force clear: {e}")
@@ -215,7 +223,7 @@ class PortKillerCommand(DevModeCommand):
     def _kill_specific_port(self):
         """Kill processes on a specific port"""
         print("\n KILL PROCESSES ON SPECIFIC PORT")
-        print("="*70)
+        print("=" * 70)
 
         try:
             port_input = input("Enter port number (e.g., 3000): ").strip()
@@ -246,10 +254,14 @@ class PortKillerCommand(DevModeCommand):
     def _ensure_ports_free(self):
         """Ensure specific ports are free"""
         print("\n ENSURE SPECIFIC PORTS ARE FREE")
-        print("="*70)
+        print("=" * 70)
 
         try:
-            ports_input = input("Enter port numbers (comma-separated, e.g., 3000,8080,5173): ").strip()
+            ports_input = input("Enter port numbers(comma - separated,
+                                                    e.g.,
+                                                    3000,
+                                                    8080,
+                                                    5173): ").strip()
 
             if not ports_input:
                 print(" No ports specified")
@@ -290,7 +302,7 @@ class PortKillerCommand(DevModeCommand):
     def _detailed_report(self):
         """Show detailed port and process report"""
         print("\n DETAILED PORT & PROCESS REPORT")
-        print("="*70)
+        print("=" * 70)
 
         try:
             killer = PortKiller(verbose=False)
@@ -304,30 +316,32 @@ class PortKillerCommand(DevModeCommand):
                 for port, processes in conflicts.items():
                     print(f"Port {port:>5}: {len(processes)} process(es)")
                     for proc in processes:
-                        print(f"         PID {proc['pid']:>6} | {proc['name']}")
+                        print(
+                            f"         PID {proc['pid']:>6} | {proc['name']}")
             else:
                 print("   All common dev ports are free")
 
             # All server processes
-            print(f"\n ALL SERVER PROCESSES:")
+            print("\n ALL SERVER PROCESSES:")
             print("-" * 40)
             servers = scan_active_servers(verbose=False)
 
             if servers:
                 for server in servers:
-                    print(f"Port {server['port']:>5} | PID {server['pid']:>6} | {server['name']:<20} | {server['protocol']}")
+                    print(
+                        f"Port {server['port']:>5} | PID {server['pid']:>6} | {server['name']:<20} | {server['protocol']}")
             else:
                 print("   No active server processes detected")
 
             # Safe vs unsafe processes
-            print(f"\n PROCESS SAFETY ANALYSIS:")
+            print("\n PROCESS SAFETY ANALYSIS:")
             print("-" * 40)
             safe_count = 0
             unsafe_count = 0
 
             for server in servers:
                 is_safe = any(safe_proc in server['name'].lower()
-                             for safe_proc in killer.SAFE_TO_KILL_PROCESSES)
+                              for safe_proc in killer.SAFE_TO_KILL_PROCESSES)
                 if is_safe:
                     safe_count += 1
                 else:
@@ -340,5 +354,7 @@ class PortKillerCommand(DevModeCommand):
             print(f" Error generating report: {e}")
 
         input("\nPress Enter to continue...")
+
+
 # Export command instance
 COMMAND = PortKillerCommand()

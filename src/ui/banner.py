@@ -1,7 +1,9 @@
+from pyfiglet import Figlet
+
 """
 Banner utilities for displaying stylized text
 """
-from pyfiglet import Figlet
+
 
 def create_qwenzyy_banner(font_style="doom"):
     """
@@ -20,6 +22,7 @@ def create_qwenzyy_banner(font_style="doom"):
         # Fallback to manual ASCII if pyfiglet fails
         return get_manual_qwenzyy_banner()
 
+
 def get_manual_qwenzyy_banner():
     """
     Manual ASCII art banner as fallback with shadow effect
@@ -28,6 +31,7 @@ def get_manual_qwenzyy_banner():
     return """
 
 """
+
 
 def get_available_fonts():
     """

@@ -1,23 +1,26 @@
+import sys
+import os
+import tty
+import termios
+import msvcrt
+
 """
 automation/dev_mode/menu_utils.py
 Shared menu utilities for dev mode commands with arrow key navigation
 """
-import sys
-import os
 
 # Try to import platform-specific modules
 try:
-    import tty
-    import termios
     HAS_TERMIOS = True
 except ImportError:
     HAS_TERMIOS = False
 
 try:
-    import msvcrt
     HAS_MSVCRT = True
 except ImportError:
     HAS_MSVCRT = False
+
+
 def get_choice_with_arrows(options, prompt="Your choice", show_numbers=True):
     """
     Display options and get user choice with arrow key navigation
@@ -38,6 +41,8 @@ def get_choice_with_arrows(options, prompt="Your choice", show_numbers=True):
         return _traditional_choice_input(options, prompt, show_numbers)
 
     return _arrow_choice_input(options, prompt, show_numbers)
+
+
 def _traditional_choice_input(options, prompt, show_numbers):
     """Traditional number input method for systems without arrow key support"""
     while True:
@@ -52,6 +57,8 @@ def _traditional_choice_input(options, prompt, show_numbers):
         except KeyboardInterrupt:
             print("\n\nOperation cancelled")
             return len(options)  # Return last option (usually Cancel/Exit)
+
+
 def _arrow_choice_input(options, prompt, show_numbers):
     """Arrow key navigation input method"""
     selected_idx = 0
@@ -107,10 +114,15 @@ def _arrow_choice_input(options, prompt, show_numbers):
                         selected_idx = len(options) - 1
                         should_select = True
 
-                # Update selection if changed - use full redraw instead of partial update
+                # Update selection if changed - use full redraw instead of
+                # partial update
                 if new_idx != old_idx:
                     selected_idx = new_idx
-                    _redraw_options(options, selected_idx, prompt, show_numbers)
+                    _redraw_options(
+                        options,
+                        selected_idx,
+                        prompt,
+                        show_numbers)
 
                 if should_select:
                     _show_cursor()
@@ -127,6 +139,8 @@ def _arrow_choice_input(options, prompt, show_numbers):
 
     finally:
         _show_cursor()
+
+
 def _display_options(options, selected_idx, prompt, show_numbers):
     """Display all options with current selection highlighted"""
     print(f"\n{prompt}:")
@@ -142,7 +156,11 @@ def _display_options(options, selected_idx, prompt, show_numbers):
         else:
             print(line_text)
 
-    print("\n  Use ↑/↓ arrow keys to navigate, Enter to select, or type number")
+    print("\n  Use ↑/↓ arrow keys to navigate,
+          Enter to select,
+          or type number")
+
+
 def _redraw_options(options, selected_idx, prompt, show_numbers):
     """Redraw the entire options menu - more reliable than partial updates"""
     # Calculate how many lines to clear (options + prompt + instruction line)
@@ -172,8 +190,12 @@ def _redraw_options(options, selected_idx, prompt, show_numbers):
         else:
             print(line_text)
 
-    print("\n  Use ↑/↓ arrow keys to navigate, Enter to select, or type number")
+    print("\n  Use ↑/↓ arrow keys to navigate,
+          Enter to select,
+          or type number")
     sys.stdout.flush()
+
+
 def _getch():
     """Get a single character from stdin"""
     if HAS_MSVCRT:  # Windows
@@ -193,10 +215,14 @@ def _getch():
         return ch
     else:
         return input()
+
+
 def _hide_cursor():
     """Hide terminal cursor"""
     sys.stdout.write('\033[?25l')
     sys.stdout.flush()
+
+
 def _show_cursor():
     """Show terminal cursor"""
     sys.stdout.write('\033[?25h')

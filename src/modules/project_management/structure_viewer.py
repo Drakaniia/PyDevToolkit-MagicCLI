@@ -13,6 +13,8 @@ import os
 import re
 from pathlib import Path
 from typing import Set, List, Optional, Tuple
+
+
 class StructureViewer:
     """Enhanced project structure viewer with hidden folder exclusion"""
 
@@ -158,9 +160,9 @@ class StructureViewer:
         """Display enhanced project structure"""
         self.current_dir = Path.cwd()
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("PROJECT STRUCTURE")
-        print("="*70)
+        print("=" * 70)
         print(f"\nCurrent Directory: {self.current_dir.name}")
         print(f"Absolute Path: {self.current_dir.absolute()}")
 
@@ -207,7 +209,8 @@ class StructureViewer:
                 print(line)
             except UnicodeEncodeError:
                 # Fallback to ASCII representation if Unicode chars fail
-                line = line.replace('├──', '|--').replace('└──', '`--').replace('│', '|')
+                line = line.replace(
+                    '├──', '|--').replace('└──', '`--').replace('│', '|')
                 print(line)
         print("```\n")
 
@@ -293,7 +296,8 @@ class StructureViewer:
         if not is_dir and name in self.ALWAYS_SHOW_FILES:
             return False
 
-        # Also check relative path for nested important files (like .vscode/settings.json)
+        # Also check relative path for nested important files (like
+        # .vscode/settings.json)
         try:
             relative_path = str(path.relative_to(self.current_dir))
             if relative_path in self.ALWAYS_SHOW_FILES:
@@ -306,7 +310,8 @@ class StructureViewer:
         if name.startswith('.'):
             if is_dir:
                 # Hidden directory - ALWAYS exclude
-                # Exception: Check if it's a special case like .vscode with important files
+                # Exception: Check if it's a special case like .vscode with
+                # important files
                 if name == '.vscode':
                     # Only show .vscode if it has important files
                     should_exclude = not self._has_important_vscode_files(path)
@@ -352,7 +357,8 @@ class StructureViewer:
                     return True
 
         # Rule 3.5: For directories, check if they contain source code
-        # This ensures we show important directories that aren't explicitly excluded
+        # This ensures we show important directories that aren't explicitly
+        # excluded
         if is_dir and not name.startswith('.'):
             # Check if this directory or its subdirectories contain source code
             if self._has_source_code_deep(path):
@@ -362,7 +368,13 @@ class StructureViewer:
         if not is_dir:
             for pattern in self.EXCLUDE_FILES:
                 if self._matches_pattern(name, pattern):
-                    if pattern in {'*.pyc', '*.pyo', '*.pyd', '*.class', '*.o', '*.obj'}:
+                    if pattern in {
+                        '*.pyc',
+                        '*.pyo',
+                        '*.pyd',
+                        '*.class',
+                        '*.o',
+                            '*.obj'}:
                         self.hidden_categories['build_artifacts'].add(name)
                     elif pattern in {'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'poetry.lock', 'Pipfile.lock'}:
                         self.hidden_categories['dependencies'].add(name)
@@ -378,9 +390,11 @@ class StructureViewer:
             for pattern in self.gitignore_patterns:
                 if self._matches_gitignore(relative_path, pattern, is_dir):
                     # For directories, double-check if they contain source code
-                    if is_dir and not name.startswith('.') and self._has_source_code_deep(path):
+                    if is_dir and not name.startswith(
+                            '.') and self._has_source_code_deep(path):
                         return False
-                    # Track gitignore exclusions as build artifacts (most common case)
+                    # Track gitignore exclusions as build artifacts (most
+                    # common case)
                     self.hidden_categories['build_artifacts'].add(name)
                     return True
         except ValueError:
@@ -438,7 +452,10 @@ class StructureViewer:
 
         return False
 
-    def _has_source_code_shallow(self, directory: Path, depth: int = 0) -> bool:
+    def _has_source_code_shallow(
+            self,
+            directory: Path,
+            depth: int = 0) -> bool:
         """Shallow recursive check for source code (max 2 levels deep)"""
         if depth > 1:
             return False
@@ -485,11 +502,14 @@ class StructureViewer:
                         if entry.name in self.ALWAYS_SHOW_FILES:
                             return True
                     elif entry.is_dir():
-                        # Skip hidden directories and known excluded directories
-                        if entry.name.startswith('.') or entry.name in self.EXCLUDE_DIRS:
+                        # Skip hidden directories and known excluded
+                        # directories
+                        if entry.name.startswith(
+                                '.') or entry.name in self.EXCLUDE_DIRS:
                             continue
                         # Recursively check subdirectories
-                        if self._has_source_code_deep(Path(entry.path), depth + 1):
+                        if self._has_source_code_deep(
+                                Path(entry.path), depth + 1):
                             return True
         except (PermissionError, OSError, FileNotFoundError):
             pass
@@ -501,7 +521,11 @@ class StructureViewer:
         pattern_regex = pattern.replace('.', r'\.').replace('*', '.*')
         return bool(re.match(f'^{pattern_regex}$', name))
 
-    def _matches_gitignore(self, path: str, pattern: str, is_dir: bool) -> bool:
+    def _matches_gitignore(
+            self,
+            path: str,
+            pattern: str,
+            is_dir: bool) -> bool:
         """Check if path matches .gitignore pattern"""
         # Handle trailing slash (directory-only patterns)
         if pattern.endswith('/'):
@@ -564,7 +588,12 @@ class StructureViewer:
                 priority = 0
 
                 # Highest priority: important config files
-                if name in {'readme.md', 'package.json', 'setup.py', 'requirements.txt', 'dockerfile'}:
+                if name in {
+                    'readme.md',
+                    'package.json',
+                    'setup.py',
+                    'requirements.txt',
+                        'dockerfile'}:
                     priority = 1
                 # High priority: source directories
                 elif is_dir and name in self.IMPORTANT_SOURCE_DIRS:
@@ -604,15 +633,21 @@ class StructureViewer:
             for i, item in enumerate(shown_items):
                 is_last = (i == len(shown_items) - 1) and (hidden_count == 0)
 
-                # Use proper Unicode tree symbols that match traditional tree format from your example
+                # Use proper Unicode tree symbols that match traditional tree
+                # format from your example
                 if is_last:
-                    current_prefix = "└── "  # For last item in directory (proper Unicode character)
+                    # For last item in directory (proper Unicode character)
+                    current_prefix = "└── "
                     next_prefix = "    "     # No vertical line continuation for the last item
                 else:
-                    current_prefix = "├── "  # For items with siblings below (proper Unicode character)
-                    next_prefix = "│   "     # Vertical line continuation for items with siblings below (proper Unicode character)
+                    # For items with siblings below (proper Unicode character)
+                    current_prefix = "├── "
+                    # Vertical line continuation for items with siblings below
+                    # (proper Unicode character)
+                    next_prefix = "│   "
 
-                # Display name with size for files (optimized for AI readability)
+                # Display name with size for files (optimized for AI
+                # readability)
                 if item.is_dir():
                     display_name = f"{item.name}/"
                 else:
@@ -687,6 +722,8 @@ class StructureViewer:
 
         count_recursive(directory, 0)
         return file_count, dir_count
+
+
 # Test
 if __name__ == "__main__":
     viewer = StructureViewer(max_depth=5)

@@ -15,7 +15,10 @@ from .exceptions import (
     GitNotInstalledError,
     UncommittedChangesError
 )
-# Import security and logging modules inside functions to avoid circular imports
+# Import security and logging modules inside functions to avoid circular
+# imports
+
+
 class GitClient:
     """
     Unified Git client providing clean interface to Git operations
@@ -79,7 +82,8 @@ class GitClient:
     def is_repo(self) -> bool:
         """Check if current directory is a Git repository"""
         try:
-            result = self._run_internal_command(['git', 'rev-parse', '--is-inside-work-tree'])
+            result = self._run_internal_command(
+                ['git', 'rev-parse', '--is-inside-work-tree'])
             return result.returncode == 0
         except Exception:
             return False
@@ -445,8 +449,7 @@ class GitClient:
             if not SecurityValidator.validate_command_input(str(element)):
                 raise GitError(
                     f"Command contains potentially dangerous element: {element}",
-                    suggestion="Use only safe command elements without shell metacharacters"
-                )
+                    suggestion="Use only safe command elements without shell metacharacters")
 
         try:
             # Ensure shell=False to prevent shell injection
@@ -488,9 +491,15 @@ class GitClient:
                 f"Command failed: {' '.join(cmd)}",
                 details={"error": str(e)}
             )
+
+
 # Singleton instance
 _git_client: Optional[GitClient] = None
-def get_git_client(working_dir: Optional[Path] = None, force_new: bool = False) -> GitClient:
+
+
+def get_git_client(
+        working_dir: Optional[Path] = None,
+        force_new: bool = False) -> GitClient:
     """
     Get or create GitClient singleton
 
@@ -504,7 +513,8 @@ def get_git_client(working_dir: Optional[Path] = None, force_new: bool = False) 
     if force_new:
         return GitClient(working_dir)
 
-    if _git_client is None or (working_dir and working_dir != _git_client.working_dir):
+    if _git_client is None or (
+            working_dir and working_dir != _git_client.working_dir):
         _git_client = GitClient(working_dir)
 
     return _git_client

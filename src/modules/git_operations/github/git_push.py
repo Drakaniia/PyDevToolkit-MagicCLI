@@ -18,6 +18,8 @@ from core.utils.exceptions import (
     handle_errors
 )
 from core.loading import LoadingSpinner, loading_animation
+
+
 class PushStrategy:
     """Represents a push strategy with specific flags"""
 
@@ -37,6 +39,8 @@ class PushStrategy:
 
     def __repr__(self):
         return f"PushStrategy({self.name})"
+
+
 class PushConfig:
     """Configuration for push retry behavior"""
 
@@ -92,7 +96,10 @@ class PushConfig:
                 is_destructive=True
             ),
         ]
-# ProgressIndicator class removed - now using LoadingSpinner from automation.core.loading
+# ProgressIndicator class removed - now using LoadingSpinner from
+# automation.core.loading
+
+
 class GitPushRetry:
     """
     Enhanced Git push with automatic retry and changelog generation
@@ -178,7 +185,8 @@ class GitPushRetry:
         for idx, strategy in enumerate(self.config.strategies, 1):
             self.attempt_count = idx
 
-            print(f"\n Attempt {idx}/{len(self.config.strategies)}: {strategy.name}")
+            print(
+                f"\n Attempt {idx}/{len(self.config.strategies)}: {strategy.name}")
             print(f"   Description: {strategy.description}")
 
             # Check if confirmation needed
@@ -188,7 +196,8 @@ class GitPushRetry:
                     continue
 
             # Try the strategy with loading animation
-            success, error = self._try_push_strategy_with_animation(strategy, remote, branch)
+            success, error = self._try_push_strategy_with_animation(
+                strategy, remote, branch)
 
             if success:
                 self._show_push_summary()
@@ -276,13 +285,15 @@ class GitPushRetry:
                 # Only show relevant output, filter out verbose info
                 output_lines = result.stdout.strip().split('\n')
                 for line in output_lines:
-                    if line.strip() and not line.startswith('To ') and 'Everything up-to-date' not in line:
+                    if line.strip() and not line.startswith(
+                            'To ') and 'Everything up-to-date' not in line:
                         print(f"    {line}")
 
             return True, None
 
         except GitCommandError as e:
-            print(f"    ❌ Push failed: {self._extract_error_message(e.stderr)}")
+            print(
+                f"    ❌ Push failed: {self._extract_error_message(e.stderr)}")
             return False, e
 
         except Exception as e:
@@ -330,10 +341,13 @@ class GitPushRetry:
             'origin/', 'does not exist upstream'
         ])
 
-        is_permission = any(x in error_msg for x in [
-            'permission denied', 'insufficient permissions', 'protected branch',
-            'push declined', 'branch is protected'
-        ])
+        is_permission = any(
+            x in error_msg for x in [
+                'permission denied',
+                'insufficient permissions',
+                'protected branch',
+                'push declined',
+                'branch is protected'])
 
         is_large_file = any(x in error_msg for x in [
             'large file', 'lfs', 'file too large', 'size exceeds',
@@ -366,7 +380,8 @@ class GitPushRetry:
 
     def _confirm_destructive_operation(self, strategy: PushStrategy) -> bool:
         """Get user confirmation for destructive operations"""
-        print(f"\n  WARNING: {strategy.name.upper()} is a destructive operation!")
+        print(
+            f"\n  WARNING: {strategy.name.upper()} is a destructive operation!")
         print(f"   This will overwrite remote history.")
         print(f"   Description: {strategy.description}\n")
 
@@ -423,13 +438,15 @@ class GitPushRetry:
             except Exception as e:
                 print(f"    {check_name}: {e}")
                 check_results[check_name.lower()] = False
-                # For local changes and network connectivity, we don't want to fail completely
+                # For local changes and network connectivity, we don't want to
+                # fail completely
                 if check_name not in ["Local changes", "Network connectivity"]:
                     all_passed = False
 
         print()
 
-        # Determine if critical checks failed (not including local changes and network connectivity)
+        # Determine if critical checks failed (not including local changes and
+        # network connectivity)
         critical_checks_passed = True
         for check_name, check_func in checks:
             if check_name in ["Local changes", "Network connectivity"]:
@@ -457,14 +474,19 @@ class GitPushRetry:
                 if not check_results.get("remote accessibility", True):
                     print("   • No internet connection - Check your network")
                 else:
-                    # Network ping failed but git remote access worked, so not a real issue
-                    print("   • Network ping failed but remote Git access works - Continuing")
+                    # Network ping failed but git remote access worked, so not
+                    # a real issue
+                    print(
+                        "   • Network ping failed but remote Git access works - Continuing")
             elif not check_results.get("remote accessibility", True):
-                print("   • Cannot access remote repository - Check internet or repository permission")
+                print(
+                    "   • Cannot access remote repository - Check internet or repository permission")
             elif not check_results.get("local changes", True):
-                print("   • No staged changes detected - Will attempt to stage and commit")
+                print(
+                    "   • No staged changes detected - Will attempt to stage and commit")
             elif not check_results.get("diverged commits", True):
-                print("   • Local and remote branches have diverged - Pull first or use merge strategy")
+                print(
+                    "   • Local and remote branches have diverged - Pull first or use merge strategy")
             elif not check_results.get("branch exists remotely", True):
                 print("   • Remote branch doesn't exist - Push with upstream flag")
 
@@ -483,10 +505,12 @@ class GitPushRetry:
                 print("   • Address the specific issues identified above")
 
             print()
-            # If network connectivity failed but git remote access worked, continue anyway
+            # If network connectivity failed but git remote access worked,
+            # continue anyway
             if (not check_results.get("network connectivity", True) and
-                check_results.get("remote accessibility", True)):
-                print(" Network ping failed but Git remote access succeeded - continuing with push...")
+                    check_results.get("remote accessibility", True)):
+                print(
+                    " Network ping failed but Git remote access succeeded - continuing with push...")
                 return True
             input("Press Enter to continue...")
 
@@ -516,7 +540,8 @@ class GitPushRetry:
                 return False
 
             # Try to fetch from remote to check accessibility
-            result = self.git._run_command(['git', 'fetch', 'origin'], check=False)
+            result = self.git._run_command(
+                ['git', 'fetch', 'origin'], check=False)
             return result.returncode == 0
         except (subprocess.CalledProcessError, OSError, TimeoutError):
             return False
@@ -524,12 +549,16 @@ class GitPushRetry:
     def _has_local_changes(self) -> bool:
         """Check if there are staged changes ready to be pushed"""
         try:
-            # Check for staged changes - if no staged changes, check for any changes to prompt user
-            result = self.git._run_command(['git', 'diff', '--cached', '--quiet'], check=False)
-            # Return True if there are staged changes (return code != 0 means changes exist)
+            # Check for staged changes - if no staged changes, check for any
+            # changes to prompt user
+            result = self.git._run_command(
+                ['git', 'diff', '--cached', '--quiet'], check=False)
+            # Return True if there are staged changes (return code != 0 means
+            # changes exist)
             if result.returncode != 0:
                 return True
-            # If no staged changes, check if there are uncommitted changes (staging needed)
+            # If no staged changes, check if there are uncommitted changes
+            # (staging needed)
             status_result = self.git.status(porcelain=True)
             return bool(status_result.strip())
         except (subprocess.CalledProcessError, OSError):
@@ -544,7 +573,9 @@ class GitPushRetry:
         """Check if the remote branch exists"""
         try:
             current_branch = self.git.current_branch()
-            result = self.git._run_command(['git', 'ls-remote', '--heads', 'origin', current_branch], check=False)
+            result = self.git._run_command(
+                ['git', 'ls-remote', '--heads', 'origin', current_branch],
+                check=False)
             return len(result.stdout.strip()) > 0
         except (subprocess.CalledProcessError, OSError, TimeoutError):
             return False
@@ -556,18 +587,20 @@ class GitPushRetry:
 
             # Get the current commit count difference between local and remote
             result = self.git._run_command(
-                ['git', 'rev-list', '--left-right', '--count', f'origin/{current_branch}...HEAD'],
-                check=False
-            )
+                ['git', 'rev-list', '--left-right', '--count',
+                 f'origin/{current_branch}...HEAD'],
+                check=False)
 
             if result.returncode == 0 and result.stdout.strip():
                 left, right = result.stdout.strip().split()
                 left_count = int(left)
                 right_count = int(right)
 
-                # If both have commits that the other doesn't have, they've diverged
+                # If both have commits that the other doesn't have, they've
+                # diverged
                 if left_count > 0 and right_count > 0:
-                    print(f"     Branch divergence detected: +{right_count} local, +{left_count} remote")
+                    print(
+                        f"     Branch divergence detected: +{right_count} local, +{left_count} remote")
                     return False
                 return True
             return True
@@ -588,7 +621,8 @@ class GitPushRetry:
     def _stage_and_commit(self, message: str) -> bool:
         """Enhanced staging and commit with smart error handling and auto-fix"""
 
-        # Step 1: Check for .gitignore changes and handle previously tracked files
+        # Step 1: Check for .gitignore changes and handle previously tracked
+        # files
         if not self._handle_gitignore_changes():
             return False
 
@@ -600,7 +634,8 @@ class GitPushRetry:
                 if self._auto_fix_git_issues(staging_issues):
                     # Re-run diagnostics to confirm fix
                     new_issues = self._diagnose_staging_issues()
-                    if new_issues and any("lock file" in issue.lower() for issue in new_issues):
+                    if new_issues and any(
+                            "lock file" in issue.lower() for issue in new_issues):
                         self._provide_manual_fix_guidance(new_issues)
                         return False
                 else:
@@ -640,8 +675,10 @@ class GitPushRetry:
                     issues.append("No changes to stage")
                     return issues
             except Exception as e:
-                if "index.lock" in str(e).lower() or "unable to create" in str(e).lower():
-                    issues.append("Git index lock detected from git status command")
+                if "index.lock" in str(e).lower(
+                ) or "unable to create" in str(e).lower():
+                    issues.append(
+                        "Git index lock detected from git status command")
                     return issues
                 issues.append(f"Git status error: {str(e)}")
                 return issues
@@ -654,14 +691,16 @@ class GitPushRetry:
                     file_path = line[3:]
 
                     # Check for binary files that might cause issues
-                    if any(ext in file_path.lower() for ext in ['.exe', '.dll', '.so', '.dylib']):
+                    if any(ext in file_path.lower()
+                           for ext in ['.exe', '.dll', '.so', '.dylib']):
                         issues.append(f"Binary file detected: {file_path}")
 
                     # Check for very large files
                     try:
                         file_obj = Path(self.git.working_dir) / file_path
                         if file_obj.exists() and file_obj.stat().st_size > 100 * 1024 * 1024:  # 100MB
-                            issues.append(f"Large file detected (>100MB): {file_path}")
+                            issues.append(
+                                f"Large file detected (>100MB): {file_path}")
                     except (OSError, PermissionError, FileNotFoundError):
                         pass
 
@@ -670,7 +709,8 @@ class GitPushRetry:
                         issues.append(f"Deleted file: {file_path}")
 
         except Exception as e:
-            if "index.lock" in str(e).lower() or "unable to create" in str(e).lower():
+            if "index.lock" in str(e).lower(
+            ) or "unable to create" in str(e).lower():
                 issues.append("Git lock file issue detected")
             else:
                 issues.append(f"Diagnostic error: {str(e)}")
@@ -748,9 +788,11 @@ class GitPushRetry:
 
                         # Verify it's actually gone
                         if not lock_path.exists():
-                            print(f"         Successfully removed {lock_path.name}")
+                            print(
+                                f"         Successfully removed {lock_path.name}")
                         else:
-                            print(f"         Failed to remove {lock_path.name}")
+                            print(
+                                f"         Failed to remove {lock_path.name}")
 
                 except Exception as e:
                     print(f"       Error removing {lock_file_path}: {e}")
@@ -780,11 +822,12 @@ class GitPushRetry:
 
     def _provide_manual_fix_guidance(self, issues: List[str]) -> None:
         """Provide manual fix guidance for remaining issues"""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print(" MANUAL FIX REQUIRED")
-        print("="*60)
+        print("=" * 60)
 
-        lock_file_issues = [issue for issue in issues if "lock file" in issue.lower()]
+        lock_file_issues = [
+            issue for issue in issues if "lock file" in issue.lower()]
 
         if lock_file_issues:
             print("\n Git Lock File Issues:")
@@ -806,7 +849,7 @@ class GitPushRetry:
             print("   Windows: del \".git\\index.lock\" 2>nul")
             print("   Linux/Mac: rm -f .git/index.lock")
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
 
     def _handle_gitignore_changes(self) -> bool:
         """Handle .gitignore changes by removing previously tracked files that now match ignore patterns"""
@@ -820,7 +863,8 @@ class GitPushRetry:
                 for line in lines:
                     if len(line) >= 3:
                         file_path = line[3:]
-                        if file_path == '.gitignore' or file_path.endswith('/.gitignore'):
+                        if file_path == '.gitignore' or file_path.endswith(
+                                '/.gitignore'):
                             gitignore_modified = True
                             break
 
@@ -833,7 +877,8 @@ class GitPushRetry:
                     ['git', 'ls-files'],
                     check=True
                 )
-                tracked_files = tracked_files_result.stdout.strip().split('\n') if tracked_files_result.stdout.strip() else []
+                tracked_files = tracked_files_result.stdout.strip().split(
+                    '\n') if tracked_files_result.stdout.strip() else []
             except Exception:
                 return True  # Continue with normal staging
 
@@ -854,7 +899,8 @@ class GitPushRetry:
                         check=False
                     )
 
-                    # If git check-ignore returns 0, the file matches an ignore pattern
+                    # If git check-ignore returns 0, the file matches an ignore
+                    # pattern
                     if check_ignore_result.returncode == 0:
                         files_to_remove.append(file_path)
 
@@ -895,18 +941,23 @@ class GitPushRetry:
 
                 # Only show summary if there were failures
                 if failed_removals:
-                    print(f"  Warning: Could not remove {len(failed_removals)} files from tracking")
+                    print(
+                        f"  Warning: Could not remove {len(failed_removals)} files from tracking")
             else:
                 # Ask user for confirmation
-                print(f"\n Found {len(files_to_remove)} previously tracked files that now match .gitignore patterns")
-                print("   These files are currently tracked in Git but now match .gitignore patterns.")
-                print("   They should be removed from Git tracking (this will delete them from the remote repository)")
+                print(
+                    f"\n Found {len(files_to_remove)} previously tracked files that now match .gitignore patterns")
+                print(
+                    "   These files are currently tracked in Git but now match .gitignore patterns.")
+                print(
+                    "   They should be removed from Git tracking (this will delete them from the remote repository)")
                 print("   Do you want to remove them from Git tracking?")
                 print("   Type 'YES' to remove them, or 'NO' to keep them tracked:")
                 user_choice = input("   > ").strip().upper()
 
                 if user_choice == 'YES':
-                    print(f"\n  Removing {len(files_to_remove)} files from Git tracking...")
+                    print(
+                        f"\n  Removing {len(files_to_remove)} files from Git tracking...")
 
                     # Remove files from Git tracking using git rm --cached
                     removed_count = 0
@@ -929,9 +980,11 @@ class GitPushRetry:
 
                     # Only show summary if there were failures
                     if failed_removals:
-                        print(f"  Warning: Could not remove {len(failed_removals)} files from tracking")
+                        print(
+                            f"  Warning: Could not remove {len(failed_removals)} files from tracking")
                 elif user_choice == 'NO':
-                    print("\n Keeping files tracked in Git (they will remain in the repository)")
+                    print(
+                        "\n Keeping files tracked in Git (they will remain in the repository)")
                 else:
                     print("\n  Invalid choice. Keeping files tracked for safety.")
 
@@ -957,7 +1010,8 @@ class GitPushRetry:
                     print(f" {strategy_name} successful\n")
                     return True
                 else:
-                    print(f"  {strategy_name} had issues, trying next strategy...\n")
+                    print(
+                        f"  {strategy_name} had issues, trying next strategy...\n")
             except Exception as e:
                 print(f" {strategy_name} failed: {e}")
                 print(f"   Trying next strategy...\n")
@@ -1009,11 +1063,13 @@ class GitPushRetry:
                     file_path = line[3:]
                     try:
                         # Try to stage individual file
-                        result = self.git._run_command(['git', 'add', file_path], check=False)
+                        result = self.git._run_command(
+                            ['git', 'add', file_path], check=False)
                         if result.returncode == 0:
                             staged_count += 1
                         else:
-                            print(f"     Skipped problematic file: {file_path}")
+                            print(
+                                f"     Skipped problematic file: {file_path}")
                     except (subprocess.CalledProcessError, OSError, PermissionError):
                         print(f"     Skipped problematic file: {file_path}")
 
@@ -1044,11 +1100,13 @@ class GitPushRetry:
                             continue
 
                         # Try to add the file
-                        result = self.git._run_command(['git', 'add', file_path], check=False)
+                        result = self.git._run_command(
+                            ['git', 'add', file_path], check=False)
                         if result.returncode == 0:
                             successful_files.append(file_path)
                         else:
-                            failed_files.append((file_path, result.stderr.strip()))
+                            failed_files.append(
+                                (file_path, result.stderr.strip()))
 
                     except Exception as e:
                         failed_files.append((file_path, str(e)))
@@ -1057,7 +1115,8 @@ class GitPushRetry:
                 print(f"    Successfully staged {len(successful_files)} files")
                 if failed_files:
                     print(f"     Failed to stage {len(failed_files)} files:")
-                    for file_path, error in failed_files[:3]:  # Show first 3 errors
+                    # Show first 3 errors
+                    for file_path, error in failed_files[:3]:
                         print(f"      - {file_path}: {error}")
                     if len(failed_files) > 3:
                         print(f"      ... and {len(failed_files) - 3} more")
@@ -1080,7 +1139,8 @@ class GitPushRetry:
         """Smart commit with validation"""
         try:
             # Check if there are staged changes
-            result = self.git._run_command(['git', 'diff', '--cached', '--quiet'], check=False)
+            result = self.git._run_command(
+                ['git', 'diff', '--cached', '--quiet'], check=False)
             if result.returncode == 0:
                 print("  No staged changes to commit")
                 return False
@@ -1099,7 +1159,8 @@ class GitPushRetry:
         """Smart commit with validation (quiet mode)"""
         try:
             # Check if there are staged changes
-            result = self.git._run_command(['git', 'diff', '--cached', '--quiet'], check=False)
+            result = self.git._run_command(
+                ['git', 'diff', '--cached', '--quiet'], check=False)
             if result.returncode == 0:
                 return False
 
@@ -1131,9 +1192,9 @@ class GitPushRetry:
 
     def _provide_push_failure_guidance(self) -> None:
         """Provide comprehensive guidance when push fails completely"""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print(" PUSH FAILURE DIAGNOSTIC & SOLUTIONS")
-        print("="*60)
+        print("=" * 60)
 
         print("\n Common Push Failure Causes & Solutions:")
 
@@ -1178,7 +1239,7 @@ class GitPushRetry:
         print("   • Manual push: git push origin <branch-name>")
         print("   • Use GitHub CLI: gh repo sync")
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
 
     def _show_push_summary(self):
         """Show visually appealing summary after successful push"""
@@ -1187,9 +1248,9 @@ class GitPushRetry:
             from colorama import Fore, Style, init
             init()
 
-            print("\n" + "="*70)
+            print("\n" + "=" * 70)
             print(f"{Fore.GREEN}{'PUSH SUCCESSFUL!':^70}{Style.RESET_ALL}")
-            print("="*70)
+            print("=" * 70)
 
             # Get latest commit info using safer commands
             self._show_latest_commit_info()
@@ -1200,9 +1261,10 @@ class GitPushRetry:
             # Get repository status
             self._show_repository_status()
 
-            print("\n" + "="*70)
-            print(f"{Fore.GREEN}{'All changes pushed successfully!':^70}{Style.RESET_ALL}")
-            print("="*70 + "\n")
+            print("\n" + "=" * 70)
+            print(
+                f"{Fore.GREEN}{'All changes pushed successfully!':^70}{Style.RESET_ALL}")
+            print("=" * 70 + "\n")
 
         except Exception as e:
             print(f"  Could not generate full summary: {e}")
@@ -1265,8 +1327,9 @@ class GitPushRetry:
 
             if result.returncode == 0 and result.stdout.strip():
                 # Create a beautiful header
-                print(f"\n{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Style.RESET_ALL}")
-                print("="*78)
+                print(
+                    f"\n{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Style.RESET_ALL}")
+                print("=" * 78)
 
                 stats_lines = result.stdout.strip().split('\n')
                 file_changes = []
@@ -1283,7 +1346,9 @@ class GitPushRetry:
                 # Parse and display summary with enhanced visuals
                 if summary_line:
                     import re
-                    match = re.search(r'(\d+)\s+files?\s+changed(?:,\s+(\d+)\s+insertions?\(\+\))?(?:,\s+(\d+)\s+deletions?\(-\))?', summary_line)
+                    match = re.search(
+                        r'(\d+)\s+files?\s+changed(?:,\s+(\d+)\s+insertions?\(\+\))?(?:,\s+(\d+)\s+deletions?\(-\))?',
+                        summary_line)
                     if match:
                         files_changed = int(match.group(1))
                         insertions = int(match.group(2) or '0')
@@ -1292,7 +1357,7 @@ class GitPushRetry:
 
                         # Summary section with visual indicators
                         print(f"{Fore.BLUE}📁 Files Changed:{Style.RESET_ALL} {files_changed:<3} │ {Fore.GREEN}➕ Insertions:{Style.RESET_ALL} {insertions:<4} │ {Fore.RED}➖ Deletions:{Style.RESET_ALL} {deletions:<18}")
-                        print("-"*78)
+                        print("-" * 78)
 
                         # Visual representation of changes
                         if total_changes > 0:
@@ -1306,11 +1371,13 @@ class GitPushRetry:
 
                             # Insertions bar
                             print(f"{Fore.GREEN}Insertions:{Style.RESET_ALL}")
-                            print(f"   [{Fore.GREEN}{'█' * ins_width}{Style.DIM}{'░' * (bar_width - ins_width)}{Style.RESET_ALL}] {ins_percentage:.1f}% ({insertions} lines)")
+                            print(
+                                f"   [{Fore.GREEN}{'█' * ins_width}{Style.DIM}{'░' * (bar_width - ins_width)}{Style.RESET_ALL}] {ins_percentage:.1f}% ({insertions} lines)")
 
                             # Deletions bar
                             print(f"{Fore.RED}Deletions:{Style.RESET_ALL}")
-                            print(f"   [{Fore.RED}{'█' * del_width}{Style.DIM}{'░' * (bar_width - del_width)}{Style.RESET_ALL}] {del_percentage:.1f}% ({deletions} lines)")
+                            print(
+                                f"   [{Fore.RED}{'█' * del_width}{Style.DIM}{'░' * (bar_width - del_width)}{Style.RESET_ALL}] {del_percentage:.1f}% ({deletions} lines)")
 
                             # Net change indicator
                             net_change = insertions - deletions
@@ -1324,13 +1391,15 @@ class GitPushRetry:
                                 net_color = Fore.YELLOW
                                 net_symbol = "→"
 
-                            print(f"{Fore.YELLOW}Net Change:{Style.RESET_ALL} {net_color}{net_symbol} {abs(net_change)} lines{Style.RESET_ALL}")
+                            print(
+                                f"{Fore.YELLOW}Net Change:{Style.RESET_ALL} {net_color}{net_symbol} {abs(net_change)} lines{Style.RESET_ALL}")
 
                 # Display detailed file changes if any
                 if file_changes:
-                    print("\n" + "="*78)
-                    print(f"{Fore.MAGENTA}{'📋 DETAILED FILE CHANGES':^78}{Style.RESET_ALL}")
-                    print("-"*78)
+                    print("\n" + "=" * 78)
+                    print(
+                        f"{Fore.MAGENTA}{'📋 DETAILED FILE CHANGES':^78}{Style.RESET_ALL}")
+                    print("-" * 78)
 
                     # Sort files by change count (most changes first)
                     file_data = []
@@ -1341,7 +1410,8 @@ class GitPushRetry:
 
                             # Extract numbers from stats
                             import re
-                            stats_match = re.search(r'(\d+)(?:\s*([+-]+))?', stats_part.strip())
+                            stats_match = re.search(
+                                r'(\d+)(?:\s*([+-]+))?', stats_part.strip())
                             if stats_match:
                                 changes = int(stats_match.group(1))
                                 symbols = stats_match.group(2) or ''
@@ -1371,15 +1441,18 @@ class GitPushRetry:
                             change_color = Fore.WHITE
                             change_type = "Changed"
 
-                        print(f"  {change_color}{change_type:>8}:{Style.RESET_ALL} {display_path:<45} {changes:>4} changes")
+                        print(
+                            f"  {change_color}{change_type:>8}:{Style.RESET_ALL} {display_path:<45} {changes:>4} changes")
 
                     if len(file_changes) > 15:
-                        print(f"  {'... and ' + str(len(file_changes) - 15) + ' more files':^78}")
+                        print(
+                            f"  {'... and ' + str(len(file_changes) - 15) + ' more files':^78}")
 
                 # Footer with summary
-                print("\n" + "="*78)
+                print("\n" + "=" * 78)
                 if summary_line and match:
-                    print(f"{'Total: ' + str(total_changes) + ' lines changed across ' + str(files_changed) + ' file(s)':^78}")
+                    print(
+                        f"{'Total: ' + str(total_changes) + ' lines changed across ' + str(files_changed) + ' file(s)':^78}")
             else:
                 # Fallback: try to get diff stats for the last commit
                 self._show_fallback_statistics()
@@ -1402,23 +1475,25 @@ class GitPushRetry:
             )
 
             # Create a simple header for statistics
-            print(f"\n{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Style.RESET_ALL}")
-            print("="*78)
+            print(
+                f"\n{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Style.RESET_ALL}")
+            print("=" * 78)
 
             if result.returncode == 0 and result.stdout.strip():
                 lines = result.stdout.strip().split('\n')
                 for line in lines:
                     if line.strip() and not line.startswith(' '):
                         print(f"  {line}")
-                print("="*78)
+                print("=" * 78)
             else:
                 print(f"  {'Detailed statistics not available':^78}")
-                print("="*78)
+                print("=" * 78)
         except Exception:
-            print(f"\n{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Style.RESET_ALL}")
-            print("="*78)
+            print(
+                f"\n{Fore.YELLOW}{'📊 COMPREHENSIVE COMMIT STATISTICS':^78}{Style.RESET_ALL}")
+            print("=" * 78)
             print(f"  {'Statistics not available':^78}")
-            print("="*78)
+            print("=" * 78)
 
     def _show_repository_status(self):
         """Show current repository status"""
@@ -1429,7 +1504,8 @@ class GitPushRetry:
 
             # Get current branch
             current_branch = self.git.current_branch()
-            print(f"\n{Fore.MAGENTA}Current Branch:{Style.RESET_ALL} {current_branch}")
+            print(
+                f"\n{Fore.MAGENTA}Current Branch:{Style.RESET_ALL} {current_branch}")
 
             # Check if there are any uncommitted changes
             status = self.git.status(porcelain=True)
@@ -1442,11 +1518,14 @@ class GitPushRetry:
                         file_path = line[3:]
 
                         if status_code.startswith('??'):
-                            print(f"    {Fore.GREEN}Untracked:{Style.RESET_ALL} {file_path}")
+                            print(
+                                f"    {Fore.GREEN}Untracked:{Style.RESET_ALL} {file_path}")
                         elif status_code[0] in ['M', 'A']:
-                            print(f"    {Fore.BLUE}Modified:{Style.RESET_ALL} {file_path}")
+                            print(
+                                f"    {Fore.BLUE}Modified:{Style.RESET_ALL} {file_path}")
                         elif status_code[0] == 'D':
-                            print(f"    {Fore.RED}Deleted:{Style.RESET_ALL} {file_path}")
+                            print(
+                                f"    {Fore.RED}Deleted:{Style.RESET_ALL} {file_path}")
 
                 status_lines = status.strip().split('\n')
                 if len(status_lines) > 5:
@@ -1462,7 +1541,8 @@ class GitPushRetry:
                 )
                 if remote_result.returncode == 0 and remote_result.stdout.strip():
                     print(f"\n{Fore.CYAN}Remote:{Style.RESET_ALL}")
-                    for line in remote_result.stdout.strip().split('\n')[:2]:  # Show first 2 remotes
+                    for line in remote_result.stdout.strip(
+                    ).split('\n')[:2]:  # Show first 2 remotes
                         if 'origin' in line:
                             parts = line.split()
                             if len(parts) >= 2:
@@ -1486,7 +1566,8 @@ class GitPushRetry:
             return "Unknown error"
 
         lines = [l.strip() for l in stderr.split('\n') if l.strip()]
-        error_lines = [l for l in lines if l.startswith('!') or 'error' in l.lower()]
+        error_lines = [l for l in lines if l.startswith(
+            '!') or 'error' in l.lower()]
 
         if error_lines:
             return error_lines[0][:100]
@@ -1500,7 +1581,8 @@ class GitPushRetry:
             print(" Checking for potential conflicts...\n")
 
             # Fetch latest changes to compare with local
-            fetch_result = self.git._run_command(['git', 'fetch', 'origin'], check=False)
+            fetch_result = self.git._run_command(
+                ['git', 'fetch', 'origin'], check=False)
             if fetch_result.returncode != 0:
                 print("  Could not fetch latest changes from remote")
                 return True  # Continue anyway
@@ -1512,19 +1594,24 @@ class GitPushRetry:
                     check=False
                 )
 
-                remote_ahead_count = len(result.stdout.strip().split()) if result.stdout.strip() else 0
+                remote_ahead_count = len(
+                    result.stdout.strip().split()) if result.stdout.strip() else 0
 
                 if remote_ahead_count > 0:
-                    print(f"  Remote branch is {remote_ahead_count} commit(s) ahead of your local branch")
-                    print(" This may cause a push failure. Consider pulling changes first:")
+                    print(
+                        f"  Remote branch is {remote_ahead_count} commit(s) ahead of your local branch")
+                    print(
+                        " This may cause a push failure. Consider pulling changes first:")
                     print(f"   $ git pull origin {current_branch}")
                     print()
-                    response = input("Do you want to continue with push? (y/N): ").strip().lower()
+                    response = input(
+                        "Do you want to continue with push? (y/N): ").strip().lower()
                     if response not in ['y', 'yes']:
                         print(" Push cancelled by user due to potential conflicts")
                         return False
                 else:
-                    print(" No conflicts detected - your branch is up to date with remote")
+                    print(
+                        " No conflicts detected - your branch is up to date with remote")
                     print()
 
             except Exception as e:
@@ -1534,6 +1621,8 @@ class GitPushRetry:
             print(f"  Could not check for conflicts: {e}")
 
         return True
+
+
 class GitPush:
     """Backward-compatible GitPush class with enhanced retry and auto-changelog"""
 
@@ -1550,20 +1639,24 @@ class GitPush:
         Args:
             dry_run: Show what would be done without executing
         """
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("  GIT PUSH (With Auto-Retry & Auto-Changelog)")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         # IMPORTANT: Refresh Git client to avoid stale state
         # This prevents the "nothing to commit" bug that requires restarting
         print(" Refreshing Git state...")
         self.git = get_git_client(working_dir=Path.cwd(), force_new=True)
-        self.push_retry.git = get_git_client(working_dir=Path.cwd(), force_new=True)
+        self.push_retry.git = get_git_client(
+            working_dir=Path.cwd(), force_new=True)
 
         # Also refresh the Git index to ensure we see all filesystem changes
         try:
             from ..core.security import SecurityValidator
-            SecurityValidator.safe_subprocess_run(['git', 'status'], capture_output=True, cwd=Path.cwd(), timeout=5)
+            SecurityValidator.safe_subprocess_run(
+                ['git', 'status'],
+                capture_output=True, cwd=Path.cwd(),
+                timeout=5)
         except (subprocess.CalledProcessError, OSError, TimeoutError, ImportError):
             pass  # Not critical if this fails
 
@@ -1594,7 +1687,8 @@ class GitPush:
             return
 
         # Execute push with retry (changelog will be auto-generated)
-        success = self.push_retry.push_with_retry(commit_message=commit_message)
+        success = self.push_retry.push_with_retry(
+            commit_message=commit_message)
 
         if success:
             print(" Push completed successfully!")
@@ -1657,7 +1751,8 @@ class GitPush:
 
         except Exception as e:
             print(f"  Error checking for changes: {e}")
-            # In case of error, be conservative and assume there might be changes
+            # In case of error, be conservative and assume there might be
+            # changes
             print(" Attempting direct git status as fallback...")
             try:
                 fallback_result = SecurityValidator.safe_subprocess_run(
@@ -1703,7 +1798,8 @@ class GitPush:
                 print("\n  Files:")
                 for line in lines[:15]:
                     status_code = line[:2]
-                    filename = line[3:].strip() if len(line) > 3 else line[2:].strip()
+                    filename = line[3:].strip() if len(
+                        line) > 3 else line[2:].strip()
 
                     if status_code == '??':
                         print(f"    ?? (untracked) {filename}")
@@ -1731,7 +1827,8 @@ class GitPush:
             print(" Checking for potential conflicts...\n")
 
             # Fetch latest changes to compare with local
-            fetch_result = self.git._run_command(['git', 'fetch', 'origin'], check=False)
+            fetch_result = self.git._run_command(
+                ['git', 'fetch', 'origin'], check=False)
             if fetch_result.returncode != 0:
                 print("  Could not fetch latest changes from remote")
                 return True  # Continue anyway
@@ -1743,19 +1840,24 @@ class GitPush:
                     check=False
                 )
 
-                remote_ahead_count = len(result.stdout.strip().split()) if result.stdout.strip() else 0
+                remote_ahead_count = len(
+                    result.stdout.strip().split()) if result.stdout.strip() else 0
 
                 if remote_ahead_count > 0:
-                    print(f"  Remote branch is {remote_ahead_count} commit(s) ahead of your local branch")
-                    print(" This may cause a push failure. Consider pulling changes first:")
+                    print(
+                        f"  Remote branch is {remote_ahead_count} commit(s) ahead of your local branch")
+                    print(
+                        " This may cause a push failure. Consider pulling changes first:")
                     print(f"   $ git pull origin {current_branch}")
                     print()
-                    response = input("Do you want to continue with push? (y/N): ").strip().lower()
+                    response = input(
+                        "Do you want to continue with push? (y/N): ").strip().lower()
                     if response not in ['y', 'yes']:
                         print(" Push cancelled by user due to potential conflicts")
                         return False
                 else:
-                    print(" No conflicts detected - your branch is up to date with remote")
+                    print(
+                        " No conflicts detected - your branch is up to date with remote")
                     print()
 
             except Exception as e:
@@ -1783,10 +1885,14 @@ class GitPush:
 
         return message
 # Backward compatibility
+
+
 def push():
     """Legacy function"""
     pusher = GitPush()
     pusher.push()
+
+
 if __name__ == "__main__":
     print("Testing Enhanced Git Push with Auto-Changelog\n")
 
@@ -1800,7 +1906,7 @@ if __name__ == "__main__":
     for i, s in enumerate(config.strategies, 1):
         print(f"  {i}. {s.name}: {s.description}")
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("Ready to use! Import and call:")
     print("  from src.github.git_push import GitPush")
     print("  pusher = GitPush()")

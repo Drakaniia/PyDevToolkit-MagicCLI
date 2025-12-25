@@ -12,6 +12,7 @@ from core.menu import Menu, MenuItem
 
 init(autoreset=True)
 
+
 class GitStash:
     """Git stash operations handler class"""
 
@@ -55,7 +56,10 @@ class GitStash:
 
             def setup_items(self):
                 for i, stash in enumerate(self.stashes):
-                    self.items.append(MenuItem(f"{stash}", lambda stash_idx=i: stash_idx))
+                    self.items.append(
+                        MenuItem(
+                            f"{stash}",
+                            lambda stash_idx=i: stash_idx))
 
                 # Add a cancel option
                 self.items.append(MenuItem("Cancel", lambda: -1))
@@ -67,7 +71,8 @@ class GitStash:
         if selected_idx == len(stashes):
             return None
         elif 0 <= selected_idx < len(stashes):
-            return self.stashes[selected_idx].split(':')[0]  # Return stash name
+            return self.stashes[selected_idx].split(
+                ':')[0]  # Return stash name
         else:
             return None
 
@@ -81,22 +86,38 @@ class GitStash:
 
             def setup_items(self):
                 self.items = [
-                    MenuItem("git stash - Save current state", self._stash_save),
-                    MenuItem("git stash list - Show saved stashes", self._stash_list),
-                    MenuItem("git stash apply - Apply a stash", self._stash_apply),
-                    MenuItem("git stash pop - Apply and remove a stash", self._stash_pop),
-                    MenuItem("git stash drop - Remove a specific stash", self._stash_drop),
-                    MenuItem("git stash clear - Remove all stashes", self._stash_clear),
-                    MenuItem("View stash details", self._stash_details),
-                    MenuItem("Back to main menu", self._exit_menu)
-                ]
+                    MenuItem(
+                        "git stash - Save current state",
+                        self._stash_save),
+                    MenuItem(
+                        "git stash list - Show saved stashes",
+                        self._stash_list),
+                    MenuItem(
+                        "git stash apply - Apply a stash",
+                        self._stash_apply),
+                    MenuItem(
+                        "git stash pop - Apply and remove a stash",
+                        self._stash_pop),
+                    MenuItem(
+                        "git stash drop - Remove a specific stash",
+                        self._stash_drop),
+                    MenuItem(
+                        "git stash clear - Remove all stashes",
+                        self._stash_clear),
+                    MenuItem(
+                        "View stash details",
+                        self._stash_details),
+                    MenuItem(
+                        "Back to main menu",
+                        self._exit_menu)]
 
             def _stash_save(self):
                 self.clear_screen()
                 print(Fore.CYAN + Style.BRIGHT + "Git Stash Save")
-                print(Fore.CYAN + "="*50)
+                print(Fore.CYAN + "=" * 50)
 
-                message = input("Enter optional stash message (or press Enter to skip): ").strip()
+                message = input(
+                    "Enter optional stash message (or press Enter to skip): ").strip()
                 if message:
                     cmd = f'git stash push -m "{message}"'
                 else:
@@ -115,7 +136,7 @@ class GitStash:
             def _stash_list(self):
                 self.clear_screen()
                 print(Fore.CYAN + Style.BRIGHT + "Git Stash List")
-                print(Fore.CYAN + "="*50)
+                print(Fore.CYAN + "=" * 50)
 
                 stashes = self.git_stash.get_stash_list()
                 if stashes:
@@ -129,7 +150,7 @@ class GitStash:
             def _stash_apply(self):
                 self.clear_screen()
                 print(Fore.CYAN + Style.BRIGHT + "Git Stash Apply")
-                print(Fore.CYAN + "="*50)
+                print(Fore.CYAN + "=" * 50)
 
                 stashes = self.git_stash.get_stash_list()
                 if not stashes:
@@ -155,7 +176,7 @@ class GitStash:
             def _stash_pop(self):
                 self.clear_screen()
                 print(Fore.CYAN + Style.BRIGHT + "Git Stash Pop")
-                print(Fore.CYAN + "="*50)
+                print(Fore.CYAN + "=" * 50)
 
                 stashes = self.git_stash.get_stash_list()
                 if not stashes:
@@ -181,7 +202,7 @@ class GitStash:
             def _stash_drop(self):
                 self.clear_screen()
                 print(Fore.CYAN + Style.BRIGHT + "Git Stash Drop")
-                print(Fore.CYAN + "="*50)
+                print(Fore.CYAN + "=" * 50)
 
                 stashes = self.git_stash.get_stash_list()
                 if not stashes:
@@ -191,7 +212,8 @@ class GitStash:
 
                 stash_id = self.git_stash.display_stash_menu(stashes)
                 if stash_id:
-                    confirm = input(f"Are you sure you want to drop {stash_id}? (y/N): ")
+                    confirm = input(
+                        f"Are you sure you want to drop {stash_id}? (y/N): ")
                     if confirm.lower() == 'y':
                         cmd = f'git stash drop {stash_id}'
                         print(Fore.CYAN + f"Running: {cmd}")
@@ -211,9 +233,10 @@ class GitStash:
             def _stash_clear(self):
                 self.clear_screen()
                 print(Fore.CYAN + Style.BRIGHT + "Git Stash Clear")
-                print(Fore.CYAN + "="*50)
+                print(Fore.CYAN + "=" * 50)
 
-                confirm = input("Are you sure you want to clear all stashes? This cannot be undone! (y/N): ")
+                confirm = input(
+                    "Are you sure you want to clear all stashes? This cannot be undone! (y/N): ")
                 if confirm.lower() == 'y':
                     cmd = 'git stash clear'
                     print(Fore.CYAN + f"Running: {cmd}")
@@ -231,7 +254,7 @@ class GitStash:
             def _stash_details(self):
                 self.clear_screen()
                 print(Fore.CYAN + Style.BRIGHT + "Git Stash Details")
-                print(Fore.CYAN + "="*50)
+                print(Fore.CYAN + "=" * 50)
 
                 stashes = self.git_stash.get_stash_list()
                 if not stashes:
@@ -248,7 +271,8 @@ class GitStash:
                         print(Fore.GREEN + f"Details for {stash_id}:")
                         print(Fore.WHITE + stdout)
                     else:
-                        print(Fore.RED + f"Error showing stash details: {stderr}")
+                        print(Fore.RED +
+                              f"Error showing stash details: {stderr}")
                 else:
                     print(Fore.YELLOW + "Operation cancelled.")
                 input("\nPress Enter to continue...")
@@ -258,6 +282,7 @@ class GitStash:
 
         stash_menu = GitStashMenu(self)
         stash_menu.run()
+
 
 if __name__ == "__main__":
     stash = GitStash()

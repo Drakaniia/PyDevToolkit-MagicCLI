@@ -8,6 +8,8 @@ import subprocess
 from pathlib import Path
 from typing import Union, List, Optional
 from ..utils.exceptions import AutomationError, ErrorSeverity
+
+
 class SecurityValidator:
     """Centralized security validation and sanitization utilities"""
 
@@ -155,7 +157,8 @@ class SecurityValidator:
             if re.search(pattern, branch_name):
                 return False
 
-        return bool(SecurityValidator.SAFE_BRANCH_NAME_PATTERN.match(branch_name))
+        return bool(
+            SecurityValidator.SAFE_BRANCH_NAME_PATTERN.match(branch_name))
 
     @staticmethod
     def sanitize_command_input(user_input: str) -> str:
@@ -183,8 +186,7 @@ class SecurityValidator:
         raise AutomationError(
             "Command input contains potentially dangerous characters",
             ErrorSeverity.WARNING,
-            suggestion="Use only alphanumeric characters, hyphens, underscores, dots, and slashes"
-        )
+            suggestion="Use only alphanumeric characters, hyphens, underscores, dots, and slashes")
 
     @staticmethod
     def sanitize_path(path: str) -> str:
@@ -215,7 +217,8 @@ class SecurityValidator:
         )
 
     @staticmethod
-    def safe_subprocess_run(cmd: List[str], **kwargs) -> subprocess.CompletedProcess:
+    def safe_subprocess_run(cmd: List[str],
+                            **kwargs) -> subprocess.CompletedProcess:
         """
         Safely run a subprocess command with validation
 
@@ -235,15 +238,17 @@ class SecurityValidator:
                 raise AutomationError(
                     f"Command contains potentially dangerous element: {element}",
                     ErrorSeverity.ERROR,
-                    suggestion="Use only safe command elements without shell metacharacters"
-                )
+                    suggestion="Use only safe command elements without shell metacharacters")
 
         # Ensure shell=False to prevent shell injection
         if 'shell' in kwargs:
-            kwargs.pop('shell')  # Remove any shell parameter to enforce shell=False
+            # Remove any shell parameter to enforce shell=False
+            kwargs.pop('shell')
 
         # Execute the command with subprocess using shell=False (default)
         return subprocess.run(cmd, **kwargs)
+
+
 def safe_input(prompt: str) -> str:
     """
     Secure input function that validates user input
@@ -260,10 +265,11 @@ def safe_input(prompt: str) -> str:
         raise AutomationError(
             "Input contains potentially dangerous characters",
             ErrorSeverity.WARNING,
-            suggestion="Use only alphanumeric characters, hyphens, underscores, dots, and slashes"
-        )
+            suggestion="Use only alphanumeric characters, hyphens, underscores, dots, and slashes")
 
     return user_input
+
+
 def safe_path_input(prompt: str) -> str:
     """
     Secure path input function that validates user-provided paths

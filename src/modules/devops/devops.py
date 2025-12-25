@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+
 class DevOpsTools:
     """Handles DevOps and infrastructure tasks"""
 
@@ -17,15 +19,15 @@ class DevOpsTools:
 
     def setup_terraform_config(self) -> None:
         """Help set up Terraform configuration"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("TERRAFORM CONFIGURATION SETUP")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool helps set up Terraform for infrastructure as code.")
 
         # Check if Terraform is installed
         result = subprocess.run(['terraform', 'version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ Terraform is not installed or not in PATH")
@@ -192,15 +194,15 @@ environment  = "dev"
 
     def setup_docker_registry(self) -> None:
         """Help set up Docker registry integration"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DOCKER REGISTRY INTEGRATION")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool helps integrate with Docker registries.")
 
         # Check if Docker is installed
         result = subprocess.run(['docker', '--version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ Docker is not installed or not in PATH")
@@ -218,7 +220,8 @@ environment  = "dev"
         print("  5. Self-hosted registry")
 
         try:
-            choice = input("\nEnter choice (1-5) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-5) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._setup_docker_hub()
@@ -277,7 +280,7 @@ echo "Done!"
         # Make executable on Unix systems
         try:
             os.chmod("build_and_push_docker.sh", 0o755)
-        except:
+        except BaseException:
             pass  # Skip on Windows
 
         print("✓ Build script created: build_and_push_docker.sh")
@@ -291,7 +294,7 @@ echo "Done!"
 
         # Check if AWS CLI is installed
         result = subprocess.run(['aws', 'configure', 'list'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ AWS CLI is not installed or not configured")
@@ -299,17 +302,21 @@ echo "Done!"
             return
 
         account_id = input("Enter AWS Account ID: ").strip()
-        region = input("Enter AWS Region (e.g., us-east-1): ").strip() or "us-east-1"
+        region = input(
+            "Enter AWS Region (e.g., us-east-1): ").strip() or "us-east-1"
 
         if not account_id:
             print("Account ID is required!")
             return
 
         print(f"\nExample ECR commands:")
-        print(f"  aws ecr get-login-password --region {region} | docker login --username AWS --password-stdin {account_id}.dkr.ecr.{region}.amazonaws.com")
+        print(
+            f"  aws ecr get-login-password --region {region} | docker login --username AWS --password-stdin {account_id}.dkr.ecr.{region}.amazonaws.com")
         print(f"  docker build -t my-app .")
-        print(f"  docker tag my-app:latest {account_id}.dkr.ecr.{region}.amazonaws.com/my-app:latest")
-        print(f"  docker push {account_id}.dkr.ecr.{region}.amazonaws.com/my-app:latest")
+        print(
+            f"  docker tag my-app:latest {account_id}.dkr.ecr.{region}.amazonaws.com/my-app:latest")
+        print(
+            f"  docker push {account_id}.dkr.ecr.{region}.amazonaws.com/my-app:latest")
 
         # Create example script
         script_content = f'''#!/bin/bash
@@ -344,7 +351,7 @@ echo "Image pushed to $ECR_REGISTRY/$IMAGE_NAME"
         # Make executable on Unix systems
         try:
             os.chmod("build_and_push_ecr.sh", 0o755)
-        except:
+        except BaseException:
             pass  # Skip on Windows
 
         print("✓ Build script created: build_and_push_ecr.sh")
@@ -398,7 +405,7 @@ echo "Image pushed to gcr.io/$PROJECT_ID/$IMAGE_NAME"
         # Make executable on Unix systems
         try:
             os.chmod("build_and_push_gcr.sh", 0o755)
-        except:
+        except BaseException:
             pass  # Skip on Windows
 
         print("✓ Build script created: build_and_push_gcr.sh")
@@ -454,7 +461,7 @@ echo "Image pushed to $ACR_NAME.azurecr.io/$IMAGE_NAME"
         # Make executable on Unix systems
         try:
             os.chmod("build_and_push_acr.sh", 0o755)
-        except:
+        except BaseException:
             pass  # Skip on Windows
 
         print("✓ Build script created: build_and_push_acr.sh")
@@ -463,7 +470,8 @@ echo "Image pushed to $ACR_NAME.azurecr.io/$IMAGE_NAME"
         """Setup self-hosted Docker registry"""
         print("\nSetting up self-hosted Docker registry...")
 
-        registry_url = input("Enter registry URL (e.g., myregistrydomain.com:5000): ").strip()
+        registry_url = input(
+            "Enter registry URL (e.g., myregistrydomain.com:5000): ").strip()
 
         if not registry_url:
             print("Registry URL is required!")
@@ -501,16 +509,16 @@ echo "Image pushed to $REGISTRY_URL/$IMAGE_NAME"
         # Make executable on Unix systems
         try:
             os.chmod("build_and_push_self_hosted.sh", 0o755)
-        except:
+        except BaseException:
             pass  # Skip on Windows
 
         print("✓ Build script created: build_and_push_self_hosted.sh")
 
     def deploy_to_cloud(self) -> None:
         """Help with deployment to cloud platforms"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("CLOUD DEPLOYMENT TOOLS")
-        print("="*70)
+        print("=" * 70)
 
         print("\nDeployment options:")
         print("  1. AWS Elastic Beanstalk")
@@ -520,7 +528,8 @@ echo "Image pushed to $REGISTRY_URL/$IMAGE_NAME"
         print("  5. Digital Ocean App Platform")
 
         try:
-            choice = input("\nEnter choice (1-5) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-5) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._deploy_to_aws_eb()
@@ -551,14 +560,15 @@ echo "Image pushed to $REGISTRY_URL/$IMAGE_NAME"
 
         # Check if EB CLI is installed
         result = subprocess.run(['eb', '--version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ EB CLI is not installed")
             install = input("Install EB CLI? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "awsebcli"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "awsebcli"], check=True)
                     print("✓ EB CLI installed successfully")
                 except subprocess.CalledProcessError:
                     print("⚠ Failed to install EB CLI")
@@ -615,7 +625,7 @@ python-dotenv==1.0.0
 
         # Check if gcloud is available
         result = subprocess.run(['gcloud', 'version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ gcloud CLI is not installed")
@@ -632,10 +642,12 @@ python-dotenv==1.0.0
             return
 
         print(f"\nDeployment command:")
-        print(f"  gcloud run deploy {service_name} --image gcr.io/{project_id}/my-app --platform managed --region us-central1 --project {project_id}")
+        print(
+            f"  gcloud run deploy {service_name} --image gcr.io/{project_id}/my-app --platform managed --region us-central1 --project {project_id}")
 
         print(f"\nFor building and deploying in one command:")
-        print(f"  gcloud run deploy {service_name} --source . --platform managed --region us-central1 --project {project_id}")
+        print(
+            f"  gcloud run deploy {service_name} --source . --platform managed --region us-central1 --project {project_id}")
 
         # Create example cloudbuild.yaml
         cloudbuild_content = f'''steps:
@@ -674,11 +686,12 @@ python-dotenv==1.0.0
 
         # Check if az is available
         result = subprocess.run(['az', '--version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ Azure CLI is not installed")
-            print("Download from: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli")
+            print(
+                "Download from: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli")
             input("\nPress Enter to continue...")
             return
 
@@ -691,12 +704,14 @@ python-dotenv==1.0.0
             return
 
         print(f"\nDeployment commands:")
-        print(f"  az webapp create --resource-group {resource_group} --name {app_name} --runtime 'PYTHON:3.11' --deployment-local-git")
+        print(
+            f"  az webapp create --resource-group {resource_group} --name {app_name} --runtime 'PYTHON:3.11' --deployment-local-git")
 
         print("\nFor deployment, you can use:")
         print(f"  git push azure main")
         print("  or")
-        print(f"  az webapp deployment source config-zip --resource-group {resource_group} --name {app_name} --src app.zip")
+        print(
+            f"  az webapp deployment source config-zip --resource-group {resource_group} --name {app_name} --src app.zip")
 
     def _deploy_to_heroku(self) -> None:
         """Deploy to Heroku"""
@@ -707,7 +722,7 @@ python-dotenv==1.0.0
 
         # Check if heroku is available
         result = subprocess.run(['heroku', '--version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ Heroku CLI is not installed")
@@ -715,7 +730,8 @@ python-dotenv==1.0.0
             input("\nPress Enter to continue...")
             return
 
-        app_name = input("Enter app name (or leave empty to generate): ").strip()
+        app_name = input(
+            "Enter app name (or leave empty to generate): ").strip()
 
         print(f"\nDeployment steps:")
         if app_name:
@@ -780,9 +796,9 @@ services:
 
     def manage_environments(self) -> None:
         """Manage different deployment environments"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("ENVIRONMENT MANAGEMENT")
-        print("="*70)
+        print("=" * 70)
 
         print("\nEnvironment management involves:")
         print("  - Configuration files for different environments")
@@ -900,6 +916,8 @@ volumes:
         print(f"  - For production: docker-compose -f docker-compose.prod.yml up")
 
         input("\nPress Enter to continue...")
+
+
 class DevOpsMenu(Menu):
     """Menu for DevOps tools"""
 

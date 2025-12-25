@@ -5,6 +5,8 @@ import sys
 import shutil
 from pathlib import Path
 from typing import List, Tuple, Optional, Any
+
+
 class TerminalInfo:
     """Handle terminal size and viewport information"""
 
@@ -19,7 +21,8 @@ class TerminalInfo:
         current_time = time.time()
 
         # Only update cache if enough time has passed or cache is empty
-        if cls._cached_size is None or (current_time - cls._last_check_time) > cls._check_interval:
+        if cls._cached_size is None or (
+                current_time - cls._last_check_time) > cls._check_interval:
             try:
                 size = shutil.get_terminal_size(fallback=(80, 24))
                 cls._cached_size = (size.columns, size.lines)
@@ -49,6 +52,8 @@ class TerminalInfo:
         """Invalidate the cached terminal size"""
         cls._cached_size = None
         cls._last_check_time = 0
+
+
 class MenuRenderer:
     """Handles menu display and rendering logic"""
 
@@ -63,8 +68,12 @@ class MenuRenderer:
         self.title: str = title
         self._scroll_offset: int = 0
 
-    def display(self, items: List[Any], selected_idx: int = 0, initial: bool = True,
-                force_full_redraw: bool = False) -> None:
+    def display(
+            self,
+            items: List[Any],
+            selected_idx: int = 0,
+            initial: bool = True,
+            force_full_redraw: bool = False) -> None:
         """
         Display the menu with responsive viewport handling
 
@@ -74,7 +83,8 @@ class MenuRenderer:
             initial: Whether this is the initial display
             force_full_redraw: Force complete screen refresh
         """
-        # Only invalidate cache if it's initial display or forced redraw to reduce overhead
+        # Only invalidate cache if it's initial display or forced redraw to
+        # reduce overhead
         if initial or force_full_redraw:
             TerminalInfo.invalidate_cache()
 
@@ -93,16 +103,30 @@ class MenuRenderer:
         else:
             self._scroll_offset = 0
 
-        # Do a full redraw when scrolling offset changes to properly update scroll indicators
+        # Do a full redraw when scrolling offset changes to properly update
+        # scroll indicators
         if initial or force_full_redraw or self._scroll_offset != old_scroll_offset:
-            self._display_full(items, selected_idx, cols, lines, available_lines, is_small)
+            self._display_full(
+                items,
+                selected_idx,
+                cols,
+                lines,
+                available_lines,
+                is_small)
         else:
             # Only update the changed items for smooth navigation
             # but also update scroll indicators if they've changed
-            self._update_visible_items_and_indicators(items, selected_idx, available_lines, cols)
+            self._update_visible_items_and_indicators(
+                items, selected_idx, available_lines, cols)
 
-    def _display_full(self, items: List[Any], selected_idx: int, cols: int, lines: int,
-                      available_lines: int, is_small: bool) -> None:
+    def _display_full(
+            self,
+            items: List[Any],
+            selected_idx: int,
+            cols: int,
+            lines: int,
+            available_lines: int,
+            is_small: bool) -> None:
         """Full screen refresh with responsive layout"""
         self.clear_screen()
 
@@ -113,7 +137,8 @@ class MenuRenderer:
         print("=" * sep_width)
 
         # Truncate title if needed
-        title_display = self.title[:cols-4] if len(self.title) > cols-4 else self.title
+        title_display = self.title[:cols -
+                                   4] if len(self.title) > cols - 4 else self.title
         print(f"  {title_display}")
 
         print("=" * sep_width)
@@ -122,7 +147,7 @@ class MenuRenderer:
         current_dir = str(Path.cwd())
         if len(current_dir) > cols - 25:
             # Show last part of path
-            current_dir = "..." + current_dir[-(cols-28):]
+            current_dir = "..." + current_dir[-(cols - 28):]
 
         print(f"  [DIR] Current Directory: {current_dir}")
         print("=" * sep_width)
@@ -134,7 +159,7 @@ class MenuRenderer:
         # Show scroll indicator at top if needed
         if self._scroll_offset > 0:
             scroll_info = f"  ^ {self._scroll_offset} more above..."
-            print(scroll_info[:cols-2])
+            print(scroll_info[:cols - 2])
 
         # Display visible menu items
         for i in range(visible_start, visible_end):
@@ -144,7 +169,7 @@ class MenuRenderer:
         if visible_end < len(items):
             remaining = len(items) - visible_end
             scroll_info = f"  v {remaining} more below..."
-            print(scroll_info[:cols-2])
+            print(scroll_info[:cols - 2])
 
         print("=" * sep_width)
 
@@ -156,11 +181,16 @@ class MenuRenderer:
                 print("\n  Type number + Enter")
         else:
             if self._has_arrow_support():
-                print("\n  Use ^/v arrow keys to navigate, Enter to select, or type number")
+                print(
+                    "\n  Use ^/v arrow keys to navigate, Enter to select, or type number")
             else:
                 print("\n  Type number and press Enter to select")
 
-    def _update_visible_items(self, items: List[Any], selected_idx: int, available_lines: int) -> None:
+    def _update_visible_items(
+            self,
+            items: List[Any],
+            selected_idx: int,
+            available_lines: int) -> None:
         """
         Update only the visible menu items for smooth navigation
 
@@ -193,7 +223,7 @@ class MenuRenderer:
                 # Truncate if too long for terminal
                 max_text_width = cols - 6  # Leave space for prefix and padding
                 if len(line_text) > max_text_width:
-                    line_text = line_text[:max_text_width-3] + "..."
+                    line_text = line_text[:max_text_width - 3] + "..."
 
                 # Format the line based on selection state
                 if actual_idx == selected_idx:
@@ -207,17 +237,24 @@ class MenuRenderer:
                 # This line is beyond our items, so it should be blank
                 formatted_line = " " * cols  # Fill with spaces to clear
 
-            lines_to_update.append((base_line + idx_in_viewport, formatted_line))
+            lines_to_update.append(
+                (base_line + idx_in_viewport, formatted_line))
 
         # Batch update all lines needed to reduce flickering
         for line_num, content in lines_to_update:
-            sys.stdout.write(f'\033[{line_num};1H')  # Move cursor to line, column 1
+            # Move cursor to line, column 1
+            sys.stdout.write(f'\033[{line_num};1H')
             sys.stdout.write(self.CLEAR_LINE)  # Clear the entire line
             sys.stdout.write(content)  # Write the new content
 
         sys.stdout.flush()
 
-    def _update_visible_items_and_indicators(self, items: List[Any], selected_idx: int, available_lines: int, cols: int) -> None:
+    def _update_visible_items_and_indicators(
+            self,
+            items: List[Any],
+            selected_idx: int,
+            available_lines: int,
+            cols: int) -> None:
         """
         Update visible menu items and scroll indicators for smooth navigation
 
@@ -241,8 +278,9 @@ class MenuRenderer:
         if has_top_indicator:
             remaining = self._scroll_offset
             scroll_info = f"  ^ {remaining} more above..."
-            scroll_info = scroll_info[:cols-2]  # Truncate if needed
-            lines_to_update.append((6, scroll_info))  # Top indicator is at line 6
+            scroll_info = scroll_info[:cols - 2]  # Truncate if needed
+            # Top indicator is at line 6
+            lines_to_update.append((6, scroll_info))
             # Adjust base line for menu items since we have a top indicator
             actual_base_line = 7
         else:
@@ -258,7 +296,7 @@ class MenuRenderer:
             # Truncate if too long for terminal
             max_text_width = cols - 6  # Leave space for prefix and padding
             if len(line_text) > max_text_width:
-                line_text = line_text[:max_text_width-3] + "..."
+                line_text = line_text[:max_text_width - 3] + "..."
 
             # Format the line based on selection state
             if actual_idx == selected_idx:
@@ -276,7 +314,7 @@ class MenuRenderer:
         if has_bottom_indicator:
             remaining = len(items) - visible_end
             scroll_info = f"  v {remaining} more below..."
-            scroll_info = scroll_info[:cols-2]  # Truncate if needed
+            scroll_info = scroll_info[:cols - 2]  # Truncate if needed
             # Calculate where the bottom indicator should go
             bottom_line_num = actual_base_line + (visible_end - visible_start)
             lines_to_update.append((bottom_line_num, scroll_info))
@@ -289,7 +327,8 @@ class MenuRenderer:
             total_lines_used += 1  # Bottom indicator
 
         # Add blank lines for any remaining space
-        remaining_available_lines = available_lines - (visible_end - visible_start)
+        remaining_available_lines = available_lines - \
+            (visible_end - visible_start)
         if has_top_indicator:
             remaining_available_lines -= 1
         if has_bottom_indicator:
@@ -298,21 +337,29 @@ class MenuRenderer:
         for i in range(remaining_available_lines):
             if has_bottom_indicator:
                 # If there's a bottom indicator, blank lines come after it
-                blank_line_num = actual_base_line + (visible_end - visible_start) + 1 + i
+                blank_line_num = actual_base_line + \
+                    (visible_end - visible_start) + 1 + i
             else:
                 # If no bottom indicator, blank lines come after the menu items
-                blank_line_num = actual_base_line + (visible_end - visible_start) + i
+                blank_line_num = actual_base_line + \
+                    (visible_end - visible_start) + i
             lines_to_update.append((blank_line_num, " " * cols))
 
         # Batch update all lines needed to reduce flickering
         for line_num, content in lines_to_update:
-            sys.stdout.write(f'\033[{line_num};1H')  # Move cursor to line, column 1
+            # Move cursor to line, column 1
+            sys.stdout.write(f'\033[{line_num};1H')
             sys.stdout.write(self.CLEAR_LINE)  # Clear the entire line
             sys.stdout.write(content)  # Write the new content
 
         sys.stdout.flush()
 
-    def _print_item(self, index: int, item: Any, is_selected: bool, cols: int) -> None:
+    def _print_item(
+            self,
+            index: int,
+            item: Any,
+            is_selected: bool,
+            cols: int) -> None:
         """Print a single menu item with proper formatting"""
         line_text = f"{index + 1}. {item.label}"
 
@@ -328,13 +375,18 @@ class MenuRenderer:
             full_line = f"    {line_text}"
             print(full_line)
 
-    def _print_item_inline(self, index: int, item: Any, is_selected: bool, cols: int) -> None:
+    def _print_item_inline(
+            self,
+            index: int,
+            item: Any,
+            is_selected: bool,
+            cols: int) -> None:
         """Print item inline (without newline) for updates"""
         line_text = f"{index + 1}. {item.label}"
 
         max_text_width = cols - 6
         if len(line_text) > max_text_width:
-            line_text = line_text[:max_text_width-3] + "..."
+            line_text = line_text[:max_text_width - 3] + "..."
 
         if is_selected:
             full_line = f"  > {line_text}"
@@ -346,13 +398,19 @@ class MenuRenderer:
             # Ensure we reset formatting first, then write content
             sys.stdout.write(f"\033[0m{full_line}")
 
-    def _print_item_to_buffer(self, index: int, item: Any, is_selected: bool, cols: int, buffer: List[str]) -> None:
+    def _print_item_to_buffer(
+            self,
+            index: int,
+            item: Any,
+            is_selected: bool,
+            cols: int,
+            buffer: List[str]) -> None:
         """Add item output to buffer instead of writing directly to stdout"""
         line_text = f"{index + 1}. {item.label}"
 
         max_text_width = cols - 6
         if len(line_text) > max_text_width:
-            line_text = line_text[:max_text_width-3] + "..."
+            line_text = line_text[:max_text_width - 3] + "..."
 
         if is_selected:
             full_line = f"  > {line_text}"
@@ -364,7 +422,12 @@ class MenuRenderer:
             # Ensure we reset formatting first, then write content
             buffer.append(f"\033[0m{full_line}")
 
-    def _calculate_header_info(self, cols: int, lines: int, available_lines: int, is_small: bool) -> List[str]:
+    def _calculate_header_info(
+            self,
+            cols: int,
+            lines: int,
+            available_lines: int,
+            is_small: bool) -> List[str]:
         """Calculate header lines to avoid recalculation during updates"""
         # Calculate separator width for terminal size
         sep_width = min(70, cols - 2)
@@ -373,7 +436,8 @@ class MenuRenderer:
         header_lines.append("=" * sep_width + "\n")
 
         # Truncate title if needed
-        title_display = self.title[:cols-4] if len(self.title) > cols-4 else self.title
+        title_display = self.title[:cols -
+                                   4] if len(self.title) > cols - 4 else self.title
         header_lines.append(f"  {title_display}\n")
 
         header_lines.append("=" * sep_width + "\n")
@@ -383,7 +447,7 @@ class MenuRenderer:
         current_dir = str(Path.cwd())
         if len(current_dir) > cols - 25:
             # Show last part of path
-            current_dir = "..." + current_dir[-(cols-28):]
+            current_dir = "..." + current_dir[-(cols - 28):]
 
         header_lines.append(f"  [DIR] Current Directory: {current_dir}\n")
         header_lines.append("=" * sep_width + "\n")
@@ -407,8 +471,9 @@ class MenuRenderer:
     def clear_screen() -> None:
         """Clear the terminal screen and invalidate terminal size cache"""
         # Use ANSI escape codes for faster clearing without system call
-        sys.stdout.write('\033[2J\033[H')  # Clear screen and move cursor to home
+        # Clear screen and move cursor to home
+        sys.stdout.write('\033[2J\033[H')
         sys.stdout.flush()
-        # Invalidate terminal size cache since window dimensions might change after clear
+        # Invalidate terminal size cache since window dimensions might change
+        # after clear
         TerminalInfo.invalidate_cache()
-

@@ -1,9 +1,13 @@
+from abc import ABC, abstractmethod
+from typing import Any, Dict
+import shutil
+
 """
 automation/dev_mode/_base.py
 Base interface for Dev Mode command modules
 """
-from abc import ABC, abstractmethod
-from typing import Any, Dict
+
+
 class DevModeCommand(ABC):
     """Abstract base class for Dev Mode commands"""
 
@@ -37,7 +41,6 @@ class DevModeCommand(ABC):
         Returns:
             True if binary exists, False otherwise
         """
-        import shutil
         return shutil.which(binary_name) is not None
 
     def show_missing_binary_error(self, binary_name: str, install_url: str):

@@ -2,6 +2,7 @@
 Prisma Database Tools Module
 Provides tools for working with Prisma ORM
 """
+from core.menu import Menu, MenuItem
 import os
 import sys
 import subprocess
@@ -10,7 +11,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from core.menu import Menu, MenuItem
+
 class PrismaTools(Menu):
     """Prisma Database Tools Menu with Prisma ORM operations"""
 
@@ -131,7 +132,8 @@ class PrismaTools(Menu):
                 cmd = ["prisma", "studio"]
 
             # Start Prisma Studio in the background
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             print("Prisma Studio launched successfully!")
             print("   It should be available at http://localhost:5555")
@@ -140,7 +142,8 @@ class PrismaTools(Menu):
             input()
 
             # Note: We're not terminating the process here since the user may want to use Studio
-            # In a real implementation, you might want to handle process termination
+            # In a real implementation, you might want to handle process
+            # termination
         except FileNotFoundError:
             print("Prisma CLI not found. Please install Prisma in your project:")
             print("   npm install prisma @prisma/client")
@@ -160,7 +163,8 @@ class PrismaTools(Menu):
         print("\nThis will push your Prisma schema to the database.")
         print("Warning: This will modify your database schema!")
 
-        confirm = input("\nDo you want to continue? (yes/no): ").strip().lower()
+        confirm = input(
+            "\nDo you want to continue? (yes/no): ").strip().lower()
         if confirm != "yes":
             print("Operation cancelled.")
             input("\nPress Enter to continue...")
@@ -203,9 +207,13 @@ class PrismaTools(Menu):
     def _back_to_db(self):
         """Return to database management menu"""
         return "exit"
+
+
 def main():
     """Test function to run the Prisma tools menu"""
     menu = PrismaTools()
     menu.run()
+
+
 if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@
 """
 Main entry point for PyDevToolkit MagicCLI
 """
+from main import main
 import io
 import os
 import sys
@@ -18,7 +19,6 @@ project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
-from main import main
 
 if __name__ == "__main__":
     main()

@@ -1,8 +1,3 @@
-"""
-automation/dev_mode/install_deps.py
-Install Node.js dependencies (npm install)
-FIXED: Windows compatibility for npm/yarn/pnpm commands
-"""
 import subprocess
 import sys
 from pathlib import Path
@@ -10,6 +5,14 @@ from typing import Optional, List, Any
 from ._base import DevModeCommand
 from core.loading import LoadingSpinner, loading_animation
 from .menu_utils import get_choice_with_arrows
+
+"""
+automation/dev_mode/install_deps.py
+Install Node.js dependencies (npm install)
+FIXED: Windows compatibility for npm/yarn/pnpm commands
+"""
+
+
 class InstallDepsCommand(DevModeCommand):
     """Command to install Node.js dependencies"""
 
@@ -25,9 +28,9 @@ class InstallDepsCommand(DevModeCommand):
 
     def _interactive_install(self):
         """Interactive dependency installation"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print(" INSTALL DEPENDENCIES")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         # Check if package.json exists
         package_json = Path.cwd() / 'package.json'
@@ -50,7 +53,9 @@ class InstallDepsCommand(DevModeCommand):
         ]
 
         print("\n Select Package Manager:")
-        choice = get_choice_with_arrows(package_manager_options, "Package Manager")
+        choice = get_choice_with_arrows(
+            package_manager_options,
+            "Package Manager")
 
         manager_map = {
             1: 'npm',
@@ -82,7 +87,9 @@ class InstallDepsCommand(DevModeCommand):
         ]
 
         print("\n Select Install Type:")
-        install_type = get_choice_with_arrows(install_type_options, "Install Type")
+        install_type = get_choice_with_arrows(
+            install_type_options,
+            "Install Type")
 
         if install_type == 1:
             # Install all
@@ -119,7 +126,7 @@ class InstallDepsCommand(DevModeCommand):
     def _install_all(self, manager: str, interactive: bool = True):
         """Install all dependencies"""
         print(f"\n Installing dependencies with {manager}...")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         cmd = [manager, 'install']
 
@@ -171,7 +178,7 @@ class InstallDepsCommand(DevModeCommand):
         """Install specific package"""
         dep_type = "dev dependency" if dev else "dependency"
         print(f"\n Installing {package} as {dep_type}...")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         # Build command
         if manager == 'npm':
@@ -240,5 +247,7 @@ class InstallDepsCommand(DevModeCommand):
             return 'npm'
         else:
             return 'npm'  # Default
+
+
 # Export command instance
 COMMAND = InstallDepsCommand()

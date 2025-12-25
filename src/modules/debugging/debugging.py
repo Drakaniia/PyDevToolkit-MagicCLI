@@ -18,6 +18,8 @@ try:
     import psutil
 except ImportError:
     psutil = None
+
+
 class DebuggingTools:
     """Handles debugging and troubleshooting tasks"""
 
@@ -26,9 +28,9 @@ class DebuggingTools:
 
     def run_debugger(self) -> None:
         """Run interactive debugger on a script"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("INTERACTIVE DEBUGGER")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool allows you to run a Python script in debug mode.")
         print("It uses Python's built-in pdb debugger.")
@@ -74,8 +76,10 @@ class DebuggingTools:
             print("Type 'h' for help or 'c' to continue execution")
 
             # This is a simplified version - for a real implementation,
-            # you might want to use runpy or similar to properly load the script
-            print("\nNote: In a real implementation, we would use pdb to debug your script.")
+            # you might want to use runpy or similar to properly load the
+            # script
+            print(
+                "\nNote: In a real implementation, we would use pdb to debug your script.")
             print("For now, here's the command you would run in your terminal:")
             print(f"python -m pdb {script_path}")
 
@@ -88,9 +92,9 @@ class DebuggingTools:
 
     def analyze_logs(self) -> None:
         """Analyze application logs"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("LOG ANALYSIS TOOL")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool analyzes log files to find errors, warnings, and patterns.")
 
@@ -103,9 +107,10 @@ class DebuggingTools:
             log_files.extend(list(project_path.rglob(f'*{ext}')))
 
         # Filter out files that are likely not logs based on name
-        filtered_logs = [f for f in log_files if
-                        'log' in f.name.lower() or
-                        any(keyword in f.name.lower() for keyword in ['error', 'debug', 'out', 'err'])]
+        filtered_logs = [
+            f for f in log_files if 'log' in f.name.lower() or any(
+                keyword in f.name.lower() for keyword in [
+                    'error', 'debug', 'out', 'err'])]
 
         print(f"\nFound {len(filtered_logs)} potential log files:")
         for i, log_file in enumerate(filtered_logs[:10], 1):  # Show first 10
@@ -150,13 +155,15 @@ class DebuggingTools:
 
             for line in lines:
                 line_lower = line.lower()
-                if 'error' in line_lower and 'error' not in line_lower.split()[0]:  # Avoid matching "error" as first word like in "errors"
+                if 'error' in line_lower and 'error' not in line_lower.split(
+                )[0]:  # Avoid matching "error" as first word like in "errors"
                     errors += 1
                 if 'warning' in line_lower or 'warn' in line_lower:
                     warnings += 1
                 if 'exception' in line_lower:
                     exceptions += 1
-                if 'traceback' in line_lower or ('file "' in line_lower and 'line' in line_lower):
+                if 'traceback' in line_lower or (
+                        'file "' in line_lower and 'line' in line_lower):
                     tracebacks += 1
 
             print(f"Errors found: {errors}")
@@ -168,7 +175,12 @@ class DebuggingTools:
             if errors > 0:
                 print(f"\nLast 10 lines of log (potential errors):")
                 for line in lines[-10:]:
-                    if any(keyword in line.lower() for keyword in ['error', 'exception', 'traceback', 'failed']):
+                    if any(
+                        keyword in line.lower() for keyword in [
+                            'error',
+                            'exception',
+                            'traceback',
+                            'failed']):
                         print(f"  {line.rstrip()}")
 
         except Exception as e:
@@ -178,9 +190,9 @@ class DebuggingTools:
 
     def run_performance_profiling(self) -> None:
         """Run performance profiling on a script"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("PERFORMANCE PROFILING")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool profiles Python code to identify performance bottlenecks.")
         print("It uses Python's built-in cProfile module.")
@@ -253,9 +265,9 @@ class DebuggingTools:
 
     def check_system_resources(self) -> None:
         """Check system resources and performance"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("SYSTEM RESOURCE MONITORING")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool monitors system resources like CPU, memory, and disk usage.")
 
@@ -279,7 +291,8 @@ class DebuggingTools:
                 print(f"  Current usage: {cpu_percent}%")
                 print(f"  Logical CPUs: {cpu_count}")
                 if cpu_freq:
-                    print(f"  Frequency: {cpu_freq.current:.2f} MHz (max: {cpu_freq.max:.2f} MHz)")
+                    print(
+                        f"  Frequency: {cpu_freq.current:.2f} MHz (max: {cpu_freq.max:.2f} MHz)")
 
                 print("\nMemory Usage:")
                 memory = psutil.virtual_memory()
@@ -298,7 +311,8 @@ class DebuggingTools:
                 print("\nNetwork I/O:")
                 net_io = psutil.net_io_counters()
                 print(f"  Bytes sent: {net_io.bytes_sent / (1024**2):.2f} MB")
-                print(f"  Bytes received: {net_io.bytes_recv / (1024**2):.2f} MB")
+                print(
+                    f"  Bytes received: {net_io.bytes_recv / (1024**2):.2f} MB")
 
             except Exception as e:
                 print(f"\nError getting system resources: {e}")
@@ -307,9 +321,9 @@ class DebuggingTools:
 
     def run_troubleshooting_wizard(self) -> None:
         """Run an interactive troubleshooting wizard"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("TROUBLESHOOTING WIZARD")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis wizard will help diagnose common issues with your application.")
 
@@ -317,7 +331,8 @@ class DebuggingTools:
 
         # Check if Python version is supported
         if sys.version_info < (3, 7):
-            issues.append("Python version is older than 3.7 - Magic CLI may not work properly")
+            issues.append(
+                "Python version is older than 3.7 - Magic CLI may not work properly")
 
         # Check for common missing dependencies
         missing_deps = []
@@ -330,23 +345,27 @@ class DebuggingTools:
                 missing_deps.append(module)
 
         if missing_deps:
-            issues.append(f"Missing required dependencies: {', '.join(missing_deps)}")
+            issues.append(
+                f"Missing required dependencies: {', '.join(missing_deps)}")
 
         # Check if we're in the project directory by looking for key files
         expected_files = ['pyproject.toml', 'requirements.txt', 'src/main.py']
         missing_files = [f for f in expected_files if not Path(f).exists()]
 
         if missing_files:
-            issues.append(f"Missing expected project files: {', '.join(missing_files)}")
+            issues.append(
+                f"Missing expected project files: {', '.join(missing_files)}")
 
         # Check if .git directory exists but no remote configured
         if Path('.git').exists():
             try:
-                result = subprocess.run(['git', 'remote', '-v'],
-                                      capture_output=True, text=True, cwd=os.getcwd())
+                result = subprocess.run(
+                    ['git', 'remote', '-v'],
+                    capture_output=True, text=True, cwd=os.getcwd())
                 if result.returncode == 0 and not result.stdout.strip():
-                    issues.append("Git repository exists but no remote configured")
-            except:
+                    issues.append(
+                        "Git repository exists but no remote configured")
+            except BaseException:
                 issues.append("Could not check Git remote configuration")
 
         # Check for common configuration issues
@@ -371,13 +390,17 @@ class DebuggingTools:
                     print(f"  {i}. Consider upgrading to Python 3.7 or higher")
                 elif "Missing required dependencies" in issue:
                     deps = [dep for dep in missing_deps]
-                    print(f"  {i}. Install missing dependencies: pip install {' '.join(deps)}")
+                    print(
+                        f"  {i}. Install missing dependencies: pip install {' '.join(deps)}")
                 elif "Missing expected project files" in issue:
-                    print(f"  {i}. Verify you're in the correct project directory")
+                    print(
+                        f"  {i}. Verify you're in the correct project directory")
                 elif "Git repository exists but no remote configured" in issue:
-                    print(f"  {i}. Configure Git remote: git remote add origin <repository-url>")
+                    print(
+                        f"  {i}. Configure Git remote: git remote add origin <repository-url>")
                 elif "Configuration file not found" in issue:
-                    print(f"  {i}. Create configuration file or check config path")
+                    print(
+                        f"  {i}. Create configuration file or check config path")
 
         # Check for common runtime issues
         print(f"\nChecking for common runtime issues...")
@@ -395,9 +418,10 @@ class DebuggingTools:
         try:
             import subprocess
             result = subprocess.run([sys.executable, '--version'],
-                                  capture_output=True, text=True, timeout=5)
+                                    capture_output=True, text=True, timeout=5)
             if result.returncode == 0:
-                print(f"  ✓ Python interpreter accessible: {result.stdout.strip()}")
+                print(
+                    f"  ✓ Python interpreter accessible: {result.stdout.strip()}")
             else:
                 print(f"  ⚠ Python interpreter issue: {result.stderr}")
         except subprocess.TimeoutExpired:
@@ -409,9 +433,9 @@ class DebuggingTools:
 
     def error_tracking_integration(self) -> None:
         """Provide guidance for error tracking integration"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("ERROR TRACKING INTEGRATION")
-        print("="*70)
+        print("=" * 70)
 
         print("\nThis tool provides guidance for integrating error tracking services.")
         print("Common error tracking services include:")
@@ -431,7 +455,8 @@ class DebuggingTools:
             install = input("Install Sentry SDK? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "sentry-sdk"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "sentry-sdk"], check=True)
                     print("  ✓ Sentry SDK installed successfully")
                     import sentry_sdk
                     print("  ✓ Sentry SDK imported successfully")
@@ -457,6 +482,8 @@ class DebuggingTools:
         print("Each service provides specific SDKs and setup instructions.")
 
         input("\nPress Enter to continue...")
+
+
 class DebuggingMenu(Menu):
     """Menu for debugging tools"""
 

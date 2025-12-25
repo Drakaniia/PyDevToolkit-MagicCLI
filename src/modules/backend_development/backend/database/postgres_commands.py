@@ -2,6 +2,7 @@
 PostgreSQL Quick Commands Module
 Provides commonly used PostgreSQL commands for quick execution
 """
+from core.menu import Menu, MenuItem
 import os
 import sys
 import subprocess
@@ -10,7 +11,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from core.menu import Menu, MenuItem
+
 class PostgresCommands(Menu):
     """PostgreSQL Quick Commands Menu with common PostgreSQL operations"""
 
@@ -23,9 +24,12 @@ class PostgresCommands(Menu):
             return
 
         self.items = [
-            MenuItem("Login to PostgreSQL (psql -U postgres)", self._login_with_psql),
-            MenuItem("Back to Database Management", self._back_to_db)
-        ]
+            MenuItem(
+                "Login to PostgreSQL (psql -U postgres)",
+                self._login_with_psql),
+            MenuItem(
+                "Back to Database Management",
+                self._back_to_db)]
 
     def _login_with_psql(self):
         """Run psql -U postgres command to login to PostgreSQL"""
@@ -41,13 +45,15 @@ class PostgresCommands(Menu):
         print("  Drop Database: DROP DATABASE your_database_name;")
         print("  List Databases: \\l")
         print("  Connect to Database: \\c your_database_name")
-        print("  Disconnect: \\c postgres")  # Disconnect by connecting to default db
+        # Disconnect by connecting to default db
+        print("  Disconnect: \\c postgres")
         print("  List Tables: \\dt")
         print("  List All Objects: \\da")
         print("  Create User: CREATE USER your_username WITH PASSWORD 'your_password';")
         print("  Drop User: DROP USER your_username;")
         print("  Grant Privileges: GRANT ALL PRIVILEGES ON DATABASE db_name TO username;")
-        print("  Revoke Privileges: REVOKE ALL PRIVILEGES ON DATABASE db_name FROM username;")
+        print(
+            "  Revoke Privileges: REVOKE ALL PRIVILEGES ON DATABASE db_name FROM username;")
         print("  List Users/Roles: \\du")
         print("  Describe Table: \\d table_name")
         print("  Describe All Tables: \\dt+")
@@ -75,7 +81,8 @@ class PostgresCommands(Menu):
             cmd = ["psql", "-U", "postgres"]
             subprocess.run(cmd)
         except FileNotFoundError:
-            print("\nError: psql command not found. Please ensure PostgreSQL is installed and added to your PATH.")
+            print(
+                "\nError: psql command not found. Please ensure PostgreSQL is installed and added to your PATH.")
             input("\nPress Enter to return to menu...")
             return None
         except Exception as e:
@@ -102,9 +109,13 @@ class PostgresCommands(Menu):
     def _back_to_db(self):
         """Return to database management menu"""
         return "exit"
+
+
 def main():
     """Test function to run the PostgreSQL quick commands menu"""
     menu = PostgresCommands()
     menu.run()
+
+
 if __name__ == "__main__":
     main()

@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 from dataclasses import dataclass, asdict
+
+
 @dataclass
 class SecurityConfig:
     """Security-related configuration settings"""
@@ -31,6 +33,8 @@ class SecurityConfig:
                 '.xml', '.ini', '.cfg', '.conf', '.dockerfile', 'dockerfile',
                 '.gitignore', '.env', '.sh', '.bash', '.zsh', '.bat', '.cmd'
             ]
+
+
 @dataclass
 class OperationalConfig:
     """Operational configuration settings"""
@@ -41,6 +45,8 @@ class OperationalConfig:
     backup_count: int = 5
     enable_color_output: bool = True
     enable_loading_animations: bool = True
+
+
 class ConfigManager:
     """Centralized configuration manager"""
 
@@ -95,7 +101,8 @@ class ConfigManager:
             return
 
         with open(self.config_file, 'r') as f:
-            if self.config_file.endswith('.yaml') or self.config_file.endswith('.yml'):
+            if self.config_file.endswith(
+                    '.yaml') or self.config_file.endswith('.yml'):
                 # Try to use yaml if available, otherwise fallback to json
                 try:
                     import yaml
@@ -123,7 +130,8 @@ class ConfigManager:
         }
 
         with open(self.config_file, 'w') as f:
-            if self.config_file.endswith('.yaml') or self.config_file.endswith('.yml'):
+            if self.config_file.endswith(
+                    '.yaml') or self.config_file.endswith('.yml'):
                 try:
                     import yaml
                     yaml.dump(config_data, f, default_flow_style=False)
@@ -148,18 +156,26 @@ class ConfigManager:
     def set_operational_setting(self, key: str, value: Any) -> None:
         """Set an operational configuration setting"""
         setattr(self.operational_config, key, value)
+
+
 # Global configuration instance
 _config_manager: Optional[ConfigManager] = None
+
+
 def get_config_manager() -> ConfigManager:
     """Get the global configuration manager instance"""
     global _config_manager
     if _config_manager is None:
         _config_manager = ConfigManager()
     return _config_manager
+
+
 def get_security_config() -> SecurityConfig:
     """Get the security configuration"""
     config_manager = get_config_manager()
     return config_manager.security_config
+
+
 def get_operational_config() -> OperationalConfig:
     """Get the operational configuration"""
     config_manager = get_config_manager()

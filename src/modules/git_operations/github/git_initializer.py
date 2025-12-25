@@ -4,6 +4,8 @@ Handles repository initialization and first-time setup
 """
 import subprocess
 from pathlib import Path
+
+
 class GitInitializer:
     """Handles git repository initialization and setup"""
 
@@ -12,9 +14,9 @@ class GitInitializer:
 
     def initialize_and_push(self):
         """Initialize git repo and push to GitHub"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print(" Git Repository Initialization & First Push")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         # Show current directory
         current_dir = Path.cwd()
@@ -22,9 +24,11 @@ class GitInitializer:
         print(f" Absolute Path: {current_dir.absolute()}\n")
 
         # Confirm this is the right directory
-        confirm = input("Is this the correct project directory? (y/n): ").strip().lower()
+        confirm = input(
+            "Is this the correct project directory? (y/n): ").strip().lower()
         if confirm != 'y':
-            print("\n Operation cancelled. Please navigate to the correct directory first.")
+            print(
+                "\n Operation cancelled. Please navigate to the correct directory first.")
             input("\nPress Enter to continue...")
             return
 
@@ -86,10 +90,10 @@ class GitInitializer:
             input("\nPress Enter to continue...")
             return
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print(" SUCCESS! Repository pushed to GitHub!")
         print(f" Your repository: {repo_url.replace('.git', '')}")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         input("Press Enter to continue...")
 
@@ -102,7 +106,8 @@ class GitInitializer:
             try:
                 with open(readme_path, "w") as f:
                     f.write(f"# {current_dir.name}\n\n")
-                    f.write("This project was initialized using Python Automation System.\n")
+                    f.write(
+                        "This project was initialized using Python Automation System.\n")
                 print(" README.md created\n")
             except Exception as e:
                 print(f" Error creating README.md: {e}\n")
@@ -148,7 +153,8 @@ class GitInitializer:
             print("\n  You have uncommitted changes:")
             print(result.stdout)
 
-            commit_choice = input("\nDo you want to commit these changes first? (y/n): ").strip().lower()
+            commit_choice = input(
+                "\nDo you want to commit these changes first? (y/n): ").strip().lower()
             if commit_choice == 'y':
                 commit_msg = input("Enter commit message: ").strip()
                 if not commit_msg:
@@ -214,10 +220,12 @@ class GitInitializer:
         if result.returncode == 0:
             # Remote exists, update it
             print("  Remote 'origin' exists, updating URL...")
-            return self._run_command(["git", "remote", "set-url", "origin", repo_url])
+            return self._run_command(
+                ["git", "remote", "set-url", "origin", repo_url])
         else:
             # Add new remote
-            return self._run_command(["git", "remote", "add", "origin", repo_url])
+            return self._run_command(
+                ["git", "remote", "add", "origin", repo_url])
 
     def _run_command(self, command):
         """Run a shell command and display output"""

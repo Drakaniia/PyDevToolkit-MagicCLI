@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
 from core.security.validator import SecurityValidator
+
+
 class CrossPlatformTools:
     """Handles cross-platform development tasks"""
 
@@ -18,9 +20,9 @@ class CrossPlatformTools:
 
     def setup_mobile_development(self) -> None:
         """Help set up mobile development environment"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("MOBILE APP DEVELOPMENT SETUP")
-        print("="*70)
+        print("=" * 70)
 
         print("\nMobile development options:")
         print("  1. React Native")
@@ -29,7 +31,8 @@ class CrossPlatformTools:
         print("  4. Ionic")
 
         try:
-            choice = input("\nEnter choice (1-4) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-4) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._setup_react_native()
@@ -56,9 +59,9 @@ class CrossPlatformTools:
         # Check if Node.js and npm are available
         try:
             node_result = subprocess.run(['node', '--version'],
-                                       capture_output=True, text=True)
+                                         capture_output=True, text=True)
             npm_result = subprocess.run(['npm', '--version'],
-                                      capture_output=True, text=True)
+                                        capture_output=True, text=True)
 
             if node_result.returncode != 0 or npm_result.returncode != 0:
                 print("⚠ Node.js and/or npm are not installed")
@@ -74,14 +77,18 @@ class CrossPlatformTools:
         # Check if React Native CLI is available
         try:
             result = subprocess.run(['npx', 'react-native', '--version'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode != 0:
-                install = input("React Native CLI not found. Install globally? (y/n): ").lower()
+                install = input(
+                    "React Native CLI not found. Install globally? (y/n): ").lower()
                 if install == 'y':
-                    subprocess.run([sys.executable, "-m", "pip", "install", "nodejs"], check=True)
-                    subprocess.run(['npm', 'install', '-g', 'react-native-cli'], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "nodejs"], check=True)
+                    subprocess.run(
+                        ['npm', 'install', '-g', 'react-native-cli'],
+                        check=True)
                     print("✓ React Native CLI installed")
-        except:
+        except BaseException:
             print("⚠ Could not install React Native CLI")
             print("Try installing manually: npm install -g react-native-cli")
             return
@@ -123,7 +130,7 @@ echo "To run on Android: npx react-native run-android"
         # Make executable on Unix systems
         try:
             os.chmod("create_react_native.sh", 0o755)
-        except:
+        except BaseException:
             pass  # Skip on Windows
 
         print("✓ Created 'create_react_native.sh' setup script")
@@ -134,7 +141,7 @@ echo "To run on Android: npx react-native run-android"
 
         # Check if Flutter is available
         result = subprocess.run(['flutter', '--version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ Flutter is not installed")
@@ -147,7 +154,7 @@ echo "To run on Android: npx react-native run-android"
         # Show Flutter doctor output
         print("\nRunning 'flutter doctor' to check setup:")
         result = subprocess.run(['flutter', 'doctor'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
         print(result.stdout)
 
         print("\nTo create a new Flutter project:")
@@ -185,7 +192,7 @@ echo "To run: flutter run"
         # Make executable on Unix systems
         try:
             os.chmod("create_flutter.sh", 0o755)
-        except:
+        except BaseException:
             pass  # Skip on Windows
 
         print("✓ Created 'create_flutter.sh' setup script")
@@ -197,7 +204,7 @@ echo "To run: flutter run"
         # Check if Node.js is available
         try:
             result = subprocess.run(['node', '--version'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode != 0:
                 print("⚠ Node.js is not installed")
                 print("Install Node.js from: https://nodejs.org/")
@@ -211,13 +218,15 @@ echo "To run: flutter run"
 
         # Check if NativeScript CLI is available
         result = subprocess.run(['ns', '--version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
-            install = input("NativeScript CLI not found. Install? (y/n): ").lower()
+            install = input(
+                "NativeScript CLI not found. Install? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run(['npm', 'install', '-g', 'nativescript'], check=True)
+                    subprocess.run(
+                        ['npm', 'install', '-g', 'nativescript'], check=True)
                     print("✓ NativeScript CLI installed")
                 except subprocess.CalledProcessError:
                     print("⚠ Could not install NativeScript CLI")
@@ -240,9 +249,9 @@ echo "To run: flutter run"
         # Check if Node.js and npm are available
         try:
             node_result = subprocess.run(['node', '--version'],
-                                       capture_output=True, text=True)
+                                         capture_output=True, text=True)
             npm_result = subprocess.run(['npm', '--version'],
-                                      capture_output=True, text=True)
+                                        capture_output=True, text=True)
 
             if node_result.returncode != 0 or npm_result.returncode != 0:
                 print("⚠ Node.js and/or npm are not installed")
@@ -257,13 +266,15 @@ echo "To run: flutter run"
 
         # Check if Ionic CLI is available
         result = subprocess.run(['ionic', '--version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
-            install = input("Ionic CLI not found. Install globally? (y/n): ").lower()
+            install = input(
+                "Ionic CLI not found. Install globally? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run(['npm', 'install', '-g', '@ionic/cli'], check=True)
+                    subprocess.run(
+                        ['npm', 'install', '-g', '@ionic/cli'], check=True)
                     print("✓ Ionic CLI installed")
                 except subprocess.CalledProcessError:
                     print("⚠ Could not install Ionic CLI")
@@ -281,9 +292,9 @@ echo "To run: flutter run"
 
     def setup_desktop_development(self) -> None:
         """Help set up desktop application development"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("DESKTOP APP DEVELOPMENT SETUP")
-        print("="*70)
+        print("=" * 70)
 
         print("\nDesktop development options:")
         print("  1. Electron (JavaScript/TypeScript)")
@@ -292,7 +303,8 @@ echo "To run: flutter run"
         print("  4. Flutter Desktop")
 
         try:
-            choice = input("\nEnter choice (1-4) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-4) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._setup_electron()
@@ -319,9 +331,9 @@ echo "To run: flutter run"
         # Check if Node.js and npm are available
         try:
             node_result = subprocess.run(['node', '--version'],
-                                       capture_output=True, text=True)
+                                         capture_output=True, text=True)
             npm_result = subprocess.run(['npm', '--version'],
-                                      capture_output=True, text=True)
+                                        capture_output=True, text=True)
 
             if node_result.returncode != 0 or npm_result.returncode != 0:
                 print("⚠ Node.js and/or npm are not installed")
@@ -404,7 +416,7 @@ app.on('window-all-closed', function () {
         # Check if Rust is available
         try:
             result = subprocess.run(['rustc', '--version'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode != 0:
                 print("⚠ Rust is not installed")
                 print("Install from: https://www.rust-lang.org/tools/install")
@@ -419,7 +431,7 @@ app.on('window-all-closed', function () {
         # Check if Node.js is available (for frontend)
         try:
             result = subprocess.run(['node', '--version'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode != 0:
                 print("⚠ Node.js is not installed (recommended for frontend)")
             else:
@@ -451,7 +463,8 @@ app.on('window-all-closed', function () {
             install = input("PyInstaller not found. Install? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "pyinstaller"], check=True)
                     print("✓ PyInstaller installed successfully")
                 except subprocess.CalledProcessError:
                     print("⚠ Failed to install PyInstaller")
@@ -534,7 +547,7 @@ exe = EXE(
 
         # Check if Flutter is available
         result = subprocess.run(['flutter', '--version'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
 
         if result.returncode != 0:
             print("⚠ Flutter is not installed")
@@ -549,13 +562,16 @@ exe = EXE(
         platforms = ['windows', 'macos', 'linux']
         for platform in platforms:
             try:
-                result = subprocess.run(['flutter', 'config', f'--enable-{platform}-desktop'],
-                                      capture_output=True, text=True)
+                result = subprocess.run(['flutter',
+                                         'config',
+                                         f'--enable-{platform}-desktop'],
+                                        capture_output=True,
+                                        text=True)
                 if result.returncode == 0:
                     print(f"✓ Enabled {platform} desktop support")
                 else:
                     print(f"⚠ Could not enable {platform} desktop support")
-            except:
+            except BaseException:
                 print(f"⚠ Error enabling {platform} desktop support")
 
         print("\nTo create a new Flutter desktop project:")
@@ -573,9 +589,9 @@ exe = EXE(
 
     def setup_game_development(self) -> None:
         """Help set up game development environment"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("GAME DEVELOPMENT SETUP")
-        print("="*70)
+        print("=" * 70)
 
         print("\nGame development options:")
         print("  1. Unity (C#)")
@@ -584,7 +600,8 @@ exe = EXE(
         print("  4. Three.js (JavaScript/3D)")
 
         try:
-            choice = input("\nEnter choice (1-4) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-4) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._setup_unity()
@@ -660,7 +677,8 @@ exe = EXE(
             install = input("PyGame not found. Install? (y/n): ").lower()
             if install == 'y':
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "pygame"], check=True)
+                    subprocess.run([sys.executable, "-m", "pip",
+                                   "install", "pygame"], check=True)
                     print("✓ PyGame installed successfully")
                     import pygame
                     print(f"✓ PyGame version: {pygame.version.ver}")
@@ -730,7 +748,7 @@ sys.exit()
         # Check if Node.js is available
         try:
             result = subprocess.run(['node', '--version'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode != 0:
                 print("⚠ Node.js is not installed")
                 print("Install from: https://nodejs.org/")
@@ -803,9 +821,9 @@ sys.exit()
 
     def setup_iot_development(self) -> None:
         """Help set up IoT development environment"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("IOT DEVELOPMENT SETUP")
-        print("="*70)
+        print("=" * 70)
 
         print("\nIoT development typically involves:")
         print("  - Microcontroller programming (Arduino, ESP32, etc.)")
@@ -819,7 +837,8 @@ sys.exit()
         print("  4. ESP-IDF (Espressif IoT Development Framework)")
 
         try:
-            choice = input("\nEnter choice (1-4) or press Enter to cancel: ").strip()
+            choice = input(
+                "\nEnter choice (1-4) or press Enter to cancel: ").strip()
 
             if choice == "1":
                 self._setup_arduino()
@@ -865,7 +884,7 @@ sys.exit()
         # Check if PlatformIO is available
         try:
             result = subprocess.run(['pio', '--version'],
-                                  capture_output=True, text=True)
+                                    capture_output=True, text=True)
             if result.returncode == 0:
                 print("✓ PlatformIO is installed")
             else:
@@ -931,6 +950,8 @@ sys.exit()
         print("\nFor VS Code integration:")
         print("  - Install Espressif IDF extension")
         print("  - Configure IDF path in settings")
+
+
 class CrossPlatformMenu(Menu):
     """Menu for cross-platform development tools"""
 

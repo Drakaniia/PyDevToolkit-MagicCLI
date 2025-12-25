@@ -6,6 +6,8 @@ import subprocess
 import sys
 import threading
 import time
+
+
 class GitPull:
     """Handles git pull operations"""
 
@@ -16,7 +18,8 @@ class GitPull:
     def _start_loading(self, message=" Loading"):
         """Start loading animation in a separate thread"""
         self.loading_active = True
-        self.loading_thread = threading.Thread(target=self._loading_animation, args=(message,))
+        self.loading_thread = threading.Thread(
+            target=self._loading_animation, args=(message,))
         self.loading_thread.start()
 
     def _stop_loading(self):
@@ -37,9 +40,9 @@ class GitPull:
 
     def pull(self):
         """Pull from remote repository"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("  GIT PULL")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         if not self._is_git_repo():
             print(" Not a git repository. Please initialize git first.")
@@ -70,19 +73,24 @@ class GitPull:
 
             # Check for potential conflicts before pulling
             if self._has_local_changes():
-                print("\n  Warning: You have uncommitted changes in your local repository.")
+                print(
+                    "\n  Warning: You have uncommitted changes in your local repository.")
                 print("Pulling now may cause merge conflicts.")
-                response = input("Do you want to continue with pull? (y/N) or discard changes first (d): ").strip().lower()
+                response = input(
+                    "Do you want to continue with pull? (y/N) or discard changes first (d): ").strip().lower()
 
                 if response == 'd':
                     print("  Discarding local changes...")
-                    discard_response = input("This will permanently delete your uncommitted changes. Continue? (y/N): ").strip().lower()
+                    discard_response = input(
+                        "This will permanently delete your uncommitted changes. Continue? (y/N): ").strip().lower()
                     if discard_response in ['y', 'yes']:
-                        reset_success = self._run_command(["git", "reset", "--hard", "HEAD"])
+                        reset_success = self._run_command(
+                            ["git", "reset", "--hard", "HEAD"])
                         if reset_success:
                             print(" Local changes discarded successfully!")
                         else:
-                            print(" Failed to discard changes. Pull operation cancelled.")
+                            print(
+                                " Failed to discard changes. Pull operation cancelled.")
                             input("\nPress Enter to continue...")
                             return False
                     else:
@@ -95,7 +103,8 @@ class GitPull:
                     return False
             else:
                 # Ask user if they want to proceed with pull
-                response = input("\nDo you want to pull the changes now? (y/N): ").strip().lower()
+                response = input(
+                    "\nDo you want to pull the changes now? (y/N): ").strip().lower()
                 if response not in ['y', 'yes']:
                     print(" Pull operation cancelled by user.")
                     input("\nPress Enter to continue...")
@@ -111,16 +120,17 @@ class GitPull:
         if success:
             print("\n Successfully pulled from remote!")
         else:
-            print("\n Pull failed. Check your network connection and remote configuration.")
+            print(
+                "\n Pull failed. Check your network connection and remote configuration.")
 
         input("\nPress Enter to continue...")
         return success
 
     def pull_with_rebase(self):
         """Pull with rebase strategy"""
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("  GIT PULL (with rebase)")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         if not self._is_git_repo():
             print(" Not a git repository. Please initialize git first.")
@@ -144,19 +154,24 @@ class GitPull:
 
             # Check for potential conflicts before pulling
             if self._has_local_changes():
-                print("\n  Warning: You have uncommitted changes in your local repository.")
+                print(
+                    "\n  Warning: You have uncommitted changes in your local repository.")
                 print("Pulling now may cause merge conflicts.")
-                response = input("Do you want to continue with pull? (y/N) or discard changes first (d): ").strip().lower()
+                response = input(
+                    "Do you want to continue with pull? (y/N) or discard changes first (d): ").strip().lower()
 
                 if response == 'd':
                     print("  Discarding local changes...")
-                    discard_response = input("This will permanently delete your uncommitted changes. Continue? (y/N): ").strip().lower()
+                    discard_response = input(
+                        "This will permanently delete your uncommitted changes. Continue? (y/N): ").strip().lower()
                     if discard_response in ['y', 'yes']:
-                        reset_success = self._run_command(["git", "reset", "--hard", "HEAD"])
+                        reset_success = self._run_command(
+                            ["git", "reset", "--hard", "HEAD"])
                         if reset_success:
                             print(" Local changes discarded successfully!")
                         else:
-                            print(" Failed to discard changes. Pull operation cancelled.")
+                            print(
+                                " Failed to discard changes. Pull operation cancelled.")
                             input("\nPress Enter to continue...")
                             return False
                     else:
@@ -169,7 +184,8 @@ class GitPull:
                     return False
             else:
                 # Ask user if they want to proceed with pull
-                response = input("\nDo you want to pull with rebase? (y/N): ").strip().lower()
+                response = input(
+                    "\nDo you want to pull with rebase? (y/N): ").strip().lower()
                 if response not in ['y', 'yes']:
                     print(" Pull operation cancelled by user.")
                     input("\nPress Enter to continue...")
@@ -300,7 +316,8 @@ class GitPull:
             )
 
             # Reset the merge if it was attempted
-            subprocess.run(["git", "merge", "--abort"], capture_output=True, text=True)
+            subprocess.run(["git", "merge", "--abort"],
+                           capture_output=True, text=True)
 
             # If merge return code is 0, it means merge would succeed (no conflicts)
             # If return code is 1, it might be conflicts or other issues

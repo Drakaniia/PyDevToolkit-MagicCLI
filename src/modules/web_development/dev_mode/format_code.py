@@ -1,8 +1,3 @@
-"""
-automation/dev_mode/format_code.py
-Simple Prettier setup - installs once and configures format-on-save
-FIXED: Searches parent folders for .code-workspace file and modifies it
-"""
 import subprocess
 import json
 import sys
@@ -10,6 +5,14 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 from ._base import DevModeCommand
 from core.loading import LoadingSpinner, loading_animation
+
+"""
+automation/dev_mode/format_code.py
+Simple Prettier setup - installs once and configures format-on-save
+FIXED: Searches parent folders for .code-workspace file and modifies it
+"""
+
+
 class FormatCodeCommand(DevModeCommand):
     """Command to setup Prettier with format-on-save"""
 
@@ -65,9 +68,9 @@ class FormatCodeCommand(DevModeCommand):
         """Interactive Prettier setup"""
         current_dir = Path.cwd()
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print(" PRETTIER SETUP (Format on Save)")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         # Check if package.json exists
         package_json = current_dir / 'package.json'
@@ -92,7 +95,7 @@ class FormatCodeCommand(DevModeCommand):
         else:
             print("  Prettier is not installed yet\n")
             print(" Installing Prettier...")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
 
             if not self._install_prettier_with_progress(current_dir):
                 print("\n Failed to install Prettier")
@@ -116,15 +119,16 @@ class FormatCodeCommand(DevModeCommand):
         print(" Created/Updated .prettierignore")
 
         # 3. Configure VS Code workspace settings (searches parent folders)
-        workspace_configured = self._configure_vscode_workspace_settings(current_dir)
+        workspace_configured = self._configure_vscode_workspace_settings(
+            current_dir)
 
         # 4. Add format script to package.json
         self._add_format_script(current_dir)
         print(" Added format script to package.json")
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print(" PRETTIER SETUP COMPLETE!")
-        print("="*70)
+        print("=" * 70)
         print("\n What was configured:")
         print("  • Prettier installed as dev dependency")
         print("  • .prettierrc configuration file")
@@ -138,7 +142,7 @@ class FormatCodeCommand(DevModeCommand):
         print("  • Manual format: npm run format")
 
         print("\n  FINAL STEPS:")
-        print("="*70)
+        print("=" * 70)
 
         if workspace_configured:
             print("\n1⃣  Reload VS Code Window:")
@@ -156,7 +160,8 @@ class FormatCodeCommand(DevModeCommand):
         else:
             print("\n  NO WORKSPACE FILE FOUND!")
             print("\n   The .code-workspace file could not be found.")
-            print("   Prettier is installed, but auto-format on save won't work")
+            print("   Prettier is installed,
+                  but auto - format on save won't work")
             print("   until you configure your workspace.")
             print("\n    How to fix:")
             print("      1. In VS Code: File → Save Workspace As...")
@@ -168,7 +173,7 @@ class FormatCodeCommand(DevModeCommand):
             print("      3. Enable: 'Format On Save'")
             print("      4. Set Prettier as default formatter")
 
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         input("Press Enter to continue...")
 
@@ -201,7 +206,7 @@ class FormatCodeCommand(DevModeCommand):
             True if workspace file was found and configured
         """
         print("\n Searching for VS Code workspace file...")
-        print("="*70)
+        print("=" * 70)
 
         # Find .code-workspace file (searches up to 3 levels)
         workspace_file = self._find_workspace_file(project_dir, max_depth=3)
@@ -214,7 +219,7 @@ class FormatCodeCommand(DevModeCommand):
             print(f"      • {project_dir.parent.parent}")
             print("\n    Cannot configure workspace settings")
             print("    Solution: Open your project as a workspace in VS Code")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
             return False
 
         print(f"    Found workspace file: {workspace_file.name}")
@@ -225,7 +230,7 @@ class FormatCodeCommand(DevModeCommand):
 
         if workspace_data is None:
             print("    Failed to load workspace file")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
             return False
 
         # Merge with required settings
@@ -234,23 +239,29 @@ class FormatCodeCommand(DevModeCommand):
         # Write back to workspace file
         success = self._write_workspace_file(workspace_file, workspace_data)
 
-        print("="*70)
+        print("=" * 70)
         if success:
             print(" Workspace settings configured successfully!")
             print(f" File: {workspace_file}")
         else:
             print(" Failed to configure workspace settings")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         return success
 
-    def _find_workspace_file(self, start_dir: Path, max_depth: int = 3) -> Optional[Path]:
+    def _find_workspace_file(
+            self,
+            start_dir: Path,
+            max_depth: int = 3) -> Optional[Path]:
         """
         Search for .code-workspace file in current directory, parent, and grandparent
 
         Args:
             start_dir: Starting directory
-            max_depth: Maximum number of parent directories to search (3 = current, parent, grandparent)
+            max_depth: Maximum number of parent directories to search (
+    3 = current,
+    parent,
+    grandparent)
 
         Returns:
             Path to workspace file or None
@@ -274,7 +285,8 @@ class FormatCodeCommand(DevModeCommand):
 
         return None
 
-    def _load_workspace_file(self, workspace_file: Path) -> Optional[Dict[str, Any]]:
+    def _load_workspace_file(
+            self, workspace_file: Path) -> Optional[Dict[str, Any]]:
         """
         Load .code-workspace file
 
@@ -312,7 +324,8 @@ class FormatCodeCommand(DevModeCommand):
             print(f"        Error: {e}")
             return None
 
-    def _merge_workspace_settings(self, workspace_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _merge_workspace_settings(
+            self, workspace_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Merge required settings into workspace data
 
@@ -348,7 +361,10 @@ class FormatCodeCommand(DevModeCommand):
 
         return workspace_data
 
-    def _write_workspace_file(self, workspace_file: Path, workspace_data: Dict[str, Any]) -> bool:
+    def _write_workspace_file(self,
+                              workspace_file: Path,
+                              workspace_data: Dict[str,
+                                                   Any]) -> bool:
         """
         Write workspace data to file
 
@@ -372,7 +388,7 @@ class FormatCodeCommand(DevModeCommand):
                 f.write(json_content)
                 f.write('\n')
 
-            print(f"       Updated successfully")
+            print("       Updated successfully")
             return True
 
         except Exception as e:
@@ -444,7 +460,8 @@ class FormatCodeCommand(DevModeCommand):
                 print(" Prettier installed successfully!")
                 return True
             else:
-                print(f" Installation failed with exit code {result.returncode}")
+                print(
+                    f" Installation failed with exit code {result.returncode}")
                 if result.stderr:
                     print(f"Error: {result.stderr.strip()}")
                 return False
@@ -562,5 +579,7 @@ class FormatCodeCommand(DevModeCommand):
                 json.dump(data, f, indent=2)
         except Exception as e:
             print(f"  Could not update package.json: {e}")
+
+
 # Export command instance
 COMMAND = FormatCodeCommand()

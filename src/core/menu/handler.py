@@ -53,7 +53,10 @@ class BaseMenuHandler:
 
         return DynamicMenu(self.title, items)
 
-    def run_menu(self, items: List[tuple], action_map: Optional[dict] = None) -> Any:
+    def run_menu(
+            self,
+            items: List[tuple],
+            action_map: Optional[dict] = None) -> Any:
         """
         Run a menu with the given items
 
@@ -147,8 +150,9 @@ class GitMenuHandler(BaseMenuHandler):
                 # Add commit options to the menu
                 for idx, commit in enumerate(self.commits):
                     commit_id = (
-                        commit.get("hash", "")[:10] if commit.get("hash") else "Unknown"
-                    )
+                        commit.get(
+                            "hash", "")[
+                            :10] if commit.get("hash") else "Unknown")
                     timestamp = commit.get("date", "")
                     message = commit.get("message", "")[:40]
                     message = (
@@ -157,12 +161,12 @@ class GitMenuHandler(BaseMenuHandler):
                         else message
                     )
                     display_text = f"{idx + 1}. {commit_id} - {message} ({timestamp})"
-                    # Bind the commit as a default argument so it's captured correctly in the lambda
+                    # Bind the commit as a default argument so it's captured
+                    # correctly in the lambda
                     self.items.append(
                         MenuItem(
-                            display_text, lambda commit=commit: self.action_func(commit)
-                        )
-                    )
+                            display_text,
+                            lambda commit=commit: self.action_func(commit)))
 
                 # Add a cancel option
                 self.items.append(MenuItem("Cancel", lambda: None))
@@ -201,8 +205,7 @@ class OperationSelectionHandler(BaseMenuHandler):
                             MenuItem(
                                 op_name,
                                 lambda: print(f"Action not implemented: {op_name}"),
-                            )
-                        )
+                            ))
 
                 # Add a back/exit option
                 self.items.append(MenuItem("Back", lambda: "exit"))
@@ -229,12 +232,14 @@ class ConfirmationHandler:
             Initialized Menu object
         """
         if on_cancel is None:
-            on_cancel = lambda: "exit"
+            def on_cancel(): return "exit"
 
         class ConfirmationMenu(Menu):
             def __init__(
-                self, title: str, confirm_action: Callable, cancel_action: Callable
-            ):
+                    self,
+                    title: str,
+                    confirm_action: Callable,
+                    cancel_action: Callable):
                 super().__init__(title)
                 self.confirm_action = confirm_action
                 self.cancel_action = cancel_action
@@ -273,7 +278,10 @@ class MenuHelper:
 
             def setup_items(self):
                 for item in self.items_list:
-                    self.items.append(MenuItem(item, lambda selected=item: selected))
+                    self.items.append(
+                        MenuItem(
+                            item,
+                            lambda selected=item: selected))
 
                 self.items.append(MenuItem("Cancel", lambda: None))
 

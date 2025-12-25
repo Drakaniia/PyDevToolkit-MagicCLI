@@ -20,6 +20,8 @@ try:
     HAS_MSVCRT = True
 except ImportError:
     HAS_MSVCRT = False
+
+
 class FolderNavigator:
     """Handles interactive folder navigation with smooth arrow key support"""
 
@@ -81,12 +83,12 @@ class FolderNavigator:
         if initial:
             self._clear_screen()
 
-        print("="*70)
+        print("=" * 70)
         print("FOLDER NAVIGATOR")
-        print("="*70)
+        print("=" * 70)
         print(f"Current Location: {self.current_path}")
         print(f"Absolute Path: {self.current_path.absolute()}")
-        print("="*70)
+        print("=" * 70)
 
         if not subdirs:
             print("\nNo subdirectories found in current location.")
@@ -95,7 +97,8 @@ class FolderNavigator:
             print("\nAvailable Directories:")
             print("-" * 70)
             for idx, subdir in enumerate(subdirs):
-                self._print_directory_item(idx, subdir, idx == self.selected_idx)
+                self._print_directory_item(
+                    idx, subdir, idx == self.selected_idx)
             print("-" * 70)
 
         # Show navigation instructions
@@ -109,7 +112,7 @@ class FolderNavigator:
             print("  • Type number + Enter: Enter that directory")
             print("  • Type 'back': Go up one level")
             print("  • Type 'confirm': Confirm current directory")
-        print("="*70)
+        print("=" * 70)
 
     def _update_selection(self, subdirs, old_idx, new_idx):
         """
@@ -296,7 +299,7 @@ class FolderNavigator:
         """Get list of subdirectories in current path"""
         try:
             subdirs = [item for item in self.current_path.iterdir()
-                      if item.is_dir() and not item.name.startswith('.')]
+                       if item.is_dir() and not item.name.startswith('.')]
             return sorted(subdirs, key=lambda x: x.name.lower())
         except PermissionError:
             return []
@@ -311,16 +314,16 @@ class FolderNavigator:
         except PermissionError:
             # Show error and wait for user acknowledgment
             self._clear_screen()
-            print("\n" + "="*70)
+            print("\n" + "=" * 70)
             print(f"Permission denied: {target_dir.name}")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
             input("Press Enter to continue...")
         except Exception as e:
             # Show error and wait for user acknowledgment
             self._clear_screen()
-            print("\n" + "="*70)
+            print("\n" + "=" * 70)
             print(f"Error: {e}")
-            print("="*70 + "\n")
+            print("=" * 70 + "\n")
             input("Press Enter to continue...")
 
     def _go_back(self):
@@ -342,6 +345,8 @@ class FolderNavigator:
         sys.stdout.write(self.CLEAR_SCREEN)
         sys.stdout.flush()
         os.system('cls' if os.name == 'nt' else 'clear')
+
+
 # Test the navigator
 if __name__ == "__main__":
     print("Testing Folder Navigator...")

@@ -2,13 +2,14 @@
 Database Management Module
 PostgreSQL Quick Commands and Prisma Tools
 """
+from core.menu import Menu, MenuItem
 import sys
 from pathlib import Path
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from core.menu import Menu, MenuItem
+
 class DatabaseManager(Menu):
     """Database Management Menu with PostgreSQL and Prisma tools"""
 

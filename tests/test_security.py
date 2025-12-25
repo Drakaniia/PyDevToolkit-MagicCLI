@@ -2,6 +2,8 @@
 Security tests for PyDevToolkit-MagicCLI
 Tests security validation, input sanitization, and security controls
 """
+from core.utils.exceptions import AutomationError
+from core.security import SecurityValidator
 import os
 import sys
 import tempfile
@@ -10,9 +12,6 @@ from pathlib import Path
 
 # Add the src directory to Python path to import modules
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-from core.security import SecurityValidator
-from core.utils.exceptions import AutomationError
 
 
 class TestSecurityValidation(unittest.TestCase):
