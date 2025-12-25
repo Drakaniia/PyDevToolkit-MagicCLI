@@ -1,23 +1,29 @@
 import sys
 import os
-import tty
-import termios
-import msvcrt
+
+# Platform-specific imports for keyboard input handling
+if sys.platform == "win32":
+    # Windows-specific modules
+    try:
+        import msvcrt
+    except ImportError:
+        msvcrt = None
+else:
+    # Unix-specific modules
+    import tty
+    import termios
 
 """
 automation/dev_mode/menu_utils.py
 Shared menu utilities for dev mode commands with arrow key navigation
 """
 
-# Try to import platform-specific modules
-try:
-    HAS_TERMIOS = True
-except ImportError:
+# Determine platform-specific module availability
+if sys.platform == "win32":
     HAS_TERMIOS = False
-
-try:
-    HAS_MSVCRT = True
-except ImportError:
+    HAS_MSVCRT = msvcrt is not None
+else:
+    HAS_TERMIOS = True
     HAS_MSVCRT = False
 
 
@@ -156,9 +162,9 @@ def _display_options(options, selected_idx, prompt, show_numbers):
         else:
             print(line_text)
 
-    print("\n  Use ↑/↓ arrow keys to navigate,
+    print("""\n  Use ↑/↓ arrow keys to navigate,
           Enter to select,
-          or type number")
+          or type number""")
 
 
 def _redraw_options(options, selected_idx, prompt, show_numbers):
@@ -190,9 +196,9 @@ def _redraw_options(options, selected_idx, prompt, show_numbers):
         else:
             print(line_text)
 
-    print("\n  Use ↑/↓ arrow keys to navigate,
+    print("""\n  Use ↑/↓ arrow keys to navigate,
           Enter to select,
-          or type number")
+          or type number""")
     sys.stdout.flush()
 
 
