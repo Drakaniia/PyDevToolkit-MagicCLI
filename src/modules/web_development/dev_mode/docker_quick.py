@@ -3,56 +3,13 @@ import json
 import re
 from pathlib import Path
 from typing import Optional, Dict, List, Tuple
-from . import _base
-from . import menu_utils
 from ._base import DevModeCommand
 from .menu_utils import get_choice_with_arrows
-            from core.security.validator import SecurityValidator, safe_input
-                from core.utils.exceptions import AutomationError
-            from core.security.validator import SecurityValidator, safe_input
-                from core.utils.exceptions import AutomationError
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator, safe_input
-            from core.utils.exceptions import AutomationError
-            from core.security.validator import SecurityValidator, safe_input
-            from core.utils.exceptions import AutomationError
-        from core.security.validator import SecurityValidator
-        from core.utils.logging import log_command_execution
-        from core.utils.exceptions import AutomationError
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-                from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
-            from core.security.validator import SecurityValidator
 
 """
 automation/dev_mode/docker_quick.py
 Quick Docker commands for development
 """
-
-# Import security and logging modules inside functions to avoid circular imports
 class DockerQuickCommand(DevModeCommand):
     """Command for quick Docker operations"""
 
@@ -166,23 +123,21 @@ class DockerQuickCommand(DevModeCommand):
             print(" Dockerfile created successfully!")
         else:
             print(f"\n  Dockerfile already exists at {dockerfile_path}")
-            overwrite = input(
-    "Do you want to overwrite it? (y/n,
-    default: n): ").strip().lower()
+            overwrite = input("""Do you want to overwrite it? (y/n,
+    default: n): """).strip().lower()
             if overwrite in ['y', 'yes']:
                 self._generate_dockerfile(
-    project_info,
-    build_dir,
-    start_command,
-    port)
+                    project_info,
+                    build_dir,
+                    start_command,
+                    port)
                 print(" Dockerfile updated successfully!")
 
         # Optionally generate .dockerignore
         dockerignore_path = Path(".dockerignore")
         if not dockerignore_path.exists():
-            generate_ignore = input(
-    "\n Generate .dockerignore file? (y/n,
-    default: y): ").strip().lower()
+            generate_ignore = input("""\n Generate .dockerignore file? (y/n,
+    default: y): """).strip().lower()
             if generate_ignore != 'n' and generate_ignore != 'no':
                 self._generate_dockerignore(project_info)
                 print(" .dockerignore created successfully!")
@@ -194,9 +149,8 @@ class DockerQuickCommand(DevModeCommand):
         print(f" Port: {port}")
 
         # Offer to build image now
-        build_now = input(
-    f"\n Build Docker image now? (y/n,
-    default: y): ").strip().lower()
+        build_now = input(f"""\n Build Docker image now? (y/n,
+    default: y): """).strip().lower()
         if build_now != 'n' and build_now != 'no':
             project_name = Path.cwd().name.lower()
             self._build_image(interactive=False,
@@ -966,18 +920,17 @@ CMD {json.dumps(start_command.split())}
             # Use secure subprocess run with logging
             SecurityValidator.safe_subprocess_run(cmd, check=True)
             log_command_execution(
-    'docker build',
-    f"image: {image_name},
+                'docker build',
+                f"""image: {image_name},
     dockerfile: {dockerfile},
-    context: {context}",
-    True)
+    context: {context}""",
+                True)
             print(f"\n Image '{image_name}' built successfully!")
 
             # Offer to run the container after successful build
             if interactive:
-                run_now = input(
-    f"\n Run container from '{image_name}' now? (y/n,
-    default: n): ").strip().lower()
+                run_now = input(f"""\n Run container from '{image_name}' now? (y/n,
+    default: n): """).strip().lower()
                 if run_now in ['y', 'yes']:
                     print("\n" + "="*70)
                     # Pass the image name to run container function
@@ -1027,23 +980,20 @@ CMD {json.dumps(start_command.split())}
             container_name = input("Container name (optional): ").strip()
 
             # Port mapping
-            port_map = input(
-    "Port mapping (e.g.,
+            port_map = input("""Port mapping (e.g.,
     8080:80,
-    optional): ").strip()
+    optional): """).strip()
 
             # Environment variables
-            env_vars = input(
-    "Environment variables (e.g.,
+            env_vars = input("""Environment variables (e.g.,
     ENV1=value1,
     ENV2=value2,
-    optional): ").strip()
+    optional): """).strip()
 
             # Volume mapping
-            volume_map = input(
-    "Volume mapping (e.g.,
+            volume_map = input("""Volume mapping (e.g.,
     /host/path:/container/path,
-    optional): ").strip()
+    optional): """).strip()
 
             # Run mode with arrow navigation
             mode_options = ["Detached (background)", "Interactive (foreground)"]
@@ -1137,17 +1087,15 @@ CMD {json.dumps(start_command.split())}
         port_map = input("Port mapping (e.g., 8080:80, optional): ").strip()
 
         # Environment variables
-        env_vars = input(
-    "Environment variables (e.g.,
+        env_vars = input("""Environment variables (e.g.,
     ENV1=value1,
     ENV2=value2,
-    optional): ").strip()
+    optional): """).strip()
 
         # Volume mapping
-        volume_map = input(
-    "Volume mapping (e.g.,
+        volume_map = input("""Volume mapping (e.g.,
     /host/path:/container/path,
-    optional): ").strip()
+    optional): """).strip()
 
         # Run mode with arrow navigation
         mode_options = ["Detached (background)", "Interactive (foreground)"]
@@ -1452,9 +1400,8 @@ CMD {json.dumps(start_command.split())}
         print()
 
         if compose_file_exists:
-            overwrite = input(
-    "docker-compose.yml already exists. Overwrite? (y/n,
-    default: n): ").strip().lower()
+            overwrite = input("""docker-compose.yml already exists. Overwrite? (y/n,
+    default: n): """).strip().lower()
             if overwrite not in ['y', 'yes']:
                 print(" Operation cancelled")
                 return
@@ -1470,9 +1417,8 @@ CMD {json.dumps(start_command.split())}
         services = {}
 
         # Database options
-        db_choice = input(
-    "Add database service? (postgres/mysql/mongo/redis/no,
-    default: no): ").strip().lower()
+        db_choice = input("""Add database service? (postgres/mysql/mongo/redis/no,
+    default: no): """).strip().lower()
         if db_choice in ['postgres', 'postgresql']:
             services['database'] = {
                 'image': 'postgres:15',
@@ -1502,9 +1448,8 @@ CMD {json.dumps(start_command.split())}
             }
 
         # Nginx reverse proxy
-        nginx_choice = input(
-    "Add Nginx reverse proxy? (y/n,
-    default: n): ").strip().lower()
+        nginx_choice = input("""Add Nginx reverse proxy? (y/n,
+    default: n): """).strip().lower()
         if nginx_choice in ['y', 'yes']:
             services['nginx'] = {
                 'image': 'nginx:alpine',
@@ -1691,9 +1636,8 @@ http {{
             print(" Run 'Initialize docker-compose.yml' first")
             return
 
-        detached = input(
-    "Run in detached mode? (Y/n,
-    default: Y): ").strip().lower()
+        detached = input("""Run in detached mode? (Y/n,
+    default: Y): """).strip().lower()
         detached = detached not in ['n', 'no']
 
         cmd = ['docker-compose', 'up']
@@ -1721,9 +1665,8 @@ http {{
             print(" docker-compose.yml not found")
             return
 
-        remove_volumes = input(
-    "Remove volumes? (y/N,
-    default: N): ").strip().lower()
+        remove_volumes = input("""Remove volumes? (y/N,
+    default: N): """).strip().lower()
         remove_volumes = remove_volumes in ['y', 'yes']
 
         cmd = ['docker-compose', 'down']
@@ -1844,9 +1787,8 @@ http {{
             print(" docker-compose.yml not found")
             return
 
-        no_cache = input(
-    "Build without cache? (y/N,
-    default: N): ").strip().lower()
+        no_cache = input("""Build without cache? (y/N,
+    default: N): """).strip().lower()
         no_cache = no_cache in ['y', 'yes']
 
         service = input("Specific service? (leave empty for all): ").strip()
@@ -2027,9 +1969,8 @@ http {{
             print(f"   Node ID: {swarm_status.get('node_id', 'unknown')}")
             print(f"   Address: {swarm_status.get('node_addr', 'unknown')}")
 
-            reset = input(
-    "Reset and reinitialize? (y/N,
-    default: N): ").strip().lower()
+            reset = input("""Reset and reinitialize? (y/N,
+    default: N): """).strip().lower()
             if reset not in ['y', 'yes']:
                 return
 
@@ -2115,9 +2056,8 @@ http {{
             return
 
         # Ask if joining as worker or manager
-        role = input(
-    "Join as worker or manager? (worker/manager,
-    default: worker): ").strip().lower()
+        role = input("""Join as worker or manager? (worker/manager,
+    default: worker): """).strip().lower()
         if role not in ['worker', 'manager']:
             role = 'worker'
 
@@ -2192,11 +2132,10 @@ http {{
 
         if not compose_file:
             print(" No Docker Compose file found")
-            print(
-    " Expected files: docker-compose.yml,
+            print(""" Expected files: docker-compose.yml,
     docker-compose.yaml,
     docker-stack.yml,
-    docker-stack.yaml")
+    docker-stack.yaml""")
             return
 
         stack_name = input("Stack name: ").strip()
@@ -2385,9 +2324,8 @@ http {{
             if new_image:
                 cmd.extend(['--image', new_image])
         elif update_choice == '2':
-            env_vars = input(
-    "Environment variables (KEY=VALUE,
-    comma-separated): ").strip()
+            env_vars = input("""Environment variables (KEY=VALUE,
+    comma-separated): """).strip()
             if env_vars:
                 for env_var in env_vars.split(','):
                     env_var = env_var.strip()
@@ -2590,8 +2528,7 @@ http {{
             except subprocess.CalledProcessError:
                 print("   Could not retrieve stack list")
         else:
-            print(
-    " To initialize a Swarm,
-    run 'Initialize Swarm' from the menu")
+            print(""" To initialize a Swarm,
+    run 'Initialize Swarm' from the menu""")
 # Export command instance
 COMMAND = DockerQuickCommand()
