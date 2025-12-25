@@ -3,7 +3,6 @@
 CLI entry point for the magic command
 """
 import sys
-import os
 from pathlib import Path
 
 # Add the src directory to the path so imports work properly

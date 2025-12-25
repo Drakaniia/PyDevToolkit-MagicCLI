@@ -438,7 +438,6 @@ def discover_and_test_all_modules():
 def run_all_tests():
     """Run all tests including dynamically discovered modules and return results"""
     # Create the full test suite
-    loader = unittest.TestLoader()
     suite = discover_and_test_all_modules()
 
     # Run the tests
