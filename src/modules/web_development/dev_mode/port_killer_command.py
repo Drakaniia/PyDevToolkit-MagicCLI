@@ -2,12 +2,6 @@ from typing import Any, List, Dict
 from ._base import DevModeCommand
 from .menu_utils import get_choice_with_arrows
 from .port_killer import (
-
-    """
-automation/dev_mode/port_killer_command.py
-Port Killer command for the Dev Mode menu
-Provides interactive port management and termination
-"""
     PortKiller,
     kill_all_dev_ports,
     scan_active_servers,
@@ -15,6 +9,12 @@ Provides interactive port management and termination
     get_port_conflicts,
     ensure_ports_free
 )
+
+"""
+automation/dev_mode/port_killer_command.py
+Port Killer command for the Dev Mode menu
+Provides interactive port management and termination
+"""
 
 
 class PortKillerCommand(DevModeCommand):
@@ -257,11 +257,11 @@ class PortKillerCommand(DevModeCommand):
         print("=" * 70)
 
         try:
-            ports_input = input("Enter port numbers(comma - separated,
+            ports_input = input("""Enter port numbers(comma - separated,
                                                     e.g.,
                                                     3000,
                                                     8080,
-                                                    5173): ").strip()
+                                                    5173): """).strip()
 
             if not ports_input:
                 print(" No ports specified")
