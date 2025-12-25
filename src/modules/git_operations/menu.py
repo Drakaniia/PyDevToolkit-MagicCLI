@@ -5,16 +5,16 @@ UPDATED: Changelog is now auto-generated after successful push
 """
 from core.utils.git_client import get_git_client
 from core.menu import Menu, MenuItem
-from github.git_stash import GitStash
-from github.git_diff import GitDiff
-from github.git_cache import GitCache
-from github.git_removesubmodule import GitRemoveSubmodule
-from github.git_recover import GitRecover
-from github.git_initializer import GitInitializer
-from github.git_push import GitPush
-from github.git_pull import GitPull
-from github.git_log import GitLog
-from github.git_status import GitStatus
+from .github.git_stash import GitStash
+from .github.git_diff import GitDiff
+from .github.git_cache import GitCache
+from .github.git_removesubmodule import GitRemoveSubmodule
+from .github.git_recover import GitRecover
+from .github.git_initializer import GitInitializer
+from .github.git_push import GitPush
+from .github.git_pull import GitPull
+from .github.git_log import GitLog
+from .github.git_status import GitStatus
 import sys
 from pathlib import Path
 from typing import Any, Optional
