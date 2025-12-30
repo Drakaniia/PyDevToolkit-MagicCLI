@@ -9,7 +9,7 @@ import io
 
 # Set UTF-8 encoding for Windows console
 if sys.platform == "win32":
-    os.system("chcp 65001 > nul")
+    import ctypes; ctypes.windll.kernel32.SetConsoleMode(ctypes.windll.kernel32.GetStdHandle(-11), 7)
     # Ensure stdout uses UTF-8 encoding
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 

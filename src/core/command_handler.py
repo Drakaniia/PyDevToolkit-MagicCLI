@@ -194,7 +194,8 @@ class ClearCommand(Command):
 
     def execute(self, *args) -> str:
         """Execute clear command"""
-        os.system("cls" if os.name == "nt" else "clear")
+        sys.stdout.write('\033[2J\033[H')
+        sys.stdout.flush()
         return ""
 
 
