@@ -31,7 +31,7 @@ class SecurityConfig:
                 '.py', '.js', '.ts', '.tsx', '.json', '.yaml', '.yml',
                 '.txt', '.md', '.html', '.css', '.jsx', '.tsx', '.sql',
                 '.xml', '.ini', '.cfg', '.conf', '.dockerfile', 'dockerfile',
-                '.gitignore', '.env', '.sh', '.bash', '.zsh', '.bat', '.cmd'
+                '.gitignore', '.env', '.sh', '.bash', '.zsh', '.bat', '.cmd', '.ps1'
             ]
 
 
