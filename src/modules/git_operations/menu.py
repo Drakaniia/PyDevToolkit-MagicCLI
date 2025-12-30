@@ -15,6 +15,7 @@ from .github.git_push import GitPush
 from .github.git_pull import GitPull
 from .github.git_log import GitLog
 from .github.git_status import GitStatus
+from .github.git_branch import BranchMenu
 import sys
 from pathlib import Path
 from typing import Any, Optional
@@ -117,6 +118,11 @@ class GitOperations:
         stash_handler = GitStash()
         stash_handler.execute_stash_operations()
 
+    def show_branch_menu(self) -> None:
+        """Show comprehensive branch operations menu"""
+        branch_menu = BranchMenu()
+        branch_menu.run()
+
 
 class GitMenu(Menu):
     """Unified menu for all Git operations"""
@@ -139,6 +145,7 @@ class GitMenu(Menu):
             MenuItem("Git Cache (Handle Sensitive Files)", lambda: self.git_ops.manage_cache()),
             MenuItem("Manage Submodules/Nested Repos", lambda: self.git_ops.manage_submodules()),
             MenuItem("Git Stash Operations", lambda: self.git_ops.show_stash_menu()),
+            MenuItem("Branch Operations", lambda: self.git_ops.show_branch_menu()),
             MenuItem("Back to Main Menu", lambda: "exit")
         ]
 
