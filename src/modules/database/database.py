@@ -74,14 +74,38 @@ class DatabaseTools:
         config_content = '''# PostgreSQL Configuration
 # Update these values according to your setup
 
+# For Development (localhost)
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=your_database_name
 POSTGRES_USER=your_username
 POSTGRES_PASSWORD=your_password
 
-# Example connection string:
-# postgresql://user:password@host:port/database
+# For Production - Choose ONE of these options:
+
+# Option A: AWS RDS PostgreSQL
+# POSTGRES_HOST=your-rds-instance.region.rds.amazonaws.com
+# POSTGRES_PORT=5432
+# POSTGRES_DB=your_prod_db
+# POSTGRES_USER=your_prod_user
+# POSTGRES_PASSWORD=your_secure_password
+# POSTGRES_SSLMODE=require
+
+# Option B: Google Cloud SQL PostgreSQL
+# POSTGRES_HOST=/cloudsql/your-project:region:instance
+# POSTGRES_DB=your_prod_db
+# POSTGRES_USER=your_prod_user
+# POSTGRES_PASSWORD=your_secure_password
+
+# Option C: Azure Database for PostgreSQL
+# POSTGRES_HOST=your-server.postgres.database.azure.com
+# POSTGRES_DB=your_prod_db
+# POSTGRES_USER=your_prod_user@your-server
+# POSTGRES_PASSWORD=your_secure_password
+
+# Example connection strings:
+# Development: postgresql://user:password@host:port/database
+# Production: postgresql://user:password@host:port/database?sslmode=require
 '''
 
         config_path = Path("config") / "database_postgresql.env"
