@@ -244,7 +244,15 @@ install_python_macos() {
         brew install python3
     else
         echo -e "${YELLOW}Homebrew not found. Installing Homebrew first...${NC}"
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        # Try curl first, fallback to wget
+        if command -v curl &> /dev/null; then
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        elif command -v wget &> /dev/null; then
+            /bin/bash -c "$(wget -qO- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        else
+            print_error "Neither curl nor wget is available. Please install one of them and try again."
+            return 1
+        fi
 
         echo -e "${CYAN}Installing Python 3 using Homebrew...${NC}"
         brew install python3
