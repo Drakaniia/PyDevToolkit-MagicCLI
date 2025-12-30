@@ -495,7 +495,7 @@ class GitClient:
             )
             if result.returncode == 0:
                 return result.stdout.strip()
-        except Exception:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError, ValueError):
             pass
         return None
 
