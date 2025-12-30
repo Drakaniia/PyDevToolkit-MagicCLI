@@ -93,7 +93,7 @@ magic
 ### After (Ultra Simple)
 ```bash
 # Just run the installer - no prior knowledge required!
-curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/scripts/install.sh | bash
 magic
 ```
 

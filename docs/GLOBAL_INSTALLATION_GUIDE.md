@@ -6,10 +6,10 @@ This guide explains how to install the PyDevToolkit-MagicCLI globally on your sy
 ## Quick Start (Recommended)
 ```bash
 # Download and run the installer (works on any system)
-curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/scripts/install.sh | bash
 
 # Or if you have the repository:
-bash install.sh
+bash scripts/install.sh
 
 # Use the magic command
 magic
@@ -30,11 +30,11 @@ The installer automatically:
 The easiest way - just run our installer:
 ```bash
 # One-liner installation (works on any system)
-curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/scripts/install.sh | bash
 
 # Or download and run manually:
-wget https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/install.sh
-bash install.sh
+wget https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/scripts/install.sh
+bash scripts/install.sh
 ```
 
 **What this does:**
@@ -131,7 +131,7 @@ If the automated installer fails:
 3. **Permission issues on Linux/macOS**:
    ```bash
    # Run with sudo if needed for system Python
-   sudo bash install.sh
+   sudo bash scripts/install.sh
    ```
 
 ### Command Not Found After Installation
@@ -182,7 +182,7 @@ When installing on Windows:
 The package is configured for PyPI publishing with the following setup:
 
 ### Package Configuration
-- **Name**: `pydevtoolkit-magiccli`
+- **Name**: `magic-cli`
 - **Entry Point**: `magic = src.main:main`
 - **Python Versions**: 3.8, 3.9, 3.10, 3.11, 3.12
 - **Dependencies**: Core dependencies only (optional extras available)
@@ -216,7 +216,7 @@ The menu provides organized access to all development tools and features.
 To uninstall the globally installed package:
 
 ```bash
-pip uninstall pydevtoolkit-magiccli
+pip uninstall magic-cli
 ```
 
 ### Complete Removal
@@ -224,7 +224,7 @@ For a complete removal including configuration files:
 
 ```bash
 # Uninstall the package
-pip uninstall pydevtoolkit-magiccli
+pip uninstall magic-cli
 
 # Remove any cached data (optional)
 pip cache purge
@@ -244,10 +244,10 @@ rmdir /s %APPDATA%\pydevtoolkit-magiccli\  # Windows
 If you encounter permission errors during uninstallation:
 ```bash
 # Try with user flag (if installed with --user)
-pip uninstall --user pydevtoolkit-magiccli
+pip uninstall --user magic-cli
 
 # Or use elevated privileges
-sudo pip uninstall pydevtoolkit-magiccli  # Linux/macOS
+sudo pip uninstall magic-cli  # Linux/macOS
 # On Windows, run Command Prompt/PowerShell as Administrator
 ```
 
@@ -255,25 +255,25 @@ sudo pip uninstall pydevtoolkit-magiccli  # Linux/macOS
 If pip can't find the package:
 ```bash
 # Check if package is installed
-pip list | grep pydevtoolkit
+pip list | grep magic
 
 # Check installation location
-pip show pydevtoolkit-magiccli
+pip show magic-cli
 
 # Force uninstall if needed
-pip uninstall --yes pydevtoolkit-magiccli
+pip uninstall --yes magic-cli
 ```
 
 #### Multiple Installations
 If you have multiple Python versions:
 ```bash
 # Check all pip installations
-python3 -m pip uninstall pydevtoolkit-magiccli
-python -m pip uninstall pydevtoolkit-magiccli
-py -m pip uninstall pydevtoolkit-magiccli
+python3 -m pip uninstall magic-cli
+python -m pip uninstall magic-cli
+py -m pip uninstall magic-cli
 
 # Or specify the pip executable
-/path/to/python -m pip uninstall pydevtoolkit-magiccli
+/path/to/python -m pip uninstall magic-cli
 ```
 
 ## Notes

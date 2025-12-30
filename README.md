@@ -23,11 +23,11 @@ Install globally with our automated installer - **Python not required!**
 
 ```bash
 # One-liner installation (works on Linux, macOS, Windows)
-curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/scripts/install.sh | bash
 
 # Or download and run manually:
-wget https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/install.sh
-bash install.sh
+wget https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/scripts/install.sh
+bash scripts/install.sh
 
 # Use anywhere
 magic
@@ -70,11 +70,11 @@ To completely remove the automated installation:
 
 ```bash
 # Use the uninstall script (handles everything automatically)
-curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/scripts/uninstall.sh | bash
 
 # Or download and run manually:
-wget https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/uninstall.sh
-bash uninstall.sh
+wget https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/scripts/uninstall.sh
+bash scripts/uninstall.sh
 ```
 
 The uninstall script automatically:
