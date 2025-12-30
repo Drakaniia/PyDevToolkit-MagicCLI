@@ -4,7 +4,7 @@ Unified Git client for all Git operations
 """
 import subprocess
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 from datetime import datetime
 
 from .exceptions import (
@@ -241,6 +241,236 @@ class GitClient:
         if checkout:
             self._run_command(['git', 'checkout', branch_name], check=True)
 
+        return True
+
+    def get_all_branches(self, include_remote: bool = True) -> List[Dict[str, str]]:
+        """
+        Get all branches with metadata
+
+        Args:
+            include_remote: Whether to include remote branches
+
+        Returns:
+            List of branch dictionaries with name, type, commit, message, date
+        """
+        self.ensure_repo()
+        branches = []
+
+        try:
+            # Get current branch
+            current_branch = self.current_branch()
+
+            # Get local branches
+            result = self._run_command(['git', 'branch', '-v', '--no-color'], check=True)
+            for line in result.stdout.strip().split('\n'):
+                if not line.strip():
+                    continue
+
+                # Parse branch line
+                is_current = line.startswith('*')
+                parts = line.split()
+                if len(parts) >= 2:
+                    branch_name = parts[1].strip()
+                    commit_hash = parts[2] if len(parts) > 2 else ""
+                    message = ' '.join(parts[3:]) if len(parts) > 3 else ""
+
+                    branches.append({
+                        'name': branch_name,
+                        'type': 'local',
+                        'is_current': is_current,
+                        'commit': commit_hash,
+                        'message': message
+                    })
+
+            # Get remote branches if requested
+            if include_remote:
+                result = self._run_command(['git', 'branch', '-r', '-v', '--no-color'], check=True)
+                for line in result.stdout.strip().split('\n'):
+                    if not line.strip() or '->' in line:
+                        continue
+
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        branch_name = parts[0].strip()
+                        commit_hash = parts[1] if len(parts) > 1 else ""
+                        message = ' '.join(parts[2:]) if len(parts) > 2 else ""
+
+                        # Avoid duplicates with local branches
+                        local_name = branch_name.split('/')[-1]
+                        is_duplicate = any(b['name'] == local_name for b in branches)
+
+                        if not is_duplicate:
+                            branches.append({
+                                'name': branch_name,
+                                'type': 'remote',
+                                'is_current': False,
+                                'commit': commit_hash,
+                                'message': message
+                            })
+
+        except GitCommandError:
+            pass
+
+        return branches
+
+    def get_remote_branches(self) -> List[str]:
+        """
+        Get list of remote branch names
+
+        Returns:
+            List of remote branch names
+        """
+        self.ensure_repo()
+
+        try:
+            result = self._run_command(['git', 'branch', '-r'], check=True)
+            branches = []
+            for line in result.stdout.strip().split('\n'):
+                if line.strip() and '->' not in line:
+                    branches.append(line.strip())
+            return branches
+        except GitCommandError:
+            return []
+
+    def rename_branch(self, old_name: str, new_name: str) -> bool:
+        """
+        Rename a branch
+
+        Args:
+            old_name: Old branch name
+            new_name: New branch name
+        """
+        self.ensure_repo()
+
+        cmd = ['git', 'branch', '-m', old_name, new_name]
+        self._run_command(cmd, check=True)
+        return True
+
+    def delete_branch(self, branch_name: str, force: bool = False) -> bool:
+        """
+        Delete a local branch
+
+        Args:
+            branch_name: Branch name to delete
+            force: Force delete even if unmerged
+        """
+        self.ensure_repo()
+
+        cmd = ['git', 'branch', '-d']
+        if force:
+            cmd = ['git', 'branch', '-D']
+        cmd.append(branch_name)
+
+        self._run_command(cmd, check=True)
+        return True
+
+    def delete_remote_branch(self, branch_name: str, remote: str = 'origin') -> bool:
+        """
+        Delete a remote branch
+
+        Args:
+            branch_name: Branch name to delete (without remote prefix)
+            remote: Remote name
+        """
+        self.ensure_repo()
+
+        cmd = ['git', 'push', remote, f':{branch_name}']
+        self._run_command(cmd, check=True)
+        return True
+
+    def merge_branch(self, branch_name: str, no_ff: bool = False) -> bool:
+        """
+        Merge a branch into current branch
+
+        Args:
+            branch_name: Branch name to merge
+            no_ff: Create merge commit even if fast-forward is possible
+        """
+        self.ensure_repo()
+
+        cmd = ['git', 'merge']
+        if no_ff:
+            cmd.append('--no-ff')
+        cmd.append(branch_name)
+
+        self._run_command(cmd, check=True)
+        return True
+
+    def get_branch_diff(self, branch1: str, branch2: str) -> str:
+        """
+        Get diff between two branches
+
+        Args:
+            branch1: First branch name
+            branch2: Second branch name
+
+        Returns:
+            Diff output
+        """
+        self.ensure_repo()
+
+        result = self._run_command(['git', 'diff', f'{branch1}...{branch2}'], check=True)
+        return result.stdout
+
+    def get_branch_ahead_behind(self, branch1: str, branch2: str) -> Tuple[int, int]:
+        """
+        Get commit counts ahead/behind between two branches
+
+        Args:
+            branch1: First branch name
+            branch2: Second branch name
+
+        Returns:
+            Tuple of (behind_count, ahead_count)
+        """
+        self.ensure_repo()
+
+        result = self._run_command(
+            ['git', 'rev-list', '--left-right', '--count', f'{branch1}...{branch2}'],
+            check=True
+        )
+
+        left, right = result.stdout.strip().split()
+        return (int(left), int(right))
+
+    def set_upstream(self, branch_name: str, remote: str = 'origin') -> bool:
+        """
+        Set upstream tracking for current branch
+
+        Args:
+            branch_name: Remote branch name to track
+            remote: Remote name
+        """
+        self.ensure_repo()
+
+        cmd = ['git', 'branch', '--set-upstream-to', f'{remote}/{branch_name}']
+        self._run_command(cmd, check=True)
+        return True
+
+    def checkout_branch(self, branch_name: str) -> bool:
+        """
+        Switch to a branch
+
+        Args:
+            branch_name: Branch name to switch to
+        """
+        self.ensure_repo()
+
+        cmd = ['git', 'checkout', branch_name]
+        self._run_command(cmd, check=True)
+        return True
+
+    def fetch_remote_branches(self, remote: str = 'origin') -> bool:
+        """
+        Fetch all remote branches
+
+        Args:
+            remote: Remote name
+        """
+        self.ensure_repo()
+
+        cmd = ['git', 'fetch', remote]
+        self._run_command(cmd, check=True)
         return True
 
     # ========== Remote Operations ==========
