@@ -433,28 +433,17 @@ class FormatCodeCommand(DevModeCommand):
         print(f"$ {' '.join(cmd)}")
 
         try:
-            use_shell = sys.platform == 'win32'
-
+            # Always use shell=False for security - works cross-platform
             with LoadingSpinner(f"Installing Prettier with {pkg_manager}", style='dots'):
-                if use_shell:
-                    result = subprocess.run(
-                        ' '.join(cmd),
-                        cwd=project_dir,
-                        shell=True,
-                        capture_output=True,
-                        text=True,
-                        encoding='utf-8',
-                        errors='replace'
-                    )
-                else:
-                    result = subprocess.run(
-                        cmd,
-                        cwd=project_dir,
-                        capture_output=True,
-                        text=True,
-                        encoding='utf-8',
-                        errors='replace'
-                    )
+                result = subprocess.run(
+                    cmd,
+                    cwd=project_dir,
+                    shell=False,  # Explicitly disable shell to prevent injection
+                    capture_output=True,
+                    text=True,
+                    encoding='utf-8',
+                    errors='replace'
+                )
 
             if result.returncode == 0:
                 print(" Prettier installed successfully!")

@@ -1422,21 +1422,33 @@ CMD {json.dumps(start_command.split())}
         if db_choice in ['postgres', 'postgresql']:
             services['database'] = {
                 'image': 'postgres:15',
-                'env': ['POSTGRES_DB=appdb', 'POSTGRES_USER=appuser', 'POSTGRES_PASSWORD=apppass'],
+                'env': [
+                    'POSTGRES_DB=appdb',
+                    'POSTGRES_USER=appuser',
+                    'POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-apppassword}'
+                ],
                 'volumes': ['postgres_data:/var/lib/postgresql/data'],
                 'ports': ['5432:5432']
             }
         elif db_choice == 'mysql':
             services['database'] = {
                 'image': 'mysql:8',
-                'env': ['MYSQL_DATABASE=appdb', 'MYSQL_USER=appuser', 'MYSQL_PASSWORD=apppass', 'MYSQL_ROOT_PASSWORD=rootpass'],
+                'env': [
+                    'MYSQL_DATABASE=appdb',
+                    'MYSQL_USER=appuser',
+                    'MYSQL_PASSWORD=${MYSQL_PASSWORD:-apppassword}',
+                    'MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}'
+                ],
                 'volumes': ['mysql_data:/var/lib/mysql'],
                 'ports': ['3306:3306']
             }
         elif db_choice == 'mongo' or db_choice == 'mongodb':
             services['database'] = {
                 'image': 'mongo:6',
-                'env': ['MONGO_INITDB_ROOT_USERNAME=admin', 'MONGO_INITDB_ROOT_PASSWORD=apppass'],
+                'env': [
+                    'MONGO_INITDB_ROOT_USERNAME=admin',
+                    'MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-apppassword}'
+                ],
                 'volumes': ['mongo_data:/data/db'],
                 'ports': ['27017:27017']
             }

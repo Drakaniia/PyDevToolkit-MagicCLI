@@ -19,20 +19,40 @@ class GitStash:
     def __init__(self):
         pass
 
-    def run_command(self, cmd: str, cwd: str = None) -> tuple:
-        """Run a shell command and return (stdout, stderr, return_code)"""
+    def run_command(self, cmd, cwd: str = None) -> tuple:
+        """
+        Run a shell command and return (stdout, stderr, return_code)
+        
+        Args:
+            cmd: Command as list (safe) or string (will be parsed safely)
+            cwd: Working directory
+            
+        Returns:
+            Tuple of (stdout, stderr, return_code)
+        """
         try:
+            # Always use shell=False for security
             if isinstance(cmd, str):
-                result = subprocess.run(
-                    cmd, shell=True, capture_output=True, text=True, cwd=cwd
-                )
+                # Parse string command safely using shlex
+                import shlex
+                cmd_list = shlex.split(cmd)
             else:
-                result = subprocess.run(
-                    cmd, capture_output=True, text=True, cwd=cwd
-                )
+                cmd_list = list(cmd)
+            
+            result = subprocess.run(
+                cmd_list,
+                shell=False,  # Explicitly disable shell to prevent injection
+                capture_output=True,
+                text=True,
+                cwd=cwd,
+                encoding='utf-8',
+                errors='replace'
+            )
             return result.stdout, result.stderr, result.returncode
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, ValueError, OSError) as e:
             return "", str(e), 1
+        except Exception as e:
+            return "", f"Unexpected error: {e}", 1
 
     def get_stash_list(self) -> List[str]:
         """Get the list of stashes"""
@@ -119,11 +139,11 @@ class GitStash:
                 message = input(
                     "Enter optional stash message (or press Enter to skip): ").strip()
                 if message:
-                    cmd = f'git stash push -m "{message}"'
+                    cmd = ['git', 'stash', 'push', '-m', message]
                 else:
-                    cmd = 'git stash'
+                    cmd = ['git', 'stash']
 
-                print(Fore.CYAN + f"Running: {cmd}")
+                print(Fore.CYAN + f"Running: {' '.join(cmd)}")
                 stdout, stderr, code = self.git_stash.run_command(cmd)
                 if code == 0:
                     print(Fore.GREEN + "Stash saved successfully!")
@@ -160,8 +180,8 @@ class GitStash:
 
                 stash_id = self.git_stash.display_stash_menu(stashes)
                 if stash_id:
-                    cmd = f'git stash apply {stash_id}'
-                    print(Fore.CYAN + f"Running: {cmd}")
+                    cmd = ['git', 'stash', 'apply', stash_id]
+                    print(Fore.CYAN + f"Running: {' '.join(cmd)}")
                     stdout, stderr, code = self.git_stash.run_command(cmd)
                     if code == 0:
                         print(Fore.GREEN + "Stash applied successfully!")
@@ -186,8 +206,8 @@ class GitStash:
 
                 stash_id = self.git_stash.display_stash_menu(stashes)
                 if stash_id:
-                    cmd = f'git stash pop {stash_id}'
-                    print(Fore.CYAN + f"Running: {cmd}")
+                    cmd = ['git', 'stash', 'pop', stash_id]
+                    print(Fore.CYAN + f"Running: {' '.join(cmd)}")
                     stdout, stderr, code = self.git_stash.run_command(cmd)
                     if code == 0:
                         print(Fore.GREEN + "Stash popped successfully!")
@@ -215,8 +235,8 @@ class GitStash:
                     confirm = input(
                         f"Are you sure you want to drop {stash_id}? (y/N): ")
                     if confirm.lower() == 'y':
-                        cmd = f'git stash drop {stash_id}'
-                        print(Fore.CYAN + f"Running: {cmd}")
+                        cmd = ['git', 'stash', 'drop', stash_id]
+                        print(Fore.CYAN + f"Running: {' '.join(cmd)}")
                         stdout, stderr, code = self.git_stash.run_command(cmd)
                         if code == 0:
                             print(Fore.GREEN + "Stash dropped successfully!")
@@ -238,8 +258,8 @@ class GitStash:
                 confirm = input(
                     "Are you sure you want to clear all stashes? This cannot be undone! (y/N): ")
                 if confirm.lower() == 'y':
-                    cmd = 'git stash clear'
-                    print(Fore.CYAN + f"Running: {cmd}")
+                    cmd = ['git', 'stash', 'clear']
+                    print(Fore.CYAN + f"Running: {' '.join(cmd)}")
                     stdout, stderr, code = self.git_stash.run_command(cmd)
                     if code == 0:
                         print(Fore.GREEN + "All stashes cleared successfully!")
@@ -264,8 +284,8 @@ class GitStash:
 
                 stash_id = self.git_stash.display_stash_menu(stashes)
                 if stash_id:
-                    cmd = f'git stash show -p {stash_id}'
-                    print(Fore.CYAN + f"Running: {cmd}")
+                    cmd = ['git', 'stash', 'show', '-p', stash_id]
+                    print(Fore.CYAN + f"Running: {' '.join(cmd)}")
                     stdout, stderr, code = self.git_stash.run_command(cmd)
                     if code == 0:
                         print(Fore.GREEN + f"Details for {stash_id}:")

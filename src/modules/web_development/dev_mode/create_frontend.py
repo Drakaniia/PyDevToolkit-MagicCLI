@@ -378,15 +378,13 @@ class CreateFrontendCommand(DevModeCommand):
             # Execute creation command
             print(f"$ {' '.join(cmd)}\n")
 
-            # Use shell=True on Windows for npx/npm commands
-            use_shell = sys.platform == 'win32'
-
+            # Always use shell=False for security - works cross-platform
             result = subprocess.run(
-                cmd if not use_shell else ' '.join(cmd),
+                cmd,
                 cwd=target_path,
                 check=True,
                 capture_output=False,
-                shell=use_shell
+                shell=False  # Explicitly disable shell to prevent injection
             )
 
             print(f"\nProject '{project_name}' created successfully!")

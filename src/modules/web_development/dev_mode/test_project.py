@@ -189,30 +189,14 @@ class TestProjectCommand(DevModeCommand):
         print("=" * 70 + "\n")
 
         try:
-            # Use shell=True on Windows for npm/yarn/pnpm commands
-            use_shell = sys.platform == 'win32'
-
-            if use_shell:
-                # Windows: use shell mode with string command
-                process = subprocess.Popen(
-                    command,
-                    cwd=cwd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    bufsize=1,
-                    universal_newlines=True,
-                    shell=True,
-                    encoding='utf-8',
-                    errors='replace'
-                )
-            else:
-                # Unix: use list command without shell
-                cmd_list = command.split()
-                process = subprocess.Popen(
-                    cmd_list,
-                    cwd=cwd,
-                    stdout=subprocess.PIPE,
+            # Always use shell=False for security - parse command safely
+            import shlex
+            cmd_list = shlex.split(command)
+            
+            process = subprocess.Popen(
+                cmd_list,
+                cwd=cwd,
+                stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                     text=True,
                     bufsize=1,

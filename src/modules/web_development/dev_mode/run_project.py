@@ -135,37 +135,17 @@ class RunProjectCommand(DevModeCommand):
         print("=" * 70 + "\n")
 
         try:
-            # Use shell=True on Windows for npm/yarn/pnpm commands
-            use_shell = sys.platform == 'win32'
-
-            if use_shell:
-                # Windows: use shell mode with string command and proper
-                # encoding
-                cmd_str = ' '.join(cmd)
-                process = subprocess.Popen(
-                    cmd_str,
-                    cwd=cwd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    bufsize=1,
-                    universal_newlines=True,
-                    shell=True,
-                    encoding='utf-8',
-                    errors='replace'  # Replace invalid characters instead of crashing
-                )
-            else:
-                # Unix: use list command without shell
-                process = subprocess.Popen(
-                    cmd,
-                    cwd=cwd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    bufsize=1,
-                    universal_newlines=True,
-                    encoding='utf-8',
-                    errors='replace'  # Replace invalid characters instead of crashing
+            # Always use shell=False for security - works cross-platform
+            process = subprocess.Popen(
+                cmd,
+                cwd=cwd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                universal_newlines=True,
+                encoding='utf-8',
+                errors='replace'  # Replace invalid characters instead of crashing
                 )
 
             # Stream output with robust error handling

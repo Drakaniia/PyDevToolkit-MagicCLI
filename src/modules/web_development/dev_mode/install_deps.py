@@ -133,17 +133,17 @@ class InstallDepsCommand(DevModeCommand):
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            # Use shell=True on Windows
-            use_shell = sys.platform == 'win32'
-
+            # Always use shell=False for security - works cross-platform
             with LoadingSpinner(f"Installing dependencies with {manager}", style='dots'):
                 result = subprocess.run(
-                    cmd if not use_shell else ' '.join(cmd),
+                    cmd,
                     cwd=Path.cwd(),
                     check=True,
                     capture_output=True,
-                    shell=use_shell,
-                    text=True
+                    shell=False,  # Explicitly disable shell to prevent injection
+                    text=True,
+                    encoding='utf-8',
+                    errors='replace'
                 )
 
             print(" Dependencies installed successfully!")
@@ -200,17 +200,17 @@ class InstallDepsCommand(DevModeCommand):
         print(f"$ {' '.join(cmd)}\n")
 
         try:
-            # Use shell=True on Windows
-            use_shell = sys.platform == 'win32'
-
+            # Always use shell=False for security - works cross-platform
             with LoadingSpinner(f"Installing {package} as {dep_type}", style='dots'):
                 result = subprocess.run(
-                    cmd if not use_shell else ' '.join(cmd),
+                    cmd,
                     cwd=Path.cwd(),
                     check=True,
                     capture_output=True,
-                    shell=use_shell,
-                    text=True
+                    shell=False,  # Explicitly disable shell to prevent injection
+                    text=True,
+                    encoding='utf-8',
+                    errors='replace'
                 )
 
             print(f" Package '{package}' installed successfully!")
