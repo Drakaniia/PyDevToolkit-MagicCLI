@@ -1008,7 +1008,7 @@ def role_required(role_name):
 
         print("\nConfiguring JWT Settings...")
 
-        # Generate new JWT secret
+        # Generate new JWT secret - use environment variable in production
         secret_key = os.environ.get(
             'JWT_SECRET_KEY') or secrets.token_urlsafe(32)
 
@@ -1036,6 +1036,8 @@ def role_required(role_name):
             json.dump(jwt_config, f, indent=2)
 
         print("JWT Configuration saved!")
+        print(f"\nIMPORTANT: Set JWT_SECRET_KEY environment variable in production!")
+        print(f"Current secret key: {secret_key[:8]}... (first 8 chars only)")
         print(f"New Secret Key: {secret_key}")
         print(" Configuration saved to: jwt_security_config.json")
 
@@ -1055,18 +1057,18 @@ def role_required(role_name):
             "oauth": {
                 "providers": {
                     "google": {
-                        "client_id": "your-google-client-id",
-                        "client_secret": "your-google-client-secret",
+                        "client_id": os.getenv("GOOGLE_CLIENT_ID", "your-google-client-id"),
+                        "client_secret": os.getenv("GOOGLE_CLIENT_SECRET", "your-google-client-secret"),
                         "redirect_uri": "http://localhost:5000/auth/google/callback",
                         "scope": "openid email profile"},
                     "github": {
-                        "client_id": "your-github-client-id",
-                        "client_secret": "your-github-client-secret",
+                        "client_id": os.getenv("GITHUB_CLIENT_ID", "your-github-client-id"),
+                        "client_secret": os.getenv("GITHUB_CLIENT_SECRET", "your-github-client-secret"),
                         "redirect_uri": "http://localhost:5000/auth/github/callback",
                         "scope": "user:email"},
                     "facebook": {
-                        "client_id": "your-facebook-app-id",
-                        "client_secret": "your-facebook-app-secret",
+                        "client_id": os.getenv("FACEBOOK_CLIENT_ID", "your-facebook-app-id"),
+                        "client_secret": os.getenv("FACEBOOK_CLIENT_SECRET", "your-facebook-app-secret"),
                         "redirect_uri": "http://localhost:5000/auth/facebook/callback",
                         "scope": "email public_profile"}}}}
 
@@ -1074,7 +1076,14 @@ def role_required(role_name):
             json.dump(oauth_config, f, indent=2)
 
         print("OAuth Configuration template created!")
-        print(" Please update the client IDs and secrets in oauth_config.json")
+        print(" Please update the client IDs and secrets via environment variables:")
+        print("  - GOOGLE_CLIENT_ID")
+        print("  - GOOGLE_CLIENT_SECRET")
+        print("  - GITHUB_CLIENT_ID")
+        print("  - GITHUB_CLIENT_SECRET")
+        print("  - FACEBOOK_CLIENT_ID")
+        print("  - FACEBOOK_CLIENT_SECRET")
+        print(" Or update them directly in oauth_config.json")
         print(" Configure redirect URIs in your OAuth provider's dashboard")
 
         input("\nPress Enter to continue...")

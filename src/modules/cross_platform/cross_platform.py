@@ -781,7 +781,7 @@ sys.exit()
 </head>
 <body>
     <script type="module">
-        import * as THREE from 'three';
+        from three import *  # TODO: Replace with specific imports from 'three';
 
         // Scene setup
         const scene = new THREE.Scene();

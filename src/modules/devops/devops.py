@@ -863,7 +863,7 @@ services:
     environment:
       POSTGRES_DB: devdb
       POSTGRES_USER: devuser
-      POSTGRES_PASSWORD: devpass
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
     ports:
       - "5432:5432"
     volumes:
@@ -896,7 +896,7 @@ services:
     environment:
       POSTGRES_DB: proddb
       POSTGRES_USER: produser
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - prod_postgres_data:/var/lib/postgresql/data/
     restart: unless-stopped
@@ -914,6 +914,7 @@ volumes:
         print(f"\nTo use environment configs:")
         print(f"  - For development: docker-compose -f docker-compose.dev.yml up")
         print(f"  - For production: docker-compose -f docker-compose.prod.yml up")
+        print(f"\nIMPORTANT: Set POSTGRES_PASSWORD environment variable in production!")
 
         input("\nPress Enter to continue...")
 

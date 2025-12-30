@@ -79,7 +79,8 @@ POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=your_database_name
 POSTGRES_USER=your_username
-POSTGRES_PASSWORD=your_password
+# IMPORTANT: Use environment variable for password in production
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-dev_password}
 
 # For Production - Choose ONE of these options:
 
@@ -88,20 +89,20 @@ POSTGRES_PASSWORD=your_password
 # POSTGRES_PORT=5432
 # POSTGRES_DB=your_prod_db
 # POSTGRES_USER=your_prod_user
-# POSTGRES_PASSWORD=your_secure_password
+# POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 # POSTGRES_SSLMODE=require
 
 # Option B: Google Cloud SQL PostgreSQL
 # POSTGRES_HOST=/cloudsql/your-project:region:instance
 # POSTGRES_DB=your_prod_db
 # POSTGRES_USER=your_prod_user
-# POSTGRES_PASSWORD=your_secure_password
+# POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
 # Option C: Azure Database for PostgreSQL
 # POSTGRES_HOST=your-server.postgres.database.azure.com
 # POSTGRES_DB=your_prod_db
 # POSTGRES_USER=your_prod_user@your-server
-# POSTGRES_PASSWORD=your_secure_password
+# POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
 # Example connection strings:
 # Development: postgresql://user:password@host:port/database
@@ -128,7 +129,8 @@ MYSQL_HOST=localhost
 MYSQL_PORT=3306
 MYSQL_DB=your_database_name
 MYSQL_USER=your_username
-MYSQL_PASSWORD=your_password
+# IMPORTANT: Use environment variable for password in production
+MYSQL_PASSWORD=${MYSQL_PASSWORD:-dev_password}
 
 # Example connection string:
 # mysql+pymysql://user:password@host:port/database
@@ -180,7 +182,8 @@ MONGO_PORT=27017
 MONGO_DB=your_database_name
 
 # For MongoDB Atlas (cloud)
-# MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/database_name
+# IMPORTANT: Use environment variable for password in production
+# MONGO_URI=mongodb+srv://username:${MONGO_PASSWORD}@cluster.mongodb.net/database_name
 
 # Example connection string:
 # mongodb://host:port/database

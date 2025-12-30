@@ -42,16 +42,16 @@ class GitBranch:
             if capture:
                 return e
             raise
-        except FileNotFoundError:
-            print("Git is not installed or not in PATH")
-            raise
+        except (FileNotFoundError, OSError) as e:
+            print(f"Git command error: {e}")
+            raise subprocess.CalledProcessError(1, command, stderr=str(e))
 
     def _is_git_repo(self) -> bool:
         """Check if current directory is a git repository"""
         try:
             result = self._run_command(['git', 'rev-parse', '--is-inside-work-tree'], check=False)
             return result.returncode == 0
-        except Exception:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError):
             return False
 
     def _get_current_branch(self) -> str:
@@ -60,7 +60,7 @@ class GitBranch:
             result = self._run_command(['git', 'branch', '--show-current'], check=False)
             if result.returncode == 0:
                 return result.stdout.strip()
-        except Exception:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError):
             pass
         return ""
 
@@ -70,7 +70,7 @@ class GitBranch:
             result = self._run_command(['git', 'status', '--porcelain'], check=False)
             if result.returncode == 0:
                 return bool(result.stdout.strip())
-        except Exception:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError):
             pass
         return False
 
@@ -217,7 +217,7 @@ class GitBranch:
                                     'message': message
                                 })
 
-        except Exception as e:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError, ValueError) as e:
             self._print_error(f"Error getting branches: {e}")
 
         return branches
@@ -253,7 +253,7 @@ class GitBranch:
                 self._print_error(f"Branch '{branch_name}' already exists.")
                 input("\nPress Enter to continue...")
                 return False
-        except Exception:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError, ValueError):
             pass
 
         self._print_header("CREATE NEW BRANCH")
@@ -549,7 +549,7 @@ class GitBranch:
                 self._print_error(f"Branch '{new_name}' already exists.")
                 input("\nPress Enter to continue...")
                 return False
-        except Exception:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError, ValueError):
             pass
 
         print(f"\nRenaming '{old_name}' to '{new_name}'...")
@@ -569,7 +569,7 @@ class GitBranch:
                         print("\nTo update remote, run:")
                         print(f"  git push origin :{old_name}")
                         print(f"  git push origin {new_name}")
-                except Exception:
+                except (subprocess.CalledProcessError, FileNotFoundError, OSError, ValueError):
                     pass
 
                 input("\nPress Enter to continue...")
@@ -674,7 +674,7 @@ class GitBranch:
                 remote_choice = input(f"\nBranch '{branch_name}' exists on remote. Delete from remote too? (y/n): ").strip().lower()
                 if remote_choice == 'y':
                     delete_remote = True
-        except Exception:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError, ValueError):
             pass
 
         try:
@@ -774,7 +774,7 @@ class GitBranch:
                     if '[' in line:
                         tracking = line.split('[')[1].split(']')[0]
                         print(f"    Tracking: {tracking}")
-            except Exception:
+            except (subprocess.CalledProcessError, FileNotFoundError, OSError, ValueError):
                 pass
 
         # Display remote branches
@@ -888,7 +888,7 @@ class GitBranch:
                             print(f"  Branch is {left} commits behind remote")
                         else:
                             print(f"  Branch is {right} commits ahead of remote")
-                except Exception:
+                except (subprocess.CalledProcessError, FileNotFoundError, OSError, ValueError):
                     pass
 
                 input("\nPress Enter to continue...")
@@ -1262,7 +1262,7 @@ class GitBranch:
                         return True
                 else:
                     print("No upstream tracking configured")
-        except Exception:
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError, ValueError):
             pass
 
         # Get remote branches

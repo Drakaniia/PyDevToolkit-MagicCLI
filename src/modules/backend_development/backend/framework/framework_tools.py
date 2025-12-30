@@ -161,7 +161,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./app.db"
 
     # Security
-    SECRET_KEY: str = "your-secret-key-here"
+    SECRET_KEY: str = os.getenv("SECRET_KEY", os.urandom(32).hex())
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
 
     # CORS
@@ -350,7 +350,7 @@ class CoreSettings(BaseSettings):
     PROJECT_NAME: str = "FastAPI Project"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = "your-secret-key-change-in-production"
+    SECRET_KEY: str = os.getenv("SECRET_KEY", os.urandom(32).hex())
 
     class Config:
         case_sensitive = True
@@ -360,12 +360,13 @@ class CoreSettings(BaseSettings):
         return '''"""
 Security Utilities for FastAPI
 """
+import os
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-SECRET_KEY = "your-secret-key-here"
+SECRET_KEY = os.getenv("SECRET_KEY", os.urandom(32).hex())
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -470,7 +471,8 @@ httpx==0.25.2
 DATABASE_URL=sqlite:///./app.db
 
 # Security
-SECRET_KEY=your-secret-key-here
+# Generate a secure key with: python -c "import secrets; print(secrets.token_hex(32))"
+SECRET_KEY=change-this-to-a-secure-random-key-in-production
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 # CORS
@@ -702,7 +704,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-your-secret-key-here'
+# Use environment variable for SECRET_KEY in production
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-dev-key-only')
 
 DEBUG = True
 
