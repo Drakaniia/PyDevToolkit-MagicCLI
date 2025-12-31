@@ -12,7 +12,7 @@
 # ============================================================
 
 $PackageName = "magic-cli"
-$InstallDir = Join-Path $env:USERPROFILE ".pydevtoolkit-magiccli"
+$InstallDir = Join-Path $env:USERPROFILE ".magic-cli"
 
 # ============================================================
 # HELPER FUNCTIONS

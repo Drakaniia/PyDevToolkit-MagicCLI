@@ -14,7 +14,7 @@ set -e  # Exit on error
 # ============================================================
 
 PACKAGE_NAME="magic-cli"
-INSTALL_DIR="$HOME/.pydevtoolkit-magiccli"
+INSTALL_DIR="$HOME/.magic-cli"
 
 # Colors
 GREEN='\033[0;32m'

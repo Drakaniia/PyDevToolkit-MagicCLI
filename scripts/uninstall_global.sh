@@ -14,7 +14,7 @@ set -e  # Exit on error
 # ============================================================
 
 PACKAGE_NAME="magic-cli"
-INSTALL_DIR="$HOME/.pydevtoolkit-magiccli"
+INSTALL_DIR="$HOME/.magic-cli"
 
 # Colors
 GREEN='\033[0;32m'
@@ -182,10 +182,7 @@ remove_config_files() {
     case "$os" in
         linux|macos)
             local config_dirs=(
-                "$HOME/.config/pydevtoolkit-magiccli"
                 "$HOME/.config/magic-cli"
-                "$HOME/.local/share/pydevtoolkit-magiccli"
-                "$HOME/.cache/pydevtoolkit-magiccli"
             )
             ;;
         windows)
