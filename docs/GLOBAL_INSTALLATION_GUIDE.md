@@ -137,17 +137,75 @@ If the automated installer fails:
 ### Command Not Found After Installation
 If `magic` command is not found:
 
+**For Windows Users (IMPORTANT):**
+1. **RESTART YOUR TERMINAL COMPLETELY** (Required)
+   - Close the current terminal window
+   - Open a new terminal window
+   - Try running `magic` again
+
+2. **If still not found after restart:**
+   ```powershell
+   # Reload environment variables (PowerShell only)
+   $env:Path = [System.Environment]::GetEnvironmentVariable('Path','User')
+   magic
+   ```
+
+3. **Manual PATH setup (if needed):**
+   ```powershell
+   # Add to PATH temporarily
+   $env:Path += ";$env:USERPROFILE\.magic-cli\bin"
+   magic
+   ```
+
+**For Linux/macOS Users:**
 1. **Restart your terminal completely**
 2. **Check if PATH was updated**:
    ```bash
-   echo $PATH | grep pydevtoolkit
-   cat ~/.bashrc | grep pydevtoolkit  # or ~/.zshrc
+   echo $PATH | grep magic-cli
+   cat ~/.bashrc | grep magic-cli  # or ~/.zshrc
    ```
 
 3. **Manual PATH setup**:
    ```bash
-   export PATH="$HOME/.pydevtoolkit-magiccli/bin:$PATH"
+   export PATH="$HOME/.magic-cli/bin:$PATH"
    magic  # Test it
+   ```
+
+### Windows-Specific Issues
+
+When installing on Windows:
+
+1. **Use PowerShell or Git Bash** (not Command Prompt)
+   - PowerShell: Right-click → "Windows PowerShell"
+   - Git Bash: Install from https://git-scm.com/downloads
+
+2. **Run as Administrator if needed**
+   - Right-click PowerShell → "Run as Administrator"
+   - Required for system-wide Python installation
+
+3. **Terminal Restart is MANDATORY**
+   - After installation, you MUST close and reopen the terminal
+   - PATH changes don't take effect until restart
+
+4. **Antivirus may block installation**
+   - Temporarily disable antivirus if installation fails
+   - Add Python and installation directory to exceptions
+
+5. **Manual Python install (if automatic fails)**
+   - Download from https://www.python.org/downloads/
+   - **CRITICAL**: Check "Add Python to PATH" during installation
+   - Restart terminal after installation
+
+6. **Verify installation after restart**
+   ```powershell
+   # Check Python
+   python --version
+
+   # Check PATH
+   $env:Path -split ';' | Select-String "magic-cli"
+
+   # Test magic command
+   magic --verify
    ```
 
 ### Python Installation Issues
@@ -169,6 +227,52 @@ If Python installation fails:
    ```bash
    python3 --version  # Should be 3.8 or higher
    ```
+
+### Restoring Shell Configuration Backups
+
+The installer automatically creates backups of your shell configuration files before modifying them. If you need to restore a previous configuration:
+
+**Using the Restore Script:**
+```bash
+# Download and run the restore script
+curl -fsSL https://raw.githubusercontent.com/Drakaniia/PyDevToolkit-MagicCLI/main/scripts/restore_config.sh | bash
+
+# Or if you have the repository:
+bash scripts/restore_config.sh
+```
+
+**Restore Script Options:**
+```bash
+# Interactive menu (default)
+bash scripts/restore_config.sh
+
+# List all available backups
+bash scripts/restore_config.sh --list
+
+# Restore a backup (interactive)
+bash scripts/restore_config.sh --restore
+
+# Show help
+bash scripts/restore_config.sh --help
+```
+
+**Manual Restoration:**
+If you prefer to restore manually:
+```bash
+# List available backups
+ls -la ~/.bashrc.backup.*  # or ~/.zshrc.backup.*
+
+# Restore a specific backup
+cp ~/.bashrc.backup.YYYYMMDD_HHMMSS ~/.bashrc
+
+# Reload your shell
+source ~/.bashrc
+```
+
+**Backup Locations:**
+- Bash: `~/.bashrc.backup.YYYYMMDD_HHMMSS`
+- Zsh: `~/.zshrc.backup.YYYYMMDD_HHMMSS`
+- Fish: `~/.config/fish/config.fish.backup.YYYYMMDD_HHMMSS`
 
 ### Windows-Specific Issues
 When installing on Windows:
@@ -231,11 +335,11 @@ pip cache purge
 
 # Remove configuration files (if any were created)
 # These are typically stored in:
-# - Linux/macOS: ~/.config/pydevtoolkit-magiccli/
-# - Windows: %APPDATA%\pydevtoolkit-magiccli\
-rm -rf ~/.config/pydevtoolkit-magiccli/  # Linux/macOS
+# - Linux/macOS: ~/.config/magic-cli/
+# - Windows: %APPDATA%\magic-cli\
+rm -rf ~/.config/magic-cli/  # Linux/macOS
 # or
-rmdir /s %APPDATA%\pydevtoolkit-magiccli\  # Windows
+rmdir /s %APPDATA%\magic-cli\  # Windows
 ```
 
 ### Troubleshooting Uninstallation
