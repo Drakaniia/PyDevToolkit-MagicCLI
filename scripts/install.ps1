@@ -17,7 +17,7 @@
 $PackageName = "magic-cli"
 $PackageVersion = "1.0.0"
 $GitHubRepo = "Drakaniia/PyDevToolkit-MagicCLI"
-$InstallDir = Join-Path $env:USERPROFILE ".pydevtoolkit-magiccli"
+$InstallDir = Join-Path $env:USERPROFILE ".magic-cli"
 $MinPythonVersion = "3.8.0"
 
 # ============================================================
@@ -179,7 +179,12 @@ function Install-Python {
     }
     
     Write-Error "Could not install Python automatically"
-    Write-Info "Please install Python manually from: https://www.python.org/downloads/"
+    Write-Info ""
+    Write-Info "Please install Python manually:"
+    Write-Info "  1. Download from: https://www.python.org/downloads/"
+    Write-Info "  2. Run the installer and check 'Add Python to PATH'"
+    Write-Info "  3. Restart this terminal after installation"
+    Write-Info "  4. Verify: python --version"
     return $null
 }
 
@@ -217,7 +222,16 @@ function Install-Package {
     }
     
     Write-Error "Failed to install package from both PyPI and GitHub"
-    Write-Info "Please check your internet connection and try again"
+    Write-Info ""
+    Write-Info "Troubleshooting steps:"
+    Write-Info "  1. Check your internet connection"
+    Write-Info "  2. Verify Python version: $PythonCmd --version"
+    Write-Info "  3. Try installing manually: $PythonCmd -m pip install $PackageName"
+    Write-Info "  4. Check pip is working: $PythonCmd -m pip --version"
+    Write-Info ""
+    Write-Info "If issues persist, try:"
+    Write-Info "  $PythonCmd -m pip install --upgrade pip"
+    Write-Info "  $PythonCmd -m pip install git+https://github.com/$GitHubRepo.git"
     return $false
 }
 

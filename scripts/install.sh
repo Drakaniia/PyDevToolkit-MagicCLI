@@ -19,7 +19,7 @@ set -e  # Exit on error
 PACKAGE_NAME="magic-cli"
 PACKAGE_VERSION="1.0.0"
 GITHUB_REPO="Drakaniia/PyDevToolkit-MagicCLI"
-INSTALL_DIR="$HOME/.pydevtoolkit-magiccli"
+INSTALL_DIR="$HOME/.magic-cli"
 PYTHON_VERSION="3.11.5"
 MIN_PYTHON_VERSION="3.8.0"
 
@@ -552,6 +552,10 @@ setup_python() {
                 *)
                     print_error "Unsupported operating system: $os"
                     print_info "Please install Python $MIN_PYTHON_VERSION+ manually from https://www.python.org/downloads/"
+                    print_info ""
+                    print_info "For Linux: sudo apt install python3 python3-pip"
+                    print_info "For macOS: brew install python3"
+                    print_info "For Windows: Download from https://www.python.org/downloads/"
                     return 1
                     ;;
             esac
@@ -571,6 +575,12 @@ setup_python() {
             print_success "pip installed successfully"
         else
             print_error "Failed to install pip"
+            print_info ""
+            print_info "Troubleshooting steps:"
+            print_info "  1. Try: $PYTHON_CMD -m ensurepip --default-pip"
+            print_info "  2. Download get-pip.py: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py"
+            print_info "  3. Install: $PYTHON_CMD get-pip.py"
+            print_info "  4. Verify: $PYTHON_CMD -m pip --version"
             return 1
         fi
     fi
@@ -607,7 +617,16 @@ install_package() {
             print_success "Package installed from GitHub"
         else
             print_error "Failed to install package from both PyPI and GitHub"
-            print_info "Please check your internet connection and try again"
+            print_info ""
+            print_info "Troubleshooting steps:"
+            print_info "  1. Check your internet connection"
+            print_info "  2. Verify Python version: $PYTHON_CMD --version"
+            print_info "  3. Try installing manually: $PYTHON_CMD -m pip install $PACKAGE_NAME"
+            print_info "  4. Check pip is working: $PYTHON_CMD -m pip --version"
+            print_info ""
+            print_info "If issues persist, try:"
+            print_info "  $PYTHON_CMD -m pip install --upgrade pip"
+            print_info "  $PYTHON_CMD -m pip install git+https://github.com/$GITHUB_REPO.git"
             return 1
         fi
     fi
@@ -680,7 +699,7 @@ EOF
         fi
 
         # Remove existing PATH entries for our install dir
-        sed -i '/export PATH=.*pydevtoolkit-magiccli/d' "$shell_config" 2>/dev/null || true
+        sed -i '/export PATH=.*magic-cli/d' "$shell_config" 2>/dev/null || true
 
         # Add new PATH entry
         echo "" >> "$shell_config"
@@ -719,6 +738,66 @@ verify_installation() {
         print_error "Package import failed"
         return 1
     fi
+
+    return 0
+}
+
+# ============================================================
+# BACKUP RESTORATION
+# ============================================================
+
+restore_shell_config_backup() {
+    print_section "Shell Config Backup Restoration"
+
+    local shell_config=$(get_shell_config)
+    local shell_type=$(detect_shell)
+
+    print_info "Shell config: $shell_config"
+
+    # Find available backups
+    local backups=($(ls -t "${shell_config}.backup."* 2>/dev/null || true))
+
+    if [ ${#backups[@]} -eq 0 ]; then
+        print_warning "No backups found for $shell_config"
+        return 1
+    fi
+
+    print_info "Found ${#backups[@]} backup(s):"
+    echo ""
+    for i in "${!backups[@]}"; do
+        local backup_file="${backups[$i]}"
+        local backup_date=$(echo "$backup_file" | grep -oP '\d{8}_\d{6}')
+        echo "  $((i+1)). $backup_file"
+        echo "     Date: $backup_date"
+    done
+
+    echo ""
+    echo -e "${YELLOW}Which backup would you like to restore? [1-${#backups[@]}] (or 'c' to cancel):${NC} "
+    read -r choice
+
+    if [ "$choice" = "c" ] || [ "$choice" = "C" ]; then
+        print_info "Restoration cancelled"
+        return 0
+    fi
+
+    if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -gt ${#backups[@]} ]; then
+        print_error "Invalid choice"
+        return 1
+    fi
+
+    local selected_backup="${backups[$((choice-1))]}"
+
+    # Create a backup of current config before restoring
+    if [ -f "$shell_config" ]; then
+        cp "$shell_config" "${shell_config}.before_restore.$(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
+        print_info "Current config backed up"
+    fi
+
+    # Restore selected backup
+    cp "$selected_backup" "$shell_config"
+
+    print_success "Restored backup: $selected_backup"
+    print_info "Please restart your terminal or run: source $shell_config"
 
     return 0
 }
