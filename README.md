@@ -2,7 +2,7 @@
 
 **One command to rule them all** - A powerful, secure developer toolkit that puts Git operations, project management, and web development automation at your fingertips.
 
-![PyPI](https://img.shields.io/pypi/v/pydevtoolkit-magiccli)
+![PyPI](https://img.shields.io/pypi/v/magic-cli)
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)
@@ -48,7 +48,7 @@ If you already have Python installed:
 pip install git+https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
 
 # Or from PyPI (when published)
-pip install pydevtoolkit-magiccli
+pip install magic-cli
 ```
 
 #### Option 3: Development Installation
@@ -88,7 +88,7 @@ If you installed manually via pip:
 
 ```bash
 # Remove the package
-pip uninstall pydevtoolkit-magiccli
+pip uninstall magic-cli
 
 # Remove installation directory
 rm -rf ~/.pydevtoolkit-magiccli
