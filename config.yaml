@@ -1,4 +1,5 @@
 operational:
+  auto_pull_on_branch_switch: false
   backup_count: 5
   enable_color_output: true
   enable_debug: false

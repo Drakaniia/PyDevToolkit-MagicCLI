@@ -45,6 +45,7 @@ class OperationalConfig:
     backup_count: int = 5
     enable_color_output: bool = True
     enable_loading_animations: bool = True
+    auto_pull_on_branch_switch: bool = False
 
 
 class ConfigManager:

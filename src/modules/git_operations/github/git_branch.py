@@ -8,6 +8,7 @@ from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 
 from core.utils.git_client import get_git_client
+from core.utils.config import get_operational_config
 from core.loading import LoadingSpinner
 
 try:
@@ -391,6 +392,10 @@ class GitBranch:
 
             if result.returncode == 0:
                 self._print_success(f"Switched to branch '{branch_name}'")
+                
+                # Auto-pull if configured
+                self._auto_pull_branch(branch_name)
+                
                 input("\nPress Enter to continue...")
                 return True
             else:
@@ -404,6 +409,50 @@ class GitBranch:
             self._print_error(f"Error switching branch: {e}")
             input("\nPress Enter to continue...")
             return False
+
+    def _auto_pull_branch(self, branch_name: str) -> bool:
+        """
+        Automatically pull from remote after switching branch if configured
+
+        Args:
+            branch_name: Name of the branch to pull
+
+        Returns:
+            True if successful or disabled, False otherwise
+        """
+        config = get_operational_config()
+        
+        # Check if auto-pull is enabled
+        if not config.auto_pull_on_branch_switch:
+            return True
+        
+        # Check if branch has remote tracking
+        try:
+            result = self._run_command(['git', 'branch', '-vv', '--list', branch_name], check=False)
+            if result.returncode == 0 and result.stdout:
+                # Check if branch has tracking info (indicated by [origin/branch_name])
+                if '[' not in result.stdout:
+                    # No remote tracking, skip pull
+                    return True
+        except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+            return True
+        
+        # Auto-pull from remote
+        self._print_info(f"Auto-pulling branch '{branch_name}' from remote...")
+        
+        try:
+            with LoadingSpinner("Pulling", style='dots'):
+                result = self._run_command(['git', 'pull', 'origin', branch_name], check=False)
+            
+            if result.returncode == 0:
+                self._print_success(f"Branch '{branch_name}' synced with remote")
+                return True
+            else:
+                self._print_warning(f"Auto-pull failed: {result.stderr}")
+                return True  # Don't fail the switch operation if pull fails
+        except Exception as e:
+            self._print_warning(f"Auto-pull error: {e}")
+            return True  # Don't fail the switch operation if pull fails
 
     def _select_branch_interactive(self) -> bool:
         """Interactive branch selection with numbered list"""
@@ -474,6 +523,10 @@ class GitBranch:
                 result = self._run_command(['git', 'checkout', '-b', local_name, selected_branch['name']], check=True)
                 if result.returncode == 0:
                     self._print_success(f"Switched to new branch '{local_name}' tracking '{selected_branch['name']}'")
+                    
+                    # Auto-pull if configured
+                    self._auto_pull_branch(local_name)
+                    
                     input("\nPress Enter to continue...")
                     return True
                 else:
@@ -485,6 +538,10 @@ class GitBranch:
                 result = self._run_command(['git', 'checkout', selected_branch['name']], check=True)
                 if result.returncode == 0:
                     self._print_success(f"Switched to branch '{selected_branch['name']}'")
+                    
+                    # Auto-pull if configured
+                    self._auto_pull_branch(selected_branch['name'])
+                    
                     input("\nPress Enter to continue...")
                     return True
                 else:
