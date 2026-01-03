@@ -200,7 +200,6 @@ class GitPushRetry:
                 strategy, remote, branch)
 
             if success:
-                self._show_push_summary()
                 return True
 
             last_error = error
@@ -1690,10 +1689,7 @@ class GitPush:
         success = self.push_retry.push_with_retry(
             commit_message=commit_message)
 
-        if success:
-            print(" Push completed successfully!")
-            print(" Changelog has been automatically updated!")
-        else:
+        if not success:
             print("  Push failed after all retry attempts")
 
         input("\nPress Enter to continue...")
