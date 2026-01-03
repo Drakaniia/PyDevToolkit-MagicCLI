@@ -4,7 +4,7 @@ Enhanced Git push with comprehensive retry strategies and automatic changelog ge
 UPDATED: Automatically generates changelog after successful push
 """
 from pathlib import Path
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 import sys
 import time
 import subprocess
@@ -123,7 +123,8 @@ class GitPushRetry:
         self,
         commit_message: Optional[str] = None,
         remote: str = 'origin',
-        branch: Optional[str] = None
+        branch: Optional[str] = None,
+        skip_staging: bool = False
     ) -> bool:
         """
         Execute push with comprehensive retry strategies and auto-changelog
@@ -132,6 +133,7 @@ class GitPushRetry:
             commit_message: Commit message (if staging changes)
             remote: Remote name (default: origin)
             branch: Branch name (default: current branch)
+            skip_staging: If True, skip staging (assumes already staged)
 
         Returns:
             True if push succeeded, False otherwise
@@ -145,9 +147,14 @@ class GitPushRetry:
                 return False
 
         # Stage and commit if there are changes
-        if commit_message and self._has_changes():
-            if not self._stage_and_commit(commit_message):
-                return False
+        if commit_message:
+            if skip_staging:
+                # Only commit, don't stage
+                if not self._commit_only(commit_message):
+                    return False
+            elif self._has_changes():
+                if not self._stage_and_commit(commit_message):
+                    return False
 
         # Execute push with progressive strategies
         push_success = self._execute_push_with_strategies(remote, branch)
@@ -160,6 +167,22 @@ class GitPushRetry:
                 self._auto_generate_changelog()
 
         return push_success
+
+    def _commit_only(self, message: str) -> bool:
+        """Commit already-staged changes without staging"""
+        try:
+            # Check if there are staged changes
+            result = self.git._run_command(
+                ['git', 'diff', '--cached', '--quiet'], check=False)
+            if result.returncode == 0:
+                print("  No staged changes to commit")
+                return False
+
+            self.git.commit(message)
+            return True
+        except Exception as e:
+            print(f" Failed to commit: {e}")
+            return False
 
     def _auto_generate_changelog(self):
         """Automatically generate changelog for the latest commit"""
@@ -1678,21 +1701,93 @@ class GitPush:
             input("\nPress Enter to continue...")
             return
 
-        # Get commit message
+        # Get commit message(s) - may return multiple if logical changes detected
         commit_message = self._get_commit_message()
         if not commit_message:
             print("\n Commit message cannot be empty")
             input("\nPress Enter to continue...")
             return
 
-        # Execute push with retry (changelog will be auto-generated)
-        success = self.push_retry.push_with_retry(
-            commit_message=commit_message)
+        # Check if we have pending commits (multiple logical changes)
+        if hasattr(self, '_pending_commits') and self._pending_commits:
+            # Handle multiple sequential commits
+            self._handle_multiple_sequential_commits()
+        else:
+            # Single commit
+            success = self.push_retry.push_with_retry(
+                commit_message=commit_message)
 
-        if not success:
-            print("  Push failed after all retry attempts")
+            if not success:
+                print("  Push failed after all retry attempts")
 
         input("\nPress Enter to continue...")
+
+    def _handle_multiple_sequential_commits(self):
+        """Handle committing multiple logical changes sequentially"""
+        if not hasattr(self, '_pending_commits') or not self._pending_commits:
+            return
+        
+        total_commits = len(self._pending_commits)
+        committed_count = 0
+        
+        print(f"\n{'='*70}")
+        print(f"  COMMITTING {total_commits} LOGICAL CHANGES SEQUENTIALLY")
+        print(f"{'='*70}\n")
+        
+        # Reset index to start from beginning
+        self._current_commit_index = 0
+        
+        while self._current_commit_index < total_commits:
+            commit_data = self._pending_commits[self._current_commit_index]
+            commit_message = commit_data["message"]
+            files = commit_data["files"]
+            
+            print(f"\n📦 Commit {self._current_commit_index + 1}/{total_commits}")
+            print(f"   Message: {commit_message}")
+            print(f"   Files: {len(files)} file(s)")
+            
+            # Stage only the files for this commit
+            try:
+                print(f"\n   Staging {len(files)} file(s) for this commit...")
+                for file_path in files:
+                    try:
+                        self.git._run_command(['git', 'add', file_path], check=False)
+                    except Exception:
+                        pass
+                
+                # Commit this group
+                print(f"   Committing...")
+                success = self.push_retry.push_with_retry(
+                    commit_message=commit_message,
+                    skip_staging=True  # Already staged
+                )
+                
+                if success:
+                    committed_count += 1
+                    print(f"   ✅ Commit {self._current_commit_index + 1} successful!")
+                else:
+                    print(f"   ❌ Commit {self._current_commit_index + 1} failed!")
+                    response = input("\n   Continue with next commit? (y/n): ").strip().lower()
+                    if response not in ['y', 'yes']:
+                        break
+                
+            except Exception as e:
+                print(f"   ❌ Error committing: {e}")
+                response = input("\n   Continue with next commit? (y/n): ").strip().lower()
+                if response not in ['y', 'yes']:
+                    break
+            
+            self._current_commit_index += 1
+        
+        print(f"\n{'='*70}")
+        print(f"  SUMMARY: {committed_count}/{total_commits} commits completed")
+        print(f"{'='*70}\n")
+        
+        # Clean up
+        if hasattr(self, '_pending_commits'):
+            del self._pending_commits
+        if hasattr(self, '_current_commit_index'):
+            del self._current_commit_index
 
     def _has_changes(self) -> bool:
         """Check if there are any changes including untracked files with fresh Git client"""
@@ -1865,8 +1960,313 @@ class GitPush:
         return True
 
     def _get_commit_message(self) -> Optional[str]:
-        """Get commit message from user"""
-        # Get user input without pre-filling
+        """Get commit message using AI generation with intelligent change analysis"""
+        try:
+            # Try AI generation first
+            from .grok_commit_generator import GroqCommitGenerator
+            
+            print("\n🤖 Intelligent commit message generation with AI (Groq)...")
+            print("   Analyzing code changes for logical grouping...\n")
+            
+            # Initialize generator
+            generator = GroqCommitGenerator()
+            
+            # Comprehensive analysis with loading animation
+            changes_info = None
+            with LoadingSpinner("Analyzing git changes and code diffs...", style="dots"):
+                changes_info = generator.analyze_git_changes(self.git)
+            
+            # Detect logical change groups
+            print("\n🔍 Detecting logical change groups...")
+            change_groups = generator.detect_logical_change_groups(changes_info)
+            
+            if len(change_groups) > 1:
+                print(f"\n📦 Detected {len(change_groups)} separate logical change groups:")
+                for idx, group in enumerate(change_groups, 1):
+                    print(f"   Group {idx}: {len(group['files'])} file(s) - {group.get('type', 'unknown')} ({group.get('reason', '')})")
+                
+                print("\n⚠️  Multiple logical changes detected!")
+                print("   Each group should be committed separately for proper commit hygiene.")
+                print("\n Options:")
+                print("  1. Generate separate commit messages for each group (recommended)")
+                print("  2. Generate single commit message for all changes")
+                print("  3. Manual input")
+                
+                choice = input("\n Your choice (1/2/3): ").strip()
+                
+                if choice == "1":
+                    return self._handle_multiple_commits(generator, change_groups, changes_info)
+                elif choice == "3":
+                    # Fall through to manual input
+                    pass
+                else:
+                    # Generate single message for all
+                    change_groups = [{
+                        "files": (
+                            changes_info.get("added_files", []) +
+                            changes_info.get("modified_files", []) +
+                            changes_info.get("deleted_files", [])
+                        ),
+                        "code_diffs": changes_info.get("code_diffs", {}),
+                        "type": "chore",
+                        "reason": "single_commit_requested"
+                    }]
+            
+            # Generate single commit message
+            return self._generate_single_commit_message(generator, change_groups[0] if change_groups else None, changes_info)
+                
+        except (ImportError, ValueError, Exception) as e:
+            # Fallback to manual input if AI generation fails
+            print(f"\n⚠️  AI commit message generation unavailable: {e}")
+            print(" Falling back to manual input...\n")
+        
+        # Manual input fallback
+        return self._get_manual_commit_message()
+
+    def _handle_multiple_commits(
+        self,
+        generator: 'GroqCommitGenerator',
+        change_groups: List[Dict],
+        changes_info: Dict
+    ) -> Optional[str]:
+        """Handle multiple logical commits"""
+        print(f"\n🔄 Generating commit messages for {len(change_groups)} change groups...\n")
+        
+        # Get git config
+        username = "Drakaniia"
+        email = "floresaybaez574@gmail.com"
+        
+        try:
+            user_result = self.git._run_command(['git', 'config', 'user.name'], check=False)
+            if user_result.returncode == 0 and user_result.stdout.strip():
+                username = user_result.stdout.strip()
+        except Exception:
+            pass
+        
+        try:
+            email_result = self.git._run_command(['git', 'config', 'user.email'], check=False)
+            if email_result.returncode == 0 and email_result.stdout.strip():
+                email = email_result.stdout.strip()
+        except Exception:
+            pass
+        
+        # Generate messages for all groups
+        preview_messages = []
+        
+        def preview_callback(message: str):
+            preview_messages.append(message)
+            sys.stdout.write(f"\r🔄 {message}")
+            sys.stdout.flush()
+        
+        commit_messages = generator.generate_multiple_commit_messages(
+            change_groups,
+            username=username,
+            email=email,
+            preview_callback=preview_callback
+        )
+        
+        sys.stdout.write("\r" + " " * 80 + "\r")
+        sys.stdout.flush()
+        
+        if not commit_messages:
+            print("⚠️  Failed to generate commit messages. Falling back to manual input.")
+            return self._get_manual_commit_message()
+        
+        # Display all generated messages
+        print("\n✅ Generated commit messages:\n")
+        for idx, commit_data in enumerate(commit_messages, 1):
+            message = commit_data["message"]
+            files = commit_data["files"]
+            validation = commit_data.get("validation", {})
+            
+            print(f"Commit {idx}/{len(commit_messages)}: {message}")
+            print(f"   Files ({len(files)}): {', '.join(files[:3])}{'...' if len(files) > 3 else ''}")
+            if validation.get("warnings"):
+                print(f"   ⚠️  Warnings: {', '.join(validation['warnings'])}")
+            print()
+        
+        print("⚠️  IMPORTANT: These will be committed separately.")
+        print("   You'll be prompted to review and commit each one individually.\n")
+        
+        response = input("Proceed with separate commits? (y/n): ").strip().lower()
+        if response not in ['y', 'yes']:
+            return None
+        
+        # Store for sequential committing
+        self._pending_commits = commit_messages
+        self._current_commit_index = 0
+        
+        # Return first commit message
+        return self._get_next_commit_message()
+    
+    def _get_next_commit_message(self) -> Optional[str]:
+        """Get the next commit message from pending commits"""
+        if not hasattr(self, '_pending_commits') or not self._pending_commits:
+            return None
+        
+        if not hasattr(self, '_current_commit_index'):
+            self._current_commit_index = 0
+        
+        if self._current_commit_index >= len(self._pending_commits):
+            return None
+        
+        commit_data = self._pending_commits[self._current_commit_index]
+        self._current_commit_index += 1
+        
+        message = commit_data["message"]
+        files = commit_data["files"]
+        
+        print(f"\n📝 Commit {self._current_commit_index}/{len(self._pending_commits)}: {message}")
+        print(f"   Files: {len(files)} file(s)")
+        
+        # Ask for confirmation
+        print("\n Options:")
+        print("  1. Use this message (press Enter)")
+        print("  2. Edit message (type 'e' or 'edit')")
+        print("  3. Skip this commit (type 's' or 'skip')")
+        
+        choice = input("\n Your choice: ").strip().lower()
+        
+        if choice in ['s', 'skip']:
+            return self._get_next_commit_message()  # Get next one
+        elif choice in ['e', 'edit']:
+            edited = input(f" Edit message (current: {message}): ").strip()
+            if edited:
+                return edited
+            return self._get_next_commit_message()
+        
+        return message
+
+    def _generate_single_commit_message(
+        self,
+        generator: 'GroqCommitGenerator',
+        change_group: Optional[Dict],
+        changes_info: Dict
+    ) -> Optional[str]:
+        """Generate a single commit message"""
+        commit_message = None
+        attempt = 1
+        max_attempts = 3
+        
+        # Get git config
+        username = "Drakaniia"
+        email = "floresaybaez574@gmail.com"
+        
+        try:
+            user_result = self.git._run_command(['git', 'config', 'user.name'], check=False)
+            if user_result.returncode == 0 and user_result.stdout.strip():
+                username = user_result.stdout.strip()
+        except Exception:
+            pass
+        
+        try:
+            email_result = self.git._run_command(['git', 'config', 'user.email'], check=False)
+            if email_result.returncode == 0 and email_result.stdout.strip():
+                email = email_result.stdout.strip()
+        except Exception:
+            pass
+        
+        def preview_callback(message: str):
+            sys.stdout.write(f"\r🔄 {message}")
+            sys.stdout.flush()
+        
+        while attempt <= max_attempts and not commit_message:
+            try:
+                print(f"\n🔄 Attempt {attempt}/{max_attempts}: Generating commit message...")
+                
+                if change_group:
+                    # Use group-specific generation
+                    group_changes = {
+                        "files": change_group["files"],
+                        "code_diffs": change_group.get("code_diffs", {}),
+                        "type_hint": change_group.get("type", "chore"),
+                        "reason": change_group.get("reason", "")
+                    }
+                    commit_message = generator.generate_commit_message(
+                        group_changes,
+                        username=username,
+                        email=email,
+                        preview_callback=preview_callback,
+                        is_group=True
+                    )
+                else:
+                    commit_message = generator.generate_commit_message(
+                        changes_info,
+                        username=username,
+                        email=email,
+                        preview_callback=preview_callback
+                    )
+                
+                if commit_message:
+                    sys.stdout.write("\r" + " " * 80 + "\r")
+                    sys.stdout.flush()
+                    
+                    # Validate
+                    validation = generator.validate_commit_message(commit_message)
+                    print(f"✅ Generated commit message ({attempt}): {commit_message}")
+                    
+                    if validation.get("warnings"):
+                        print(f"   ⚠️  Warnings: {', '.join(validation['warnings'])}")
+                    if validation.get("errors"):
+                        print(f"   ❌ Errors: {', '.join(validation['errors'])}")
+                    
+                    # Ask user if they want to use it or edit it
+                    print("\n Options:")
+                    print("  1. Use this message (press Enter)")
+                    print("  2. Edit message (type 'e' or 'edit')")
+                    print("  3. Enter custom message (type 'c' or 'custom')")
+                    print("  4. Generate another (type 'r' or 'retry')")
+                    
+                    choice = input("\n Your choice: ").strip().lower()
+                    
+                    if choice in ['e', 'edit']:
+                        edited = input(f" Edit message (current: {commit_message}): ").strip()
+                        if edited:
+                            commit_message = edited
+                    elif choice in ['c', 'custom']:
+                        custom = input(" Enter custom commit message: ").strip()
+                        if custom:
+                            commit_message = custom
+                        else:
+                            commit_message = None
+                    elif choice in ['r', 'retry']:
+                        commit_message = None
+                        attempt += 1
+                        if attempt > max_attempts:
+                            print("\n⚠️  Max attempts reached.")
+                            break
+                        continue
+                    
+            except Exception as e:
+                attempt += 1
+                if attempt > max_attempts:
+                    sys.stdout.write("\r" + " " * 80 + "\r")
+                    sys.stdout.flush()
+                    print(f"\n⚠️  Failed to generate commit message: {e}")
+                    break
+                print(f"\n⚠️  Attempt {attempt-1} failed: {e}")
+                print(f" Retrying... (attempt {attempt}/{max_attempts})")
+                time.sleep(1)
+        
+        return commit_message
+
+    def _get_manual_commit_message(self) -> Optional[str]:
+        """Get commit message from manual user input"""
+        message = input(" Commit message: ").strip()
+
+        if not message:
+            return None
+
+        if len(message) < 3:
+            print("\n  Commit message too short (minimum 3 characters)")
+            retry = input("Try again? (y/n): ").strip().lower()
+            if retry == 'y':
+                return self._get_manual_commit_message()
+            return None
+
+        return message
+        
+        # Manual input fallback
         message = input(" Commit message: ").strip()
 
         if not message:
