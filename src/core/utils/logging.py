@@ -83,7 +83,7 @@ class SecurityAuditLogger:
         """Log command execution for audit purposes"""
         status = "SUCCESS" if success else "FAILED"
         audit_message = f"COMMAND_EXECUTION: {status} - Command: {command}, Input: {user_input}"
-        self.logger.info(audit_message)
+        self.logger.debug(audit_message)
 
     def audit_input_validation_failure(
             self,
