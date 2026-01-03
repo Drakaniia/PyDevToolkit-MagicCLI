@@ -12,6 +12,10 @@ import requests
 from typing import Optional, Dict, List, Callable, Tuple
 from pathlib import Path
 from collections import defaultdict
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class GroqCommitGenerator:
@@ -20,13 +24,10 @@ class GroqCommitGenerator:
     def __init__(self, api_key: Optional[str] = None):
         """Initialize Groq commit generator.
 
-        The generator can operate in two modes:
-        - **Online mode** (default): uses the Groq API when ``GROQ_API_KEY`` is set.
-        - **Offline mode**: if no API key is available, falls back to deterministic
-          conventional commit messages based purely on local git analysis.
+        Requires GROQ_API_KEY environment variable or api_key parameter.
+        AI generation is mandatory - no offline fallback available.
         """
-        # API key is optional – offline mode still enables strict hygiene and
-        # automatic commit grouping even when the Groq service is unavailable.
+        # API key is required for AI commit message generation
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
         self.online = bool(self.api_key)
 
@@ -436,18 +437,15 @@ class GroqCommitGenerator:
     def _classify_change_type(self, change: Dict) -> str:
         """Infer a Conventional Commit type from a single file change.
 
-        This is intentionally opinionated and errs on the side of splitting
-        changes into more, smaller commits rather than fewer, larger ones.
+        Simplified classification focused on the user's specific requirements.
         """
         file_path = change.get("file", "")
         file_lower = file_path.lower()
 
-        # Highest-priority / most specific categories first.
+        # Check for specific commit types in order of priority
         if change.get("test_changes") or "test" in file_lower or "spec" in file_lower:
             return "test"
-        if change.get("doc_changes") or any(
-            kw in file_lower for kw in ["readme", "doc", ".md"]
-        ):
+        if change.get("doc_changes") or any(kw in file_lower for kw in ["readme", "doc", ".md"]):
             return "docs"
         if change.get("dependency_changes"):
             return "deps"
@@ -462,21 +460,21 @@ class GroqCommitGenerator:
         if change.get("removal_only"):
             return "removal"
 
-        # Bug fixes inferred from filename hints.
+        # Bug fixes
         if any(kw in file_lower for kw in ["fix", "bug", "error", "hotfix"]):
             return "fix"
 
-        # Feature vs refactor – based on whether new functions/classes appear.
+        # Features vs refactor
         if change.get("functions_changed") or change.get("classes_changed"):
             if any(kw in file_lower for kw in ["feature", "feat", "add", "new", "implement"]):
                 return "feat"
             return "refactor"
 
-        # Config and general maintenance default to chore.
+        # Config and maintenance
         if change.get("config_changes"):
             return "chore"
 
-        # Fallback for improvements that don't clearly match another bucket.
+        # Default fallback
         return "improvement"
 
     def generate_multiple_commit_messages(
@@ -634,106 +632,6 @@ class GroqCommitGenerator:
 
         return validation
 
-    def _generate_offline_commit_message(self, changes_info: Dict[str, any]) -> str:
-        """Generate a deterministic Conventional Commit message without the API.
-
-        This is used when the Groq service is unavailable or disabled but we
-        still want strictly formatted, single-purpose commit messages.
-        """
-        # Determine affected files
-        files: List[str] = list(changes_info.get("files", []))
-        if not files:
-            files = (
-                changes_info.get("added_files", [])
-                + changes_info.get("modified_files", [])
-                + changes_info.get("deleted_files", [])
-            )
-        files = [f for f in files if f]
-
-        primary_file = files[0] if files else ""
-        try:
-            scope = Path(primary_file).name or "project"
-        except Exception:
-            scope = primary_file or "project"
-
-        # Prefer explicit type hints from the caller/grouping
-        type_hint = (changes_info.get("type_hint") or changes_info.get("type") or "chore").lower()
-
-        # If we have per-file analysis, refine the type based on the first file.
-        file_changes = changes_info.get("file_changes") or []
-        if file_changes:
-            inferred_type = self._classify_change_type(file_changes[0])
-            if inferred_type:
-                type_hint = inferred_type
-
-        # Normalise into the supported Conventional Commit types
-        valid_types = [
-            "feat",
-            "fix",
-            "refactor",
-            "perf",
-            "test",
-            "build",
-            "docs",
-            "style",
-            "chore",
-            "revert",
-            "security",
-            "deps",
-            "ci",
-            "improvement",
-            "removal",
-        ]
-        alias_map = {
-            "documentation": "docs",
-            "doc": "docs",
-            "dependency": "deps",
-            "dependencies": "deps",
-            "config": "chore",
-            "configuration": "chore",
-            "tests": "test",
-        }
-
-        commit_type = alias_map.get(type_hint, type_hint)
-        if commit_type not in valid_types:
-            commit_type = "chore"
-
-        # Build a concise, specific description
-        file_count = len(files)
-        if file_count > 1:
-            base_desc = f"update {file_count} files"
-        else:
-            if commit_type == "feat":
-                base_desc = f"add or update {scope}"
-            elif commit_type == "fix":
-                base_desc = f"fix issues in {scope}"
-            elif commit_type == "docs":
-                base_desc = f"update documentation for {scope}"
-            elif commit_type == "test":
-                base_desc = f"update tests for {scope}"
-            elif commit_type == "deps":
-                base_desc = f"update dependencies in {scope or 'project'}"
-            elif commit_type == "refactor":
-                base_desc = f"refactor {scope}"
-            elif commit_type == "perf":
-                base_desc = f"improve performance in {scope}"
-            elif commit_type == "style":
-                base_desc = f"apply style updates to {scope}"
-            elif commit_type == "build":
-                base_desc = f"update build configuration ({scope})"
-            elif commit_type == "security":
-                base_desc = f"harden security in {scope}"
-            elif commit_type == "removal":
-                base_desc = f"remove deprecated code from {scope}"
-            else:
-                base_desc = f"update {scope}"
-
-        # Ensure description is not excessively long
-        if len(base_desc) > 60:
-            base_desc = base_desc[:57] + "..."
-
-        return f"{commit_type}: {base_desc}"
-
     def generate_commit_message(
         self,
         changes_info: Dict[str, any],
@@ -742,18 +640,7 @@ class GroqCommitGenerator:
         preview_callback: Optional[Callable[[str], None]] = None,
         is_group: bool = False,
     ) -> Optional[str]:
-        """Generate a commit message, using Groq when available.
-
-        In offline mode (no API key), falls back to a deterministic
-        Conventional Commit message built from the analysed changes.
-        """
-        # Offline mode – no API key, or API intentionally disabled.
-        if not self.online:
-            message = self._generate_offline_commit_message(changes_info)
-            if preview_callback:
-                preview_callback("Generated offline conventional commit message")
-            return message
-
+        """Generate a commit message using AI only - mandatory, no fallback"""
         # Build the prompt for the Groq API
         prompt = self._build_prompt(changes_info, username, email, is_group=is_group)
 
@@ -853,20 +740,20 @@ class GroqCommitGenerator:
                     and model_name != models_to_try[-1]
                 ):
                     continue  # Try next model
-                # Fall back to offline message on hard failure
-                return self._generate_offline_commit_message(changes_info)
+                # Hard failure - return None
+                return None
             except requests.exceptions.RequestException:
-                # Network or timeout issue – try next model, or fall back.
+                # Network or timeout issue – try next model
                 if model_name == models_to_try[-1]:
-                    return self._generate_offline_commit_message(changes_info)
+                    return None
                 continue
             except (KeyError, IndexError):
                 if model_name == models_to_try[-1]:
-                    return self._generate_offline_commit_message(changes_info)
+                    return None
                 continue
 
-        # If we get here, all models failed – final offline fallback
-        return self._generate_offline_commit_message(changes_info)
+        # If we get here, all models failed
+        return None
 
     def _build_prompt(
         self,
@@ -876,7 +763,7 @@ class GroqCommitGenerator:
         is_group: bool = False
     ) -> str:
         """
-        Build comprehensive prompt for Groq API with detailed code analysis
+        Build simple, direct prompt for Groq API focused on strict commit hygiene
 
         Args:
             changes_info: Dictionary with git changes analysis
@@ -887,104 +774,43 @@ class GroqCommitGenerator:
         Returns:
             Formatted prompt string
         """
-        # Get files - either from group or from changes_info
-        if is_group:
-            all_files = changes_info.get("files", [])
-            code_diffs = changes_info.get("code_diffs", {})
-            type_hint = changes_info.get("type_hint", "chore")
-            reason = changes_info.get("reason", "")
-        else:
-            all_files = (
-                changes_info.get("added_files", []) +
-                changes_info.get("modified_files", []) +
-                changes_info.get("deleted_files", []) +
-                changes_info.get("untracked_files", [])
-            )
-            code_diffs = changes_info.get("code_diffs", {})
-            type_hint = None
-            reason = None
+        # Get files
+        all_files = (
+            changes_info.get("files", []) if is_group
+            else changes_info.get("added_files", []) +
+            changes_info.get("modified_files", []) +
+            changes_info.get("deleted_files", []) +
+            changes_info.get("untracked_files", [])
+        )
 
-        file_list = "\n".join([f"  - {f}" for f in all_files[:30]])  # Increased limit
-        if len(all_files) > 30:
-            file_list += f"\n  ... and {len(all_files) - 30} more files"
+        file_list = "\n".join([f"  - {f}" for f in all_files[:20]])
+        if len(all_files) > 20:
+            file_list += f"\n  ... and {len(all_files) - 20} more files"
 
-        # Build detailed code diff summary (truncated for token limits)
+        # Build simple code diff summary
         code_diff_summary = ""
+        code_diffs = changes_info.get("code_diffs", {})
         if code_diffs:
-            code_diff_summary = "\n\nDetailed code changes:\n"
-            for file_path, diff_content in list(code_diffs.items())[:5]:  # Limit to 5 files
-                # Truncate very long diffs
-                diff_preview = diff_content[:2000] if len(diff_content) > 2000 else diff_content
+            code_diff_summary = "\n\nCode changes:\n"
+            for file_path, diff_content in list(code_diffs.items())[:3]:
+                diff_preview = diff_content[:1000] if len(diff_content) > 1000 else diff_content
                 code_diff_summary += f"\n--- {file_path} ---\n{diff_preview}\n"
-                if len(diff_content) > 2000:
-                    code_diff_summary += f"\n... (truncated, {len(diff_content) - 2000} more characters)\n"
-            if len(code_diffs) > 5:
-                code_diff_summary += f"\n... and {len(code_diffs) - 5} more files with changes\n"
+            if len(code_diffs) > 3:
+                code_diff_summary += f"\n... and {len(code_diffs) - 3} more files\n"
 
-        diff_summary = changes_info.get("diff_summary", "No diff summary available")
         change_summary = changes_info.get("change_summary", "No changes detected")
-        file_types = ", ".join(changes_info.get("file_types", [])[:10])
-        
-        # Get file change details if available
-        file_changes_detail = ""
-        if changes_info.get("file_changes"):
-            file_changes_detail = "\n\nFile change analysis:\n"
-            for change in changes_info.get("file_changes", [])[:10]:
-                detail_parts = []
-                if change.get("functions_changed"):
-                    detail_parts.append(f"functions: {', '.join(change['functions_changed'][:3])}")
-                if change.get("classes_changed"):
-                    detail_parts.append(f"classes: {', '.join(change['classes_changed'][:3])}")
-                if change.get("lines_added"):
-                    detail_parts.append(f"+{change['lines_added']} lines")
-                if change.get("lines_removed"):
-                    detail_parts.append(f"-{change['lines_removed']} lines")
-                if detail_parts:
-                    file_changes_detail += f"  {change['file']}: {', '.join(detail_parts)}\n"
 
-        # Build comprehensive prompt
-        prompt = f"""You are an expert Git commit message generator following strict GitHub commit hygiene and version control best practices.
-
-CRITICAL RULES:
-1. Each commit MUST represent exactly ONE clear, logical, and cohesive change
-2. NEVER use "and", "also", "plus", or similar conjunctions to combine multiple changes
-3. If multiple unrelated changes are detected, they MUST be split into separate commits
-4. Commit types: feat (new feature), fix (bug fix), refactor (code restructuring), perf (performance), test (tests), build (build system), docs (documentation), style (formatting), chore (maintenance), revert (revert commit), security (security fix), deps (dependencies), ci (CI/CD), improvement (general improvement), removal (removing code/features)
-5. Format: "commit_type: concise_description" (e.g., "feat: add user authentication")
-6. Description must be clear, specific, and under 72 characters when possible
-7. Focus on WHAT changed and WHY, not HOW (implementation details)
-
-Context:
-- Username: {username}
-- Email: {email}
-{f"- Change group type hint: {type_hint}" if type_hint else ""}
-{f"- Grouping reason: {reason}" if reason else ""}
+        # Build simple, direct prompt
+        prompt = f"""PUSH CHANGES TO GITHUB NOW (Username: {username} email: {email}). Follow strict commit hygiene and version control best practices: each commit must represent one clear, logical change—such as a single feature, fix, refactor, removal, refactor, performance, test, build, docs, style, chore, revert, security, deps, improvement, or continuous integration—NEVER commit unrelated work, Dont/Never use "and" when combining commit message, separate commits to every feature as possible. USE THIS STRICT FORMAT: "commit_type: commit_message".
 
 Changes detected:
 {change_summary}
 
 Files changed ({len(all_files)} total):
 {file_list}
-
-File types: {file_types}
-
-Diff statistics:
-{diff_summary}
-{file_changes_detail}
 {code_diff_summary}
 
-ANALYSIS REQUIRED:
-1. Carefully examine the code changes above
-2. Identify if this represents a SINGLE logical change or MULTIPLE unrelated changes
-3. If multiple unrelated changes exist, you MUST indicate this clearly
-4. Determine the most appropriate commit type based on the actual code changes
-5. Generate a commit message that accurately describes ONLY the primary logical change
-
-Generate a SINGLE commit message following the format "commit_type: commit_message". 
-- The commit_type must accurately reflect the nature of the change
-- The commit_message must be concise, clear, and describe exactly what this commit does
-- DO NOT use "and" or combine multiple unrelated changes
-- If you detect multiple logical changes, focus on the PRIMARY change only and note that splitting may be needed
+Generate a commit message following the strict format "commit_type: commit_message". Focus on ONE clear logical change. Do NOT use "and" to combine multiple changes.
 
 Commit message:"""
 

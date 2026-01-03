@@ -5,6 +5,7 @@ colorama>=0.4.4
 pyfiglet>=0.7
 termcolor>=1.1.0
 psutil>=5.8.0
+python-dotenv>=1.0.0
 
 # Backend development (optional)
 fastapi>=0.100.0
