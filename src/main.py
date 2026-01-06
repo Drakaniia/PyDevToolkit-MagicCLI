@@ -91,13 +91,19 @@ def verify_installation():
 
     # Check dependencies
     print("\nDependencies:")
-    dependencies = ["pyyaml", "colorama", "pyfiglet", "termcolor", "psutil"]
-    for dep in dependencies:
+    dependencies = {
+        "pyyaml": "yaml",  # Package name vs import name
+        "colorama": "colorama",
+        "pyfiglet": "pyfiglet",
+        "termcolor": "termcolor",
+        "psutil": "psutil"
+    }
+    for pkg_name, import_name in dependencies.items():
         try:
-            __import__(dep)
-            print(f"  ✓ {dep}")
+            __import__(import_name)
+            print(f"  ✓ {pkg_name}")
         except ImportError:
-            print(f"  ⚠  {dep} not installed")
+            print(f"  ⚠  {pkg_name} not installed")
             all_good = False
 
     # Summary
