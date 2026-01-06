@@ -73,9 +73,16 @@ class GroqCommitGenerator:
             for line in lines:
                 if len(line) < 3:
                     continue
-                
+
+                # Parse status code (first 2 characters) and file path
                 status_code = line[:2]
-                file_path = line[3:].strip()
+                # File path starts after the status code and a space
+                # Handle cases where there might be extra spaces
+                parts = line[2:].strip().split(maxsplit=1)
+                file_path = parts[-1] if parts else ""
+
+                if not file_path:
+                    continue
 
                 if status_code == '??':
                     changes_info["untracked_files"].append(file_path)
@@ -86,11 +93,12 @@ class GroqCommitGenerator:
                 elif 'M' in status_code:
                     changes_info["modified_files"].append(file_path)
 
-            # Get actual code diffs for each file
+            # Get actual code diffs for each file (include untracked files)
             all_changed_files = (
                 changes_info["added_files"] +
                 changes_info["modified_files"] +
-                changes_info["deleted_files"]
+                changes_info["deleted_files"] +
+                changes_info["untracked_files"]
             )
 
             for file_path in all_changed_files:
@@ -348,17 +356,21 @@ class GroqCommitGenerator:
         file_changes = changes_info.get("file_changes", [])
         code_diffs = changes_info.get("code_diffs", {})
 
+        # Collect all files that need to be committed
+        all_files_to_commit = (
+            changes_info.get("added_files", [])
+            + changes_info.get("modified_files", [])
+            + changes_info.get("deleted_files", [])
+            + changes_info.get("untracked_files", [])
+        )
+
         if not file_changes:
             # If we have no per-file analysis, we cannot reliably detect multiple
             # logical units. In that case we conservatively return a single
             # group and let higher layers decide whether to proceed.
             return [
                 {
-                    "files": (
-                        changes_info.get("added_files", [])
-                        + changes_info.get("modified_files", [])
-                        + changes_info.get("deleted_files", [])
-                    ),
+                    "files": all_files_to_commit,
                     "type": "chore",
                     "reason": "single_change_group",
                     "code_diffs": code_diffs,
@@ -373,6 +385,17 @@ class GroqCommitGenerator:
             file_path = change["file"]
             commit_type = self._classify_change_type(change)
             groups[commit_type].append(file_path)
+
+        # Add untracked files to appropriate groups based on their file type
+        for file_path in changes_info.get("untracked_files", []):
+            # Classify based on file extension/path
+            file_lower = file_path.lower()
+            if any(ext in file_lower for ext in ['.md', '.txt', '.rst']):
+                groups['docs'].append(file_path)
+            elif any(ext in file_lower for ext in ['.py', '.js', '.ts', '.java', '.cpp']):
+                groups['improvement'].append(file_path)
+            else:
+                groups['chore'].append(file_path)
 
         # Create change groups from the type-based buckets
         for commit_type, files in groups.items():

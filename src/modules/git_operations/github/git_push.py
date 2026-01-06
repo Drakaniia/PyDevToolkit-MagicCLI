@@ -149,22 +149,37 @@ class GitPushRetry:
                 print(f" Could not determine current branch: {e}")
                 return False
 
-        # Generate commit message if not provided
+        # Generate commit messages if not provided
         if not commit_message:
-            print("\n🤖 Generating AI commit message...")
-            commit_message = self._generate_commit_message()
-            if not commit_message:
-                print(" Failed to generate commit message")
+            print("\n🤖 Analyzing changes and generating AI commit messages...")
+            commit_messages = self._generate_multiple_commit_messages()
+            if not commit_messages:
+                print(" Failed to generate commit messages")
                 return False
+        else:
+            # Single commit message provided
+            commit_messages = [{"message": commit_message, "files": []}]
 
-        # Stage and commit if there are changes
+        # Stage, commit each change group separately
         if skip_staging:
-            # Only commit, don't stage
-            if not self._commit_only(commit_message):
+            # Only commit, don't stage (for already staged changes)
+            if not self._commit_only(commit_messages[0]["message"]):
                 return False
         elif self._has_changes():
-            if not self._stage_and_commit(commit_message):
+            if not self._stage_and_commit_multiple(commit_messages):
                 return False
+
+        # Wait for user confirmation before pushing
+        print("\n" + "="*60)
+        print(" All commits created successfully!")
+        print(" Ready to push to GitHub")
+        print("="*60)
+        print("\n Press Enter to push changes to GitHub, or Ctrl+C to cancel...")
+        try:
+            input()
+        except KeyboardInterrupt:
+            print("\n Push cancelled by user")
+            return False
 
         # Execute push with progressive strategies
         push_success = self._execute_push_with_strategies(remote, branch)
@@ -178,8 +193,8 @@ class GitPushRetry:
 
         return push_success
 
-    def _generate_commit_message(self) -> Optional[str]:
-        """Generate a commit message using AI - mandatory, no fallback"""
+    def _generate_multiple_commit_messages(self) -> Optional[List[Dict]]:
+        """Generate multiple commit messages for logical change groups using AI"""
         try:
             print("   Analyzing changes for AI commit message generation...")
 
@@ -193,7 +208,8 @@ class GitPushRetry:
             all_files = (
                 changes_info.get("added_files", []) +
                 changes_info.get("modified_files", []) +
-                changes_info.get("deleted_files", [])
+                changes_info.get("deleted_files", []) +
+                changes_info.get("untracked_files", [])
             )
 
             if not all_files:
@@ -202,6 +218,8 @@ class GitPushRetry:
 
             # Detect logical change groups
             change_groups = generator.detect_logical_change_groups(changes_info)
+
+            print(f"   Detected {len(change_groups)} logical change group(s)")
 
             # Get git config for username and email
             username = "Drakaniia"
@@ -221,22 +239,26 @@ class GitPushRetry:
             except Exception:
                 pass
 
-            # Generate commit message for all changes using AI only
-            commit_message = generator.generate_commit_message(
-                changes_info,
+            # Generate commit messages for each change group
+            commit_messages = generator.generate_multiple_commit_messages(
+                change_groups,
                 username=username,
-                email=email
+                email=email,
+                preview_callback=lambda msg: print(f"   {msg}")
             )
 
-            if commit_message:
-                print(f"   Generated commit message: {commit_message}")
-                return commit_message
+            if commit_messages:
+                print(f"\n   Generated {len(commit_messages)} commit message(s):")
+                for idx, commit in enumerate(commit_messages, 1):
+                    print(f"   {idx}. {commit['message']}")
+                    print(f"      Files: {', '.join(commit['files'][:5])}" + ("..." if len(commit['files']) > 5 else ""))
+                return commit_messages
             else:
-                print("   Failed to generate AI commit message")
+                print("   Failed to generate AI commit messages")
                 return None
 
         except Exception as e:
-            print(f"   Error generating AI commit message: {e}")
+            print(f"   Error generating AI commit messages: {e}")
             return None
 
     def _commit_only(self, message: str) -> bool:
@@ -253,6 +275,40 @@ class GitPushRetry:
             return True
         except Exception as e:
             print(f" Failed to commit: {e}")
+            return False
+
+    def _stage_and_commit_multiple(self, commit_messages: List[Dict]) -> bool:
+        """Stage and commit multiple change groups separately with individual commit messages"""
+        try:
+            print("\n Creating commits for each logical change group...")
+
+            for idx, commit_info in enumerate(commit_messages, 1):
+                message = commit_info["message"]
+                files = commit_info["files"]
+
+                print(f"\n Commit {idx}/{len(commit_messages)}: {message}")
+                print(f"   Files: {', '.join(files[:5])}" + ("..." if len(files) > 5 else ""))
+
+                # Stage only the files for this commit
+                for file_path in files:
+                    try:
+                        self.git._run_command(['git', 'add', file_path], check=True)
+                    except Exception as e:
+                        print(f"   Warning: Could not stage {file_path}: {e}")
+
+                # Commit with the generated message
+                try:
+                    self.git.commit(message)
+                    print(f"   ✓ Committed successfully")
+                except Exception as e:
+                    print(f"   ✗ Failed to commit: {e}")
+                    return False
+
+            print(f"\n ✓ All {len(commit_messages)} commit(s) created successfully")
+            return True
+
+        except Exception as e:
+            print(f" Failed to stage and commit: {e}")
             return False
 
     def _auto_generate_changelog(self):
