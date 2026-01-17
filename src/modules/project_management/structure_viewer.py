@@ -708,28 +708,34 @@ class StructureViewer:
         """Copy text to clipboard using platform-specific method"""
         try:
             system = platform.system()
-            
+
             if system == "Windows":
-                subprocess.run(['clip'], input=text.encode(), check=True)
-                return True
+                # Use PowerShell with UTF-8 encoding for proper Unicode support
+                ps_command = f"Set-Clipboard -Value @'{text}'"
+                result = subprocess.run(
+                    ['powershell', '-NoProfile', '-Command', ps_command],
+                    capture_output=True,
+                    text=True
+                )
+                return result.returncode == 0
             elif system == "Darwin":  # macOS
-                subprocess.run(['pbcopy'], input=text.encode(), check=True)
+                subprocess.run(['pbcopy'], input=text.encode('utf-8'), check=True)
                 return True
             elif system == "Linux":
                 try:
-                    subprocess.run(['xclip', '-selection', 'clipboard'], 
-                                 input=text.encode(), check=True)
+                    subprocess.run(['xclip', '-selection', 'clipboard'],
+                                 input=text.encode('utf-8'), check=True)
                     return True
                 except (subprocess.CalledProcessError, FileNotFoundError):
                     try:
-                        subprocess.run(['xsel', '--clipboard', '--input'], 
-                                     input=text.encode(), check=True)
+                        subprocess.run(['xsel', '--clipboard', '--input'],
+                                     input=text.encode('utf-8'), check=True)
                         return True
                     except (subprocess.CalledProcessError, FileNotFoundError):
                         return False
             else:
                 return False
-                
+
         except Exception:
             return False
 
