@@ -710,12 +710,14 @@ class StructureViewer:
             system = platform.system()
 
             if system == "Windows":
-                # Use PowerShell with UTF-8 encoding for proper Unicode support
-                ps_command = f"Set-Clipboard -Value @'{text}'"
+                # Use PowerShell with stdin for proper Unicode support
+                ps_script = "$input | Set-Clipboard"
                 result = subprocess.run(
-                    ['powershell', '-NoProfile', '-Command', ps_command],
+                    ['powershell', '-NoProfile', '-Command', ps_script],
+                    input=text,
                     capture_output=True,
-                    text=True
+                    text=True,
+                    encoding='utf-8'
                 )
                 return result.returncode == 0
             elif system == "Darwin":  # macOS
