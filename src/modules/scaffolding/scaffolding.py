@@ -5,6 +5,7 @@ Creates advanced project templates for various development frameworks
 import sys
 import subprocess
 import os
+import platform
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 from core.menu import Menu, MenuItem
@@ -747,7 +748,7 @@ This project was created using Magic CLI's React project generator.
                 input("\nPress Enter to continue...")
                 return
 
-            # Create Flutter app
+# Create Flutter app
             print(f"\nCreating Flutter app '{project_name}'...")
             result = subprocess.run([
                 'flutter', 'create', project_name
@@ -772,6 +773,99 @@ This project was created using Magic CLI's React project generator.
             print(f"\n⚠ Error creating Flutter project: {e}")
 
         input("\nPress Enter to continue...")
+
+    def generate_folder_structure(self) -> None:
+        """Generate folder structure of current directory and copy to clipboard"""
+        print("\n" + "=" * 70)
+        print("GENERATE FOLDER STRUCTURE")
+        print("=" * 70)
+
+        try:
+            # Get current directory path
+            current_path = Path.cwd()
+            print(f"\nCurrent directory: {current_path}")
+            print("\nGenerating folder structure...")
+
+            # Generate tree structure
+            structure_lines = []
+            structure_lines.append(str(current_path.name) + "/")
+            
+            def build_tree(path: Path, prefix: str = "", is_last: bool = True):
+                """Recursively build tree structure"""
+                try:
+                    items = sorted([item for item in path.iterdir() if not item.name.startswith('.')], 
+                                 key=lambda x: (x.is_file(), x.name.lower()))
+                    
+                    for i, item in enumerate(items):
+                        is_last_item = i == len(items) - 1
+                        item_prefix = "└── " if is_last_item else "├── "
+                        structure_lines.append(f"{prefix}{item_prefix}{item.name}")
+                        
+                        if item.is_dir():
+                            # Check if directory contains visible items
+                            try:
+                                if any(not subitem.name.startswith('.') for subitem in item.iterdir()):
+                                    next_prefix = prefix + ("    " if is_last_item else "│   ")
+                                    build_tree(item, next_prefix, is_last_item)
+                            except (PermissionError, OSError):
+                                structure_lines.append(f"{prefix}    └── [Permission Denied]")
+                except PermissionError:
+                    structure_lines.append(f"{prefix}└── [Permission Denied]")
+                except Exception as e:
+                    structure_lines.append(f"{prefix}└── [Error: {str(e)}]")
+
+            build_tree(current_path)
+            
+            # Join lines into final structure
+            full_structure = "\n".join(structure_lines)
+            
+            print("\nFolder Structure:")
+            print("-" * 50)
+            print(full_structure)
+            print("-" * 50)
+            
+            # Copy to clipboard
+            if self.copy_to_clipboard(full_structure):
+                print("\n✓ Folder structure copied to clipboard!")
+            else:
+                print("\n⚠ Could not copy to clipboard. Structure generated above.")
+                print("You can manually copy the structure from the output.")
+
+        except KeyboardInterrupt:
+            print("\nOperation cancelled.")
+        except Exception as e:
+            print(f"\n⚠ Error generating folder structure: {e}")
+
+        input("\nPress Enter to continue...")
+
+    def copy_to_clipboard(self, text: str) -> bool:
+        """Copy text to clipboard using platform-specific method"""
+        try:
+            system = platform.system()
+            
+            if system == "Windows":
+                subprocess.run(['clip'], input=text.encode(), check=True)
+                return True
+            elif system == "Darwin":  # macOS
+                subprocess.run(['pbcopy'], input=text.encode(), check=True)
+                return True
+            elif system == "Linux":
+                try:
+                    subprocess.run(['xclip', '-selection', 'clipboard'], 
+                                 input=text.encode(), check=True)
+                    return True
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    try:
+                        subprocess.run(['xsel', '--clipboard', '--input'], 
+                                     input=text.encode(), check=True)
+                        return True
+                    except (subprocess.CalledProcessError, FileNotFoundError):
+                        return False
+            else:
+                return False
+                
+        except Exception:
+            return False
 
     def create_docker_project(self) -> None:
         """Create Docker configuration files for a project"""
@@ -906,5 +1000,6 @@ class ScaffoldingMenu(Menu):
             MenuItem("Create React Project", self.scaffolding.create_react_project),
             MenuItem("Create Flutter Project", self.scaffolding.create_flutter_project),
             MenuItem("Create Docker Configuration", self.scaffolding.create_docker_project),
+            MenuItem("Generate Folder Structure", self.scaffolding.generate_folder_structure),
             MenuItem("Back to Main Menu", lambda: "exit")
         ]

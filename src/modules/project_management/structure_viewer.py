@@ -11,6 +11,8 @@ Features:
 """
 import os
 import re
+import platform
+import subprocess
 from pathlib import Path
 from typing import Set, List, Optional, Tuple
 
@@ -200,7 +202,7 @@ class StructureViewer:
 
         # Show summary first for AI context
         file_count, dir_count = self._count_items(self.current_dir)
-        print(f"\nSummary: {dir_count} directories, {file_count} files")
+print(f"\nSummary: {dir_count} directories, {file_count} files")
 
         print("\n```")
         print(f"{self.current_dir.name}/")
@@ -213,6 +215,16 @@ class StructureViewer:
                     '├──', '|--').replace('└──', '`--').replace('│', '|')
                 print(line)
         print("```\n")
+
+        # Get clean structure for clipboard
+        clean_structure = self.get_clean_structure()
+        
+        # Copy to clipboard
+        if self._copy_to_clipboard(clean_structure):
+            print("✓ Project structure copied to clipboard!")
+        else:
+            print("⚠ Could not copy to clipboard. Structure shown above.")
+            print("You can manually copy the structure from the output.")
 
         input("Press Enter to continue...")
 
@@ -683,13 +695,43 @@ class StructureViewer:
 
         return lines
 
-    def _format_size(self, size: int) -> str:
+def _format_size(self, size: int) -> str:
         """Format file size in human-readable format"""
+        size_float = float(size)
         for unit in ['B', 'KB', 'MB', 'GB']:
-            if size < 1024.0:
-                return f"{size:.1f}{unit}"
-            size /= 1024.0
-        return f"{size:.1f}TB"
+            if size_float < 1024.0:
+                return f"{size_float:.1f}{unit}"
+            size_float /= 1024.0
+        return f"{size_float:.1f}TB"
+
+def _copy_to_clipboard(self, text: str) -> bool:
+        """Copy text to clipboard using platform-specific method"""
+        try:
+            system = platform.system()
+            
+            if system == "Windows":
+                subprocess.run(['clip'], input=text.encode(), check=True)
+                return True
+            elif system == "Darwin":  # macOS
+                subprocess.run(['pbcopy'], input=text.encode(), check=True)
+                return True
+            elif system == "Linux":
+                try:
+                    subprocess.run(['xclip', '-selection', 'clipboard'], 
+                                 input=text.encode(), check=True)
+                    return True
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    try:
+                        subprocess.run(['xsel', '--clipboard', '--input'], 
+                                     input=text.encode(), check=True)
+                        return True
+                    except (subprocess.CalledProcessError, FileNotFoundError):
+                        return False
+            else:
+                return False
+                
+        except Exception:
+            return False
 
     def _count_items(self, directory: Path) -> Tuple[int, int]:
         """
