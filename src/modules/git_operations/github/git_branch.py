@@ -518,21 +518,43 @@ class GitBranch:
             # If remote branch, create local tracking branch
             if selected_branch['type'] == 'remote':
                 local_name = selected_branch['name'].split('/')[-1]
-                self._print_info(f"Creating local branch '{local_name}' to track '{selected_branch['name']}'")
-
-                result = self._run_command(['git', 'checkout', '-b', local_name, selected_branch['name']], check=True)
-                if result.returncode == 0:
-                    self._print_success(f"Switched to new branch '{local_name}' tracking '{selected_branch['name']}'")
-                    
-                    # Auto-pull if configured
-                    self._auto_pull_branch(local_name)
-                    
-                    input("\nPress Enter to continue...")
-                    return True
+                
+                # Check if local branch already exists
+                result = self._run_command(['git', 'branch', '--list', local_name], check=False)
+                local_exists = result.returncode == 0 and result.stdout.strip()
+                
+                if local_exists:
+                    # Local branch exists, just checkout it
+                    self._print_info(f"Switching to existing local branch '{local_name}'")
+                    result = self._run_command(['git', 'checkout', local_name], check=True)
+                    if result.returncode == 0:
+                        self._print_success(f"Switched to branch '{local_name}'")
+                        
+                        # Auto-pull if configured
+                        self._auto_pull_branch(local_name)
+                        
+                        input("\nPress Enter to continue...")
+                        return True
+                    else:
+                        self._print_error("Failed to switch to local branch")
+                        input("\nPress Enter to continue...")
+                        return False
                 else:
-                    self._print_error("Failed to create tracking branch")
-                    input("\nPress Enter to continue...")
-                    return False
+                    # Local branch doesn't exist, create tracking branch
+                    self._print_info(f"Creating local branch '{local_name}' to track '{selected_branch['name']}'")
+                    result = self._run_command(['git', 'checkout', '-b', local_name, selected_branch['name']], check=True)
+                    if result.returncode == 0:
+                        self._print_success(f"Switched to new branch '{local_name}' tracking '{selected_branch['name']}'")
+                        
+                        # Auto-pull if configured
+                        self._auto_pull_branch(local_name)
+                        
+                        input("\nPress Enter to continue...")
+                        return True
+                    else:
+                        self._print_error("Failed to create tracking branch")
+                        input("\nPress Enter to continue...")
+                        return False
             else:
                 # Switch to local branch
                 result = self._run_command(['git', 'checkout', selected_branch['name']], check=True)

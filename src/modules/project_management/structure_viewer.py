@@ -200,9 +200,9 @@ class StructureViewer:
 
         print(f"   Max depth: {self.max_depth} levels")
 
-        # Show summary first for AI context
+# Show summary first for AI context
         file_count, dir_count = self._count_items(self.current_dir)
-print(f"\nSummary: {dir_count} directories, {file_count} files")
+        print(f"\nSummary: {dir_count} directories, {file_count} files")
 
         print("\n```")
         print(f"{self.current_dir.name}/")
@@ -695,7 +695,7 @@ print(f"\nSummary: {dir_count} directories, {file_count} files")
 
         return lines
 
-def _format_size(self, size: int) -> str:
+    def _format_size(self, size: int) -> str:
         """Format file size in human-readable format"""
         size_float = float(size)
         for unit in ['B', 'KB', 'MB', 'GB']:
@@ -704,7 +704,7 @@ def _format_size(self, size: int) -> str:
             size_float /= 1024.0
         return f"{size_float:.1f}TB"
 
-def _copy_to_clipboard(self, text: str) -> bool:
+    def _copy_to_clipboard(self, text: str) -> bool:
         """Copy text to clipboard using platform-specific method"""
         try:
             system = platform.system()
