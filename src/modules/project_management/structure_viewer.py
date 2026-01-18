@@ -710,16 +710,27 @@ class StructureViewer:
             system = platform.system()
 
             if system == "Windows":
-                # Use PowerShell with stdin for proper Unicode support
-                ps_script = "$input | Set-Clipboard"
-                result = subprocess.run(
-                    ['powershell', '-NoProfile', '-Command', ps_script],
-                    input=text,
-                    capture_output=True,
-                    text=True,
-                    encoding='utf-8'
-                )
-                return result.returncode == 0
+                import tempfile
+                import os
+
+                # Create a temporary file with UTF-8 BOM encoding
+                with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8-sig', suffix='.txt') as f:
+                    f.write(text)
+                    temp_file = f.name
+
+                try:
+                    # Use clip.exe to copy the file content
+                    result = subprocess.run(
+                        ['cmd', '/c', f'type "{temp_file}" | clip'],
+                        capture_output=True
+                    )
+                    return result.returncode == 0
+                finally:
+                    # Clean up the temporary file
+                    try:
+                        os.unlink(temp_file)
+                    except:
+                        pass
             elif system == "Darwin":  # macOS
                 subprocess.run(['pbcopy'], input=text.encode('utf-8'), check=True)
                 return True
