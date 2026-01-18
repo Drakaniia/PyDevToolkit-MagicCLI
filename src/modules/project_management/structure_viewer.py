@@ -710,27 +710,21 @@ class StructureViewer:
             system = platform.system()
 
             if system == "Windows":
-                import tempfile
-                import os
+                import base64
 
-                # Create a temporary file with UTF-8 BOM encoding
-                with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8-sig', suffix='.txt') as f:
-                    f.write(text)
-                    temp_file = f.name
+                # Encode text as UTF-8 bytes, then base64 encode
+                utf8_bytes = text.encode('utf-8')
+                base64_bytes = base64.b64encode(utf8_bytes)
+                base64_str = base64_bytes.decode('ascii')
 
-                try:
-                    # Use clip.exe to copy the file content
-                    result = subprocess.run(
-                        ['cmd', '/c', f'type "{temp_file}" | clip'],
-                        capture_output=True
-                    )
-                    return result.returncode == 0
-                finally:
-                    # Clean up the temporary file
-                    try:
-                        os.unlink(temp_file)
-                    except:
-                        pass
+                # Use PowerShell to decode base64 and set clipboard with UTF-8
+                ps_script = f'[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("{base64_str}")) | Set-Clipboard'
+                result = subprocess.run(
+                    ['powershell', '-NoProfile', '-Command', ps_script],
+                    capture_output=True,
+                    text=True
+                )
+                return result.returncode == 0
             elif system == "Darwin":  # macOS
                 subprocess.run(['pbcopy'], input=text.encode('utf-8'), check=True)
                 return True
