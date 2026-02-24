@@ -103,9 +103,8 @@ class MenuRenderer:
         else:
             self._scroll_offset = 0
 
-        # Do a full redraw when scrolling offset changes to properly update
-        # scroll indicators
-        if initial or force_full_redraw or self._scroll_offset != old_scroll_offset:
+        # Initial display or forced redraw
+        if initial or force_full_redraw:
             self._display_full(
                 items,
                 selected_idx,
@@ -113,11 +112,125 @@ class MenuRenderer:
                 lines,
                 available_lines,
                 is_small)
+        # Scroll offset changed - need to update more than just selection
+        elif self._scroll_offset != old_scroll_offset:
+            self._update_with_scroll(
+                items,
+                selected_idx,
+                old_scroll_offset,
+                available_lines,
+                cols,
+                is_small)
         else:
-            # Only update the changed items for smooth navigation
-            # but also update scroll indicators if they've changed
+            # Only selection changed - update visible items and indicators
             self._update_visible_items_and_indicators(
                 items, selected_idx, available_lines, cols)
+
+    def _update_with_scroll(
+            self,
+            items: List[Any],
+            selected_idx: int,
+            old_scroll_offset: int,
+            available_lines: int,
+            cols: int,
+            is_small: bool) -> None:
+        """
+        Update display when scrolling occurs - without clearing entire screen
+        
+        This method updates only the visible portion that changed during scrolling,
+        preventing the 'jump' effect while maintaining smooth scrolling.
+        """
+        visible_start = self._scroll_offset
+        visible_end = min(visible_start + available_lines, len(items))
+        
+        # Calculate line positions
+        # Header lines: separator(1) + title(1) + separator(1) + dir info(1) + separator(1) = 5 lines
+        # Then optional top scroll indicator
+        base_line = 6
+        has_top_indicator = self._scroll_offset > 0
+        has_bottom_indicator = visible_end < len(items)
+        
+        # Build all output as batch for fast rendering
+        escape_sequences = []
+        
+        # Update or add top scroll indicator if needed
+        if has_top_indicator:
+            remaining = self._scroll_offset
+            scroll_info = f"  ^ {remaining} more above..."
+            scroll_info = scroll_info[:cols - 2]
+            escape_sequences.append(f'\033[{base_line};1H')
+            escape_sequences.append(self.CLEAR_LINE)
+            escape_sequences.append(scroll_info)
+            actual_base_line = 7  # Items start one line lower with indicator
+        else:
+            # Remove old top indicator if it existed
+            if old_scroll_offset > 0:
+                escape_sequences.append(f'\033[{base_line};1H')
+                escape_sequences.append(self.CLEAR_LINE)
+            actual_base_line = 6
+        
+        # Update all visible items
+        for idx_in_viewport in range(visible_end - visible_start):
+            actual_idx = visible_start + idx_in_viewport
+            item = items[actual_idx]
+            line_text = f"{actual_idx + 1}. {item.label}"
+            
+            # Truncate if too long
+            max_text_width = cols - 6
+            if len(line_text) > max_text_width:
+                line_text = line_text[:max_text_width - 3] + "..."
+            
+            # Format based on selection
+            if actual_idx == selected_idx:
+                full_line = f"  > {line_text}"
+                full_line = full_line.ljust(min(70, cols - 2))
+                formatted = f"\033[1;46m{full_line}\033[0m"
+            else:
+                full_line = f"    {line_text}"
+                formatted = full_line
+            
+            line_num = actual_base_line + idx_in_viewport
+            escape_sequences.append(f'\033[{line_num};1H')
+            escape_sequences.append(self.CLEAR_LINE)
+            escape_sequences.append(formatted)
+        
+        # Update or add bottom scroll indicator
+        total_items_displayed = visible_end - visible_start
+        if has_bottom_indicator:
+            remaining = len(items) - visible_end
+            scroll_info = f"  v {remaining} more below..."
+            scroll_info = scroll_info[:cols - 2]
+            bottom_line = actual_base_line + total_items_displayed
+            escape_sequences.append(f'\033[{bottom_line};1H')
+            escape_sequences.append(self.CLEAR_LINE)
+            escape_sequences.append(scroll_info)
+        else:
+            # Remove old bottom indicator if it existed
+            if old_scroll_offset + available_lines < len(items):
+                bottom_line = actual_base_line + total_items_displayed
+                escape_sequences.append(f'\033[{bottom_line};1H')
+                escape_sequences.append(self.CLEAR_LINE)
+        
+        # Clear any remaining old content
+        remaining_lines = available_lines - total_items_displayed
+        if has_top_indicator:
+            remaining_lines -= 1
+        if has_bottom_indicator:
+            remaining_lines -= 1
+        
+        start_clear_line = actual_base_line + total_items_displayed
+        if has_bottom_indicator:
+            start_clear_line += 1
+            
+        for i in range(remaining_lines):
+            clear_line_num = start_clear_line + i
+            escape_sequences.append(f'\033[{clear_line_num};1H')
+            escape_sequences.append(self.CLEAR_LINE)
+            escape_sequences.append(" " * cols)
+        
+        # Write all at once
+        sys.stdout.write(''.join(escape_sequences))
+        sys.stdout.flush()
 
     def _display_full(
             self,
@@ -240,13 +353,15 @@ class MenuRenderer:
             lines_to_update.append(
                 (base_line + idx_in_viewport, formatted_line))
 
-        # Batch update all lines needed to reduce flickering
+        # Batch update all lines needed - build single string for faster rendering
+        escape_sequences = []
         for line_num, content in lines_to_update:
-            # Move cursor to line, column 1
-            sys.stdout.write(f'\033[{line_num};1H')
-            sys.stdout.write(self.CLEAR_LINE)  # Clear the entire line
-            sys.stdout.write(content)  # Write the new content
+            escape_sequences.append(f'\033[{line_num};1H')  # Move to position
+            escape_sequences.append(self.CLEAR_LINE)  # Clear line
+            escape_sequences.append(content)  # Add content
 
+        # Write everything at once
+        sys.stdout.write(''.join(escape_sequences))
         sys.stdout.flush()
 
     def _update_visible_items_and_indicators(
@@ -345,13 +460,15 @@ class MenuRenderer:
                     (visible_end - visible_start) + i
             lines_to_update.append((blank_line_num, " " * cols))
 
-        # Batch update all lines needed to reduce flickering
+        # Build single escape sequence for all updates - MUCH faster than individual writes
+        escape_sequences = []
         for line_num, content in lines_to_update:
-            # Move cursor to line, column 1
-            sys.stdout.write(f'\033[{line_num};1H')
-            sys.stdout.write(self.CLEAR_LINE)  # Clear the entire line
-            sys.stdout.write(content)  # Write the new content
+            escape_sequences.append(f'\033[{line_num};1H')  # Move to position
+            escape_sequences.append(self.CLEAR_LINE)  # Clear line
+            escape_sequences.append(content)  # Add content
 
+        # Write everything at once
+        sys.stdout.write(''.join(escape_sequences))
         sys.stdout.flush()
 
     def _print_item(
