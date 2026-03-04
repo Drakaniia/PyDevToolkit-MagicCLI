@@ -82,3 +82,6 @@ htmlcov/
 # Coverage reports
 *.cover
 coverage.xml
+
+.env
+.env.*
