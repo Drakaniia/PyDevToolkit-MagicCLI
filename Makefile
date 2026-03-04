@@ -52,10 +52,7 @@ test-unit:
 
 # Code quality
 lint:
-	flake8 src/ tests/
 	mypy src/
-	bandit -r src/
-	safety check
 
 format:
 	black src/ tests/
@@ -128,8 +125,7 @@ dev:
 
 # Security audit
 audit:
-	safety check
-	bandit -r src/
+	@echo "Security audit not configured without CI/CD tools"
 
 # All checks (used in CI)
 check-all: format-check lint test

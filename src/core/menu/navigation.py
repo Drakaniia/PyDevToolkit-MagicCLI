@@ -167,7 +167,9 @@ class MenuNavigation:
                     sys.stdout.flush()
                     return len(items)
                 except Exception as e:
-                    # Log error but continue
+                    # Log error but continue - at minimum print to stderr for debugging
+                    print(f"⚠️  Menu navigation error: {type(e).__name__}: {e}", file=sys.stderr)
+                    # Continue to next iteration
                     continue
 
         finally:

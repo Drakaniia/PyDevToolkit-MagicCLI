@@ -1,6 +1,7 @@
 """
 pytest configuration and fixtures for PyDevToolkit MagicCLI
 """
+
 import os
 import shutil
 import sys

@@ -13,11 +13,15 @@ from ..utils.exceptions import AutomationError, ErrorSeverity
 class SecurityValidator:
     """Centralized security validation and sanitization utilities"""
 
-    # Patterns for validating inputs
-    SAFE_COMMAND_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\:\/\s=]+$')
+    # Patterns for validating inputs - restricted to prevent command injection
+    # Note: Removed \s (whitespace) and = to prevent shell argument injection
+    SAFE_COMMAND_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\/]+$')
     SAFE_PATH_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\/\\]+$')
     SAFE_FILE_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.]+$')
     SAFE_BRANCH_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.\:\/]+$')
+    
+    # Dangerous shell metacharacters that must be blocked
+    DANGEROUS_SHELL_CHARS = frozenset([';', '&', '|', '$', '`', '(', ')', '{', '}', '[', ']', '<', '>', '!', '#', '~', '*', '?', '"', "'", '\\', '\n', '\r', '\t'])
 
     @staticmethod
     def validate_command_input(user_input: str) -> bool:
@@ -32,6 +36,10 @@ class SecurityValidator:
         """
         if not user_input:
             return True  # Empty input is safe
+
+        # CRITICAL: Check for ANY dangerous shell metacharacters first
+        if any(char in SecurityValidator.DANGEROUS_SHELL_CHARS for char in user_input):
+            return False
 
         # Check for dangerous characters/sequences
         dangerous_patterns = [
@@ -54,7 +62,7 @@ class SecurityValidator:
             if re.search(pattern, user_input, re.IGNORECASE):
                 return False
 
-        # Check against safe command pattern
+        # Check against safe command pattern (stricter now - no spaces or =)
         return bool(SecurityValidator.SAFE_COMMAND_PATTERN.match(user_input))
 
     @staticmethod
@@ -77,12 +85,17 @@ class SecurityValidator:
 
         # Check for absolute paths that might lead outside project
         try:
-            abs_path = Path(path).resolve(strict=True)
+            # Use strict=False to allow non-existent paths (for file creation)
+            abs_path = Path(path).resolve(strict=False)
             project_root = Path.cwd().resolve(strict=True)
             # Only allow paths within or relative to project root
-            abs_path.relative_to(project_root)
-        except (ValueError, OSError, RuntimeError):
-            # Path is outside project root or doesn't exist
+            try:
+                abs_path.relative_to(project_root)
+            except ValueError:
+                # Path is outside project root
+                return False
+        except (OSError, RuntimeError):
+            # Path resolution failed
             return False
 
         # Check against safe path pattern
