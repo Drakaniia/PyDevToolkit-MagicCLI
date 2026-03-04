@@ -503,8 +503,8 @@ class GroqCommitGenerator:
     def generate_multiple_commit_messages(
         self,
         change_groups: List[Dict],
-        username: str = "Drakaniia",
-        email: str = "floresaybaez574@gmail.com",
+        username: str = "<default_username>",
+        email: str = "<default_email>",
         preview_callback: Optional[Callable[[str], None]] = None
     ) -> List[Dict]:
         """
@@ -658,8 +658,8 @@ class GroqCommitGenerator:
     def generate_commit_message(
         self,
         changes_info: Dict[str, any],
-        username: str = "Drakaniia",
-        email: str = "floresaybaez574@gmail.com",
+        username: str = "<default_username>",
+        email: str = "<default_email>",
         preview_callback: Optional[Callable[[str], None]] = None,
         is_group: bool = False,
     ) -> Optional[str]:
@@ -703,6 +703,7 @@ class GroqCommitGenerator:
                     headers=self.headers,
                     json=payload,
                     timeout=30,
+                    verify=True
                 )
 
                 # If we get a 404, try the next model

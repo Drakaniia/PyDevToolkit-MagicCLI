@@ -222,8 +222,8 @@ class GitPushRetry:
             print(f"   Detected {len(change_groups)} logical change group(s)")
 
             # Get git config for username and email
-            username = "Drakaniia"
-            email = "floresaybaez574@gmail.com"
+            username = "<default_username>"
+            email = "<default_email>"
 
             try:
                 user_result = self.git._run_command(['git', 'config', 'user.name'], check=False)
@@ -2096,8 +2096,8 @@ class GitPush:
             generator = GroqCommitGenerator()
 
             # Get git config
-            username = "Drakaniia"
-            email = "floresaybaez574@gmail.com"
+            username = "<default_username>"
+            email = "<default_email>"
 
             try:
                 user_result = self.git._run_command(['git', 'config', 'user.name'], check=False)
