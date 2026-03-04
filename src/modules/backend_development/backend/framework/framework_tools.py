@@ -6,10 +6,40 @@ from core.menu import Menu, MenuItem
 import os
 import sys
 import json
+import re
 from pathlib import Path
+from html import escape
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
+
+
+def sanitize_input(user_input, allow_dots=False):
+    """Sanitize user input to prevent injection attacks"""
+    if not user_input or not isinstance(user_input, str):
+        raise ValueError("Invalid input")
+    
+    # Remove any path traversal attempts
+    user_input = user_input.replace("..", "").replace("~", "")
+    
+    # Allow only alphanumeric, underscore, hyphen, and optionally dots
+    pattern = r'^[a-zA-Z0-9_-]+$' if not allow_dots else r'^[a-zA-Z0-9_.-]+$'
+    if not re.match(pattern, user_input):
+        raise ValueError("Input contains invalid characters")
+    
+    return user_input
+
+
+def sanitize_package_name(package_name):
+    """Sanitize package name (allows dots for Java packages)"""
+    if not package_name or not isinstance(package_name, str):
+        raise ValueError("Invalid package name")
+    
+    # Allow alphanumeric, dots, and underscores for package names
+    if not re.match(r'^[a-zA-Z0-9._]+$', package_name):
+        raise ValueError("Package name contains invalid characters")
+    
+    return package_name
 
 
 class FrameworkTools(Menu):
@@ -40,7 +70,12 @@ class FrameworkTools(Menu):
         print("  FastAPI Project Setup")
         print("=" * 60)
 
-        project_name = input("Enter project name: ")
+        try:
+            project_name = sanitize_input(input("Enter project name: "))
+        except ValueError as e:
+            print(f"Error: {e}")
+            input("\nPress Enter to continue...")
+            return None
 
         print(f"\nSetting up FastAPI project: {project_name}")
 
@@ -803,14 +838,22 @@ CORS_ALLOWED_ORIGINS = [
 ]
 '''
 
-        with open('django_settings.py', 'w') as f:
+        safe_path = Path('django_settings.py').resolve()
+        if not safe_path.parent.samefile(Path.cwd()):
+            print("Error: Invalid file path")
+            return
+        with open(safe_path, 'w', encoding='utf-8') as f:
             f.write(django_settings_content)
 
         print("Django project template created!")
 
     def _create_django_app(self):
         """Create Django app"""
-        app_name = input("Enter app name: ")
+        try:
+            app_name = sanitize_input(input("Enter app name: "))
+        except ValueError as e:
+            print(f"Error: {e}")
+            return
         print(f"\nCreating Django app: {app_name}")
 
         # Create app structure
@@ -958,8 +1001,12 @@ class {app_name.title()}Serializer(serializers.ModelSerializer):
 
     def _create_flask_app(self):
         """Create Flask application"""
-        app_name = input("Enter app name: ")
-        print(f"\n Creating Flask app: {app_name}")
+        try:
+            app_name = sanitize_input(input("Enter app name: "))
+        except ValueError as e:
+            print(f"Error: {e}")
+            return
+        print(f"\nCreating Flask app: {app_name}")
 
         flask_app_content = f'''"""
 Flask Application: {app_name}
@@ -997,7 +1044,11 @@ def create_app(config_name='development'):
     return app
 '''
 
-        with open('app.py', 'w') as f:
+        safe_path = Path('app.py').resolve()
+        if not safe_path.parent.samefile(Path.cwd()):
+            print("Error: Invalid file path")
+            return
+        with open(safe_path, 'w', encoding='utf-8') as f:
             f.write(flask_app_content)
 
         print("Flask application created!")
@@ -1024,8 +1075,13 @@ def create_app(config_name='development'):
         print("  Spring Boot Configuration")
         print("=" * 60)
 
-        project_name = input("Enter project name: ")
-        package_name = input("Enter package name (e.g., com.example.app): ")
+        try:
+            project_name = sanitize_input(input("Enter project name: "))
+            package_name = sanitize_package_name(input("Enter package name (e.g., com.example.app): "))
+        except ValueError as e:
+            print(f"Error: {e}")
+            input("\nPress Enter to continue...")
+            return None
 
         print(f"\nConfiguring Spring Boot project: {project_name}")
 
@@ -1462,7 +1518,11 @@ logging.level.org.springframework=WARN
 
     def _create_express_app(self):
         """Create Express.js application"""
-        app_name = input("Enter app name: ")
+        try:
+            app_name = sanitize_input(input("Enter app name: "))
+        except ValueError as e:
+            print(f"Error: {e}")
+            return
         print(f"\nCreating Express.js app: {app_name}")
 
         express_app_content = f'''/**
@@ -1536,7 +1596,11 @@ app.listen(PORT, () => {{
 module.exports = app;
 '''
 
-        with open('app.js', 'w') as f:
+        safe_path = Path('app.js').resolve()
+        if not safe_path.parent.samefile(Path.cwd()):
+            print("Error: Invalid file path")
+            return
+        with open(safe_path, 'w', encoding='utf-8') as f:
             f.write(express_app_content)
 
         # Create package.json
@@ -1573,7 +1637,11 @@ module.exports = app;
 }}
 '''
 
-        with open('package.json', 'w') as f:
+        safe_path = Path('package.json').resolve()
+        if not safe_path.parent.samefile(Path.cwd()):
+            print("Error: Invalid file path")
+            return
+        with open(safe_path, 'w', encoding='utf-8') as f:
             f.write(package_json_content)
 
         print("Express.js application created!")
@@ -1638,14 +1706,28 @@ module.exports = app;
 
     def _create_project_structure(self, structure, base_path="."):
         """Create project structure from dictionary"""
+        base_path_obj = Path(base_path).resolve()
+        
         for name, content in structure.items():
-            path = os.path.join(base_path, name)
+            # Validate path to prevent traversal
+            try:
+                path = (base_path_obj / name).resolve()
+                if not path.is_relative_to(base_path_obj):
+                    print(f"Error: Invalid path detected: {name}")
+                    continue
+            except (ValueError, OSError) as e:
+                print(f"Error: Invalid path: {name}")
+                continue
+            
             if isinstance(content, dict):
-                os.makedirs(path, exist_ok=True)
-                self._create_project_structure(content, path)
+                path.mkdir(parents=True, exist_ok=True)
+                self._create_project_structure(content, str(path))
             else:
-                with open(path, 'w') as f:
-                    f.write(content)
+                try:
+                    with open(path, 'w', encoding='utf-8') as f:
+                        f.write(content)
+                except (OSError, IOError) as e:
+                    print(f"Error writing file {path}: {e}")
 
     def _back_to_backend(self):
         """Return to backend development menu"""
