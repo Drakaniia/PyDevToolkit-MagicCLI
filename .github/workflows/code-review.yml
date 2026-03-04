@@ -39,7 +39,7 @@ jobs:
       run: flake8 src/ --format=json --output-file=flake8.json || true
 
     - name: Upload Reports
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: code-review-reports
         path: "*.json"
