@@ -3,13 +3,13 @@ Git Status Module
 Handles repository status checking and display
 """
 import subprocess
+import sys
 try:
     from termcolor import colored
     HAS_TERMCOLOR = True
 except ImportError:
     HAS_TERMCOLOR = False
     # Only print warning if directly running this file
-    import sys
     if __name__ == "__main__":
         print(
             "Warning: termcolor library not found. Install it using: pip install termcolor")
