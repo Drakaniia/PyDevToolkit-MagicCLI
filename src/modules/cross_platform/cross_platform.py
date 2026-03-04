@@ -59,9 +59,9 @@ class CrossPlatformTools:
         # Check if Node.js and npm are available
         try:
             node_result = subprocess.run(['node', '--version'],
-                                         capture_output=True, text=True)
+                                         capture_output=True, text=True, shell=False)
             npm_result = subprocess.run(['npm', '--version'],
-                                        capture_output=True, text=True)
+                                        capture_output=True, text=True, shell=False)
 
             if node_result.returncode != 0 or npm_result.returncode != 0:
                 print("⚠ Node.js and/or npm are not installed")
@@ -77,7 +77,7 @@ class CrossPlatformTools:
         # Check if React Native CLI is available
         try:
             result = subprocess.run(['npx', 'react-native', '--version'],
-                                    capture_output=True, text=True)
+                                    capture_output=True, text=True, shell=False)
             if result.returncode != 0:
                 install = input(
                     "React Native CLI not found. Install globally? (y/n): ").lower()
@@ -127,9 +127,9 @@ echo "To run on Android: npx react-native run-android"
         with open("create_react_native.sh", "w") as f:
             f.write(setup_script)
 
-        # Make executable on Unix systems
+        # Make executable on Unix systems with secure permissions
         try:
-            os.chmod("create_react_native.sh", 0o755)
+            os.chmod("create_react_native.sh", 0o700)
         except BaseException:
             pass  # Skip on Windows
 
@@ -141,7 +141,7 @@ echo "To run on Android: npx react-native run-android"
 
         # Check if Flutter is available
         result = subprocess.run(['flutter', '--version'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             print("⚠ Flutter is not installed")
@@ -154,7 +154,7 @@ echo "To run on Android: npx react-native run-android"
         # Show Flutter doctor output
         print("\nRunning 'flutter doctor' to check setup:")
         result = subprocess.run(['flutter', 'doctor'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
         print(result.stdout)
 
         print("\nTo create a new Flutter project:")
@@ -189,9 +189,9 @@ echo "To run: flutter run"
         with open("create_flutter.sh", "w") as f:
             f.write(setup_script)
 
-        # Make executable on Unix systems
+        # Make executable on Unix systems with secure permissions
         try:
-            os.chmod("create_flutter.sh", 0o755)
+            os.chmod("create_flutter.sh", 0o700)
         except BaseException:
             pass  # Skip on Windows
 
@@ -204,7 +204,7 @@ echo "To run: flutter run"
         # Check if Node.js is available
         try:
             result = subprocess.run(['node', '--version'],
-                                    capture_output=True, text=True)
+                                    capture_output=True, text=True, shell=False)
             if result.returncode != 0:
                 print("⚠ Node.js is not installed")
                 print("Install Node.js from: https://nodejs.org/")
@@ -218,7 +218,7 @@ echo "To run: flutter run"
 
         # Check if NativeScript CLI is available
         result = subprocess.run(['ns', '--version'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             install = input(
@@ -249,9 +249,9 @@ echo "To run: flutter run"
         # Check if Node.js and npm are available
         try:
             node_result = subprocess.run(['node', '--version'],
-                                         capture_output=True, text=True)
+                                         capture_output=True, text=True, shell=False)
             npm_result = subprocess.run(['npm', '--version'],
-                                        capture_output=True, text=True)
+                                        capture_output=True, text=True, shell=False)
 
             if node_result.returncode != 0 or npm_result.returncode != 0:
                 print("⚠ Node.js and/or npm are not installed")
@@ -266,7 +266,7 @@ echo "To run: flutter run"
 
         # Check if Ionic CLI is available
         result = subprocess.run(['ionic', '--version'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             install = input(
@@ -331,9 +331,9 @@ echo "To run: flutter run"
         # Check if Node.js and npm are available
         try:
             node_result = subprocess.run(['node', '--version'],
-                                         capture_output=True, text=True)
+                                         capture_output=True, text=True, shell=False)
             npm_result = subprocess.run(['npm', '--version'],
-                                        capture_output=True, text=True)
+                                        capture_output=True, text=True, shell=False)
 
             if node_result.returncode != 0 or npm_result.returncode != 0:
                 print("⚠ Node.js and/or npm are not installed")
@@ -416,7 +416,7 @@ app.on('window-all-closed', function () {
         # Check if Rust is available
         try:
             result = subprocess.run(['rustc', '--version'],
-                                    capture_output=True, text=True)
+                                    capture_output=True, text=True, shell=False)
             if result.returncode != 0:
                 print("⚠ Rust is not installed")
                 print("Install from: https://www.rust-lang.org/tools/install")
@@ -431,7 +431,7 @@ app.on('window-all-closed', function () {
         # Check if Node.js is available (for frontend)
         try:
             result = subprocess.run(['node', '--version'],
-                                    capture_output=True, text=True)
+                                    capture_output=True, text=True, shell=False)
             if result.returncode != 0:
                 print("⚠ Node.js is not installed (recommended for frontend)")
             else:
@@ -547,7 +547,7 @@ exe = EXE(
 
         # Check if Flutter is available
         result = subprocess.run(['flutter', '--version'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             print("⚠ Flutter is not installed")
@@ -566,7 +566,8 @@ exe = EXE(
                                          'config',
                                          f'--enable-{platform}-desktop'],
                                         capture_output=True,
-                                        text=True)
+                                        text=True,
+                                        shell=False)
                 if result.returncode == 0:
                     print(f"✓ Enabled {platform} desktop support")
                 else:
@@ -748,7 +749,7 @@ sys.exit()
         # Check if Node.js is available
         try:
             result = subprocess.run(['node', '--version'],
-                                    capture_output=True, text=True)
+                                    capture_output=True, text=True, shell=False)
             if result.returncode != 0:
                 print("⚠ Node.js is not installed")
                 print("Install from: https://nodejs.org/")
@@ -884,7 +885,7 @@ sys.exit()
         # Check if PlatformIO is available
         try:
             result = subprocess.run(['pio', '--version'],
-                                    capture_output=True, text=True)
+                                    capture_output=True, text=True, shell=False)
             if result.returncode == 0:
                 print("✓ PlatformIO is installed")
             else:
