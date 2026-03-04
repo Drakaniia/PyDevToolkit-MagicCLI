@@ -2,6 +2,7 @@
 Integration tests for PyDevToolkit-MagicCLI
 Tests modules working together and overall system functionality
 """
+
 import os
 import sys
 import tempfile
@@ -95,7 +96,7 @@ class TestRealWorldScenarios(unittest.TestCase):
         """Test safe file path operations"""
         # Use existing project paths to avoid Windows temp dir cleanup issues
         safe_path = "src/main.py"
-        
+
         # Validate the path (should be valid as it exists in project)
         self.assertTrue(SecurityValidator.validate_path(safe_path))
 

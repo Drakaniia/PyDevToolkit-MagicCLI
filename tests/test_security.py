@@ -2,6 +2,7 @@
 Security tests for PyDevToolkit-MagicCLI
 Tests security validation, input sanitization, and security controls
 """
+
 import os
 import sys
 import tempfile
@@ -20,7 +21,7 @@ class TestSecurityValidation(unittest.TestCase):
 
     def test_validate_safe_command_input(self):
         """Test validation of safe command inputs
-        
+
         Note: For security, spaces and shell metacharacters are now blocked.
         Commands should use hyphenated format (e.g., 'git-status' not 'git status')
         """

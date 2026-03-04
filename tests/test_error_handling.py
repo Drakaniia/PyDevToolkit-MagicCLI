@@ -2,6 +2,7 @@
 Error handling tests for PyDevToolkit-MagicCLI
 Tests comprehensive error handling and exception management
 """
+
 import sys
 import unittest
 from pathlib import Path
