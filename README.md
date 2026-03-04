@@ -178,6 +178,28 @@ Commit message:
 - **Git** (optional but recommended for full functionality)
 - **Bash shell** (Linux/macOS) or **Git Bash** (Windows)
 
+## Environment Setup
+
+### API Keys Configuration
+
+For AI-powered features (like auto-generated commit messages), you'll need to configure API keys:
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` and add your API keys:
+   ```bash
+   GROQ_API_KEY=your_actual_groq_api_key_here
+   ```
+
+3. Get your Groq API key from [https://console.groq.com/](https://console.groq.com/)
+
+**Security Note:** Never commit your `.env` file to version control. It's already included in `.gitignore`.
+
+For detailed setup instructions, see [docs/GROQ_API_SETUP.md](docs/GROQ_API_SETUP.md).
+
 ## Project Structure
 
 ```
