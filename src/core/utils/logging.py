@@ -80,17 +80,54 @@ class SecurityAuditLogger:
             command: str,
             user_input: str,
             success: bool) -> None:
-        """Log command execution for audit purposes"""
+        """Log command execution for audit purposes
+        
+        SECURITY: Sanitizes user input to prevent logging sensitive data
+        """
         status = "SUCCESS" if success else "FAILED"
-        audit_message = f"COMMAND_EXECUTION: {status} - Command: {command}, Input: {user_input}"
+        # SECURITY: Sanitize user input before logging to prevent sensitive data exposure
+        sanitized_input = self._sanitize_for_logging(user_input)
+        audit_message = f"COMMAND_EXECUTION: {status} - Command: {command}, Input: {sanitized_input}"
         self.logger.debug(audit_message)
+    
+    def _sanitize_for_logging(self, value: str, max_length: int = 100) -> str:
+        """
+        Sanitize a value for safe logging
+        
+        Args:
+            value: The value to sanitize
+            max_length: Maximum length to log (prevents log flooding)
+        
+        Returns:
+            str: Sanitized value safe for logging
+        """
+        if not value:
+            return "<empty>"
+        
+        # Truncate to prevent log flooding
+        if len(value) > max_length:
+            value = value[:max_length] + "..."
+        
+        # Replace potential sensitive patterns with placeholders
+        import re
+        # Mask potential passwords after = or :
+        value = re.sub(r'([=:])\s*[^\s,;]+', r'\1 <REDACTED>', value)
+        # Mask potential API keys/tokens (alphanumeric strings 20+ chars)
+        value = re.sub(r'\b[A-Za-z0-9]{20,}\b', '<TOKEN>', value)
+        
+        return value
 
     def audit_input_validation_failure(
             self,
             input_value: str,
             validation_rule: str) -> None:
-        """Log input validation failures"""
-        audit_message = f"INPUT_VALIDATION_FAILURE: Value: {input_value}, Rule: {validation_rule}"
+        """Log input validation failures
+        
+        SECURITY: Sanitizes input value before logging
+        """
+        # SECURITY: Sanitize input value before logging
+        sanitized_value = self._sanitize_for_logging(input_value)
+        audit_message = f"INPUT_VALIDATION_FAILURE: Value: {sanitized_value}, Rule: {validation_rule}"
         self.logger.warning(audit_message)
 
 

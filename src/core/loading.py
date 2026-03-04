@@ -64,8 +64,10 @@ class LoadingSpinner:
         with self._lock:
             if self.active:
                 return
+            # Set active BEFORE creating thread to prevent race condition
             self.active = True
             self.thread = threading.Thread(target=self._animate, daemon=True)
+            # Start thread while still holding lock
             self.thread.start()
 
     def stop(self):
@@ -73,9 +75,12 @@ class LoadingSpinner:
         with self._lock:
             if not self.active:
                 return
+            # Set inactive first to signal animation loop to stop
             self.active = False
-            if self.thread:
-                self.thread.join(timeout=0.1)
+        
+        # Join thread outside lock to prevent deadlock
+        if self.thread:
+            self.thread.join(timeout=0.1)
 
     def _animate(self):
         """Animation loop"""

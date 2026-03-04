@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Optional, Dict, Any, Tuple, Callable
 import functools
 import traceback
+import sys
 
 
 class ErrorSeverity(Enum):
@@ -159,7 +160,6 @@ class ExceptionHandler:
             print(error.display())
 
             if exit_on_critical and error.severity == ErrorSeverity.CRITICAL:
-                import sys
                 sys.exit(1)
         else:
             # Wrap unexpected errors
