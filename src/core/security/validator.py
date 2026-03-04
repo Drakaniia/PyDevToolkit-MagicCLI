@@ -77,12 +77,12 @@ class SecurityValidator:
 
         # Check for absolute paths that might lead outside project
         try:
-            abs_path = Path(path).resolve()
-            project_root = Path.cwd().resolve()
+            abs_path = Path(path).resolve(strict=True)
+            project_root = Path.cwd().resolve(strict=True)
             # Only allow paths within or relative to project root
             abs_path.relative_to(project_root)
-        except ValueError:
-            # Path is outside project root
+        except (ValueError, OSError, RuntimeError):
+            # Path is outside project root or doesn't exist
             return False
 
         # Check against safe path pattern
@@ -114,6 +114,11 @@ class SecurityValidator:
         """
         if not filename:
             return True  # Empty filename is safe
+
+        # Normalize path separators and check for traversal
+        normalized = filename.replace('\\', '/')
+        if '..' in normalized or normalized.startswith('/'):
+            return False
 
         # Get just the filename part (not the path)
         file_part = Path(filename).name
