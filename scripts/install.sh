@@ -17,10 +17,8 @@ set -e  # Exit on error
 # ============================================================
 
 PACKAGE_NAME="magic-cli"
-PACKAGE_VERSION="1.0.0"
 GITHUB_REPO="Drakaniia/PyDevToolkit-MagicCLI"
 INSTALL_DIR="$HOME/.magic-cli"
-PYTHON_VERSION="3.11.5"
 MIN_PYTHON_VERSION="3.8.0"
 
 # Colors
@@ -194,8 +192,8 @@ check_python_version() {
     fi
 
     # Compare versions (simple comparison)
-    local version_num=$(echo "$version" | sed 's/\.//g')
-    local min_version_num=$(echo "$min_version" | sed 's/\.//g')
+    local version_num="${version//./}"
+    local min_version_num="${min_version//./}"
 
     if [ "$version_num" -ge "$min_version_num" ]; then
         return 0
@@ -699,7 +697,9 @@ EOF
         fi
 
         # Remove existing PATH entries for our install dir
-        sed -i '/export PATH=.*magic-cli/d' "$shell_config" 2>/dev/null || true
+        if command -v sed &> /dev/null; then
+            sed -i.bak '/export PATH=.*magic-cli/d' "$shell_config" 2>/dev/null && rm -f "${shell_config}.bak" || true
+        fi
 
         # Add new PATH entry
         echo "" >> "$shell_config"
