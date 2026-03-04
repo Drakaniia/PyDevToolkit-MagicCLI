@@ -48,12 +48,14 @@ class SecurityTools:
             return
 
         try:
-            # Run detect-secrets scan
+            # Run detect-secrets scan with explicit shell=False for security
             result = subprocess.run(
                 ["detect-secrets", "scan", "."],
                 capture_output=True,
                 text=True,
                 cwd=Path.cwd(),
+                shell=False,  # CRITICAL: Prevent shell injection
+                timeout=60,   # Add timeout to prevent hanging
             )
 
             if result.returncode == 0:
@@ -96,6 +98,8 @@ class SecurityTools:
                     ["rg", "-n", pattern, "--type", "py"],
                     capture_output=True,
                     text=True,
+                    shell=False,  # CRITICAL: Prevent shell injection
+                    timeout=30,   # Add timeout
                 )
                 if result.stdout.strip():
                     issues.append(
@@ -103,6 +107,8 @@ class SecurityTools:
                     )
             except FileNotFoundError:
                 pass
+            except subprocess.TimeoutExpired:
+                print(f"⚠️  Pattern search timed out, skipping...")
 
         # Check for SQL injection vulnerabilities
         sql_patterns = [
@@ -116,6 +122,8 @@ class SecurityTools:
                     ["rg", "-n", pattern, "--type", "py"],
                     capture_output=True,
                     text=True,
+                    shell=False,  # CRITICAL: Prevent shell injection
+                    timeout=30,   # Add timeout
                 )
                 if result.stdout.strip():
                     issues.append(
@@ -123,6 +131,8 @@ class SecurityTools:
                     )
             except FileNotFoundError:
                 pass
+            except subprocess.TimeoutExpired:
+                print(f"⚠️  Pattern search timed out, skipping...")
 
         if issues:
             print("\n⚠️ Security Issues Found:")
@@ -138,9 +148,13 @@ class SecurityTools:
         print("=" * 70)
 
         try:
-            # Check for safety package
+            # Check for safety package with explicit shell=False
             result = subprocess.run(
-                ["safety", "check", "--json"], capture_output=True, text=True
+                ["safety", "check", "--json"],
+                capture_output=True,
+                text=True,
+                shell=False,  # CRITICAL: Prevent shell injection
+                timeout=60,   # Add timeout
             )
 
             if result.returncode == 0:
