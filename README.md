@@ -8,6 +8,8 @@
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)
 ![Security](https://img.shields.io/badge/security-audited-brightgreen)
 
+> **Note**: This is a Python CLI tool designed to be installed globally with pip. Python CLI tools are installed using `pip install package-name` rather than npm. This tool can be installed globally with `pip install magic-cli` (once published) or using the installation methods below.
+
 ---
 
 **Just type `magic` in your terminal and get instant access to powerful development automation.**
@@ -44,11 +46,15 @@ magic
 If you already have Python installed:
 
 ```bash
-# Install via pip
+# Install via pip from GitHub (latest development version)
 pip install git+https://github.com/Drakaniia/PyDevToolkit-MagicCLI.git
 
 # Or from PyPI (when published)
 pip install magic-cli
+
+# Or build and install from local source
+python -m build
+pip install dist/magic_cli-*.whl
 ```
 
 #### Option 3: Development Installation
@@ -286,6 +292,11 @@ magic_cli/
   - Manual: Access via GitHub Operations → Generate Changelog menu option
   - Command line: `python src/modules/git_operations/changelog.py generate [N]`
 - For Warp users, repository-specific agent rules and commands are documented in `WARP.md`.
+- **Package Distribution**: This tool can be distributed as a Python package with a console script entry point:
+  - To build the package: `python -m build`
+  - To install built package: `pip install dist/magic_cli-*.whl`
+  - To upload to PyPI: `python -m twine upload dist/*` (requires PyPI account)
+  - The console script "magic" is defined in `pyproject.toml` under `[project.scripts]`
 
 ---
 

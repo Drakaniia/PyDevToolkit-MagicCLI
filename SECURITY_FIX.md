@@ -1,4 +1,4 @@
-# Security Fix: Hardcoded Credentials Removed
+ # Security Fix: Hardcoded Credentials Removed
 
 ## Issue
 Hardcoded GROQ API key was found in the `.env` file, which poses a security risk if accidentally committed or shared.
