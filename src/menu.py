@@ -28,7 +28,6 @@ class MainMenu(Menu):
         self._others_menu = None
 
         # Use different title based on system to avoid Unicode encoding issues
-        import sys
         if sys.platform == "win32":
             title = "Python Automation System - Main Menu"
         else:
