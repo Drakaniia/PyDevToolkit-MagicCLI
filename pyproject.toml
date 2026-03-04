@@ -153,7 +153,7 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "--verbose",
-    "--cov=magic_cli",
+    "--cov=src",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
@@ -172,7 +172,6 @@ omit = [
     "*/__pycache__/*",
     "*/venv/*",
     "*/env/*",
-    "*/src/*",
 ]
 
 [tool.coverage.report]
