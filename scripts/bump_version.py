@@ -39,13 +39,19 @@ def bump_version(current_version: str, bump_type: str) -> str:
     major, minor, patch = parse_version(current_version)
 
     if bump_type == "major":
-        return f"{major + 1}.0.0"
+        new_version = f"{major + 1}.0.0"
     elif bump_type == "minor":
-        return f"{major}.{minor + 1}.0"
+        new_version = f"{major}.{minor + 1}.0"
     elif bump_type == "patch":
-        return f"{major}.{minor}.{patch + 1}"
+        new_version = f"{major}.{minor}.{patch + 1}"
     else:
         raise ValueError(f"Invalid bump type: {bump_type}")
+    
+    # Validate the generated version matches expected format
+    if not re.match(r"^\d+\.\d+\.\d+$", new_version):
+        raise ValueError(f"Generated invalid version format")
+    
+    return new_version
 
 
 def update_pyproject_version(new_version: str) -> None:
@@ -55,6 +61,10 @@ def update_pyproject_version(new_version: str) -> None:
     with open(pyproject_path, "r") as f:
         content = f.read()
 
+    # Validate version format before use
+    if not re.match(r"^\d+\.\d+\.\d+$", new_version):
+        raise ValueError(f"Invalid version format: {new_version}")
+    
     # Update version in pyproject.toml
     content = re.sub(
         r'version = "[^"]*"',
@@ -77,6 +87,10 @@ def update_setup_py_version(new_version: str) -> None:
     with open(setup_path, "r") as f:
         content = f.read()
 
+    # Validate version format before use
+    if not re.match(r"^\d+\.\d+\.\d+$", new_version):
+        raise ValueError(f"Invalid version format: {new_version}")
+    
     # Update version in setup.py
     content = re.sub(r'version="[^"]*"', f'version="{new_version}"', content)
 

@@ -13,8 +13,6 @@ set -e
 # CONFIGURATION
 # ============================================================
 
-INSTALL_DIR="$HOME/.magic-cli"
-
 # Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -228,7 +226,7 @@ list_backups() {
     for backup in "${backups[@]}"; do
         local backup_date=$(basename "$backup" | grep -oP '\d{8}_\d{6}' || echo "Unknown")
         local backup_size=$(du -h "$backup" | cut -f1)
-        local backup_perms=$(ls -l "$backup" | awk '{print $1}')
+        local backup_perms=$(stat -c '%A' "$backup" 2>/dev/null || stat -f '%Sp' "$backup" 2>/dev/null || echo "Unknown")
         echo "  • $(basename "$backup")"
         echo "    Date: $backup_date | Size: $backup_size | Permissions: $backup_perms"
     done

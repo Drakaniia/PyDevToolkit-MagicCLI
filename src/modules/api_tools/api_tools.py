@@ -186,13 +186,13 @@ if __name__ == "__main__":
 
             # Make the API call
             if method == "GET":
-                response = requests.get(api_url, headers=headers)
+                response = requests.get(api_url, headers=headers, timeout=30, verify=True)
             elif method == "POST":
-                response = requests.post(api_url, json=data, headers=headers)
+                response = requests.post(api_url, json=data, headers=headers, timeout=30, verify=True)
             elif method == "PUT":
-                response = requests.put(api_url, json=data, headers=headers)
+                response = requests.put(api_url, json=data, headers=headers, timeout=30, verify=True)
             elif method == "DELETE":
-                response = requests.delete(api_url, headers=headers)
+                response = requests.delete(api_url, headers=headers, timeout=30, verify=True)
 
             print(f"\nResponse Status: {response.status_code}")
             print(f"Response Headers: {dict(response.headers)}")
@@ -318,7 +318,9 @@ if __name__ == '__main__':
                 import time
 
                 def run_server():
-                    exec(mock_content)
+                    import flask
+                    app = flask.Flask(__name__)
+                    app.run(debug=True, host='0.0.0.0', port=port)
 
                 server_thread = threading.Thread(
                     target=run_server, daemon=True)

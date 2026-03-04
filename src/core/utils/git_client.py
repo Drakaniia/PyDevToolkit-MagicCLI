@@ -146,11 +146,8 @@ class GitClient:
         else:
             cmd.append('.')
 
-        try:
-            self._run_command(cmd, check=True)
-            return True
-        except GitCommandError:
-            raise
+        self._run_command(cmd, check=True)
+        return True
 
     # ========== Commit Operations ==========
 
@@ -171,11 +168,8 @@ class GitClient:
         if amend:
             cmd.append('--amend')
 
-        try:
-            self._run_command(cmd, check=True)
-            return True
-        except GitCommandError:
-            raise
+        self._run_command(cmd, check=True)
+        return True
 
     # ========== Log Operations ==========
 
@@ -285,6 +279,8 @@ class GitClient:
             # Get remote branches if requested
             if include_remote:
                 result = self._run_command(['git', 'branch', '-r', '-v', '--no-color'], check=True)
+                local_names = {b['name'] for b in branches}
+                
                 for line in result.stdout.strip().split('\n'):
                     if not line.strip() or '->' in line:
                         continue
@@ -297,9 +293,8 @@ class GitClient:
 
                         # Avoid duplicates with local branches
                         local_name = branch_name.split('/')[-1]
-                        is_duplicate = any(b['name'] == local_name for b in branches)
-
-                        if not is_duplicate:
+                        
+                        if local_name not in local_names:
                             branches.append({
                                 'name': branch_name,
                                 'type': 'remote',
@@ -595,11 +590,8 @@ class GitClient:
         if branch:
             cmd.append(branch)
 
-        try:
-            self._run_command(cmd, check=True)
-            return True
-        except GitCommandError:
-            raise
+        self._run_command(cmd, check=True)
+        return True
 
     # ========== Reset Operations ==========
 
@@ -623,11 +615,8 @@ class GitClient:
 
         cmd = ['git', 'reset', f'--{mode}', commit]
 
-        try:
-            self._run_command(cmd, check=True)
-            return True
-        except GitCommandError:
-            raise
+        self._run_command(cmd, check=True)
+        return True
 
     # ========== Init Operations ==========
 
@@ -647,7 +636,8 @@ class GitClient:
             result = subprocess.run(
                 ['git', '--version'],
                 capture_output=True,
-                timeout=5
+                timeout=5,
+                shell=False
             )
             if result.returncode != 0:
                 raise GitNotInstalledError()

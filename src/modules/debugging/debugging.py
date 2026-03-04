@@ -223,36 +223,30 @@ class DebuggingTools:
         print(f"\nProfiling script: {script_path}")
 
         try:
-            # Run cProfile on the script
-            import cProfile
+            # Run cProfile on the script using subprocess (secure)
+            profile_file = "profile_output.prof"
+            result = subprocess.run(
+                [sys.executable, '-m', 'cProfile', '-o', profile_file, script_path],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+
+            if result.returncode != 0:
+                print(f"Error running profiler: {result.stderr}")
+                input("\nPress Enter to continue...")
+                return
+
+            # Read and display profiling stats
             import pstats
             import io
-
-            profiler = cProfile.Profile()
-            profiler.enable()
-
-            # Execute the script
-            with open(script_path, 'r') as file:
-                script_content = file.read()
-
-            # Execute in a restricted namespace
-            namespace = {"__name__": "__main__", "__file__": script_path}
-            exec(compile(script_content, script_path, 'exec'), namespace)
-
-            profiler.disable()
-
-            # Create a string stream to capture stats
             s = io.StringIO()
-            ps = pstats.Stats(profiler, stream=s)
+            ps = pstats.Stats(profile_file, stream=s)
             ps.sort_stats('cumulative')
-            ps.print_stats(10)  # Show top 10 functions
+            ps.print_stats(10)
 
             print("\nTop 10 performance bottlenecks:")
             print(s.getvalue())
-
-            # Save full profiling results to a file
-            profile_file = "profile_output.prof"
-            profiler.dump_stats(profile_file)
             print(f"\nFull profiling data saved to: {profile_file}")
             print("To analyze further, run: python -m pstats profile_output.prof")
 

@@ -27,7 +27,7 @@ class DevOpsTools:
 
         # Check if Terraform is installed
         result = subprocess.run(['terraform', 'version'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             print("⚠ Terraform is not installed or not in PATH")
@@ -202,7 +202,7 @@ environment  = "dev"
 
         # Check if Docker is installed
         result = subprocess.run(['docker', '--version'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             print("⚠ Docker is not installed or not in PATH")
@@ -279,7 +279,7 @@ echo "Done!"
 
         # Make executable on Unix systems
         try:
-            os.chmod("build_and_push_docker.sh", 0o755)
+            os.chmod("build_and_push_docker.sh", 0o700)
         except BaseException:
             pass  # Skip on Windows
 
@@ -294,7 +294,7 @@ echo "Done!"
 
         # Check if AWS CLI is installed
         result = subprocess.run(['aws', 'configure', 'list'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             print("⚠ AWS CLI is not installed or not configured")
@@ -350,7 +350,7 @@ echo "Image pushed to $ECR_REGISTRY/$IMAGE_NAME"
 
         # Make executable on Unix systems
         try:
-            os.chmod("build_and_push_ecr.sh", 0o755)
+            os.chmod("build_and_push_ecr.sh", 0o700)
         except BaseException:
             pass  # Skip on Windows
 
@@ -404,7 +404,7 @@ echo "Image pushed to gcr.io/$PROJECT_ID/$IMAGE_NAME"
 
         # Make executable on Unix systems
         try:
-            os.chmod("build_and_push_gcr.sh", 0o755)
+            os.chmod("build_and_push_gcr.sh", 0o700)
         except BaseException:
             pass  # Skip on Windows
 
@@ -460,7 +460,7 @@ echo "Image pushed to $ACR_NAME.azurecr.io/$IMAGE_NAME"
 
         # Make executable on Unix systems
         try:
-            os.chmod("build_and_push_acr.sh", 0o755)
+            os.chmod("build_and_push_acr.sh", 0o700)
         except BaseException:
             pass  # Skip on Windows
 
@@ -508,7 +508,7 @@ echo "Image pushed to $REGISTRY_URL/$IMAGE_NAME"
 
         # Make executable on Unix systems
         try:
-            os.chmod("build_and_push_self_hosted.sh", 0o755)
+            os.chmod("build_and_push_self_hosted.sh", 0o700)
         except BaseException:
             pass  # Skip on Windows
 
@@ -560,7 +560,7 @@ echo "Image pushed to $REGISTRY_URL/$IMAGE_NAME"
 
         # Check if EB CLI is installed
         result = subprocess.run(['eb', '--version'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             print("⚠ EB CLI is not installed")
@@ -625,7 +625,7 @@ python-dotenv==1.0.0
 
         # Check if gcloud is available
         result = subprocess.run(['gcloud', 'version'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             print("⚠ gcloud CLI is not installed")
@@ -636,8 +636,13 @@ python-dotenv==1.0.0
         service_name = input("Enter service name: ").strip()
         project_id = input("Enter Google Cloud Project ID: ").strip()
 
-        if not service_name or not project_id:
-            print("Service name and project ID are required!")
+        if not self.validator.validate_file_name(service_name):
+            print("Invalid service name!")
+            input("\nPress Enter to continue...")
+            return
+
+        if not self.validator.validate_file_name(project_id):
+            print("Invalid project ID!")
             input("\nPress Enter to continue...")
             return
 
@@ -686,7 +691,7 @@ python-dotenv==1.0.0
 
         # Check if az is available
         result = subprocess.run(['az', '--version'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             print("⚠ Azure CLI is not installed")
@@ -722,7 +727,7 @@ python-dotenv==1.0.0
 
         # Check if heroku is available
         result = subprocess.run(['heroku', '--version'],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, shell=False)
 
         if result.returncode != 0:
             print("⚠ Heroku CLI is not installed")
@@ -821,12 +826,12 @@ services:
             },
             'staging': {
                 'DEBUG': 'False',
-                'DATABASE_URL': 'postgresql://user:pwd@staging-db:5432/app',
+                'DATABASE_URL': 'postgresql://${DB_USER}:${DB_PASSWORD}@staging-db:5432/app',
                 'LOG_LEVEL': 'INFO'
             },
             'production': {
                 'DEBUG': 'False',
-                'DATABASE_URL': 'postgresql://user:pwd@prod-db:5432/app',
+                'DATABASE_URL': 'postgresql://${DB_USER}:${DB_PASS}@prod-db:5432/app',
                 'LOG_LEVEL': 'WARNING'
             }
         }
@@ -863,7 +868,7 @@ services:
     environment:
       POSTGRES_DB: devdb
       POSTGRES_USER: devuser
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -886,7 +891,7 @@ services:
     environment:
       - DEBUG=0
       - ENV=production
-      - DATABASE_URL=postgresql://prod-user:pwd@prod-db:5432/proddb
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@prod-db:5432/proddb
     restart: unless-stopped
     depends_on:
       - db
