@@ -39,19 +39,15 @@ class PortKillerCommand(DevModeCommand):
             print(" Detect and terminate processes using development ports")
             print("=" * 70 + "\n")
 
-            # Show current port status
-            self._show_port_status()
-
-            # Menu options
             options = [
-                " Scan for Port Conflicts",
-                " Scan All Server Processes",
-                " Kill Common Dev Ports",
-                " Force Clear All Servers",
-                " Kill Specific Port",
-                " Ensure Ports Free",
-                " Detailed Port Report",
-                " Back to Dev Mode Menu"
+                "Scan for Port Conflicts",
+                "Scan All Server Processes",
+                "Kill Common Dev Ports",
+                "Force Clear All Servers",
+                "Kill Specific Port",
+                "Ensure Ports Free",
+                "Detailed Port Report",
+                "Back to Dev Mode Menu"
             ]
 
             choice = get_choice_with_arrows(options, "Port Killer Options")
@@ -257,11 +253,7 @@ class PortKillerCommand(DevModeCommand):
         print("=" * 70)
 
         try:
-            ports_input = input("""Enter port numbers(comma - separated,
-                                                    e.g.,
-                                                    3000,
-                                                    8080,
-                                                    5173): """).strip()
+            ports_input = input("Enter port numbers (comma-separated, e.g., 3000,8080,5173): ").strip()
 
             if not ports_input:
                 print(" No ports specified")

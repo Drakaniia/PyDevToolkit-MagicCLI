@@ -68,11 +68,16 @@ def _traditional_choice_input(options, prompt, show_numbers):
 def _arrow_choice_input(options, prompt, show_numbers):
     """Arrow key navigation input method with stable viewport"""
     selected_idx = 0
-    previous_idx = -1  # Track previous selection for efficient updates
+    previous_idx = -1
 
-    # Initial display
     _display_options(options, selected_idx, prompt, show_numbers)
     _hide_cursor()
+
+    # Calculate base line for menu items:
+    # Line 1: prompt
+    # Lines 2+: options (starting from line 2)
+    # Last line + 1: instruction line (static, not updated)
+    base_line = 2  # Options start from line 2 (1-indexed)
 
     try:
         while True:
@@ -83,109 +88,72 @@ def _arrow_choice_input(options, prompt, show_numbers):
                 new_idx = selected_idx
                 should_select = False
 
-                if HAS_MSVCRT:  # Windows
+                if HAS_MSVCRT:
                     if key in ('\xe0', '\x00'):
                         arrow = _getch()
-                        if arrow == 'H':  # Up
+                        if arrow == 'H':
                             new_idx = (selected_idx - 1) % len(options)
-                        elif arrow == 'P':  # Down
+                        elif arrow == 'P':
                             new_idx = (selected_idx + 1) % len(options)
-                    elif key == '\r':  # Enter
+                    elif key == '\r':
                         should_select = True
                     elif key.isdigit():
                         num = int(key)
                         if 1 <= num <= len(options):
                             selected_idx = num - 1
                             should_select = True
-                    elif key == '\x03':  # Ctrl+C
+                    elif key == '\x03':
                         selected_idx = len(options) - 1
                         should_select = True
 
-                else:  # Unix/Linux/Mac
-                    if key == '\x1b':  # ESC sequence
+                else:
+                    if key == '\x1b':
                         next_key = _getch()
                         if next_key == '[':
                             arrow = _getch()
-                            if arrow == 'A':  # Up
+                            if arrow == 'A':
                                 new_idx = (selected_idx - 1) % len(options)
-                            elif arrow == 'B':  # Down
+                            elif arrow == 'B':
                                 new_idx = (selected_idx + 1) % len(options)
-                    elif key in ['\r', '\n']:  # Enter
+                    elif key in ['\r', '\n']:
                         should_select = True
                     elif key.isdigit():
                         num = int(key)
                         if 1 <= num <= len(options):
                             selected_idx = num - 1
                             should_select = True
-                    elif key in ['\x03', '\x04']:  # Ctrl+C or Ctrl+D
+                    elif key in ['\x03', '\x04']:
                         selected_idx = len(options) - 1
                         should_select = True
 
-                # Update selection if changed - only redraw affected lines
                 if new_idx != old_idx:
                     previous_idx = selected_idx
                     selected_idx = new_idx
-                    _update_selection(options, previous_idx, selected_idx, prompt, show_numbers)
+                    _update_selection(options, previous_idx, selected_idx, base_line, show_numbers)
 
                 if should_select:
                     _show_cursor()
-                    print()  # Add newline after selection
+                    print()
                     return selected_idx + 1
 
             except KeyboardInterrupt:
                 _show_cursor()
                 print("\n\nOperation cancelled")
-                return len(options)  # Return last option (usually Cancel/Exit)
+                return len(options)
             except Exception:
-                # Continue on any other errors
                 continue
 
     finally:
         _show_cursor()
 
 
-def _update_selection(options, old_idx, new_idx, prompt, show_numbers):
-    """Update only the two changed lines - no screen clearing, no jumping"""
-    # Calculate line positions (menu starts at line 1)
-    base_line = 2  # Line 1 is the prompt
-    
-    # Build old line (now unselected)
-    if show_numbers:
-        old_line_text = f"  {old_idx + 1}. {options[old_idx]}"
-    else:
-        old_line_text = f"  {options[old_idx]}"
-    
-    # Build new line (now selected)
-    if show_numbers:
-        new_line_text = f"  {new_idx + 1}. {options[new_idx]}"
-    else:
-        new_line_text = f"  {options[new_idx]}"
-    
-    # Build escape sequences for both lines
-    output = []
-    
-    # Update old selection (remove highlight)
-    output.append(f'\033[{base_line + old_idx};1H')  # Move to old line
-    output.append('\033[2K')  # Clear line
-    output.append(old_line_text)
-    
-    # Update new selection (add highlight)
-    output.append(f'\033[{base_line + new_idx};1H')  # Move to new line
-    output.append('\033[2K')  # Clear line
-    output.append(f"\033[1;46m   {new_line_text[4:]}\033[0m")
-    
-    # Write all at once
-    sys.stdout.write(''.join(output))
-    sys.stdout.flush()
-
-
 def _build_menu_string(options, selected_idx, prompt, show_numbers):
     """Build the complete menu as a single string - internal helper"""
     output_lines = []
-    
+
     # Add prompt
     output_lines.append(f"{prompt}:")
-    
+
     # Add all options
     for i, option in enumerate(options):
         if show_numbers:
@@ -198,56 +166,37 @@ def _build_menu_string(options, selected_idx, prompt, show_numbers):
             output_lines.append(f"\033[1;46m   {line_text[4:]}\033[0m")
         else:
             output_lines.append(line_text)
-    
-    # Add instruction line (as separate line, no leading newline)
-    output_lines.append("  Use ↑/↓ arrow keys to navigate, Enter to select, or type number")
-    
+
     # Join all lines into single string
     return '\n'.join(output_lines)
 
 
 def _display_options(options, selected_idx, prompt, show_numbers):
     """Display all options with current selection highlighted - initial display"""
-    full_output = _build_menu_string(options, selected_idx, prompt, show_numbers)
-    print(full_output)
+    # Move cursor to line 1 and clear screen below to ensure menu displays at top
+    # This prevents the menu from appearing at the bottom of previous output
+    sys.stdout.write('\033[1;1H\033[J')  # Move to line 1, column 1 and clear to end of screen
     sys.stdout.flush()
-
-
-def _update_selection(options, old_idx, new_idx, prompt, show_numbers):
-    """Update only the two changed lines - no screen clearing, no jumping"""
-    # Calculate line positions (menu starts at line 1)
-    # Line 1: prompt
-    # Lines 2 to len(options)+1: options
-    # Line len(options)+2: instruction
-    base_line = 2  # First option is on line 2
     
-    # Build old line text (now unselected)
+    full_output = _build_menu_string(options, selected_idx, prompt, show_numbers)
+    print(full_output, flush=True)
+    # Print instruction line separately (static, not part of dynamic content)
+    print("  Use ↑/↓ arrow keys to navigate, Enter to select, or type number", flush=True)
+
+
+def _update_selection(options, old_idx, new_idx, base_line, show_numbers):
+    """Update only the two changed lines - no screen clearing, no jumping"""
     if show_numbers:
         old_line_text = f"  {old_idx + 1}. {options[old_idx]}"
-    else:
-        old_line_text = f"  {options[old_idx]}"
-    
-    # Build new line text (now selected)
-    if show_numbers:
         new_line_text = f"  {new_idx + 1}. {options[new_idx]}"
     else:
+        old_line_text = f"  {options[old_idx]}"
         new_line_text = f"  {options[new_idx]}"
     
-    # Build escape sequences for both lines
-    output = []
-    
-    # Update old selection (remove highlight)
-    output.append(f'\033[{base_line + old_idx};1H')  # Move to old line
-    output.append('\033[2K')  # Clear line
-    output.append(old_line_text)
-    
-    # Update new selection (add highlight)
-    output.append(f'\033[{base_line + new_idx};1H')  # Move to new line
-    output.append('\033[2K')  # Clear line
-    output.append(f"\033[1;46m   {new_line_text[4:]}\033[0m")
-    
-    # Write all at once
-    sys.stdout.write(''.join(output))
+    sys.stdout.write(
+        f'\033[{base_line + old_idx};1H\033[2K{old_line_text}'
+        f'\033[{base_line + new_idx};1H\033[2K\033[1;46m   {new_line_text[4:]}\033[0m'
+    )
     sys.stdout.flush()
 
 
