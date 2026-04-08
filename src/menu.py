@@ -11,7 +11,6 @@ src_path = Path(__file__).parent
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from modules.others_menu import OthersMenu
 from typing import Any, Optional
 from core.menu import Menu, MenuItem
 
@@ -25,7 +24,6 @@ class MainMenu(Menu):
         self._structure_viewer = None
         self._folder_nav = None
         self._dev_mode_menu = None
-        self._others_menu = None
 
         # Use different title based on system to avoid Unicode encoding issues
         if sys.platform == "win32":
@@ -54,8 +52,6 @@ class MainMenu(Menu):
             self._folder_nav = FolderNavigator()
         if self._dev_mode_menu is None:
             self._dev_mode_menu = DevModeMenu()
-        if self._others_menu is None:
-            self._others_menu = OthersMenu()
 
         # Create menu items with bound methods
         self.items = [
@@ -63,7 +59,6 @@ class MainMenu(Menu):
             MenuItem("Show Project Structure", self._show_structure),
             MenuItem("Navigate Folders", self._navigate_folders),
             MenuItem("Dev Mode (Web Dev Automation)", self._run_dev_mode),
-            MenuItem("Others", self._run_others),
             MenuItem("Exit", self._exit_program)
         ]
 
@@ -85,11 +80,6 @@ class MainMenu(Menu):
     def _run_dev_mode(self) -> Optional[str]:
         """Run Dev Mode menu"""
         self._dev_mode_menu.run()
-        return None
-
-    def _run_others(self) -> Optional[str]:
-        """Run Others menu"""
-        self._others_menu.run()
         return None
 
     def _exit_program(self) -> str:
