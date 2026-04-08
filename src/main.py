@@ -225,6 +225,22 @@ def main():
             print("   Or: magic kill <port>  Kill specific port")
             return 1
 
+    # Check for "show" command
+    if len(sys.argv) > 1 and sys.argv[1] == "show":
+        if len(sys.argv) > 2 and sys.argv[2] in ["-s", "--structure"]:
+            # Show folder structure
+            from modules.project_management.structure_viewer import StructureViewer
+            viewer = StructureViewer()
+            viewer.show_structure()
+            return 0
+        else:
+            # Show help for show command
+            print("\nMagic CLI - Show Command\n")
+            print("Usage:")
+            print("  magic show -s          Show project folder structure")
+            print("  magic show --structure Show project folder structure\n")
+            return 0
+
     # Check for --help flag
     if len(sys.argv) > 1 and sys.argv[1] in ["--help", "-h"]:
         print("\nMagic CLI - Python Developer Toolkit\n")
@@ -235,6 +251,7 @@ def main():
         print("  magic kill a             (shorthand for 'all')")
         print("  magic kill p <port>      Kill specific port")
         print("  magic kill <port>        Kill specific port")
+        print("  magic show -s            Show project folder structure")
         print("  magic --help             Show this help message\n")
         return 0
 
