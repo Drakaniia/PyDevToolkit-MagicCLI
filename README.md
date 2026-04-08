@@ -1,6 +1,14 @@
 # Magic CLI
 
-**One command to rule them all** - A powerful, secure developer toolkit that puts Git operations, project management, and web development automation at your fingertips.
+**Magic CLI** is a Python-based developer automation toolkit that provides an interactive CLI menu system for common development tasks. It streamlines Git operations, project management, and web development automation.
+
+### Key Features
+- **Interactive Menu System**: Navigate via arrow keys or numbered selection
+- **Git Operations**: Auto-commit, push/pull, changelog generation, submodule management, stash operations
+- **Web Development**: Scaffold React, Next.js, Vue, Svelte, React Native projects; run dev servers
+- **Project Management**: Visualize project structure, navigate folders
+- **Security**: Input sanitization, blocked dangerous commands, rate limiting
+- **Cross-Platform**: Works on Linux, macOS, and Windows
 
 ![PyPI](https://img.shields.io/pypi/v/magic-cli)
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
@@ -212,72 +220,52 @@ For detailed setup instructions, see [docs/GROQ_API_SETUP.md](docs/GROQ_API_SETU
 magic_cli/
 ├── pyproject.toml          # Modern Python packaging
 ├── requirements.txt        # Production dependencies
+├── config.yaml             # Runtime security & operational settings
 ├── README.md              # This file
-├── magic_cli/             # Main package
+├── src/                   # Main package
 │   ├── __init__.py
-│   ├── __main__.py         # Module entry point
+│   ├── main.py            # Module entry point
+│   ├── menu.py            # Main menu orchestration
 │   ├── cli/               # CLI presentation layer
-│   │   ├── __init__.py
-│   │   ├── main.py        # CLI entry point
-│   │   ├── menu.py        # Main menu
-│   │   ├── menu_base.py   # Base menu classes
-│   │   ├── renderer.py    # Menu rendering
-│   │   └── navigation.py  # Input handling
+│   │   └── __init__.py
 │   ├── core/              # Cross-cutting concerns
 │   │   ├── __init__.py
 │   │   ├── config.py      # Configuration management
 │   │   ├── exceptions.py  # Error handling
-│   │   └── security.py    # Security utilities
-│   ├── domain/            # Business logic
+│   │   ├── security/      # Security utilities
+│   │   ├── menu/          # Menu base classes
+│   │   └── utils/         # Shared utilities
+│   ├── modules/           # Feature modules
 │   │   ├── __init__.py
-│   │   ├── git/          # Git domain models & services
-│   │   ├── project/      # Project management domain
-│   │   └── backend/      # Backend development domain
-│   ├── infrastructure/    # External dependencies
-│   │   ├── __init__.py
-│   │   ├── git_client.py # Git operations
-│   │   └── file_system.py # File operations
-│   ├── application/       # Application services & use cases
-│   │   ├── __init__.py
-│   │   ├── services/     # Application services
-│   │   └── use_cases/    # Use case orchestrators
-│   ├── presentation/      # Presentation layer
-│   │   ├── __init__.py
-│   │   └── ui/           # UI components & banners
-│   └── plugins/          # Plugin system
-│       ├── __init__.py
-│       └── registry.py   # Plugin management
-├── assets/               # Static assets (fonts, etc.)
-├── scripts/              # Setup and utility scripts
+│   │   ├── git_operations/  # Git automation
+│   │   ├── web_development/ # Web dev scaffolding
+│   │   └── project_management/ # Project tools
+│   ├── ui/                # UI components
+│   │   └── banner.py      # ASCII art banners
+│   └── assets/            # Static assets
+├── scripts/               # Setup and utility scripts
 └── tests/                # Test suite
     ├── __init__.py
     ├── unit/
-    ├── integration/
-    └── e2e/
+    └── integration/
 ```
 
 ---
 
 ## Development notes
 
-- **Architecture**: The codebase follows Domain-Driven Design (DDD) principles with clean architecture:
-  - `magic_cli/core/` - Cross-cutting concerns (config, exceptions, security)
-  - `magic_cli/domain/` - Business logic and domain models
-  - `magic_cli/application/` - Application services and use cases
-  - `magic_cli/infrastructure/` - External dependencies and adapters
-  - `magic_cli/presentation/` - UI and CLI presentation layer
+- **Architecture**: The codebase follows a modular structure with clear separation of concerns:
+  - `src/core/` - Cross-cutting concerns (config, exceptions, security, menu system)
+  - `src/modules/` - Feature modules (git_operations, web_development, project_management)
+  - `src/cli/` - CLI presentation layer
+  - `src/ui/` - UI components and banners
 - **Entry Points**: Multiple ways to run:
-  - `python -m magic_cli` (module execution)
+  - `python -m src.main` (module execution)
   - `magic` (installed script)
-  - `python magic_cli/cli/main.py` (direct execution)
 - **Web Development (Dev Mode)**: from the main menu, opens tools for:
   - Creating modern frontend/mobile projects (React, Next.js, Vue, Svelte, React Native, etc.).
   - Running Node-based dev servers (`npm run dev`, `npm run start`, etc.).
   - Running JS/Python tests via the "Run Tests (All Types)" option.
-- **Backend Development**: from the main menu, opens tools for:
-  - Database setup and connection config.
-  - API scaffolding (FastAPI, Flask, DRF, Express.js).
-  - Auth and user-management scaffolding.
 - **Running tests directly** (when Python tests are present under `tests/`):
   - All tests via pytest:
     ```bash

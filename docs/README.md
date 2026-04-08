@@ -12,10 +12,8 @@ MagicCLI is a powerful automation toolkit that provides:
 - Git operations automation
 - Project structure visualization
 - Web development automation tools
-- Backend development utilities
 - Comprehensive code quality tools
-- Testing and CI/CD integrations
-- And much more!
+- And more!
 
 ## Getting Started
 

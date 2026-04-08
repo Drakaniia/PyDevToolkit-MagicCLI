@@ -8,7 +8,7 @@
 - **Interactive Menu System**: Navigate via arrow keys or numbered selection
 - **Git Operations**: Auto-commit, push/pull, changelog generation, submodule management
 - **Web Development**: Scaffold React, Next.js, Vue, Svelte, React Native projects; run dev servers
-- **Backend Development**: Database setup, API scaffolding (FastAPI, Flask, DRF, Express.js), auth generation
+- **Project Management**: Visualize project structure, navigate folders
 - **Security**: Input sanitization, blocked dangerous commands, rate limiting
 - **Cross-Platform**: Works on Linux, macOS, and Windows
 
@@ -27,15 +27,10 @@ src/
 │   ├── menu/            # Menu base classes
 │   ├── security/        # Security utilities
 │   └── utils/           # Shared utilities
-├── modules/             # Feature modules (20+ domains)
+├── modules/             # Feature modules
 │   ├── git_operations/
 │   ├── web_development/
-│   ├── backend_development/
-│   ├── database/
-│   ├── testing_cicd/
-│   ├── devops/
-│   ├── security_tools/
-│   └── ... (more domains)
+│   └── project_management/
 ├── ui/                  # UI components
 │   └── banner.py        # ASCII art banners
 └── assets/              # Static assets
@@ -186,7 +181,7 @@ make upload-test
 ### Adding a New Feature Module
 1. Create directory under `src/modules/<feature_name>/`
 2. Implement module logic following existing patterns
-3. Register in appropriate menu (see `src/menu.py` or `src/modules/others_menu.py`)
+3. Register in main menu (see `src/menu.py`)
 4. Add tests under `tests/unit/` or `tests/integration/`
 5. Update documentation if needed
 

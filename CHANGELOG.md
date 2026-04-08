@@ -1,3 +1,17 @@
+### 2026-04-08
+
+#### Maintenance
+
+- **Remove "Others" menu and 16 backend/tool modules to streamline the CLI** - _Qwenzy_
+  - Removed modules: backend_development, dependency_management, code_quality, testing_cicd, monitoring, documentation, scaffolding, database, api_tools, devops, code_analysis, security_tools, debugging, version_control, cross_platform, ai_ml
+  - Removed `src/modules/others_menu.py`
+  - Updated `src/menu.py` to remove "Others" option (main menu now has 4 options + Exit)
+  - Updated documentation (README.md, QWEN.md, docs/README.md)
+
+**Total**: 1 commit(s)
+
+---
+
 ### 2025-11-03
 
 #### Maintenance
